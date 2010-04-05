@@ -28,12 +28,6 @@ ScriptDownloader.prototype.startViewScript = function(uri) {
 };
 
 ScriptDownloader.prototype.startDownload = function() {
-  this.win_.GM_BrowserUI.statusImage.src = "chrome://global/skin/throbber/Throbber-small.gif";
-  this.win_.GM_BrowserUI.statusImage.style.opacity = "0.5";
-  this.win_.GM_BrowserUI.statusImage.tooltipText = this.bundle_.getString("tooltip.loading");
-
-  this.win_.GM_BrowserUI.showStatus("Fetching user script", false);
-
   Components.classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
     .getService().wrappedJSObject
     .ignoreNextScript();
@@ -45,9 +39,6 @@ ScriptDownloader.prototype.startDownload = function() {
 };
 
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
-  this.win_.GM_BrowserUI.refreshStatus();
-  this.win_.GM_BrowserUI.hideStatusImmediately();
-
   try {
     // If loading from file, status might be zero on success
     if (this.req_.status != 200 && this.req_.status != 0) {
@@ -55,6 +46,17 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
       alert("Error loading user script:\n" +
       this.req_.status + ": " +
       this.req_.statusText);
+      return;
+    }
+
+    // If there is a 'Content-Type' header and it contains 'text/html',
+    // then do not install the file, and display it instead.
+    if (/text\/html/i.test(this.req_.getResponseHeader("Content-Type"))) {
+      Components.classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
+      .getService().wrappedJSObject
+      .ignoreNextScript();
+
+      content.location.href = this.uri_.spec;
       return;
     }
 
