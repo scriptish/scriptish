@@ -63,9 +63,6 @@ ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
 };
 
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
-  this.win_.GM_BrowserUI.refreshStatus();
-  this.win_.GM_BrowserUI.hideStatusImmediately();
-
   try {
     // If loading from file, status might be zero on success
     if (this.req_.status != 200 && this.req_.status != 0) {
@@ -106,12 +103,21 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     window.setTimeout(GM_hitch(this, "fetchDependencies"), 0);
 
-    if(this.installing_){
-      this.showInstallDialog();
-    }else{
+    if (this.installing_) {
+      this._callback = function() {
+        this.showInstallDialog();
+        this._callback = undefined;
+      };
+    } else {
       this.showScriptView();
+      this._callback = function() {
+        this.hideFetchMsg();
+        this._callback = undefined;
+      };
     }
+
   } catch (e) {
+    this.hideFetchMsg();
     // NOTE: unlocalized string
     alert("Script could not be installed " + e);
     throw e;
@@ -166,6 +172,7 @@ ScriptDownloader.prototype.downloadNextDependency = function(){
     }
   } else {
     this.dependenciesLoaded_ = true;
+    if(this._callback) this._callback();
     this.finishInstall();
   }
 };
@@ -219,16 +226,18 @@ ScriptDownloader.prototype.finishInstall = function(){
   }
 };
 
-ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg){
-  GM_log("Error loading dependency " + dep.urlToDownload + "\n" + msg)
+ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg) {
+  this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
+  GM_log(this.dependencyError)
   if (this.installOnCompletion_) {
-    alert("Error loading dependency " + dep.urlToDownload + "\n" + msg);
-  } else {
-    this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
+    alert(this.dependencyError);
+  }
+  if (this._callback) {
+    this._callback();
   }
 };
 
-ScriptDownloader.prototype.installScript = function(){
+ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
     alert(this.dependencyError);
   } else if(this.dependenciesLoaded_) {
@@ -250,9 +259,15 @@ ScriptDownloader.prototype.showInstallDialog = function(timer) {
     this.win_.setTimeout(GM_hitch(this, "showInstallDialog", true), 0);
     return;
   }
+  this.hideFetchMsg();
   this.win_.openDialog("chrome://greasemonkey/content/install.xul", "",
                        "chrome,centerscreen,modal,dialog,titlebar,resizable",
                        this);
+};
+
+ScriptDownloader.prototype.hideFetchMsg = function() {
+  this.win_.GM_BrowserUI.refreshStatus();
+  this.win_.GM_BrowserUI.hideStatusImmediately();
 };
 
 ScriptDownloader.prototype.showScriptView = function() {
