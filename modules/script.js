@@ -328,7 +328,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
       var match = result.match(/\/\/ \@(\S+)(?:\s+([^\n]+))?/);
       if (match === null) continue;
 
-      var header = match[1];
+      var header = match[1].toLowerCase();
       var value = match[2];
 
       if (!value) {
