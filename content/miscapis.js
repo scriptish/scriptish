@@ -89,8 +89,8 @@ GM_ScriptStorage.prototype.listValues = function() {
 
 function GM_addStyle(doc, css) {
   var head = doc.getElementsByTagName("head")[0];
+  var style = doc.createElement("style");
   if (head) {
-    var style = doc.createElement("style");
     style.textContent = css;
     style.type = "text/css";
     head.appendChild(style);

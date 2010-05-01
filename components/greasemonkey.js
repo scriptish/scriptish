@@ -255,7 +255,9 @@ var greasemonkeyService = {
       sandbox.XPathResult = Ci.nsIDOMXPathResult;
 
       // add our own APIs
-      sandbox.GM_addStyle = function(css) { GM_addStyle(safeDoc, css) };
+      sandbox.GM_addStyle = function(css) {
+        return GM_addStyle(safeDoc, css);
+      };
       sandbox.GM_log = GM_hitch(logger, "log");
       sandbox.console = console;
       sandbox.GM_setValue = GM_hitch(storage, "setValue");
