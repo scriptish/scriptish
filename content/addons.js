@@ -56,6 +56,10 @@ var observer = {
         break;
       case "uninstall":
         listbox.removeChild(node);
+        if (0 < listbox.childNodes.length) {
+          var position = Math.max(0, Math.min(i, listbox.childNodes.length-1));
+          listbox.selectedItem = listbox.childNodes[position];
+        }
         break;
       case "move":
         listbox.removeChild(node);
