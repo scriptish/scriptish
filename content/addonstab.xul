@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://greasemonkey/locale/greasemonkey.dtd">
+<?xml-stylesheet href="chrome://greasemonkey/skin/addonstab.css" type="text/css"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<script type="application/x-javascript" src="chrome://greasemonkey/content/utils.js" />
+<script type="application/x-javascript" src="chrome://greasemonkey/content/prefmanager.js" />
+<script type="application/x-javascript" src="chrome://greasemonkey/content/addonstab.js" />
+
+
+
+</overlay>
