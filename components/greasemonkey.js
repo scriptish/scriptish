@@ -365,22 +365,24 @@ var greasemonkeyService = {
     }
 
     var worker = new chromeWin.Worker(resources.getFileURL(resourceName));
-    return {
-      onmessage: function(callback) {
-          worker.onmessage = function(evt) {
-            // Pop back onto browser thread and call event handler.
-            new XPCNativeWrapper(unsafeContentWin, "setTimeout()")
-              .setTimeout(function(){
-                callback({
-                  data: evt.data+''
-                });
-              }, 0);
-          };
-      },
+    var fakeWorker = {
+      onmessage: function() {},
       postMessage: function(msg) {
         worker.postMessage(msg);
       }
     };
+
+    worker.onmessage = function(evt) {
+      // Pop back onto browser thread and call event handler.
+      new XPCNativeWrapper(unsafeContentWin, "setTimeout()")
+        .setTimeout(function(){
+          fakeWorker.onmessage({
+            data: evt.data+''
+          });
+        }, 0);
+    };
+
+    return fakeWorker;
   },
 
   evalInSandbox: function(code, codebase, sandbox, script) {
