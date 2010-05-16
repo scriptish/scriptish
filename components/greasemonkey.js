@@ -277,6 +277,7 @@ var greasemonkeyService = {
       sandbox.GM_getResourceURL = GM_hitch(resources, "getResourceURL");
       sandbox.GM_getResourceText = GM_hitch(resources, "getResourceText");
       sandbox.GM_openInTab = GM_hitch(this, "openInTab", safeWin, chromeWin);
+      sandbox.GM_worker = GM_hitch(this, "createWorker", resources, unsafeContentWin, chromeWin);
       sandbox.GM_xmlhttpRequest = GM_hitch(xmlhttpRequester,
                                            "contentStartRequest");
       sandbox.GM_registerMenuCommand = GM_hitch(this,
@@ -356,6 +357,30 @@ var greasemonkeyService = {
       .QueryInterface(Ci.nsIInterfaceRequestor)
       .getInterface(Ci.nsIDOMWindow);
     return newWindow;
+  },
+
+  createWorker: function(resources, unsafeContentWin, chromeWin, resourceName) {
+    if (!GM_apiLeakCheck("GM_worker") || !chromeWin.Worker) {
+      return undefined;
+    }
+
+    var worker = new chromeWin.Worker(resources.getFileURL(resourceName));
+    return {
+      onmessage: function(callback) {
+          worker.onmessage = function(evt) {
+            // Pop back onto browser thread and call event handler.
+            new XPCNativeWrapper(unsafeContentWin, "setTimeout()")
+              .setTimeout(function(){
+                callback({
+                  data: evt.data+''
+                });
+              }, 0);
+          };
+      },
+      postMessage: function(msg) {
+        worker.postMessage(msg);
+      }
+    };
   },
 
   evalInSandbox: function(code, codebase, sandbox, script) {

@@ -60,6 +60,13 @@ GM_Resources.prototype.getResourceText = function(name) {
   return this.getDep_(name).textContent;
 };
 
+GM_Resources.prototype.getFileURL = function(name) {
+  if (!GM_apiLeakCheck("GM_getResourceText")) {
+    return undefined;
+  }
+  return GM_getUriFromFile(this.getDep_(name)._file).spec;
+};
+
 GM_Resources.prototype.getDep_ = function(name) {
   var resources = this.script.resources;
   for (var i = 0, resource; resource = resources[i]; i++) {
