@@ -367,19 +367,39 @@ var greasemonkeyService = {
     var worker = new chromeWin.Worker(resources.getFileURL(resourceName));
     var fakeWorker = {
       onmessage: function() {},
+      onerror: function() {},
+      terminate: function() {
+        worker.terminate();
+      },
       postMessage: function(msg) {
         worker.postMessage(msg);
       }
     };
 
-    worker.onmessage = function(evt) {
+    function doLater(func) {
       // Pop back onto browser thread and call event handler.
       new XPCNativeWrapper(unsafeContentWin, "setTimeout()")
-        .setTimeout(function(){
-          fakeWorker.onmessage({
-            data: evt.data+''
-          });
-        }, 0);
+        .setTimeout(func, 0);
+    }
+
+    worker.onmessage = function(evt) {
+      doLater(function() {
+        fakeWorker.onmessage({
+          data: evt.data+''
+        });
+      });
+    };
+    worker.onerror = function(evt) {
+      doLater(function() {
+        fakeWorker.onerror({
+          message: evt.message+'',
+          filename: evt.filename+'',
+          lineno: evt.lineno,
+          preventDefault: function() {
+            evt.preventDefault();
+          }
+        });
+      });
     };
 
     return fakeWorker;
