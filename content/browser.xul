@@ -121,6 +121,9 @@
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
           oncommand="BrowserOpenAddonsMgr('userscripts');" />
+        <menuitem accesskey="&menu.options.accesskey;"
+          label="&menu.options;"
+          oncommand="GM_BrowserUI.openOptionsWin();" />
         <menuseparator />
         <menuitem id="gm-status-enabled-item"
           accesskey="&statusbar.enabled.accesskey;"
