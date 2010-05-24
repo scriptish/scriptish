@@ -463,6 +463,10 @@ GM_GreasemonkeyService.prototype = {
 
       // if we found it, use it to open a welcome tab
       if (chromeWin.gBrowser) {
+        // set version to fake version number gt 0.0 so that it is not possible
+        // for the welcome tab to be opened more than once.
+        GM_prefRoot.setValue("version", "0.0.1");
+
         // the setTimeout makes sure we do not execute too early -- sometimes
         // the window isn't quite ready to add a tab yet
         chromeWin.setTimeout(
