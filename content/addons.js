@@ -8,6 +8,7 @@ var GM_uninstallQueue = {};
 var gUserscriptsView = null;
 
 (function() {
+
 // Override some built-in functions, with a closure reference to the original
 // function, to either handle or delegate the call.
 var _origShowView = showView;
@@ -15,8 +16,6 @@ showView = function(aView) {
   if ('userscripts' == aView) {
     greasemonkeyAddons.showView();
   } else {
-    greasemonkeyAddons.hideView();
-
     // Native code will break us, so hide from it before running it.
     if ('userscripts' == gView) gView = null;
 
@@ -31,7 +30,7 @@ var observer = {
     if (event == "install") {
       var item = greasemonkeyAddons.addScriptToList(script);
       item.setAttribute('newAddon', 'true');
-      if (gView == "userscripts") gUserscriptsView.selectedItem = item;
+      if (greasemonkeyAddons.tabSelected) gUserscriptsView.selectedItem = item;
       return;
     }
 
@@ -80,17 +79,18 @@ window.addEventListener('load', function() {
 
   GM_config.addObserver(observer);
 
-  // Work-around for Stylish compatibility, which does not update gView in
-  // its overridden showView() function.
-  var stylishRadio = document.getElementById('userstyles-view');
-  if (stylishRadio) {
-    stylishRadio.addEventListener(
-        'command',
-        function() {
-          greasemonkeyAddons.hideView();
-          gView = 'userstyles';
-        },
-        false);
+  // Work-around for any exentsion which does not update gView in
+  // its overridden showView() function (such as Stylish).
+  var viewGroup = document.getElementById('viewGroup');
+  var userscriptsRadioBtn = document.getElementById('userscripts-view');
+  var radioBtns = viewGroup.getElementsByTagName('radio');
+  for (var i = 0, radioBtn; radioBtn = radioBtns[i]; i++) {
+    if (radioBtn === userscriptsRadioBtn) continue;
+
+    radioBtn.addEventListener(
+      'command',
+      greasemonkeyAddons.hideView,
+      false);
   }
 }, false);
 
@@ -105,12 +105,18 @@ window.addEventListener('unload', function() {
   // Todo: This without dipping into private members.
   GM_config._save(true);
 }, false);
+
 })();
 
 var greasemonkeyAddons = {
+  tabSelected: false,
+
   showView: function() {
     gUserscriptsView = document.getElementById('userscriptsView');
-    if ('userscripts' == gView) return;
+
+    if(greasemonkeyAddons.tabSelected) return;
+    greasemonkeyAddons.tabSelected = true;
+    gView = 'userscripts';
 
     document.getElementById('viewGroup')
         .setAttribute('last-selected', 'userscripts');
@@ -118,17 +124,21 @@ var greasemonkeyAddons = {
     var viewGroup = document.getElementById("viewGroup");
     viewGroup.selectedItem = userscriptsRadio;
     greasemonkeyAddons.reselectLastSelected();
-    gView='userscripts';
+
     document.documentElement.className += ' userscripts';
 
     GM_config.updateModifiedScripts();
+
     gUserscriptsView.focus();
   },
 
   hideView: function() {
-    if ('userscripts' != gView) return;
+    if(!greasemonkeyAddons.tabSelected) return;
+    greasemonkeyAddons.tabSelected = false;
+
     document.documentElement.className =
       document.documentElement.className.replace(/ *\buserscripts\b/g, '');
+
     gExtensionsView.focus();
   },
 
@@ -194,7 +204,7 @@ var greasemonkeyAddons = {
 
     // I have no idea why, but this setTimeout makes it work.
     setTimeout(function() {
-          if ('userscripts' == gView) {
+          if (greasemonkeyAddons.tabSelected) {
             if (lastId) {
               gUserscriptsView.selectedItem = document.getElementById(lastId);
             }
