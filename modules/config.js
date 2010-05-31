@@ -182,12 +182,14 @@ Config.prototype = {
    *                    position the script will be moved.
    */
   move: function(script, destination) {
-    var from = this._scripts.indexOf(script);
-    var to = -1;
+    // If the destination is zero, then there is nothing to move. 
+    if (0 == destination) return;
 
+    var from = this._scripts.indexOf(script);
     // Make sure the user script is installed
     if (from == -1) return;
 
+    var to = -1;
     if (typeof destination == "number") { // if destination is an offset
       to = from + destination;
       to = Math.max(0, to);
@@ -195,7 +197,6 @@ Config.prototype = {
     } else { // if destination is a script object
       to = this._scripts.indexOf(destination);
     }
-
     if (to == -1) return;
 
     var data = {
