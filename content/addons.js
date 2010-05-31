@@ -43,7 +43,7 @@ var observer = {
         gUserscriptsView.removeChild(node);
         break;
       case "move":
-        gUserscriptsView.insertBefore(node, gUserscriptsView.childNodes[data]);
+        gUserscriptsView.insertBefore(node, gUserscriptsView.childNodes[data.insertBefore]);
         break;
       case "modified":
         var item = greasemonkeyAddons.listitemForScript(script);
