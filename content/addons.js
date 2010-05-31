@@ -263,6 +263,7 @@ var greasemonkeyAddons = {
     }
 
     var selectedListitem = gUserscriptsView.selectedItem;
+    var toBottom = false;
     switch (command) {
     case 'cmd_userscript_edit':
       GM_openInEditor(script, window);
@@ -282,17 +283,21 @@ var greasemonkeyAddons = {
         GM_config.movePast(script, greasemonkeyAddons.findScriptById(refScriptID));
       }
       break;
-    case 'cmd_userscript_move_bottom':
-      GM_config.move(script, GM_config.scripts.length);
-      break;
     case 'cmd_userscript_move_up':
       if (gUserscriptsView.selectedItem.previousSibling) {
         var refScriptID = gUserscriptsView.selectedItem.previousSibling.getAttribute('addonId');
         GM_config.movePast(script, greasemonkeyAddons.findScriptById(refScriptID));
       }
       break;
+    case 'cmd_userscript_move_bottom':
+      toBottom = true;
+      // fall-through
     case 'cmd_userscript_move_top':
-      GM_config.move(script, -1 * GM_config.scripts.length);
+      GM_config.move(script, GM_config.scripts.length * (toBottom ? 1 : -1));
+
+      // scroll to the selected element as it may be out of sight now.
+      gUserscriptsView.scrollBoxObject
+          .scrollToElement(gUserscriptsView.selectedItem);
       break;
     case 'cmd_userscript_sort':
       GM_config.sort();
