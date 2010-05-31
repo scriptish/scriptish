@@ -291,10 +291,7 @@ var greasemonkeyAddons = {
       GM_config.move(script, -1 * GM_config.scripts.length);
       break;
     case 'cmd_userscript_sort':
-      function scriptCmp(a, b) { return a.name < b.name ? -1 : 1; }
-      GM_config._scripts.sort(scriptCmp);
-      GM_config._save();
-      greasemonkeyAddons.fillList();
+      GM_config.sort();
       break;
     case 'cmd_userscript_uninstall':
       GM_uninstallQueue[script.id] = script;

@@ -432,6 +432,21 @@ Config.prototype = {
     this._changed(script, "move", to);
   },
 
+  sort: function() {
+    var scripts = this._scripts;
+
+    // sort the scripts
+    scripts.sort(function(a, b) {
+      return a.name < b.name ? -1 : 1;
+    });
+
+    for (var i = 0, script; script = scripts[i]; i++) {
+      this._changed(script, "move", i);
+    }
+
+    this._save();
+  },
+
   get _scriptDir() {
     var file = Components.classes["@mozilla.org/file/directory_service;1"]
                          .getService(Components.interfaces.nsIProperties)
