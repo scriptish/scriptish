@@ -67,8 +67,7 @@ var observer = {
         listbox.insertBefore(node, listbox.childNodes[data]);
         break;
       case "modified":
-        var item = greasemonkeyAddons.listitemForScript(script);
-        gExtensionsView.replaceChild(item, node);
+        greasemonkeyAddons.fillListItemFromScript(node, script);
         break;
     }
   }
@@ -164,6 +163,17 @@ var greasemonkeyAddons = {
   listitemForScript: function(script) {
     var item = document.createElement('richlistitem');
     item.setAttribute('class', 'userscript');
+
+    greasemonkeyAddons.fillListItemFromScript(item, script);
+
+    if (script.id in GM_uninstallQueue) {
+      item.setAttribute('opType', 'needs-uninstall');
+    }
+
+    return item;
+  },
+
+  fillListItemFromScript: function(item, script) {
     // Fake this for now.
     // Setting these attributes inherits the values into the same place they
     // would go for extensions.
@@ -181,10 +191,6 @@ var greasemonkeyAddons = {
     item.setAttribute('providesUpdatesSecurely', 'true');
     item.setAttribute('satisfiesDependencies', 'true');
     item.setAttribute('type', nsIUpdateItem.TYPE_EXTENSION);
-
-    if (script.id in GM_uninstallQueue) {
-      item.setAttribute('opType', 'needs-uninstall');
-    }
 
     return item;
   },
