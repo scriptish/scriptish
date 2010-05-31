@@ -1,4 +1,5 @@
 function Config() {
+  this._saveTimer = null;
   this._scripts = null;
   this._configFile = this._scriptDir;
   this._configFile.append("config.xml");
@@ -74,15 +75,20 @@ Config.prototype = {
       script._basedir = node.getAttribute("basedir") || ".";
       script._downloadURL = node.getAttribute("installurl") || null;
 
-      if (!node.getAttribute("modified") || !node.getAttribute("dependhash")) {
+      if (!node.getAttribute("modified")
+          || !node.getAttribute("dependhash")
+          || !node.getAttribute("version")
+      ) {
         script._modified = script._file.lastModifiedTime;
-        var rawMeta = this.parse(
-            GM_getContents(script._file), script._downloadURL, true)._rawMeta;
-        script._dependhash = GM_sha1(rawMeta);
+        var parsedScript = this.parse(
+            GM_getContents(script._file), script._downloadURL, true);
+        script._dependhash = GM_sha1(parsedScript._rawMeta);
+        script._version = parsedScript._version;
         fileModified = true;
       } else {
         script._modified = node.getAttribute("modified");
         script._dependhash = node.getAttribute("dependhash");
+        script._version = node.getAttribute("version");
       }
 
       for (var i = 0, childNode; childNode = node.childNodes[i]; i++) {
@@ -125,19 +131,25 @@ Config.prototype = {
     }
   },
 
-  _save: function() {
-    var win = Components.classes['@mozilla.org/appshell/window-mediator;1']
-                .getService(Ci.nsIWindowMediator)
-                .getMostRecentWindow("navigator:browser");
+  _save: function(saveNow) {
+    // If we have not explicitly been told to save now, then defer execution
+    // via a timer, to avoid locking up the UI.
+    if (!saveNow) {
+      // Reduce work in the case of many changes near to each other in time.
+      if (this._saveTimer) {
+        this._saveTimer.cancel(this._saveTimer);
+      }
 
-    if (win) {
-      win.setTimeout(GM_hitch(this, "_saveConfigToFile"), 250);
-    } else {
-      this._saveConfigToFile();
+      this._saveTimer = Components.classes["@mozilla.org/timer;1"]
+          .createInstance(Components.interfaces.nsITimer);
+
+      var _save = GM_hitch(this, "_save"); // dereference 'this' for the closure
+      this._saveTimer.initWithCallback(
+          {'notify': function() { _save(true); }}, 250,
+          Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+      return;
     }
-  },
 
-  _saveConfigToFile: function() {
     var doc = Components.classes["@mozilla.org/xmlextras/domparser;1"]
       .createInstance(Components.interfaces.nsIDOMParser)
       .parseFromString("<UserScriptConfig></UserScriptConfig>", "text/xml");
@@ -195,6 +207,7 @@ Config.prototype = {
       scriptNode.setAttribute("name", scriptObj._name);
       scriptNode.setAttribute("namespace", scriptObj._namespace);
       scriptNode.setAttribute("description", scriptObj._description);
+      scriptNode.setAttribute("version", scriptObj._version);
       scriptNode.setAttribute("enabled", scriptObj._enabled);
       scriptNode.setAttribute("basedir", scriptObj._basedir);
       scriptNode.setAttribute("modified", scriptObj._modified);
@@ -269,6 +282,7 @@ Config.prototype = {
           case "name":
           case "namespace":
           case "description":
+          case "version":
             script["_" + header] = value;
             break;
           case "include":
@@ -334,6 +348,7 @@ Config.prototype = {
     if (!script._name && uri) script._name = GM_parseScriptName(uri);
     if (!script._namespace && uri) script._namespace = uri.host;
     if (!script._description) script._description = "";
+    if (!script._version) script._version = "";
     if (script._includes.length == 0) script._includes.push("*");
 
     return script;
@@ -501,10 +516,19 @@ Config.prototype = {
       this._pointEightBackup();
 
     // update the currently initialized version so we don't do this work again.
-    var extMan = Components.classes["@mozilla.org/extensions/manager;1"]
-      .getService(Components.interfaces.nsIExtensionManager);
-    var item = extMan.getItemForID(GM_GUID);
-    GM_prefRoot.setValue("version", item.version);
+    if ("@mozilla.org/extensions/manager;1" in Components.classes) {
+      // Firefox <= 3.6.*
+      var extMan = Components.classes["@mozilla.org/extensions/manager;1"]
+          .getService(Components.interfaces.nsIExtensionManager);
+      var item = extMan.getItemForID(GM_GUID);
+      GM_prefRoot.setValue("version", item.version);
+    } else {
+      // Firefox 3.7+
+      Components.utils.import("resource://gre/modules/AddonManager.jsm");
+      AddonManager.getAddonByID(GM_GUID, function(addon) {
+         GM_prefRoot.setValue("version", addon.version);
+      });
+    }
 
     GM_log("< GM_updateVersion");
   },
