@@ -437,7 +437,7 @@ Config.prototype = {
 
     // sort the scripts
     scripts.sort(function(a, b) {
-      return a.name < b.name ? -1 : 1;
+      return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
     });
 
     for (var i = 0, script; script = scripts[i]; i++) {
