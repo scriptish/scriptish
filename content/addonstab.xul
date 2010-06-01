@@ -8,6 +8,10 @@
 <script type="application/x-javascript" src="chrome://greasemonkey/content/prefmanager.js" />
 <script type="application/x-javascript" src="chrome://greasemonkey/content/addonstab.js" />
 
-
+<richlistbox id="categories">
+  <richlistitem id="category-userscripts" class="category" name="&userscripts;"
+    insertafter="category-plugins" value="addons://list/userscripts">
+  </richlistitem>
+</richlistbox>
 
 </overlay>
