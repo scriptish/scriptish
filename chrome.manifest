@@ -2,7 +2,8 @@ content    greasemonkey    content/
 skin       greasemonkey    classic/1.0 skin/
 
 overlay    chrome://browser/content/browser.xul    chrome://greasemonkey/content/browser.xul
-overlay    chrome://mozapps/content/extensions/extensions.xul chrome://greasemonkey/content/addons.xul
+overlay    chrome://mozapps/content/extensions/extensions.xul chrome://greasemonkey/content/addons.xul appversion<3.7a5pre
+overlay    chrome://mozapps/content/extensions/extensions.xul chrome://greasemonkey/content/addonstab.xul appversion>=3.7a5pre
 
 overlay    chrome://greasemonkey/content/install.xul chrome://greasemonkey/content/closewindow.xul
 overlay    chrome://greasemonkey/content/options.xul chrome://greasemonkey/content/closewindow.xul
