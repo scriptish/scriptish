@@ -76,6 +76,10 @@ window.addEventListener('load', function() {
       'select', greasemonkeyAddons.updateLastSelected, false);
   gUserscriptsView.addEventListener(
       'keypress', greasemonkeyAddons.onKeypress, false);
+  gUserscriptsView.addEventListener(
+      'dragover', greasemonkeyAddons.onDragOver, false);
+  gUserscriptsView.addEventListener(
+      'drop', greasemonkeyAddons.onDrop, false);
 
   GM_config.addObserver(observer);
 
@@ -140,6 +144,25 @@ var greasemonkeyAddons = {
       document.documentElement.className.replace(/ *\buserscripts\b/g, '');
 
     gExtensionsView.focus();
+  },
+
+  onDragOver: function(event) {
+    var types = event.dataTransfer.types;
+    var supportedTypes = ["text/x-moz-url"];
+    var requiredExtension = ".user.js";
+    types = supportedTypes.filter(function (value) types.contains(value));
+    if (types.length) {
+      var data = event.dataTransfer.getData(types[0]);
+      if (data.lastIndexOf(requiredExtension) == data.length-requiredExtension.length) {
+        event.preventDefault();
+      }
+    }
+  },
+
+  onDrop: function(event) {
+    //install script
+    var scriptURI = event.dataTransfer.getData("text/x-moz-url");
+    alert("NEXT STEP: Install this .user.js script: " + scriptURI);
   },
 
   updateLastSelected: function() {
