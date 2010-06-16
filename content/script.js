@@ -11,7 +11,10 @@ function Script(config) {
 
   this._name = null;
   this._namespace = null;
+  this._id = null;
+  this._prefroot = null;
   this._description = null;
+  this._version = null;
   this._enabled = true;
   this._includes = [];
   this._excludes = [];
@@ -36,9 +39,16 @@ Script.prototype = {
 
   get name() { return this._name; },
   get namespace() { return this._namespace; },
-  get prefroot() { return [
-      "scriptvals.", this.namespace, "/", this.name, "."].join(""); },
+  get id() {
+    if (!this._id) this._id = this._namespace + "/" + this._name;
+    return this._id;
+  },
+  get prefroot() { 
+    if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
+    return this._prefroot;
+  },
   get description() { return this._description; },
+  get version() { return this._version; },
   get enabled() { return this._enabled; },
   set enabled(enabled) { this._enabled = enabled; this._changed("edit-enabled", enabled); },
 
@@ -123,7 +133,6 @@ Script.prototype = {
   },
 
   isModified: function() {
-    this.delayInjection = false;
     if (this._modified != this._file.lastModifiedTime) {
       this._modified = this._file.lastModifiedTime;
       return true;
@@ -132,6 +141,10 @@ Script.prototype = {
   },
 
   updateFromNewScript: function(newScript) {
+    // Empty cached values.
+    this._id = null;
+    this._prefroot = null;
+
     // Migrate preferences.
     if (this.prefroot != newScript.prefroot) {
       var storageOld = new GM_ScriptStorage(this);
@@ -151,6 +164,7 @@ Script.prototype = {
     this._namespace = newScript._namespace;
     this._description = newScript._description;
     this._unwrap = newScript._unwrap;
+    this._version = newScript._version;
 
     var dependhash = GM_sha1(newScript._rawMeta);
     if (dependhash != this._dependhash && !newScript._dependFail) {

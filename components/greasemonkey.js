@@ -120,16 +120,13 @@ var greasemonkeyService = {
   },
 
   domContentLoaded: function(wrappedContentWin, chromeWin) {
-    var unsafeWin = wrappedContentWin.wrappedJSObject;
-    var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
-    var href = new XPCNativeWrapper(unsafeLoc, "href").href;
-    var scripts = this.initScripts(href, wrappedContentWin, chromeWin);
+    var url = wrappedContentWin.document.location.href;
+    var scripts = this.initScripts(url, wrappedContentWin, chromeWin);
 
     if (scripts.length > 0) {
-      this.injectScripts(scripts, href, unsafeWin, chromeWin);
+      this.injectScripts(scripts, url, wrappedContentWin, chromeWin);
     }
   },
-
 
   startup: function() {
     var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
@@ -232,7 +229,7 @@ var greasemonkeyService = {
     return this.config.getMatchingScripts(testMatch);
   },
 
-  injectScripts: function(scripts, url, unsafeContentWin, chromeWin) {
+  injectScripts: function(scripts, url, wrappedContentWin, chromeWin) {
     var sandbox;
     var script;
     var logger;
@@ -240,14 +237,13 @@ var greasemonkeyService = {
     var storage;
     var xmlhttpRequester;
     var resources;
-    var safeWin = new XPCNativeWrapper(unsafeContentWin);
-    var safeDoc = safeWin.document;
+    var unsafeContentWin = wrappedContentWin.wrappedJSObject;
 
     // detect and grab reference to firebug console and context, if it exists
     var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
 
     for (var i = 0; script = scripts[i]; i++) {
-      sandbox = new Components.utils.Sandbox(safeWin);
+      sandbox = new Components.utils.Sandbox(wrappedContentWin);
 
       logger = new GM_ScriptLogger(script);
 
@@ -259,7 +255,7 @@ var greasemonkeyService = {
                                                  url);
       resources = new GM_Resources(script);
 
-      sandbox.window = safeWin;
+      sandbox.window = wrappedContentWin;
       sandbox.document = sandbox.window.document;
       sandbox.unsafeWindow = unsafeContentWin;
 
@@ -267,7 +263,9 @@ var greasemonkeyService = {
       sandbox.XPathResult = Ci.nsIDOMXPathResult;
 
       // add our own APIs
-      sandbox.GM_addStyle = function(css) { GM_addStyle(safeDoc, css) };
+      sandbox.GM_addStyle = function(css) {
+            GM_addStyle(wrappedContentWin.document, css);
+          };
       sandbox.GM_log = GM_hitch(logger, "log");
       sandbox.console = console;
       sandbox.GM_setValue = GM_hitch(storage, "setValue");
@@ -276,14 +274,15 @@ var greasemonkeyService = {
       sandbox.GM_listValues = GM_hitch(storage, "listValues");
       sandbox.GM_getResourceURL = GM_hitch(resources, "getResourceURL");
       sandbox.GM_getResourceText = GM_hitch(resources, "getResourceText");
-      sandbox.GM_openInTab = GM_hitch(this, "openInTab", safeWin, chromeWin);
+      sandbox.GM_openInTab = GM_hitch(
+          this, "openInTab", wrappedContentWin, chromeWin);
       sandbox.GM_xmlhttpRequest = GM_hitch(xmlhttpRequester,
                                            "contentStartRequest");
       sandbox.GM_registerMenuCommand = GM_hitch(this,
                                                 "registerMenuCommand",
                                                 unsafeContentWin);
 
-      sandbox.__proto__ = safeWin;
+      sandbox.__proto__ = wrappedContentWin;
 
       var contents = script.textContent;
 
@@ -336,18 +335,8 @@ var greasemonkeyService = {
       return undefined;
     }
 
-    var info = Cc["@mozilla.org/xre/app-info;1"]
-      .getService(Components.interfaces.nsIXULAppInfo);
-    if (parseFloat(info.version, 10) < 3.0) {
-      // Pre FF 3.0 wants the URL as the second argument.
-      var newTab = chromeWin.openNewTabWith(
-        url, safeContentWin.document.location.href, null, null, null, null);
-    } else {
-      // Post FF 3.0 wants the document as the second argument.
-      var newTab = chromeWin.openNewTabWith(
-        url, safeContentWin.document, null, null, null, null);
-    }
-
+    var newTab = chromeWin.openNewTabWith(
+      url, safeContentWin.document, null, null, null, null);
     // Source:
     // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
     var newWindow = chromeWin.gBrowser
@@ -458,16 +447,9 @@ var greasemonkeyService = {
         return null;
       }
 
-      try {
-        if (!fbConsole.isEnabled(fbContext)) return null;
-      } catch (e) {
-        // FB 1.1 can't be enabled/disabled.  Function to check doesn't exist.
-        // Silently ignore.
-      }
+      if (!fbConsole.isEnabled(fbContext)) return null;
 
-      if (fbVersion < 1.2) {
-        return new chromeWin.FirebugConsole(fbContext, unsafeContentWin);
-      } else if (1.2 == fbVersion) {
+      if (1.2 == fbVersion) {
         var safeWin = new XPCNativeWrapper(unsafeContentWin);
 
         if (fbContext.consoleHandler) {
