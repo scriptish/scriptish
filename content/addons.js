@@ -30,8 +30,7 @@ var observer = {
       return;
     }
 
-    // find the script's node in the listbox
-    var listbox = gExtensionsView;
+    // find the script's node
     var node = document.getElementById('urn:greasemonkey:item:'+script.id);
     if (!node) return;
 
@@ -43,7 +42,9 @@ var observer = {
         gUserscriptsView.removeChild(node);
         break;
       case "move":
+        gUserscriptsView.removeChild(node);
         gUserscriptsView.insertBefore(node, gUserscriptsView.childNodes[data]);
+        greasemonkeyAddons.reselectLastSelected();
         break;
       case "modified":
         greasemonkeyAddons.fillListItemFromScript(node, script);
@@ -72,7 +73,7 @@ window.addEventListener('load', function() {
         'command',
         function() {
           greasemonkeyAddons.hideView();
-          gView = 'userstyles'
+          gView = 'userstyles';
         },
         false);
   }
@@ -112,7 +113,7 @@ var greasemonkeyAddons = {
   hideView: function() {
     if ('userscripts' != gView) return;
     document.documentElement.className =
-      document.documentElement.className.replace(/ *\buserscripts\b/, '');
+      document.documentElement.className.replace(/ *\buserscripts\b/g, '');
     gExtensionsView.focus();
   },
 
@@ -214,6 +215,9 @@ var greasemonkeyAddons = {
     case 'cmd_userscript_edit':
       GM_openInEditor(script);
       break;
+    case 'cmd_userscript_show':
+      GM_openFolder(script._file);
+      break;
     case 'cmd_userscript_enable':
       script.enabled = true;
       break;
@@ -286,7 +290,9 @@ var greasemonkeyAddons = {
     var standardItems = [
       'move_up', 'move_down', 'move_top', 'move_bottom', 'sort',
       'move_separator',
-      'edit', 'uninstall'];
+      'edit', 'show',
+      'edit_separator',
+      'uninstall'];
     var uninstallItems = ['uninstall_now', 'cancelUninstall'];
 
     // Set everything hidden now, reveal the right selection below.
