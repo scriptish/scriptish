@@ -157,7 +157,8 @@ var greasemonkeyAddons = {
           break;
         case 'url':
           var scripts = GM_config.getMatchingScripts(function(script) {
-            if (script.matchesURL(filterText)) {
+            if (GM_isGreasemonkeyable(filterText) &&
+                script.matchesURL(filterText)) {
               return true;
             }
             return false;
