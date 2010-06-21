@@ -30,6 +30,26 @@
 
 <notificationbox id="addonsMsg">
   <vbox id="userscriptsBox" insertafter="extensionsBox" flex="1">
+    <hbox id="userscriptsFilterBar" flex="1">
+      <textbox id="userscriptsFilterText"
+          type="search"
+          flex="1"
+          timeout="751"
+          emptytext="&FilterText.emptytext;"
+          oncommand="greasemonkeyAddons.fillList();"
+          persist="value"
+      />
+      <label control="userscriptsFilterBy" value="&FilterBy.label;:"/>
+      <menulist id="userscriptsFilterBy"
+          persist="value"
+          oncommand="greasemonkeyAddons.fillList();">
+        <menupopup>
+          <menuitem value="name" label="&FilterByName.label;"/>
+          <menuitem value="url" label="URL" />
+        </menupopup>
+      </menulist>
+    </hbox>
+
     <hbox flex="1">
       <richlistbox id="userscriptsView" flex="1" context="userscriptContextMenu"/>
     </hbox>
