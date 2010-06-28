@@ -78,7 +78,7 @@ GM_BrowserUI.chromeLoad = function(e) {
 
   // register for notifications from greasemonkey-service about ui type things
   this.gmSvc = Components.classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
-                         .getService(Components.interfaces.gmIGreasemonkeyService);
+                   .getService().wrappedJSObject;
 
   // reference this once, so that the getter is called at least once, and the
   // initialization routines will run, no matter what

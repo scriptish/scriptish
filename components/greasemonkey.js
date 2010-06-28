@@ -85,7 +85,6 @@ GM_GreasemonkeyService.prototype = {
       Ci.nsIObserver,
       Ci.nsISupports,
       Ci.nsISupportsWeakReference,
-      Ci.gmIGreasemonkeyService,
       Ci.nsIContentPolicy
   ]),
 
