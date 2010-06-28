@@ -98,15 +98,6 @@ GM_BrowserUI.registerMenuCommand = function(menuCommand) {
 };
 
 /**
- * openInTab
- */
-GM_BrowserUI.openInTab = function(domWindow, url) {
-  if (this.isMyWindow(domWindow)) {
-    this.tabBrowser.addTab(url);
-  }
-};
-
-/**
  * Gets called when a DOMContentLoaded event occurs somewhere in the browser.
  * If that document is in in the top-level window of the focused tab, find
  * it's menu items and activate them.
@@ -365,22 +356,6 @@ GM_BrowserUI.getCommander = function(unsafeWin) {
   this.menuCommanders.push({win:unsafeWin, commander:commander});
 
   return commander;
-};
-
-/**
- * Helper to determine if a given dom window is in this tabbrowser
- */
-GM_BrowserUI.isMyWindow = function(domWindow) {
-  var tabbrowser = getBrowser();
-  var browser;
-
-  for (var i = 0; browser = tabbrowser.browsers[i]; i++) {
-    if (browser.contentWindow == domWindow) {
-      return true;
-    }
-  }
-
-  return false;
 };
 
 function GM_showGeneralPopup(aEvent) {
