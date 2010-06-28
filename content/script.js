@@ -1,3 +1,6 @@
+
+Components.utils.import("resource://greasemonkey/convert2RegExp.js");
+
 function Script(config) {
   this._config = config;
   this._observers = [];
