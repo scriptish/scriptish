@@ -1,4 +1,5 @@
 content    greasemonkey    content/
+resource   greasemonkey    modules/
 skin       greasemonkey    classic/1.0 skin/
 
 overlay    chrome://browser/content/browser.xul    chrome://greasemonkey/content/browser.xul

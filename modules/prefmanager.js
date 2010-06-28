@@ -1,7 +1,13 @@
-var GM_prefRoot = new GM_PrefManager();
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["GM_prefRoot", "GM_PrefManager"];
 
-GM_PrefManager.MIN_INT_32 = -0x80000000;
-GM_PrefManager.MAX_INT_32 = 0x7FFFFFFF;
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+const MIN_INT_32 = -0x80000000;
+const MAX_INT_32 = 0x7FFFFFFF;
+
+var GM_prefRoot = new GM_PrefManager();
 
 /**
  * Simple API on top of preferences for greasemonkey.
@@ -15,12 +21,12 @@ function GM_PrefManager(startPoint) {
 
   startPoint = "greasemonkey." + startPoint;
 
-  var pref = Components.classes["@mozilla.org/preferences-service;1"]
-                       .getService(Components.interfaces.nsIPrefService)
-                       .getBranch(startPoint);
+  var pref = Cc["@mozilla.org/preferences-service;1"]
+                 .getService(Ci.nsIPrefService)
+                 .getBranch(startPoint);
 
   var observers = {};
-  const nsISupportsString = Components.interfaces.nsISupportsString;
+  const nsISupportsString = Ci.nsISupportsString;
 
   /**
    * whether a preference exists
@@ -77,8 +83,8 @@ function GM_PrefManager(startPoint) {
         break;
       case "number":
         if (value % 1 == 0 &&
-            value >= GM_PrefManager.MIN_INT_32 &&
-            value <= GM_PrefManager.MAX_INT_32) {
+            value >= MIN_INT_32 &&
+            value <= MAX_INT_32) {
           goodType = true;
         }
         break;
@@ -99,8 +105,8 @@ function GM_PrefManager(startPoint) {
     // set new value using correct method
     switch (prefType) {
       case "string":
-        var str = Components.classes["@mozilla.org/supports-string;1"]
-                            .createInstance(nsISupportsString);
+        var str = Cc["@mozilla.org/supports-string;1"]
+                      .createInstance(nsISupportsString);
         str.data = value;
         pref.setComplexValue(prefName, nsISupportsString, str);
         break;
@@ -134,7 +140,7 @@ function GM_PrefManager(startPoint) {
     // store the observer in case we need to remove it later
     observers[watcher] = observer;
 
-    pref.QueryInterface(Components.interfaces.nsIPrefBranchInternal).
+    pref.QueryInterface(Ci.nsIPrefBranchInternal).
       addObserver(prefName, observer, false);
   };
 
@@ -143,7 +149,7 @@ function GM_PrefManager(startPoint) {
    */
   this.unwatch = function(prefName, watcher) {
     if (observers[watcher]) {
-      pref.QueryInterface(Components.interfaces.nsIPrefBranchInternal).
+      pref.QueryInterface(Ci.nsIPrefBranchInternal).
         removeObserver(prefName, observers[watcher]);
     }
   };
