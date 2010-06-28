@@ -17,7 +17,6 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 <script type="application/x-javascript" src="chrome://greasemonkey/content/third-party/mpl-utils.js" />
-<script type="application/x-javascript" src="chrome://greasemonkey/content/utils.js" />
 <script type="application/x-javascript" src="chrome://greasemonkey/content/addons.js" />
 
 <radiogroup id="viewGroup">
@@ -52,7 +51,7 @@
   <button id="newUserscript"
     label="&NewScript;"
     accesskey="&NewScript.accesskey;"
-    oncommand="GM_newUserScript()"
+    oncommand="GM_newUserScript(window)"
   />
 </hbox>
 

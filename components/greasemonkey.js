@@ -30,39 +30,6 @@ const maxJSVersion = (function getMaxJSVersion() {
   return "1.6";
 })();
 
-function alert(msg) {
-  Cc["@mozilla.org/embedcomp/prompt-service;1"]
-    .getService(Ci.nsIPromptService)
-    .alert(null, "Greasemonkey alert", msg);
-}
-
-// Examines the stack to determine if an API should be callable.
-function GM_apiLeakCheck(apiName) {
-  var stack = Components.stack;
-
-  do {
-    // Valid stack frames for GM api calls are: native and js when coming from
-    // chrome:// URLs and the greasemonkey.js component's file:// URL.
-    if (2 == stack.language) {
-      // NOTE: In FF 2.0.0.0, I saw that stack.filename can be null for JS/XPCOM
-      // services. This didn't happen in FF 2.0.0.11; I'm not sure when it
-      // changed.
-      if (stack.filename != null &&
-          stack.filename != gmSvcFilename &&
-          stack.filename.substr(0, 6) != "chrome") {
-        GM_logError(new Error("Greasemonkey access violation: unsafeWindow " +
-                    "cannot call " + apiName + "."));
-        return false;
-      }
-    }
-
-    stack = stack.caller;
-  } while (stack);
-
-  return true;
-}
-
-
 function GM_GreasemonkeyService() {
   this.wrappedJSObject = this;
 }
@@ -87,6 +54,8 @@ GM_GreasemonkeyService.prototype = {
       Ci.nsISupportsWeakReference,
       Ci.nsIContentPolicy
   ]),
+
+  get filename() { return gmSvcFilename; },
 
   _config: null,
   get config() {
@@ -115,7 +84,7 @@ GM_GreasemonkeyService.prototype = {
     var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
       .getService(Ci.mozIJSSubScriptLoader);
     loader.loadSubScript("chrome://global/content/XPCNativeWrapper.js");
-    loader.loadSubScript("chrome://greasemonkey/content/utils.js");
+    Cu.import("resource://greasemonkey/utils.js");
     loader.loadSubScript("chrome://greasemonkey/content/config.js");
     loader.loadSubScript("chrome://greasemonkey/content/script.js");
     loader.loadSubScript("chrome://greasemonkey/content/scriptrequire.js");

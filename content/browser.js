@@ -5,6 +5,8 @@
 
 var GM_BrowserUI = new Object();
 
+Components.utils.import("resource://greasemonkey/utils.js");
+
 /**
  * nsISupports.QueryInterface
  */
@@ -463,7 +465,7 @@ function GM_popupClicked(aEvent) {
     if (aEvent.button == 0) // left-click: toggle enabled state
       script.enabled =! script.enabled;
     else // right-click: open in editor
-      GM_openInEditor(script);
+      GM_openInEditor(script, window);
 
     closeMenus(aEvent.target);
   }

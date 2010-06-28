@@ -18,7 +18,6 @@
   onload="GM_onloadOptions()"
 >
 <script type="application/x-javascript" src="chrome://greasemonkey/content/prefmanager.js" />
-<script type="application/x-javascript" src="chrome://greasemonkey/content/utils.js" />
 <script type="application/x-javascript" src="chrome://greasemonkey/content/options.js" />
 
 <dialogheader title="Greasemonkey" description="&prefWindow.titleWin;"/>
@@ -26,7 +25,9 @@
 <vbox>
   <groupbox>
     <caption label="&options.editor;" />
-    <button oncommand="GM_getEditor(true)"><label>&options.changeEditor;</label></button>
+    <button oncommand="GM_getEditor(window, true)">
+      <label>&options.changeEditor;</label>
+    </button>
   </groupbox>
 
   <groupbox>
