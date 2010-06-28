@@ -29,7 +29,19 @@ Contributor(s):
 
   Anthony Lieuallen <arantius@gmail.com>
   Mike Medley <medleymind@gmail.com>
+  Erik Vold <erikvvold@gmail.com>
 ***** END LICENSE BLOCK ****/
+
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["GM_openFolder"];
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+const ioService = Cc["@mozilla.org/network/io-service;1"]
+                      .getService(Ci.nsIIOService);
+const protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
+                            .getService(Ci.nsIExternalProtocolService);
 
 function GM_openFolder(aFile) {
   try {
@@ -44,14 +56,9 @@ function GM_openFolder(aFile) {
       if (fParent.exists()) fParent.launch();
     } catch (e) {
       // If launch also fails let the OS handler try to open the parent.
-      var uri = Components.classes["@mozilla.org/network/io-service;1"]
-          .getService(Components.interfaces.nsIIOService)
-          .newFileURI(fParent);
-      var protocolSvc = Components
-          .classes["@mozilla.org/uriloader/external-protocol-service;1"]
-          .getService(Components.interfaces.nsIExternalProtocolService);
+      var uri = ioService.newFileURI(fParent);
 
-      protocolSvc.loadUrl(uri);
+      protocolService.loadUrl(uri);
     }
   }
 }
