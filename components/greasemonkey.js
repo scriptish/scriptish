@@ -94,7 +94,6 @@ GM_GreasemonkeyService.prototype = {
       this._config = new Config();
     return this._config;
   },
-  browserWindows: [],
 
   // nsIObserver
   observe: function(aSubject, aTopic, aData) {
@@ -103,40 +102,12 @@ GM_GreasemonkeyService.prototype = {
     }
   },
 
-
-  // gmIGreasemonkeyService
-  registerBrowser: function(browserWin) {
-    var existing;
-
-    for (var i = 0; existing = this.browserWindows[i]; i++) {
-      if (existing == browserWin) {
-        // NOTE: Unlocalised strings
-        throw new Error("Browser window has already been registered.");
-      }
-    }
-
-    this.browserWindows.push(browserWin);
-  },
-
-  unregisterBrowser: function(browserWin) {
-   var existing;
-
-    for (var i = 0; existing = this.browserWindows[i]; i++) {
-      if (existing == browserWin) {
-        this.browserWindows.splice(i, 1);
-        return;
-      }
-    }
-
-    throw new Error("Browser window is not registered.");
-  },
-
-  domContentLoaded: function(wrappedContentWin, chromeWin) {
+  domContentLoaded: function(wrappedContentWin, chromeWin, gmBrowser) {
     var url = wrappedContentWin.document.location.href;
     var scripts = this.initScripts(url, wrappedContentWin, chromeWin);
 
     if (scripts.length > 0) {
-      this.injectScripts(scripts, url, wrappedContentWin, chromeWin);
+      this.injectScripts(scripts, url, wrappedContentWin, chromeWin, gmBrowser);
     }
   },
 
@@ -241,7 +212,7 @@ GM_GreasemonkeyService.prototype = {
     return this.config.getMatchingScripts(testMatch);
   },
 
-  injectScripts: function(scripts, url, wrappedContentWin, chromeWin) {
+  injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {
     var sandbox;
     var script;
     var logger;
@@ -292,7 +263,8 @@ GM_GreasemonkeyService.prototype = {
                                            "contentStartRequest");
       sandbox.GM_registerMenuCommand = GM_hitch(this,
                                                 "registerMenuCommand",
-                                                unsafeContentWin);
+                                                unsafeContentWin,
+                                                gmBrowser);
 
       sandbox.__proto__ = wrappedContentWin;
 
@@ -324,22 +296,20 @@ GM_GreasemonkeyService.prototype = {
     }
   },
 
-  registerMenuCommand: function(unsafeContentWin, commandName, commandFunc,
-                                accelKey, accelModifiers, accessKey) {
+  registerMenuCommand: function(unsafeContentWin, gmBrowser, commandName,
+                                commandFunc, accelKey, accelModifiers,
+                                accessKey) {
     if (!GM_apiLeakCheck("GM_registerMenuCommand")) {
       return;
     }
 
-    var command = {name: commandName,
-                   accelKey: accelKey,
-                   accelModifiers: accelModifiers,
-                   accessKey: accessKey,
-                   doCommand: commandFunc,
-                   window: unsafeContentWin };
-
-    for (var i = 0; i < this.browserWindows.length; i++) {
-      this.browserWindows[i].registerMenuCommand(command);
-    }
+    gmBrowser.registerMenuCommand({
+      name: commandName,
+      accelKey: accelKey,
+      accelModifiers: accelModifiers,
+      accessKey: accessKey,
+      doCommand: commandFunc,
+      window: unsafeContentWin});
   },
 
   openInTab: function(safeContentWin, chromeWin, url) {

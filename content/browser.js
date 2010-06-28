@@ -82,23 +82,19 @@ GM_BrowserUI.chromeLoad = function(e) {
   // reference this once, so that the getter is called at least once, and the
   // initialization routines will run, no matter what
   this.gmSvc.wrappedJSObject.config;
-
-  this.gmSvc.registerBrowser(this);
 };
 
 /**
  * registerMenuCommand
  */
 GM_BrowserUI.registerMenuCommand = function(menuCommand) {
-  if (this.isMyWindow(menuCommand.window)) {
-    var commander = this.getCommander(menuCommand.window);
+  var commander = this.getCommander(menuCommand.window);
 
-    commander.registerMenuCommand(menuCommand.name,
-                                  menuCommand.doCommand,
-                                  menuCommand.accelKey,
-                                  menuCommand.accelModifiers,
-                                  menuCommand.accessKey);
-  }
+  commander.registerMenuCommand(menuCommand.name,
+                                menuCommand.doCommand,
+                                menuCommand.accelKey,
+                                menuCommand.accelModifiers,
+                                menuCommand.accessKey);
 };
 
 /**
@@ -134,7 +130,7 @@ GM_BrowserUI.contentLoad = function(e) {
       this.currentMenuCommander.attach();
     }
 
-    this.gmSvc.domContentLoaded(safeWin, window);
+    this.gmSvc.domContentLoaded(safeWin, window, this);
 
     GM_listen(unsafeWin, "pagehide", GM_hitch(this, "contentUnload"));
   }
@@ -296,7 +292,6 @@ GM_BrowserUI.contentUnload = function(e) {
 GM_BrowserUI.chromeUnload = function() {
   GM_prefRoot.unwatch("enabled", this.enabledWatcher);
   this.tabBrowser.removeProgressListener(this);
-  this.gmSvc.unregisterBrowser(this);
   delete this.menuCommanders;
 };
 
