@@ -88,7 +88,7 @@ GM_GreasemonkeyService.prototype = {
     loader.loadSubScript("chrome://greasemonkey/content/config.js");
     loader.loadSubScript("chrome://greasemonkey/content/script.js");
     Cu.import("resource://greasemonkey/scriptrequire.js");
-    loader.loadSubScript("chrome://greasemonkey/content/scriptresource.js");
+    Cu.import("resource://greasemonkey/scriptresource.js");
     loader.loadSubScript("chrome://greasemonkey/content/miscapis.js");
     Cu.import("resource://greasemonkey/xmlhttprequester.js");
   },
