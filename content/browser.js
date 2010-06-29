@@ -6,6 +6,7 @@
 var GM_BrowserUI = new Object();
 
 Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://greasemonkey/scriptdownloader.js");
 
 /**
  * nsISupports.QueryInterface

@@ -91,7 +91,6 @@ GM_GreasemonkeyService.prototype = {
     loader.loadSubScript("chrome://greasemonkey/content/scriptresource.js");
     loader.loadSubScript("chrome://greasemonkey/content/miscapis.js");
     Cu.import("resource://greasemonkey/xmlhttprequester.js");
-    loader.loadSubScript("chrome://greasemonkey/content/scriptdownloader.js");
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {

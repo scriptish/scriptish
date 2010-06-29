@@ -1,5 +1,6 @@
 
 Components.utils.import("resource://greasemonkey/convert2RegExp.js");
+Components.utils.import("resource://greasemonkey/scriptdownloader.js");
 
 function Script(config) {
   this._config = config;
