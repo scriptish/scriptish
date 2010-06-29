@@ -1,3 +1,11 @@
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["ScriptRequire"];
+
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+Cu.import("resource://greasemonkey/utils.js");
+
 function ScriptRequire(script) {
   this._script = script;
 
@@ -26,7 +34,7 @@ ScriptRequire.prototype = {
 
     var file = this._script._basedirFile;
     file.append(name);
-    file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+    file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
     this._filename = file.leafName;
 
     GM_log("Moving dependency file from " + this._tempFile.path + " to " + file.path);
