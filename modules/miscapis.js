@@ -1,3 +1,14 @@
+// JSM exported symbols
+var EXPORTED_SYMBOLS = [
+    "GM_ScriptStorage",
+    "GM_Resources",
+    "GM_ScriptLogger",
+    "GM_addStyle",
+    "GM_console"];
+
+Components.utils.import("resource://greasemonkey/utils.js");
+GM_apiAcceptableFile(Components.stack.filename);
+
 function GM_ScriptStorage(script) {
   this.prefMan = new GM_PrefManager(script.prefroot);
 }
