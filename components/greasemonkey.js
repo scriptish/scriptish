@@ -86,7 +86,7 @@ GM_GreasemonkeyService.prototype = {
     loader.loadSubScript("chrome://global/content/XPCNativeWrapper.js");
     Cu.import("resource://greasemonkey/utils.js");
     loader.loadSubScript("chrome://greasemonkey/content/config.js");
-    loader.loadSubScript("chrome://greasemonkey/content/script.js");
+    Cu.import("resource://greasemonkey/script.js");
     Cu.import("resource://greasemonkey/scriptrequire.js");
     Cu.import("resource://greasemonkey/scriptresource.js");
     loader.loadSubScript("chrome://greasemonkey/content/miscapis.js");
