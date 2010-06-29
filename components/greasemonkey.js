@@ -148,13 +148,13 @@ GM_GreasemonkeyService.prototype = {
       return false;
     }
 
-    var fph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+    var fph = Cc["@mozilla.org/network/protocol;1?name=file"]
     .getService(Ci.nsIFileProtocolHandler);
 
     var file = fph.getFileFromURLSpec(uri.spec);
-    var tmpDir = Components.classes["@mozilla.org/file/directory_service;1"]
-    .getService(Components.interfaces.nsIProperties)
-    .get("TmpD", Components.interfaces.nsILocalFile);
+    var tmpDir = Cc["@mozilla.org/file/directory_service;1"]
+    .getService(Ci.nsIProperties)
+    .get("TmpD", Ci.nsILocalFile);
 
     return file.parent.equals(tmpDir) && file.leafName != "newscript.user.js";
   },
@@ -189,7 +189,7 @@ GM_GreasemonkeyService.prototype = {
     var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
 
     for (var i = 0; script = scripts[i]; i++) {
-      sandbox = new Components.utils.Sandbox(wrappedContentWin);
+      sandbox = new Cu.Sandbox(wrappedContentWin);
 
       logger = new GM_ScriptLogger(script);
 
@@ -293,7 +293,7 @@ GM_GreasemonkeyService.prototype = {
   },
 
   evalInSandbox: function(code, codebase, sandbox, script) {
-    if (!(Components.utils && Components.utils.Sandbox)) {
+    if (!(Cu && Cu.Sandbox)) {
       var e = new Error("Could not create sandbox.");
       GM_logError(e, 0, e.fileName, e.lineNumber);
       return true;
@@ -301,7 +301,7 @@ GM_GreasemonkeyService.prototype = {
     try {
       // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
       var lineFinder = new Error();
-      Components.utils.evalInSandbox(code, sandbox, maxJSVersion);
+      Cu.evalInSandbox(code, sandbox, maxJSVersion);
     } catch (e) { // catches errors while running the script code
       try {
         if (e && "return not in function" == e.message)
