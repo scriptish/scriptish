@@ -464,7 +464,7 @@ Config.prototype = {
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
     if (script.enabled && script.matchesURL(href)) {
-      greasemonkeyService.injectScripts([script], href, unsafeWin, this.chromeWin);
+      GM_GreasemonkeyService.injectScripts([script], href, unsafeWin, this.chromeWin);
     }
   },
 
