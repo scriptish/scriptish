@@ -1,3 +1,18 @@
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["Config"];
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+const gmService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"]
+                      .getService().wrappedJSObject;
+
+Cu.import("resource://greasemonkey/utils.js");
+Cu.import("resource://greasemonkey/script.js");
+Cu.import("resource://greasemonkey/scriptrequire.js");
+Cu.import("resource://greasemonkey/scriptresource.js");
+
 function Config() {
   this._saveTimer = null;
   this._scripts = null;
@@ -58,8 +73,8 @@ Config.prototype = {
   },
 
   _load: function() {
-    var domParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-                              .createInstance(Components.interfaces.nsIDOMParser);
+    var domParser = Cc["@mozilla.org/xmlextras/domparser;1"]
+                        .createInstance(Ci.nsIDOMParser);
 
     var configContents = GM_getContents(this._configFile);
     var doc = domParser.parseFromString(configContents, "text/xml");
@@ -140,18 +155,18 @@ Config.prototype = {
         this._saveTimer.cancel(this._saveTimer);
       }
 
-      this._saveTimer = Components.classes["@mozilla.org/timer;1"]
-          .createInstance(Components.interfaces.nsITimer);
+      this._saveTimer = Cc["@mozilla.org/timer;1"]
+          .createInstance(Ci.nsITimer);
 
       var _save = GM_hitch(this, "_save"); // dereference 'this' for the closure
       this._saveTimer.initWithCallback(
           {'notify': function() { _save(true); }}, 250,
-          Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+          Ci.nsITimer.TYPE_ONE_SHOT);
       return;
     }
 
-    var doc = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-      .createInstance(Components.interfaces.nsIDOMParser)
+    var doc = Cc["@mozilla.org/xmlextras/domparser;1"]
+      .createInstance(Ci.nsIDOMParser)
       .parseFromString("<UserScriptConfig></UserScriptConfig>", "text/xml");
 
     for (var i = 0, scriptObj; scriptObj = this._scripts[i]; i++) {
@@ -224,8 +239,8 @@ Config.prototype = {
     doc.firstChild.appendChild(doc.createTextNode("\n"));
 
     var configStream = GM_getWriteStream(this._configFile);
-    Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
-      .createInstance(Components.interfaces.nsIDOMSerializer)
+    Cc["@mozilla.org/xmlextras/xmlserializer;1"]
+      .createInstance(Ci.nsIDOMSerializer)
       .serializeToStream(doc, configStream, "utf-8");
     configStream.close();
   },
@@ -433,9 +448,9 @@ Config.prototype = {
   },
 
   get _scriptDir() {
-    var file = Components.classes["@mozilla.org/file/directory_service;1"]
-                         .getService(Components.interfaces.nsIProperties)
-                         .get("ProfD", Components.interfaces.nsILocalFile);
+    var file = Cc["@mozilla.org/file/directory_service;1"]
+                         .getService(Ci.nsIProperties)
+                         .get("ProfD", Ci.nsILocalFile);
     file.append("gm_scripts");
     return file;
   },
@@ -447,7 +462,7 @@ Config.prototype = {
     var dir = this._scriptDir;
 
     if (!dir.exists()) {
-      dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+      dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
 
       var configStream = GM_getWriteStream(this._configFile);
       var xml = "<UserScriptConfig/>";
@@ -464,7 +479,7 @@ Config.prototype = {
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
     if (script.enabled && script.matchesURL(href)) {
-      GM_GreasemonkeyService.injectScripts([script], href, unsafeWin, this.chromeWin);
+      gmService.injectScripts([script], href, unsafeWin, this.chromeWin);
     }
   },
 
@@ -498,9 +513,8 @@ Config.prototype = {
       // this is the first launch.  show the welcome screen.
 
       // find an open window.
-      var windowManager = Components
-           .classes['@mozilla.org/appshell/window-mediator;1']
-           .getService(Components.interfaces.nsIWindowMediator);
+      var windowManager = Cc['@mozilla.org/appshell/window-mediator;1']
+           .getService(Ci.nsIWindowMediator);
       var chromeWin = windowManager.getMostRecentWindow("navigator:browser");
       // if we found it, use it to open a welcome tab
       if (chromeWin.gBrowser) {
@@ -516,15 +530,15 @@ Config.prototype = {
       this._pointEightBackup();
 
     // update the currently initialized version so we don't do this work again.
-    if ("@mozilla.org/extensions/manager;1" in Components.classes) {
+    if ("@mozilla.org/extensions/manager;1" in Cc) {
       // Firefox <= 3.6.*
-      var extMan = Components.classes["@mozilla.org/extensions/manager;1"]
-          .getService(Components.interfaces.nsIExtensionManager);
+      var extMan = Cc["@mozilla.org/extensions/manager;1"]
+          .getService(Ci.nsIExtensionManager);
       var item = extMan.getItemForID(GM_GUID);
       GM_prefRoot.setValue("version", item.version);
     } else {
       // Firefox 3.7+
-      Components.utils.import("resource://gre/modules/AddonManager.jsm");
+      Cu.import("resource://gre/modules/AddonManager.jsm");
       AddonManager.getAddonByID(GM_GUID, function(addon) {
          GM_prefRoot.setValue("version", addon.version);
       });
