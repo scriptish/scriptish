@@ -6,6 +6,7 @@
 var GM_BrowserUI = new Object();
 
 Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://greasemonkey/accelimation.js");
 Components.utils.import("resource://greasemonkey/scriptdownloader.js");
 
 /**
@@ -510,7 +511,7 @@ GM_BrowserUI.showStatus = function(message, autoHide) {
   this.statusLabel.value = message;
   var max = label.boxObject.width;
 
-  this.showAnimation = new Accelimation(this.statusLabel.style,
+  this.showAnimation = new Accelimation(window, this.statusLabel.style,
                                           "width", max, 300, 2, "px");
   this.showAnimation.onend = GM_hitch(this, "showStatusAnimationEnd", autoHide);
   this.showAnimation.start();
@@ -555,7 +556,7 @@ GM_BrowserUI.hideStatusImmediately = function() {
 GM_BrowserUI.hideStatus = function() {
   if (!this.hideAnimation) {
     this.autoHideTimer = null;
-    this.hideAnimation = new Accelimation(this.statusLabel.style,
+    this.hideAnimation = new Accelimation(window, this.statusLabel.style,
                                             "width", 0, 300, 2, "px");
     this.hideAnimation.onend = GM_hitch(this, "hideStatusAnimationEnd");
     this.hideAnimation.start();

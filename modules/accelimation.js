@@ -1,11 +1,15 @@
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["Accelimation"];
+
 //=====================================================================
 // Accel[erated] [an]imation object
 // change a property of an object over time in an accelerated fashion
 //=====================================================================
-// obj  : reference to the object whose property you'd like to animate
-// prop : property you would like to change eg: "left"
-// to   : final value of prop
-// time : time the animation should take to run
+// window : reference to the window where the animation takes place
+// obj    : reference to the object whose property you'd like to animate
+// prop   : property you would like to change eg: "left"
+// to     : final value of prop
+// time   : time the animation should take to run
 // zip    : optional. specify the zippiness of the acceleration. pick a
 //          number between -1 and 1 where -1 is full decelerated, 1 is
 //          full accelerated, and 0 is linear (no acceleration). default
@@ -14,7 +18,7 @@
 //          "px".
 //=====================================================================
 
-function Accelimation(obj, prop, to, time, zip, unit) {
+function Accelimation(window, obj, prop, to, time, zip, unit) {
   if (typeof zip  == "undefined") zip  = 0;
   if (typeof unit == "undefined") unit = "px";
 
@@ -34,6 +38,8 @@ function Accelimation(obj, prop, to, time, zip, unit) {
   this.A = this.D / Math.abs(Math.pow(time, this.zip));
   this.id = Accelimation.instances.length;
   this.onend = null;
+
+  this.window = window;
 }
 
 //=====================================================================
@@ -84,7 +90,9 @@ Accelimation._add = function(o) {
   this.instances[index] = o;
   // if this is the first one, start the engine
   if (this.instances.length == 1) {
-    this.timerID = window.setInterval("Accelimation._paintAll()", this.targetRes);
+    this.timerID = o.window.setInterval(function(){
+      Accelimation._paintAll()
+    }, this.targetRes);
   }
 };
 
@@ -98,7 +106,7 @@ Accelimation._remove = function(o) {
   }
   // if that was the last one, stop the engine
   if (this.instances.length == 0) {
-    window.clearInterval(this.timerID);
+    o.window.clearInterval(this.timerID);
     this.timerID = null;
   }
 };
