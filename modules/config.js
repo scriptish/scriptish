@@ -105,10 +105,10 @@ Config.prototype = {
       for (var i = 0, childNode; childNode = node.childNodes[i]; i++) {
         switch (childNode.nodeName) {
         case "Include":
-          script._includes.push(childNode.firstChild.nodeValue);
+          script.addInclude(childNode.firstChild.nodeValue);
           break;
         case "Exclude":
-          script._excludes.push(childNode.firstChild.nodeValue);
+          script.addExclude(childNode.firstChild.nodeValue);
           break;
         case "Require":
           var scriptRequire = new ScriptRequire(script);
@@ -235,10 +235,10 @@ Config.prototype = {
             script["_" + header] = value;
             break;
           case "include":
-            script._includes.push(value);
+            script.addInclude(value);
             break;
           case "exclude":
-            script._excludes.push(value);
+            script.addExclude(value);
             break;
           case "require":
             try {
@@ -298,7 +298,7 @@ Config.prototype = {
     if (!script._namespace && uri) script._namespace = uri.host;
     if (!script._description) script._description = "";
     if (!script._version) script._version = "";
-    if (script._includes.length == 0) script._includes.push("*");
+    if (script._includes.length == 0) script.addInclude("*");
 
     return script;
   },

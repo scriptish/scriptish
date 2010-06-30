@@ -30,6 +30,8 @@ function Script(config) {
   this._enabled = true;
   this._includes = [];
   this._excludes = [];
+  this._includeRegExps = [];
+  this._excludeRegExps = [];
   this._requires = [];
   this._resources = [];
   this._unwrap = false;
@@ -40,11 +42,11 @@ function Script(config) {
 
 Script.prototype = {
   matchesURL: function(url) {
-    function test(page) {
-      return GM_convert2RegExp(page).test(url);
+    function test(regExp) {
+      return regExp.test(url);
     }
 
-    return this._includes.some(test) && !this._excludes.some(test);
+    return this._includeRegExps.some(test) && !this._excludeRegExps.some(test);
   },
 
   _changed: function(event, data) { this._config._changed(this, event, data); },
@@ -66,10 +68,14 @@ Script.prototype = {
 
   get includes() { return this._includes.concat(); },
   get excludes() { return this._excludes.concat(); },
-  addInclude: function(url) { this._includes.push(url); this._changed("edit-include-add", url); },
-  removeIncludeAt: function(index) { this._includes.splice(index, 1); this._changed("edit-include-remove", index); },
-  addExclude: function(url) { this._excludes.push(url); this._changed("edit-exclude-add", url); },
-  removeExcludeAt: function(index) { this._excludes.splice(index, 1); this._changed("edit-exclude-remove", index); },
+  addInclude: function(aPattern) {
+    this._includes.push(aPattern);
+    this._includeRegExps.push(GM_convert2RegExp(aPattern));
+  },
+  addExclude: function(aPattern) {
+    this._excludes.push(aPattern);
+    this._excludeRegExps.push(GM_convert2RegExp(aPattern));
+  },
 
   get requires() { return this._requires.concat(); },
   get resources() { return this._resources.concat(); },
@@ -170,6 +176,8 @@ Script.prototype = {
     // Copy new values.
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
+    this._includeRegExps = newScript._includeRegExps;
+    this._excludeRegExps = newScript._excludeRegExps;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this._description = newScript._description;
