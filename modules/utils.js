@@ -430,7 +430,7 @@ function GM_apiLeakCheck(apiName) {
 
   do {
     // Valid stack frames for GM api calls are: native and js when coming from
-    // chrome:// URLs and the greasemonkey.js component's file:// URL.
+    // chrome:// URLs and any file name listed in _apiAcceptedFiles.
     if (2 == stack.language &&
         0 > _apiAcceptedFiles.indexOf(stack.filename) &&
         stack.filename.substr(0, 6) != "chrome") {
@@ -438,9 +438,7 @@ function GM_apiLeakCheck(apiName) {
           "cannot call " + apiName + "."));
       return false;
     }
-
-    stack = stack.caller;
-  } while (stack);
+  } while (stack = stack.caller);
 
   return true;
 };
