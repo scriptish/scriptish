@@ -1,8 +1,6 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = [
   "GM_GUID",
-  "GM_prefRoot",
-  "GM_PrefManager",
   "GM_alert",
   "GM_stringBundle",
   "GM_isDef",

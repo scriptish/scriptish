@@ -1,13 +1,9 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["Config"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
 const Cu = Components.utils;
-
-const gmService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"]
-                      .getService().wrappedJSObject;
-
+Cu.import("resource://greasemonkey/constants.js");
+Cu.import("resource://greasemonkey/prefmanager.js");
 Cu.import("resource://greasemonkey/utils.js");
 Cu.import("resource://greasemonkey/script.js");
 Cu.import("resource://greasemonkey/scriptrequire.js");

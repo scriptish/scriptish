@@ -1,5 +1,6 @@
 /////////////////////////////// global variables ///////////////////////////////
 
+Components.utils.import("resource://greasemonkey/prefmanager.js");
 Components.utils.import("resource://greasemonkey/utils.js");
 
 var bundle = null;

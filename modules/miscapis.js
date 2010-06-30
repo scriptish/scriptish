@@ -6,7 +6,9 @@ var EXPORTED_SYMBOLS = [
     "GM_addStyle",
     "GM_console"];
 
-Components.utils.import("resource://greasemonkey/utils.js");
+const Cu = Components.utils;
+Cu.import("resource://greasemonkey/prefmanager.js");
+Cu.import("resource://greasemonkey/utils.js");
 GM_apiAcceptableFile(Components.stack.filename);
 
 function GM_ScriptStorage(script) {
