@@ -6,8 +6,6 @@ Cu.import("resource://greasemonkey/constants.js");
 Cu.import("resource://greasemonkey/prefmanager.js");
 Cu.import("resource://greasemonkey/utils.js");
 Cu.import("resource://greasemonkey/script.js");
-Cu.import("resource://greasemonkey/scriptrequire.js");
-Cu.import("resource://greasemonkey/scriptresource.js");
 
 function Config() {
   this._saveTimer = null;
@@ -54,6 +52,10 @@ Config.prototype = {
     return this._find(script) > -1;
   },
 
+  addScript: function(aScript) {
+    this._scripts.push(aScript);
+  },
+
   _find: function(aScript) {
     var namespace = aScript._namespace.toLowerCase();
     var name = aScript._name.toLowerCase();
@@ -70,7 +72,7 @@ Config.prototype = {
 
   _load: function() {
     var domParser = Cc["@mozilla.org/xmlextras/domparser;1"]
-                        .createInstance(Ci.nsIDOMParser);
+        .createInstance(Ci.nsIDOMParser);
 
     var configContents = GM_getContents(this._configFile);
     var doc = domParser.parseFromString(configContents, "text/xml");
@@ -80,61 +82,7 @@ Config.prototype = {
     this._scripts = [];
 
     for (var node = null; node = nodes.iterateNext(); ) {
-      var script = new Script(this);
-
-      script._filename = node.getAttribute("filename");
-      script._basedir = node.getAttribute("basedir") || ".";
-      script._downloadURL = node.getAttribute("installurl") || null;
-
-      if (!node.getAttribute("modified")
-          || !node.getAttribute("dependhash")
-          || !node.getAttribute("version")
-      ) {
-        script._modified = script._file.lastModifiedTime;
-        var parsedScript = this.parse(
-            GM_getContents(script._file), script._downloadURL, true);
-        script._dependhash = GM_sha1(parsedScript._rawMeta);
-        script._version = parsedScript._version;
-        fileModified = true;
-      } else {
-        script._modified = node.getAttribute("modified");
-        script._dependhash = node.getAttribute("dependhash");
-        script._version = node.getAttribute("version");
-      }
-
-      for (var i = 0, childNode; childNode = node.childNodes[i]; i++) {
-        switch (childNode.nodeName) {
-        case "Include":
-          script.addInclude(childNode.firstChild.nodeValue);
-          break;
-        case "Exclude":
-          script.addExclude(childNode.firstChild.nodeValue);
-          break;
-        case "Require":
-          var scriptRequire = new ScriptRequire(script);
-          scriptRequire._filename = childNode.getAttribute("filename");
-          script._requires.push(scriptRequire);
-          break;
-        case "Resource":
-          var scriptResource = new ScriptResource(script);
-          scriptResource._name = childNode.getAttribute("name");
-          scriptResource._filename = childNode.getAttribute("filename");
-          scriptResource._mimetype = childNode.getAttribute("mimetype");
-          scriptResource._charset = childNode.getAttribute("charset");
-          script._resources.push(scriptResource);
-          break;
-        case "Unwrap":
-          script._unwrap = true;
-          break;
-        }
-      }
-
-      script._name = node.getAttribute("name");
-      script._namespace = node.getAttribute("namespace");
-      script._description = node.getAttribute("description");
-      script._enabled = node.getAttribute("enabled") == true.toString();
-
-      this._scripts.push(script);
+      fileModified = Script.load(this, node) || fileModified;
     }
 
     if (fileModified) {
@@ -193,7 +141,7 @@ Config.prototype = {
 
     script.install();
 
-    this._scripts.push(script);
+    this.addScript(script);
     this._changed(script, "install", null);
 
     GM_log("< Config.install");

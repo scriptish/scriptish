@@ -293,16 +293,16 @@ Script.prototype = {
   }
 };
 
-Script.parse = function parse(config, source, uri, updating) {
-  var script = new Script(config);
+Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
+  var script = new Script(aConfig);
 
-  if (uri) {
-    script._downloadURL = uri.spec;
+  if (aURI) {
+    script._downloadURL = aURI.spec;
     script._enabled = true;
   }
 
   // read one line at a time looking for start meta delimiter or EOF
-  var lines = source.match(/.+/g);
+  var lines = aSource.match(/.+/g);
   var lnIdx = 0;
   var result = {};
   var foundMeta = false;
@@ -356,13 +356,13 @@ Script.parse = function parse(config, source, uri, updating) {
           break;
         case "require":
           try {
-            var reqUri = GM_uriFromUrl(value, uri);
+            var reqUri = GM_uriFromUrl(value, aURI);
             var scriptRequire = new ScriptRequire(script);
             scriptRequire._downloadURL = reqUri.spec;
             script._requires.push(scriptRequire);
             script._rawMeta += header + '\0' + value + '\0';
           } catch (e) {
-            if (updating) {
+            if (aUpdate) {
               script._dependFail = true;
             } else {
               throw new Error('Failed to @require '+ value);
@@ -388,14 +388,14 @@ Script.parse = function parse(config, source, uri, updating) {
           }
 
           try {
-            var resUri = GM_uriFromUrl(res[2], uri);
+            var resUri = GM_uriFromUrl(res[2], aURI);
             var scriptResource = new ScriptResource(script);
             scriptResource._name = resName;
             scriptResource._downloadURL = resUri.spec;
             script._resources.push(scriptResource);
             script._rawMeta += header + '\0' + resName + '\0' + resUri.spec + '\0';
           } catch (e) {
-            if (updating) {
+            if (aUpdate) {
               script._dependFail = true;
             } else {
               throw new Error('Failed to get @resource '+ resName +' from '+
@@ -408,11 +408,71 @@ Script.parse = function parse(config, source, uri, updating) {
   }
 
   // if no meta info, default to reasonable values
-  if (!script._name && uri) script._name = GM_parseScriptName(uri);
-  if (!script._namespace && uri) script._namespace = uri.host;
+  if (!script._name && aURI) script._name = GM_parseScriptName(aURI);
+  if (!script._namespace && aURI) script._namespace = aURI.host;
   if (!script._description) script._description = "";
   if (!script._version) script._version = "";
   if (script._includes.length == 0) script.addInclude("*");
 
   return script;
+};
+
+Script.load = function load(aConfig, aNode) {
+  var script = new Script(aConfig);
+  var fileModified = false;
+
+  script._filename = aNode.getAttribute("filename");
+  script._basedir = aNode.getAttribute("basedir") || ".";
+  script._downloadURL = aNode.getAttribute("installurl") || null;
+
+  if (!aNode.getAttribute("modified")
+      || !aNode.getAttribute("dependhash")
+      || !aNode.getAttribute("version")
+  ) {
+    script._modified = script._file.lastModifiedTime;
+    var parsedScript = Script.parse(
+        aConfig, GM_getContents(script._file), script._downloadURL, true);
+    script._dependhash = GM_sha1(parsedScript._rawMeta);
+    script._version = parsedScript._version;
+    fileModified = true;
+  } else {
+    script._modified = aNode.getAttribute("modified");
+    script._dependhash = aNode.getAttribute("dependhash");
+    script._version = aNode.getAttribute("version");
+  }
+
+  for (var i = 0, childNode; childNode = aNode.childNodes[i]; i++) {
+    switch (childNode.nodeName) {
+      case "Include":
+        script.addInclude(childNode.firstChild.nodeValue);
+        break;
+      case "Exclude":
+        script.addExclude(childNode.firstChild.nodeValue);
+        break;
+      case "Require":
+        var scriptRequire = new ScriptRequire(script);
+        scriptRequire._filename = childNode.getAttribute("filename");
+        script._requires.push(scriptRequire);
+        break;
+      case "Resource":
+        var scriptResource = new ScriptResource(script);
+        scriptResource._name = childNode.getAttribute("name");
+        scriptResource._filename = childNode.getAttribute("filename");
+        scriptResource._mimetype = childNode.getAttribute("mimetype");
+        scriptResource._charset = childNode.getAttribute("charset");
+        script._resources.push(scriptResource);
+        break;
+      case "Unwrap":
+        script._unwrap = true;
+        break;
+    }
+  }
+
+  script._name = aNode.getAttribute("name");
+  script._namespace = aNode.getAttribute("namespace");
+  script._description = aNode.getAttribute("description");
+  script._enabled = aNode.getAttribute("enabled") == true.toString();
+
+  aConfig.addScript(script);
+  return fileModified;
 };
