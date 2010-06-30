@@ -90,6 +90,8 @@ GM_GreasemonkeyService.prototype = {
     Cc["@mozilla.org/moz/jssubscript-loader;1"]
         .getService(Ci.mozIJSSubScriptLoader)
         .loadSubScript("chrome://global/content/XPCNativeWrapper.js");
+
+    Cu.import("resource://greasemonkey/constants.js");
     Cu.import("resource://greasemonkey/prefmanager.js");
     Cu.import("resource://greasemonkey/utils.js");
     Cu.import("resource://greasemonkey/config.js");
@@ -124,15 +126,13 @@ GM_GreasemonkeyService.prototype = {
       dump("shouldload: " + cl.spec + "\n");
       dump("ignorescript: " + this.ignoreNextScript_ + "\n");
 
-      if (!this.ignoreNextScript_) {
-        if (!this.isTempScript(cl)) {
-          var win = Cc['@mozilla.org/appshell/window-mediator;1']
-            .getService(Ci.nsIWindowMediator)
+      if (!this.ignoreNextScript_ && !this.isTempScript(cl)) {
+        var win = windowMediatorService
             .getMostRecentWindow("navigator:browser");
-          if (win && win.GM_BrowserUI) {
-            win.GM_BrowserUI.startInstallScript(cl);
-            ret = Ci.nsIContentPolicy.REJECT_REQUEST;
-          }
+
+        if (win && win.GM_BrowserUI) {
+          win.GM_BrowserUI.startInstallScript(cl);
+          ret = Ci.nsIContentPolicy.REJECT_REQUEST;
         }
       }
     }
