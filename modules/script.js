@@ -1,13 +1,8 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["Script"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
 const Cu = Components.utils;
-
-const ioService = Cc["@mozilla.org/network/io-service;1"]
-                      .getService(Ci.nsIIOService);
-
+Cu.import("resource://greasemonkey/constants.js");
 Cu.import("resource://greasemonkey/utils.js");
 Cu.import("resource://greasemonkey/miscapis.js");
 Cu.import("resource://greasemonkey/convert2RegExp.js");

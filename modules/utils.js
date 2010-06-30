@@ -33,23 +33,17 @@ var EXPORTED_SYMBOLS = [
   "GM_apiAcceptableFile"
 ];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
 const Cu = Components.utils;
+Cu.import("resource://greasemonkey/constants.js");
+Cu.import("resource://greasemonkey/prefmanager.js");
 
 const GM_GUID = "{e4a8a97b-f2ed-450b-b12d-ee082ba24781}";
 
-const gmService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"]
-                      .getService().wrappedJSObject;
-const ioService = Cc["@mozilla.org/network/io-service;1"]
-                      .getService(Ci.nsIIOService);
 const consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);
 
 // An array of filenames that the GM API will allow in GM_apiLeakCheck
 var _apiAcceptedFiles = [Components.stack.filename, gmService.filename];
-
-Cu.import("resource://greasemonkey/prefmanager.js");
 
 function GM_alert(msg) {
   Cc["@mozilla.org/embedcomp/prompt-service;1"]

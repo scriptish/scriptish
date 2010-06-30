@@ -1,9 +1,8 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["ScriptRequire"];
 
-const Ci = Components.interfaces;
 const Cu = Components.utils;
-
+Cu.import("resource://greasemonkey/constants.js");
 Cu.import("resource://greasemonkey/utils.js");
 
 function ScriptRequire(script) {

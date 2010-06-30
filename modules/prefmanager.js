@@ -1,8 +1,8 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_prefRoot", "GM_PrefManager"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+const Cu = Components.utils;
+Cu.import("resource://greasemonkey/constants.js");
 
 const MIN_INT_32 = -0x80000000;
 const MAX_INT_32 = 0x7FFFFFFF;

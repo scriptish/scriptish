@@ -35,11 +35,9 @@ Contributor(s):
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_openFolder"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+const Cu = Components.utils;
+Cu.import("resource://greasemonkey/constants.js");
 
-const ioService = Cc["@mozilla.org/network/io-service;1"]
-                      .getService(Ci.nsIIOService);
 const protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
                             .getService(Ci.nsIExternalProtocolService);
 
