@@ -40,9 +40,6 @@ const GM_GUID = "{e4a8a97b-f2ed-450b-b12d-ee082ba24781}";
 const consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);
 
-// An array of filenames that the GM API will allow in GM_apiLeakCheck
-var _apiAcceptedFiles = [Components.stack.filename, gmService.filename];
-
 function GM_alert(msg) {
   Cc["@mozilla.org/embedcomp/prompt-service;1"]
     .getService(Ci.nsIPromptService)
@@ -432,7 +429,7 @@ function GM_apiLeakCheck(apiName) {
     // Valid stack frames for GM api calls are: native and js when coming from
     // chrome:// URLs and any file name listed in _apiAcceptedFiles.
     if (2 == stack.language &&
-        0 > _apiAcceptedFiles.indexOf(stack.filename) &&
+        0 > GM_apiGetAcceptableFiles().indexOf(stack.filename) &&
         stack.filename.substr(0, 6) != "chrome") {
       GM_logError(new Error("Greasemonkey access violation: unsafeWindow " +
           "cannot call " + apiName + "."));
@@ -443,7 +440,19 @@ function GM_apiLeakCheck(apiName) {
   return true;
 };
 
+// Creates and returns an array of filenames that are allowed by GM_apiLeakCheck
+function GM_apiGetAcceptableFiles() {
+  var _apiAcceptedFiles = [Components.stack.filename, gmService.filename];
+
+  // replace this function after first execution
+  GM_apiGetAcceptableFiles = function() {
+    return _apiAcceptedFiles;
+  }
+
+  return _apiAcceptedFiles;
+};
+
 // Adds a filename to an array of filenames that are allowed by GM_apiLeakCheck
 function GM_apiAcceptableFile(aFilename) {
-  _apiAcceptedFiles.push(aFilename);
+  GM_apiGetAcceptableFiles().push(aFilename);
 };
