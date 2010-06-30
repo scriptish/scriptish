@@ -1,5 +1,5 @@
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["convert2RegExp"];
+var EXPORTED_SYMBOLS = ["GM_convert2RegExp"];
 
 Components.utils.import("resource://greasemonkey/utils.js");
 
@@ -10,8 +10,8 @@ const tldStr = "\\.(?:demon\\.co\\.uk|esc\\.edu\\.ar|(?:c[oi]\\.)?[^\\.]\\.(?:vt
 
 // Converts a pattern in this programs simple notation to a regular expression.
 // thanks AdBlock! http://www.mozdev.org/source/browse/adblock/adblock/
-function convert2RegExp( pattern ) {
-  var s = new String(pattern);
+function convert2RegExp(aPattern) {
+  var s = new String(aPattern);
   var res = new String("^");
 
   for (var i = 0 ; i < s.length ; i++) {
@@ -51,7 +51,13 @@ function convert2RegExp( pattern ) {
     // insert it
     res = tldRes[1] + tldStr + tldRes[3];
   }
+
   return new RegExp(res + "$", "i");
 }
 
-convert2RegExp = GM_memoize(convert2RegExp);
+GM_convert2RegExp = function(aPattern) {
+  // memoize convert2RegExp on the first execution of this function
+  GM_convert2RegExp = GM_memoize(convert2RegExp);
+
+  return GM_convert2RegExp(aPattern);
+}

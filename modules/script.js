@@ -41,7 +41,7 @@ function Script(config) {
 Script.prototype = {
   matchesURL: function(url) {
     function test(page) {
-      return convert2RegExp(page).test(url);
+      return GM_convert2RegExp(page).test(url);
     }
 
     return this._includes.some(test) && !this._excludes.some(test);
