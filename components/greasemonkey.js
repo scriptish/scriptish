@@ -13,8 +13,6 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 const appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
                  .getService(Ci.nsIAppShellService);
 
-const gmSvcFilename = Components.stack.filename;
-
 var getMaxJSVersion = function(){
   var maxJSVersion = (function() {
     var appInfo = Cc["@mozilla.org/xre/app-info;1"]
@@ -63,7 +61,7 @@ GM_GreasemonkeyService.prototype = {
       Ci.nsIContentPolicy
   ]),
 
-  get filename() { return gmSvcFilename; },
+  get filename() { return Components.stack.filename; },
 
   _config: null,
   get config() {
