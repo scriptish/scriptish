@@ -82,12 +82,13 @@ GM_BrowserUI.chromeLoad = function(e) {
   this.refreshStatus();
 
   // register for notifications from greasemonkey-service about ui type things
-  this.gmSvc = Components.classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
-                   .getService().wrappedJSObject;
+  var gmSvc = Components.classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
+                  .getService().wrappedJSObject;
+  this.gmSvc = gmSvc;
 
   // reference this once, so that the getter is called at least once, and the
   // initialization routines will run, no matter what
-  this.gmSvc.wrappedJSObject.config;
+  setTimeout(function() {gmSvc.wrappedJSObject.config}, 0);
 };
 
 /**
@@ -181,8 +182,7 @@ GM_BrowserUI.startInstallScript = function(uri, timer) {
   if (!timer) {
     // docs for nsicontentpolicy say we're not supposed to block, so short
     // timer.
-    window.setTimeout(
-      function() { GM_BrowserUI.startInstallScript(uri, true) }, 0);
+    setTimeout(function() { GM_BrowserUI.startInstallScript(uri, true) }, 0);
 
     return;
   }
