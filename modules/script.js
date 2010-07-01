@@ -302,108 +302,102 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
   }
 
   // read one line at a time looking for start meta delimiter or EOF
-  var lines = aSource.match(/.+/g);
-  var lnIdx = 0;
+  var lineRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\n]+))?)/g;
   var result = {};
   var foundMeta = false;
 
-  while ((result = lines[lnIdx++])) {
-    if (result.indexOf("// ==UserScript==") == 0) {
+  // used for duplicate resource name detection
+  var previousResourceNames = {};
+  script._rawMeta = "";
+
+  while (result = lineRegExp(aSource)) {
+    result = result[0];
+
+    if (!foundMeta && result.indexOf("// ==UserScript==") == 0) {
       foundMeta = true;
+      continue;
+    }
+
+    if (!foundMeta) continue;
+    // gather up meta lines
+
+    if (result.indexOf("// ==/UserScript==") == 0) {
+      // done gathering up meta lines
       break;
     }
-  }
 
-  // gather up meta lines
-  if (foundMeta) {
-    // used for duplicate resource name detection
-    var previousResourceNames = {};
-    script._rawMeta = "";
+    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\n]+))?/);
+    if (match === null) continue;
 
-    while ((result = lines[lnIdx++])) {
-      if (result.indexOf("// ==/UserScript==") == 0) {
-        break;
-      }
+    var header = match[1].toLowerCase();
+    var value = match[2];
 
-      var match = result.match(/\/\/ \@(\S+)(?:\s+([^\n]+))?/);
-      if (match === null) continue;
-
-      var header = match[1].toLowerCase();
-      var value = match[2];
-
-      if (!value) {
-        switch (header) {
-          case "unwrap":
-            script._unwrap = true;
-            break;
-          default:
-            continue;
-        }
-      }
-
-      switch (header) {
-        case "name":
-        case "namespace":
-        case "description":
-        case "version":
-          script["_" + header] = value;
-          break;
-        case "include":
-          script.addInclude(value);
-          break;
-        case "exclude":
-          script.addExclude(value);
-          break;
-        case "require":
-          try {
-            var reqUri = GM_uriFromUrl(value, aURI);
-            var scriptRequire = new ScriptRequire(script);
-            scriptRequire._downloadURL = reqUri.spec;
-            script._requires.push(scriptRequire);
-            script._rawMeta += header + '\0' + value + '\0';
-          } catch (e) {
-            if (aUpdate) {
-              script._dependFail = true;
-            } else {
-              throw new Error('Failed to @require '+ value);
-            }
-          }
-          break;
-        case "resource":
-          var res = value.match(/(\S+)\s+(.*)/);
-          if (res === null) {
-            // NOTE: Unlocalized strings
-            throw new Error("Invalid syntax for @resource declaration '" +
-                            value + "'. Resources are declared like: " +
-                            "@resource <name> <url>.");
-          }
-
-          var resName = res[1];
-          if (previousResourceNames[resName]) {
-            throw new Error("Duplicate resource name '" + resName + "' " +
-                            "detected. Each resource must have a unique " +
-                            "name.");
+    switch (header) {
+      case "name":
+      case "namespace":
+      case "description":
+      case "version":
+        script["_" + header] = value;
+        continue;
+      case "include":
+        script.addInclude(value);
+        continue;
+      case "exclude":
+        script.addExclude(value);
+        continue;
+      case "require":
+        try {
+          var reqUri = GM_uriFromUrl(value, aURI);
+          var scriptRequire = new ScriptRequire(script);
+          scriptRequire._downloadURL = reqUri.spec;
+          script._requires.push(scriptRequire);
+          script._rawMeta += header + '\0' + value + '\0';
+        } catch (e) {
+          if (aUpdate) {
+            script._dependFail = true;
           } else {
-            previousResourceNames[resName] = true;
+            throw new Error('Failed to @require '+ value);
           }
-
-          try {
-            var resUri = GM_uriFromUrl(res[2], aURI);
-            var scriptResource = new ScriptResource(script);
-            scriptResource._name = resName;
-            scriptResource._downloadURL = resUri.spec;
-            script._resources.push(scriptResource);
-            script._rawMeta += header + '\0' + resName + '\0' + resUri.spec + '\0';
-          } catch (e) {
-            if (aUpdate) {
-              script._dependFail = true;
-            } else {
-              throw new Error('Failed to get @resource '+ resName +' from '+
-                              res[2]);
-            }
+        }
+        continue;
+      case "resource":
+        var res = value.match(/(\S+)\s+(.*)/);
+        if (res === null) {
+          // NOTE: Unlocalized strings
+          throw new Error("Invalid syntax for @resource declaration '" +
+                          value + "'. Resources are declared like: " +
+                          "@resource <name> <url>.");
+        }
+         var resName = res[1];
+        if (previousResourceNames[resName]) {
+          throw new Error("Duplicate resource name '" + resName + "' " +
+                          "detected. Each resource must have a unique " +
+                          "name.");
+        } else {
+          previousResourceNames[resName] = true;
+        }
+        try {
+          var resUri = GM_uriFromUrl(res[2], aURI);
+          var scriptResource = new ScriptResource(script);
+          scriptResource._name = resName;
+          scriptResource._downloadURL = resUri.spec;
+          script._resources.push(scriptResource);
+          script._rawMeta +=
+              header + '\0' + resName + '\0' + resUri.spec + '\0';
+        } catch (e) {
+          if (aUpdate) {
+            script._dependFail = true;
+          } else {
+            throw new Error(
+                'Failed to get @resource '+ resName +' from '+ res[2]);
           }
-          break;
-      }
+        }
+        continue;
+      case "unwrap":
+        if (!value) script._unwrap = true;
+        continue;
+      default:
+        continue;
     }
   }
 
