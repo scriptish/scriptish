@@ -239,7 +239,7 @@ Config.prototype = {
     }
 
     // read one line at a time looking for start meta delimiter or EOF
-    var lines = source.match(/.+/g);
+    var lines = source.match(/\/\/ (==|\@).+/gi);
     var lnIdx = 0;
     var result = {};
     var foundMeta = false;
