@@ -47,9 +47,15 @@ function GM_alert(msg) {
     .alert(null, "Greasemonkey alert", msg);
 }
 
-var GM_stringBundle = Cc["@mozilla.org/intl/stringbundle;1"]
-    .getService(Ci.nsIStringBundleService)
-    .createBundle("chrome://greasemonkey/locale/gm-browser.properties");
+GM_stringBundle = function() {
+  var stringBundle = Cc["@mozilla.org/intl/stringbundle;1"]
+      .getService(Ci.nsIStringBundleService)
+      .createBundle("chrome://greasemonkey/locale/gm-browser.properties");
+
+  GM_stringBundle = function() { return stringBundle; };
+
+  return stringBundle;
+}
 
 function GM_isDef(thing) {
   return typeof(thing) != "undefined";
@@ -127,7 +133,7 @@ function GM_openInEditor(script, parentWindow) {
   } catch (e) {
     // Something may be wrong with the editor the user selected. Remove so that
     // next time they can pick a different one.
-    GM_alert(GM_stringBundle.GetStringFromName("editor.could_not_launch") + "\n" + e);
+    GM_alert(GM_stringBundle().GetStringFromName("editor.could_not_launch") + "\n" + e);
     GM_prefRoot.remove("editor");
     throw e;
   }
@@ -163,7 +169,7 @@ function GM_getEditor(parentWindow, change) {
                          .createInstance(nsIFilePicker);
 
     filePicker.init(parentWindow,
-                    GM_stringBundle.GetStringFromName("editor.prompt"),
+                    GM_stringBundle().GetStringFromName("editor.prompt"),
                     nsIFilePicker.modeOpen);
     filePicker.appendFilters(nsIFilePicker.filterApplication);
     filePicker.appendFilters(nsIFilePicker.filterAll);
@@ -180,7 +186,7 @@ function GM_getEditor(parentWindow, change) {
       GM_prefRoot.setValue("editor", filePicker.file.path);
       return filePicker.file;
     } else {
-      GM_alert(GM_stringBundle.GetStringFromName("editor.please_pick_executable"));
+      GM_alert(GM_stringBundle().GetStringFromName("editor.please_pick_executable"));
     }
   }
 }
