@@ -100,7 +100,6 @@ GM_GreasemonkeyService.prototype = {
     Cu.import("resource://greasemonkey/prefmanager.js");
     Cu.import("resource://greasemonkey/utils.js");
     Cu.import("resource://greasemonkey/miscapis.js");
-    Cu.import("resource://greasemonkey/xmlhttprequester.js");
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
@@ -196,6 +195,9 @@ GM_GreasemonkeyService.prototype = {
     var resources;
     var unsafeContentWin = wrappedContentWin.wrappedJSObject;
 
+    var tools = {};
+    Cu.import("resource://greasemonkey/xmlhttprequester.js", tools);
+
     // detect and grab reference to firebug console and context, if it exists
     var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
 
@@ -207,9 +209,8 @@ GM_GreasemonkeyService.prototype = {
       console = firebugConsole ? firebugConsole : new GM_console(script);
 
       storage = new GM_ScriptStorage(script);
-      xmlhttpRequester = new GM_xmlhttpRequester(unsafeContentWin,
-                                                 appSvc.hiddenDOMWindow,
-                                                 url);
+      xmlhttpRequester = new tools.GM_xmlhttpRequester(
+          unsafeContentWin, appSvc.hiddenDOMWindow, url);
       resources = new GM_Resources(script);
 
       sandbox.window = wrappedContentWin;
