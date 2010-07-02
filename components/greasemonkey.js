@@ -94,7 +94,6 @@ GM_GreasemonkeyService.prototype = {
   startup: function() {
     Cu.import("resource://greasemonkey/prefmanager.js");
     Cu.import("resource://greasemonkey/utils.js");
-    Cu.import("resource://greasemonkey/miscapis.js");
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
@@ -193,6 +192,7 @@ GM_GreasemonkeyService.prototype = {
 
     var tools = {};
     Cu.import("resource://greasemonkey/xmlhttprequester.js", tools);
+    Cu.import("resource://greasemonkey/miscapis.js", tools);
 
     // detect and grab reference to firebug console and context, if it exists
     var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
@@ -200,14 +200,14 @@ GM_GreasemonkeyService.prototype = {
     for (var i = 0; script = scripts[i]; i++) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
 
-      logger = new GM_ScriptLogger(script);
+      logger = new tools.GM_ScriptLogger(script);
 
-      console = firebugConsole ? firebugConsole : new GM_console(script);
+      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
 
-      storage = new GM_ScriptStorage(script);
+      storage = new tools.GM_ScriptStorage(script);
       xmlhttpRequester = new tools.GM_xmlhttpRequester(
           unsafeContentWin, appSvc.hiddenDOMWindow, url);
-      resources = new GM_Resources(script);
+      resources = new tools.GM_Resources(script);
 
       sandbox.window = wrappedContentWin;
       sandbox.document = sandbox.window.document;
@@ -218,8 +218,8 @@ GM_GreasemonkeyService.prototype = {
 
       // add our own APIs
       sandbox.GM_addStyle = function(css) {
-            GM_addStyle(wrappedContentWin.document, css);
-          };
+          tools.GM_addStyle(wrappedContentWin.document, css);
+      };
       sandbox.GM_log = GM_hitch(logger, "log");
       sandbox.console = console;
       sandbox.GM_setValue = GM_hitch(storage, "setValue");

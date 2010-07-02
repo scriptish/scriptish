@@ -4,7 +4,6 @@ var EXPORTED_SYMBOLS = ["Script"];
 const Cu = Components.utils;
 Cu.import("resource://greasemonkey/constants.js");
 Cu.import("resource://greasemonkey/utils.js");
-Cu.import("resource://greasemonkey/miscapis.js");
 Cu.import("resource://greasemonkey/convert2RegExp.js");
 Cu.import("resource://greasemonkey/scriptdownloader.js");
 Cu.import("resource://greasemonkey/scriptrequire.js");
@@ -159,14 +158,13 @@ Script.prototype = {
   },
 
   updateFromNewScript: function(newScript) {
-    // Empty cached values.
-    this._id = null;
-    this._prefroot = null;
-
     // Migrate preferences.
     if (this.prefroot != newScript.prefroot) {
-      var storageOld = new GM_ScriptStorage(this);
-      var storageNew = new GM_ScriptStorage(newScript);
+      var tools = {};
+      Cu.import("resource://greasemonkey/miscapis.js", tools);
+
+      var storageOld = new tools.GM_ScriptStorage(this);
+      var storageNew = new tools.GM_ScriptStorage(newScript);
 
       var names = storageOld.listValues();
       for (var i = 0, name = null; name = names[i]; i++) {
@@ -174,6 +172,10 @@ Script.prototype = {
         storageOld.deleteValue(name);
       }
     }
+
+    // Empty cached values.
+    this._id = null;
+    this._prefroot = null;
 
     // Copy new values.
     this._includes = newScript._includes;
