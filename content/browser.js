@@ -8,7 +8,6 @@ var GM_BrowserUI = new Object();
 Components.utils.import("resource://greasemonkey/prefmanager.js");
 Components.utils.import("resource://greasemonkey/utils.js");
 Components.utils.import("resource://greasemonkey/scriptdownloader.js");
-Components.utils.import("resource://greasemonkey/menucommander.js");
 
 /**
  * nsISupports.QueryInterface
@@ -356,8 +355,11 @@ GM_BrowserUI.getCommander = function(unsafeWin) {
     }
   }
 
+  var tools = {};
+  Components.utils.import("resource://greasemonkey/menucommander.js", tools);
+
   // no commander found. create one and add it.
-  var commander = new GM_MenuCommander(document);
+  var commander = new tools.GM_MenuCommander(document);
   this.menuCommanders.push({win:unsafeWin, commander:commander});
 
   return commander;
