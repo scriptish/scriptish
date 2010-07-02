@@ -92,10 +92,6 @@ GM_GreasemonkeyService.prototype = {
   },
 
   startup: function() {
-    Cc["@mozilla.org/moz/jssubscript-loader;1"]
-        .getService(Ci.mozIJSSubScriptLoader)
-        .loadSubScript("chrome://global/content/XPCNativeWrapper.js");
-
     Cu.import("resource://greasemonkey/prefmanager.js");
     Cu.import("resource://greasemonkey/utils.js");
     Cu.import("resource://greasemonkey/miscapis.js");
@@ -407,7 +403,11 @@ GM_GreasemonkeyService.prototype = {
       if (!fbConsole.isEnabled(fbContext)) return null;
 
       if (1.2 == fbVersion) {
-        var safeWin = new XPCNativeWrapper(unsafeContentWin);
+        var tools = {};
+        Cc["@mozilla.org/moz/jssubscript-loader;1"]
+            .getService(Ci.mozIJSSubScriptLoader)
+            .loadSubScript("chrome://global/content/XPCNativeWrapper.js", tools);
+        var safeWin = new tools.XPCNativeWrapper(unsafeContentWin);
 
         if (fbContext.consoleHandler) {
           for (var i = 0; i < fbContext.consoleHandler.length; i++) {
