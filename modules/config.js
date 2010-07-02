@@ -9,16 +9,16 @@ Cu.import("resource://greasemonkey/script.js");
 
 GM_apiAcceptableFile(Components.stack.filename);
 
-function Config() {
+function Config(aScriptDir) {
   this._saveTimer = null;
   this._scripts = null;
+  this._scriptFoldername = aScriptDir;
   this._configFile = this._scriptDir;
   this._configFile.append("config.xml");
   this._initScriptDir();
 
   this._observers = [];
 
-  this._updateVersion();
   this._load();
 }
 
@@ -200,11 +200,7 @@ Config.prototype = {
   },
 
   get _scriptDir() {
-    var file = Cc["@mozilla.org/file/directory_service;1"]
-                         .getService(Ci.nsIProperties)
-                         .get("ProfD", Ci.nsILocalFile);
-    file.append("gm_scripts");
-    return file;
+    return GM_getProfileFile(this._scriptFoldername);
   },
 
   /**
@@ -249,67 +245,5 @@ Config.prototype = {
     }
 
     this._save();
-  },
-
-  /**
-   * Checks whether the version has changed since the last run and performs
-   * any necessary upgrades.
-   */
-  _updateVersion: function() {
-    GM_log("> GM_updateVersion");
-
-    // this is the last version which has been run at least once
-    var initialized = GM_prefRoot.getValue("version", "0.0");
-
-    if ("0.0" == initialized) {
-      // this is the first launch.  show the welcome screen.
-
-      // find an open window.
-      var chromeWin = Cc['@mozilla.org/appshell/window-mediator;1']
-          .getService(Ci.nsIWindowMediator)
-          .getMostRecentWindow("navigator:browser");
-
-      // if we found it, use it to open a welcome tab
-      if (chromeWin.gBrowser) {
-        // the setTimeout makes sure we do not execute too early -- sometimes
-        // the window isn't quite ready to add a tab yet
-        chromeWin.setTimeout(
-            "gBrowser.selectedTab = gBrowser.addTab(" +
-            "'http://wiki.greasespot.net/Welcome')", 0);
-      }
-    }
-
-    if (GM_compareVersions(initialized, "0.8") == -1)
-      this._pointEightBackup();
-
-    // update the currently initialized version so we don't do this work again.
-    if ("@mozilla.org/extensions/manager;1" in Cc) {
-      // Firefox <= 3.6.*
-      var extMan = Cc["@mozilla.org/extensions/manager;1"]
-          .getService(Ci.nsIExtensionManager);
-      var item = extMan.getItemForID(GM_GUID);
-      GM_prefRoot.setValue("version", item.version);
-    } else {
-      // Firefox 3.7+
-      Cu.import("resource://gre/modules/AddonManager.jsm");
-      AddonManager.getAddonByID(GM_GUID, function(addon) {
-         GM_prefRoot.setValue("version", addon.version);
-      });
-    }
-
-    GM_log("< GM_updateVersion");
-  },
-
-  /**
-   * In Greasemonkey 0.8 there was a format change to the gm_scripts folder and
-   * testing found several bugs where the entire folder would get nuked. So we
-   * are paranoid and backup the folder the first time 0.8 runs.
-   */
-  _pointEightBackup: function() {
-    var scriptDir = this._scriptDir;
-    var scriptDirBackup = scriptDir.clone();
-    scriptDirBackup.leafName += "_08bak";
-    if (scriptDir.exists() && !scriptDirBackup.exists())
-      scriptDir.copyTo(scriptDirBackup.parent, scriptDirBackup.leafName);
   }
 };

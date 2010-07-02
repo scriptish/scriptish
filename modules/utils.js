@@ -15,6 +15,7 @@ var EXPORTED_SYMBOLS = [
   "GM_launchApplicationWithDoc",
   "GM_parseScriptName",
   "GM_getTempFile",
+  "GM_getProfileFile",
   "GM_getBinaryContents",
   "GM_getContents",
   "GM_getWriteStream",
@@ -223,6 +224,16 @@ function GM_getTempFile() {
     Ci.nsILocalFile.NORMAL_FILE_TYPE,
     0640
   );
+
+  return file;
+}
+
+function GM_getProfileFile(aFilename) {
+  var file = Cc["@mozilla.org/file/directory_service;1"]
+      .getService(Ci.nsIProperties)
+      .get("ProfD", Ci.nsILocalFile);
+
+  file.append(aFilename);
 
   return file;
 }

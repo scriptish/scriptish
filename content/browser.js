@@ -84,9 +84,8 @@ GM_BrowserUI.chromeLoad = function(e) {
                   .getService().wrappedJSObject;
   this.gmSvc = gmSvc;
 
-  // reference this once, so that the getter is called at least once, and the
-  // initialization routines will run, no matter what
-  setTimeout(function() {gmSvc.wrappedJSObject.config}, 0);
+  // check if GM was updated/installed
+  setTimeout(function() {gmSvc.updateVersion()}, 100);
 };
 
 /**

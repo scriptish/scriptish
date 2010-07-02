@@ -62,14 +62,18 @@ GM_GreasemonkeyService.prototype = {
   ]),
 
   get filename() { return Components.stack.filename; },
+  _scriptFoldername: "gm_scripts",
 
   _config: null,
   get config() {
     if (!this._config) {
+      // check if GM was updated/installed
+      this.updateVersion();
+
       var tools = {};
       Cu.import("resource://greasemonkey/config.js", tools);
 
-      this._config = new tools.Config();
+      this._config = new tools.Config(this._scriptFoldername);
     }
 
     return this._config;
@@ -433,6 +437,71 @@ GM_GreasemonkeyService.prototype = {
     }
 
     return null;
+  },
+
+  /**
+   * Checks whether the version has changed since the last run and performs
+   * any necessary upgrades.
+   */
+  updateVersion: function() {
+    GM_log("> GM_updateVersion");
+
+    // this is the last version which has been run at least once
+    var initialized = GM_prefRoot.getValue("version", "0.0");
+
+    // check if this is the first launch
+    if ("0.0" == initialized) {
+      // find an open window.
+      var chromeWin = Cc['@mozilla.org/appshell/window-mediator;1']
+          .getService(Ci.nsIWindowMediator)
+          .getMostRecentWindow("navigator:browser");
+
+      // if we found it, use it to open a welcome tab
+      if (chromeWin.gBrowser) {
+        // the setTimeout makes sure we do not execute too early -- sometimes
+        // the window isn't quite ready to add a tab yet
+        chromeWin.setTimeout(
+            "gBrowser.selectedTab = gBrowser.addTab(" +
+            "'http://wiki.greasespot.net/Welcome')", 500);
+      }
+    }
+
+    // check if this is an upgrade from a version less than 0.8
+    if (GM_compareVersions(initialized, "0.8") == -1) {
+      /**
+       * In Greasemonkey 0.8 there was a format change to the gm_scripts folder and
+       * testing found several bugs where the entire folder would get nuked. So we
+       * are paranoid and backup the folder the first time 0.8 runs.
+       */
+      var scriptDir = GM_getProfileFile(this._scriptFoldername);
+      var scriptDirBackup = scriptDir.clone();
+      scriptDirBackup.leafName += "_08bak";
+      if (scriptDir.exists() && !scriptDirBackup.exists()) {
+        scriptDir.copyTo(scriptDirBackup.parent, scriptDirBackup.leafName);
+      }
+    }
+
+    // update the currently initialized version so we don't do this work again.
+    if ("@mozilla.org/extensions/manager;1" in Cc) {
+      // Firefox <= 3.6.*
+      var extMan = Cc["@mozilla.org/extensions/manager;1"]
+          .getService(Ci.nsIExtensionManager);
+      var item = extMan.getItemForID(GM_GUID);
+
+      GM_prefRoot.setValue("version", item.version);
+    } else {
+      // Firefox 3.7+
+      var tools = {};
+      Cu.import("resource://gre/modules/AddonManager.jsm", tools);
+
+      tools.AddonManager.getAddonByID(GM_GUID, function(addon) {
+         GM_prefRoot.setValue("version", addon.version);
+      });
+    }
+
+    this.updateVersion = function() {};
+
+    GM_log("< GM_updateVersion");
   }
 };
 
