@@ -263,7 +263,8 @@ Config.prototype = {
       // this is the first launch.  show the welcome screen.
 
       // find an open window.
-      var chromeWin = windowMediatorService
+      var chromeWin = Cc['@mozilla.org/appshell/window-mediator;1']
+          .getService(Ci.nsIWindowMediator)
           .getMostRecentWindow("navigator:browser");
 
       // if we found it, use it to open a welcome tab
