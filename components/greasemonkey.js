@@ -65,8 +65,13 @@ GM_GreasemonkeyService.prototype = {
 
   _config: null,
   get config() {
-    if (!this._config)
-      this._config = new Config();
+    if (!this._config) {
+      var tools = {};
+      Cu.import("resource://greasemonkey/config.js", tools);
+
+      this._config = new tools.Config();
+    }
+
     return this._config;
   },
 
@@ -94,7 +99,6 @@ GM_GreasemonkeyService.prototype = {
     Cu.import("resource://greasemonkey/constants.js");
     Cu.import("resource://greasemonkey/prefmanager.js");
     Cu.import("resource://greasemonkey/utils.js");
-    Cu.import("resource://greasemonkey/config.js");
     Cu.import("resource://greasemonkey/miscapis.js");
     Cu.import("resource://greasemonkey/xmlhttprequester.js");
   },
