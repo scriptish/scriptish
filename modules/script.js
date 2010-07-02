@@ -173,11 +173,9 @@ Script.prototype = {
       }
     }
 
-    // Empty cached values.
-    this._id = null;
-    this._prefroot = null;
-
     // Copy new values.
+    this._id = newScript.id;
+    this._prefroot = newScript.prefroot;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
