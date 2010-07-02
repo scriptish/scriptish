@@ -371,7 +371,20 @@ function GM_uriFromUrl(url, baseUrl) {
     return null;
   }
 }
-GM_uriFromUrl = GM_memoize(GM_uriFromUrl);
+
+GM_uriFromUrl = function(aUrl, aBaseUrl) {
+  GM_uriFromUrl = GM_memoize(function(aUrl, aBaseUrl) {
+    var baseUri = null;
+    if (aBaseUrl) baseUri = GM_uriFromUrl(aBaseUrl);
+    try {
+      return ioService.newURI(aUrl, null, baseUri);
+    } catch (e) {
+      return null;
+    }
+  });
+
+  return GM_uriFromUrl(aUrl, aBaseUrl);
+}
 
 // UTF-8 encodes input, SHA-1 hashes it and returns the 40-char hex version.
 GM_sha1 = function(aUnicode) {
