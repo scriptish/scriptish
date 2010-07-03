@@ -72,8 +72,11 @@ GM_GreasemonkeyService.prototype = {
 
   // nsIObserver
   observe: function(aSubject, aTopic, aData) {
-    if (aTopic == "app-startup") {
-      this.startup();
+    switch (aTopic) {
+      case 'app-startup':
+      case 'profile-after-change':
+        this.startup();
+        break;
     }
   },
 
@@ -95,6 +98,8 @@ GM_GreasemonkeyService.prototype = {
     Cu.import("resource://greasemonkey/config.js");
     Cu.import("resource://greasemonkey/miscapis.js");
     Cu.import("resource://greasemonkey/xmlhttprequester.js");
+
+    this.startup = function() {};
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
@@ -431,7 +436,12 @@ GM_GreasemonkeyService.prototype = {
   }
 };
 
-// XPCOM module registration.
-function NSGetModule(compMgr, fileSpec) {
-  return XPCOMUtils.generateModule([GM_GreasemonkeyService]);
+/**
+* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+*/
+if (XPCOMUtils.generateNSGetFactory) {
+    var NSGetFactory = XPCOMUtils.generateNSGetFactory([GM_GreasemonkeyService]);
+} else {
+    var NSGetModule = XPCOMUtils.generateNSGetModule([GM_GreasemonkeyService]);
 }
