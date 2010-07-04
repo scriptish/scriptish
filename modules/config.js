@@ -203,6 +203,21 @@ Config.prototype = {
     this._changed(script, "move", to);
   },
 
+  sort: function() {
+    var scripts = this._scripts;
+
+    // sort the scripts
+    scripts.sort(function(a, b) {
+      return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+    });
+
+    for (var i = 0, script; script = scripts[i]; i++) {
+      this._changed(script, "move", i);
+    }
+
+    this._save();
+  },
+
   get _scriptDir() {
     return GM_getProfileFile(this._scriptFoldername);
   },
