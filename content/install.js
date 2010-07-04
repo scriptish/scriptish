@@ -1,3 +1,6 @@
+
+Components.utils.import("resource://greasemonkey/utils.js");
+
 var GMInstall = {
   init: function() {
     var ioservice = Components.classes["@mozilla.org/network/io-service;1"]

@@ -5,12 +5,17 @@
 
 var GM_BrowserUI = new Object();
 
+Components.utils.import("resource://greasemonkey/prefmanager.js");
+Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://greasemonkey/accelimation.js");
+Components.utils.import("resource://greasemonkey/scriptdownloader.js");
+Components.utils.import("resource://greasemonkey/menucommander.js");
+
 /**
  * nsISupports.QueryInterface
  */
 GM_BrowserUI.QueryInterface = function(aIID) {
   if (!aIID.equals(Components.interfaces.nsISupports) &&
-      !aIID.equals(Components.interfaces.gmIBrowserWindow) &&
       !aIID.equals(Components.interfaces.nsISupportsWeakReference) &&
       !aIID.equals(Components.interfaces.nsIWebProgressListener))
     throw Components.results.NS_ERROR_NO_INTERFACE;
@@ -77,38 +82,26 @@ GM_BrowserUI.chromeLoad = function(e) {
   this.refreshStatus();
 
   // register for notifications from greasemonkey-service about ui type things
-  this.gmSvc = Components.classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
-                         .getService(Components.interfaces.gmIGreasemonkeyService);
+  var gmSvc = Components.classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
+                  .getService().wrappedJSObject;
+  this.gmSvc = gmSvc;
 
   // reference this once, so that the getter is called at least once, and the
   // initialization routines will run, no matter what
-  this.gmSvc.wrappedJSObject.config;
-
-  this.gmSvc.registerBrowser(this);
+  setTimeout(function() {gmSvc.wrappedJSObject.config}, 0);
 };
 
 /**
- * gmIBrowserWindow.registerMenuCommand
+ * registerMenuCommand
  */
 GM_BrowserUI.registerMenuCommand = function(menuCommand) {
-  if (this.isMyWindow(menuCommand.window)) {
-    var commander = this.getCommander(menuCommand.window);
+  var commander = this.getCommander(menuCommand.window);
 
-    commander.registerMenuCommand(menuCommand.name,
-                                  menuCommand.doCommand,
-                                  menuCommand.accelKey,
-                                  menuCommand.accelModifiers,
-                                  menuCommand.accessKey);
-  }
-};
-
-/**
- * gmIBrowserWindow.openInTab
- */
-GM_BrowserUI.openInTab = function(domWindow, url) {
-  if (this.isMyWindow(domWindow)) {
-    this.tabBrowser.addTab(url);
-  }
+  commander.registerMenuCommand(menuCommand.name,
+                                menuCommand.doCommand,
+                                menuCommand.accelKey,
+                                menuCommand.accelModifiers,
+                                menuCommand.accessKey);
 };
 
 /**
@@ -135,7 +128,7 @@ GM_BrowserUI.contentLoad = function(e) {
       this.currentMenuCommander.attach();
     }
 
-    this.gmSvc.domContentLoaded(safeWin, window);
+    this.gmSvc.domContentLoaded(safeWin, window, this);
 
     GM_listen(unsafeWin, "pagehide", GM_hitch(this, "contentUnload"));
   }
@@ -189,8 +182,7 @@ GM_BrowserUI.startInstallScript = function(uri, timer) {
   if (!timer) {
     // docs for nsicontentpolicy say we're not supposed to block, so short
     // timer.
-    window.setTimeout(
-      function() { GM_BrowserUI.startInstallScript(uri, true) }, 0);
+    setTimeout(function() { GM_BrowserUI.startInstallScript(uri, true) }, 0);
 
     return;
   }
@@ -297,7 +289,6 @@ GM_BrowserUI.contentUnload = function(e) {
 GM_BrowserUI.chromeUnload = function() {
   GM_prefRoot.unwatch("enabled", this.enabledWatcher);
   this.tabBrowser.removeProgressListener(this);
-  this.gmSvc.unregisterBrowser(this);
   delete this.menuCommanders;
 };
 
@@ -371,22 +362,6 @@ GM_BrowserUI.getCommander = function(unsafeWin) {
   this.menuCommanders.push({win:unsafeWin, commander:commander});
 
   return commander;
-};
-
-/**
- * Helper to determine if a given dom window is in this tabbrowser
- */
-GM_BrowserUI.isMyWindow = function(domWindow) {
-  var tabbrowser = getBrowser();
-  var browser;
-
-  for (var i = 0; browser = tabbrowser.browsers[i]; i++) {
-    if (browser.contentWindow == domWindow) {
-      return true;
-    }
-  }
-
-  return false;
 };
 
 function GM_showGeneralPopup(aEvent) {
@@ -494,7 +469,7 @@ function GM_popupClicked(aEvent) {
     if (aEvent.button == 0) // left-click: toggle enabled state
       script.enabled =! script.enabled;
     else // right-click: open in editor
-      GM_openInEditor(script);
+      GM_openInEditor(script, window);
 
     closeMenus(aEvent.target);
   }
@@ -538,7 +513,7 @@ GM_BrowserUI.showStatus = function(message, autoHide) {
   this.statusLabel.value = message;
   var max = label.boxObject.width;
 
-  this.showAnimation = new Accelimation(this.statusLabel.style,
+  this.showAnimation = new Accelimation(window, this.statusLabel.style,
                                           "width", max, 300, 2, "px");
   this.showAnimation.onend = GM_hitch(this, "showStatusAnimationEnd", autoHide);
   this.showAnimation.start();
@@ -583,7 +558,7 @@ GM_BrowserUI.hideStatusImmediately = function() {
 GM_BrowserUI.hideStatus = function() {
   if (!this.hideAnimation) {
     this.autoHideTimer = null;
-    this.hideAnimation = new Accelimation(this.statusLabel.style,
+    this.hideAnimation = new Accelimation(window, this.statusLabel.style,
                                             "width", 0, 300, 2, "px");
     this.hideAnimation.onend = GM_hitch(this, "hideStatusAnimationEnd");
     this.hideAnimation.start();
@@ -617,10 +592,6 @@ GM_BrowserUI.viewContextItemClicked = function() {
 
   this.scriptDownloader_ = new GM_ScriptDownloader(window, uri, this.bundle);
   this.scriptDownloader_.startViewScript();
-};
-
-GM_BrowserUI.manageMenuItemClicked = function() {
-   GM_openUserScriptManager();
 };
 
 GM_BrowserUI.init();

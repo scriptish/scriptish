@@ -1,3 +1,15 @@
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["Script"];
+
+const Cu = Components.utils;
+Cu.import("resource://greasemonkey/constants.js");
+Cu.import("resource://greasemonkey/utils.js");
+Cu.import("resource://greasemonkey/miscapis.js");
+Cu.import("resource://greasemonkey/convert2RegExp.js");
+Cu.import("resource://greasemonkey/scriptdownloader.js");
+
+GM_apiAcceptableFile(Components.stack.filename);
+
 function Script(config) {
   this._config = config;
   this._observers = [];
@@ -110,11 +122,11 @@ Script.prototype = {
     var name = this._initFileName(this._name, false);
 
     file.append(name);
-    file.createUnique(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+    file.createUnique(Ci.nsIFile.DIRECTORY_TYPE, 0755);
     this._basedir = file.leafName;
 
     file.append(name + ".user.js");
-    file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+    file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
     this._filename = file.leafName;
 
     GM_log("Moving script file from " + tempFile.path + " to " + file.path);
@@ -127,9 +139,7 @@ Script.prototype = {
   setDownloadedFile: function(file) { this._tempFile = file; },
 
   get previewURL() {
-    return Components.classes["@mozilla.org/network/io-service;1"]
-                     .getService(Components.interfaces.nsIIOService)
-                     .newFileURI(this._tempFile).spec;
+    return ioService.newFileURI(this._tempFile).spec;
   },
 
   isModified: function() {
@@ -176,7 +186,7 @@ Script.prototype = {
       var dirFiles = this._basedirFile.directoryEntries;
       while (dirFiles.hasMoreElements()) {
         var nextFile = dirFiles.getNext()
-            .QueryInterface(Components.interfaces.nsIFile);
+            .QueryInterface(Ci.nsIFile);
         if (!nextFile.equals(this._file)) nextFile.remove(true);
       }
 

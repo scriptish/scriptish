@@ -1,3 +1,9 @@
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
+
+Components.utils.import("resource://greasemonkey/utils.js");
+GM_apiAcceptableFile(Components.stack.filename);
+
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
   this.unsafeContentWin = unsafeContentWin;
   this.chromeWindow = chromeWindow;

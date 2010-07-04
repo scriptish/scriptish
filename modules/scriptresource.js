@@ -1,3 +1,11 @@
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["ScriptResource"];
+
+const Cu = Components.utils;
+Cu.import("resource://greasemonkey/constants.js");
+Cu.import("resource://greasemonkey/utils.js");
+Cu.import("resource://greasemonkey/scriptrequire.js");
+
 function ScriptResource(script) {
   this._script = script;
 
@@ -23,8 +31,8 @@ ScriptResource.prototype = {
   get textContent() { return GM_getContents(this._file); },
 
   get dataContent() {
-    var appSvc = Components.classes["@mozilla.org/appshell/appShellService;1"]
-                           .getService(Components.interfaces.nsIAppShellService);
+    var appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
+                     .getService(Ci.nsIAppShellService);
 
     var window = appSvc.hiddenDOMWindow;
     var binaryContents = GM_getBinaryContents(this._file);

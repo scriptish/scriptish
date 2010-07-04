@@ -1,11 +1,53 @@
+// JSM exported symbols
+var EXPORTED_SYMBOLS = [
+  "GM_GUID",
+  "GM_alert",
+  "GM_stringBundle",
+  "GM_isDef",
+  "GM_getConfig",
+  "GM_hitch",
+  "GM_listen",
+  "GM_unlisten",
+  "GM_logError",
+  "GM_log",
+  "GM_openInEditor",
+  "GM_getEditor",
+  "GM_launchApplicationWithDoc",
+  "GM_parseScriptName",
+  "GM_getTempFile",
+  "GM_getBinaryContents",
+  "GM_getContents",
+  "GM_getWriteStream",
+  "GM_getUriFromFile",
+  "GM_compareVersions",
+  "GM_isGreasemonkeyable",
+  "GM_getEnabled",
+  "GM_setEnabled",
+  "GM_uriFromUrl",
+  "GM_sha1",
+  "GM_memoize",
+  "GM_newUserScript",
+  "GM_apiLeakCheck",
+  "GM_apiAcceptableFile"
+];
+
+const Cu = Components.utils;
+Cu.import("resource://greasemonkey/constants.js");
+Cu.import("resource://greasemonkey/prefmanager.js");
+
 const GM_GUID = "{e4a8a97b-f2ed-450b-b12d-ee082ba24781}";
 
-var GM_consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-                        .getService(Components.interfaces.nsIConsoleService);
+const consoleService = Cc["@mozilla.org/consoleservice;1"]
+                           .getService(Ci.nsIConsoleService);
 
-var GM_stringBundle = Components
-    .classes["@mozilla.org/intl/stringbundle;1"]
-    .getService(Components.interfaces.nsIStringBundleService)
+function GM_alert(msg) {
+  Cc["@mozilla.org/embedcomp/prompt-service;1"]
+    .getService(Ci.nsIPromptService)
+    .alert(null, "Greasemonkey alert", msg);
+}
+
+var GM_stringBundle = Cc["@mozilla.org/intl/stringbundle;1"]
+    .getService(Ci.nsIStringBundleService)
     .createBundle("chrome://greasemonkey/locale/gm-browser.properties");
 
 function GM_isDef(thing) {
@@ -13,10 +55,7 @@ function GM_isDef(thing) {
 }
 
 function GM_getConfig() {
-  return Components
-    .classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
-    .getService(Components.interfaces.gmIGreasemonkeyService)
-    .wrappedJSObject.config;
+  return gmService.config;
 }
 
 function GM_hitch(obj, meth) {
@@ -41,24 +80,19 @@ function GM_hitch(obj, meth) {
 }
 
 function GM_listen(source, event, listener, opt_capture) {
-  Components.utils.lookupMethod(source, "addEventListener")(
-    event, listener, opt_capture);
+  Cu.lookupMethod(source, "addEventListener")(event, listener, opt_capture);
 }
 
 function GM_unlisten(source, event, listener, opt_capture) {
-  Components.utils.lookupMethod(source, "removeEventListener")(
-    event, listener, opt_capture);
+  Cu.lookupMethod(source, "removeEventListener")(event, listener, opt_capture);
 }
 
 /**
  * Utility to create an error message in the log without throwing an error.
  */
 function GM_logError(e, opt_warn, fileName, lineNumber) {
-  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-    .getService(Components.interfaces.nsIConsoleService);
-
-  var consoleError = Components.classes["@mozilla.org/scripterror;1"]
-    .createInstance(Components.interfaces.nsIScriptError);
+  var consoleError = Cc["@mozilla.org/scripterror;1"]
+    .createInstance(Ci.nsIScriptError);
 
   var flags = opt_warn ? 1 : 0;
 
@@ -72,16 +106,16 @@ function GM_logError(e, opt_warn, fileName, lineNumber) {
 
 function GM_log(message, force) {
   if (force || GM_prefRoot.getValue("logChrome", false)) {
-    GM_consoleService.logStringMessage(message);
+    consoleService.logStringMessage(message);
   }
 }
 
 // TODO: this stuff was copied wholesale and not refactored at all. Lots of
 // the UI and Config rely on it. Needs rethinking.
 
-function GM_openInEditor(script) {
+function GM_openInEditor(script, parentWindow) {
   var file = script.editFile;
-  var editor = GM_getEditor();
+  var editor = GM_getEditor(parentWindow);
   if (!editor) {
     // The user did not choose an editor.
     return;
@@ -92,20 +126,20 @@ function GM_openInEditor(script) {
   } catch (e) {
     // Something may be wrong with the editor the user selected. Remove so that
     // next time they can pick a different one.
-    alert(GM_stringBundle.GetStringFromName("editor.could_not_launch") + "\n" + e);
+    GM_alert(GM_stringBundle.GetStringFromName("editor.could_not_launch") + "\n" + e);
     GM_prefRoot.remove("editor");
     throw e;
   }
 }
 
-function GM_getEditor(change) {
+function GM_getEditor(parentWindow, change) {
   var editorPath = GM_prefRoot.getValue("editor");
 
   if (!change && editorPath) {
     GM_log("Found saved editor preference: " + editorPath);
 
-    var editor = Components.classes["@mozilla.org/file/local;1"]
-                 .createInstance(Components.interfaces.nsILocalFile);
+    var editor = Cc["@mozilla.org/file/local;1"]
+                 .createInstance(Ci.nsILocalFile);
     editor.followLinks = true;
     editor.initWithPath(editorPath);
 
@@ -123,11 +157,12 @@ function GM_getEditor(change) {
   // that we can give them an error and try again.
   while (true) {
     GM_log("Asking user to choose editor...");
-    var nsIFilePicker = Components.interfaces.nsIFilePicker;
-    var filePicker = Components.classes["@mozilla.org/filepicker;1"]
-                               .createInstance(nsIFilePicker);
+    var nsIFilePicker = Ci.nsIFilePicker;
+    var filePicker = Cc["@mozilla.org/filepicker;1"]
+                         .createInstance(nsIFilePicker);
 
-    filePicker.init(window, GM_stringBundle.GetStringFromName("editor.prompt"),
+    filePicker.init(parentWindow,
+                    GM_stringBundle.GetStringFromName("editor.prompt"),
                     nsIFilePicker.modeOpen);
     filePicker.appendFilters(nsIFilePicker.filterApplication);
     filePicker.appendFilters(nsIFilePicker.filterAll);
@@ -144,28 +179,29 @@ function GM_getEditor(change) {
       GM_prefRoot.setValue("editor", filePicker.file.path);
       return filePicker.file;
     } else {
-      alert(GM_stringBundle.GetStringFromName("editor.please_pick_executable"));
+      GM_alert(GM_stringBundle.GetStringFromName("editor.please_pick_executable"));
     }
   }
 }
 
 function GM_launchApplicationWithDoc(appFile, docFile) {
-  var args=[docFile.path];
+  var args = [docFile.path];
 
   // For the mac, wrap with a call to "open".
-  var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
-                             .getService(Components.interfaces.nsIXULRuntime);
-  if ("Darwin"==xulRuntime.OS) {
-    args=["-a", appFile.path, docFile.path]
+  var xulRuntime = Cc["@mozilla.org/xre/app-info;1"]
+                       .getService(Ci.nsIXULRuntime);
 
-    appFile = Components.classes["@mozilla.org/file/local;1"]
-                        .createInstance(Components.interfaces.nsILocalFile);
+  if ("Darwin" == xulRuntime.OS) {
+    args = ["-a", appFile.path, docFile.path];
+
+    appFile = Cc["@mozilla.org/file/local;1"]
+                  .createInstance(Ci.nsILocalFile);
     appFile.followLinks = true;
     appFile.initWithPath("/usr/bin/open");
   }
 
-  var process = Components.classes["@mozilla.org/process/util;1"]
-                          .createInstance(Components.interfaces.nsIProcess);
+  var process = Cc["@mozilla.org/process/util;1"]
+                    .createInstance(Ci.nsIProcess);
   process.init(appFile);
   process.run(false, args, args.length);
 }
@@ -178,13 +214,13 @@ function GM_parseScriptName(sourceUri) {
 }
 
 function GM_getTempFile() {
-  var file = Components.classes["@mozilla.org/file/directory_service;1"]
-        .getService(Components.interfaces.nsIProperties)
-        .get("TmpD", Components.interfaces.nsILocalFile);
+  var file = Cc["@mozilla.org/file/directory_service;1"]
+        .getService(Ci.nsIProperties)
+        .get("TmpD", Ci.nsILocalFile);
 
   file.append("gm-temp");
   file.createUnique(
-    Components.interfaces.nsILocalFile.NORMAL_FILE_TYPE,
+    Ci.nsILocalFile.NORMAL_FILE_TYPE,
     0640
   );
 
@@ -192,14 +228,11 @@ function GM_getTempFile() {
 }
 
 function GM_getBinaryContents(file) {
-    var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                              .getService(Components.interfaces.nsIIOService);
-
     var channel = ioService.newChannelFromURI(GM_getUriFromFile(file));
     var input = channel.open();
 
-    var bstream = Components.classes["@mozilla.org/binaryinputstream;1"]
-                            .createInstance(Components.interfaces.nsIBinaryInputStream);
+    var bstream = Cc["@mozilla.org/binaryinputstream;1"]
+                            .createInstance(Ci.nsIBinaryInputStream);
     bstream.setInputStream(input);
 
     var bytes = bstream.readBytes(bstream.available());
@@ -211,15 +244,11 @@ function GM_getContents(file, charset) {
   if( !charset ) {
     charset = "UTF-8"
   }
-  var ioService=Components.classes["@mozilla.org/network/io-service;1"]
-    .getService(Components.interfaces.nsIIOService);
-  var scriptableStream=Components
-    .classes["@mozilla.org/scriptableinputstream;1"]
-    .getService(Components.interfaces.nsIScriptableInputStream);
+  var scriptableStream = Cc["@mozilla.org/scriptableinputstream;1"]
+    .getService(Ci.nsIScriptableInputStream);
   // http://lxr.mozilla.org/mozilla/source/intl/uconv/idl/nsIScriptableUConv.idl
-  var unicodeConverter = Components
-    .classes["@mozilla.org/intl/scriptableunicodeconverter"]
-    .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+  var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+    .createInstance(Ci.nsIScriptableUnicodeConverter);
   unicodeConverter.charset = charset;
 
   var channel = ioService.newChannelFromURI(GM_getUriFromFile(file));
@@ -243,8 +272,8 @@ function GM_getContents(file, charset) {
 }
 
 function GM_getWriteStream(file) {
-  var stream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-                         .createInstance(Components.interfaces.nsIFileOutputStream);
+  var stream = Cc["@mozilla.org/network/file-output-stream;1"]
+                   .createInstance(Ci.nsIFileOutputStream);
 
   stream.init(file, 0x02 | 0x08 | 0x20, 420, -1);
 
@@ -252,9 +281,7 @@ function GM_getWriteStream(file) {
 }
 
 function GM_getUriFromFile(file) {
-  return Components.classes["@mozilla.org/network/io-service;1"]
-                   .getService(Components.interfaces.nsIIOService)
-                   .newFileURI(file);
+  return ioService.newFileURI(file);
 }
 
 // Todo: replace with nsIVersionComparator?
@@ -294,9 +321,7 @@ function GM_compareVersions(aV1, aV2) {
 }
 
 function GM_isGreasemonkeyable(url) {
-  var scheme = Components.classes["@mozilla.org/network/io-service;1"]
-               .getService(Components.interfaces.nsIIOService)
-               .extractScheme(url);
+  var scheme = ioService.extractScheme(url);
 
   switch (scheme) {
     case "http":
@@ -327,8 +352,6 @@ function GM_setEnabled(enabled) {
 }
 
 function GM_uriFromUrl(url, baseUrl) {
-  var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                                     .getService(Components.interfaces.nsIIOService);
   var baseUri = null;
   if (baseUrl) baseUri = GM_uriFromUrl(baseUrl);
   try {
@@ -341,14 +364,13 @@ GM_uriFromUrl = GM_memoize(GM_uriFromUrl);
 
 // UTF-8 encodes input, SHA-1 hashes it and returns the 40-char hex version.
 function GM_sha1(unicode) {
-  var unicodeConverter = Components
-      .classes["@mozilla.org/intl/scriptableunicodeconverter"]
-      .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+  var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+      .createInstance(Ci.nsIScriptableUnicodeConverter);
   unicodeConverter.charset = "UTF-8";
 
   var data = unicodeConverter.convertToByteArray(unicode, {});
-  var ch = Components.classes["@mozilla.org/security/hash;1"]
-      .createInstance(Components.interfaces.nsICryptoHash);
+  var ch = Cc["@mozilla.org/security/hash;1"]
+      .createInstance(Ci.nsICryptoHash);
   ch.init(ch.SHA1);
   ch.update(data, data.length);
   var hash = ch.finish(false); // hash as raw octets
@@ -390,12 +412,47 @@ function GM_memoize(func, limit) {
   }
 }
 
-function GM_newUserScript() {
-  var windowWatcher = Components
-    .classes["@mozilla.org/embedcomp/window-watcher;1"]
-    .getService(Components.interfaces.nsIWindowWatcher);
+function GM_newUserScript(parentWindow) {
+  var windowWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
+    .getService(Ci.nsIWindowWatcher);
   windowWatcher.openWindow(
-    window, "chrome://greasemonkey/content/newscript.xul", null,
+    parentWindow, "chrome://greasemonkey/content/newscript.xul", null,
     "chrome,dependent,centerscreen,resizable,dialog", null
   );
-}
+};
+
+// Examines the stack to determine if an API should be callable.
+function GM_apiLeakCheck(apiName) {
+  var stack = Components.stack;
+
+  do {
+    // Valid stack frames for GM api calls are: native and js when coming from
+    // chrome:// URLs and any file name listed in _apiAcceptedFiles.
+    if (2 == stack.language &&
+        0 > GM_apiGetAcceptableFiles().indexOf(stack.filename) &&
+        stack.filename.substr(0, 6) != "chrome") {
+      GM_logError(new Error("Greasemonkey access violation: unsafeWindow " +
+          "cannot call " + apiName + "."));
+      return false;
+    }
+  } while (stack = stack.caller);
+
+  return true;
+};
+
+// Creates and returns an array of filenames that are allowed by GM_apiLeakCheck
+function GM_apiGetAcceptableFiles() {
+  var _apiAcceptedFiles = [Components.stack.filename, gmService.filename];
+
+  // replace this function after first execution
+  GM_apiGetAcceptableFiles = function() {
+    return _apiAcceptedFiles;
+  }
+
+  return _apiAcceptedFiles;
+};
+
+// Adds a filename to an array of filenames that are allowed by GM_apiLeakCheck
+function GM_apiAcceptableFile(aFilename) {
+  GM_apiGetAcceptableFiles().push(aFilename);
+};

@@ -5,15 +5,7 @@
 <overlay id="greasemonkey-browser-overlay"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/utils.js" />
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/prefmanager.js" />
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/convert2RegExp.js" />
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/menucommander.js" />
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/xmlhttprequester.js" />
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/miscapis.js" />
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/scriptdownloader.js" />
   <script type="application/x-javascript" src="chrome://greasemonkey/content/browser.js" />
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/accelimation.js" />
 
   <popup id="contentAreaContextMenu">
     <menuitem id="view-userscript"
@@ -108,7 +100,7 @@
         <menuseparator />
         <menuitem accesskey="&menu.new.accesskey;"
           label="&menu.new;"
-          oncommand="GM_newUserScript();" />
+          oncommand="GM_newUserScript(window);" />
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
           oncommand="BrowserOpenAddonsMgr('userscripts');" />

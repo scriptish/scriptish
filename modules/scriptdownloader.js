@@ -1,9 +1,18 @@
-// This anonymous function exists to isolate generic names inside it to its
-// private scope.
-var GM_ScriptDownloader;
-(function() {
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
 
-GM_ScriptDownloader = function(win, uri, bundle) {
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+const gmService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"]
+                      .getService().wrappedJSObject;
+const ioService = Cc["@mozilla.org/network/io-service;1"]
+                      .getService(Ci.nsIIOService);
+
+Cu.import("resource://greasemonkey/utils.js");
+
+function GM_ScriptDownloader(win, uri, bundle) {
   this.win_ = win;
   this.uri_ = uri;
   this.bundle_ = bundle;
@@ -33,11 +42,9 @@ GM_ScriptDownloader.prototype.startDownload = function() {
 
   this.win_.GM_BrowserUI.showStatus("Fetching user script", false);
 
-  Components.classes["@greasemonkey.mozdev.org/greasemonkey-service;1"]
-    .getService().wrappedJSObject
-    .ignoreNextScript();
+  gmService.ignoreNextScript();
 
-  this.req_ = new XMLHttpRequest();
+  this.req_ = new this.win_.XMLHttpRequest();
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
   this.req_.onload = GM_hitch(this, "handleScriptDownloadComplete");
@@ -52,7 +59,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     // If loading from file, status might be zero on success
     if (this.req_.status != 200 && this.req_.status != 0) {
       // NOTE: Unlocalized string
-      alert("Error loading user script:\n" +
+      GM_alert("Error loading user script:\n" +
       this.req_.status + ": " +
       this.req_.statusText);
       return;
@@ -62,21 +69,20 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script = GM_getConfig().parse(source, this.uri_.spec);
 
-    var file = Components.classes["@mozilla.org/file/directory_service;1"]
-                         .getService(Components.interfaces.nsIProperties)
-                         .get("TmpD", Components.interfaces.nsILocalFile);
+    var file = Cc["@mozilla.org/file/directory_service;1"]
+                   .getService(Ci.nsIProperties)
+                   .get("TmpD", Ci.nsILocalFile);
 
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
     file.append(base + ".user.js");
     file.createUnique(
-      Components.interfaces.nsILocalFile.NORMAL_FILE_TYPE,
+      Ci.nsILocalFile.NORMAL_FILE_TYPE,
       0640
     );
     this.tempFiles_.push(file);
 
-    var converter =
-      Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-        .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+        .createInstance(Ci.nsIScriptableUnicodeConverter);
     converter.charset = "UTF-8";
     source = converter.ConvertFromUnicode(source);
 
@@ -86,7 +92,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script.setDownloadedFile(file);
 
-    window.setTimeout(GM_hitch(this, "fetchDependencies"), 0);
+    this.win_.setTimeout(GM_hitch(this, "fetchDependencies"), 0);
 
     if(this.installing_){
       this.showInstallDialog();
@@ -95,7 +101,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     }
   } catch (e) {
     // NOTE: unlocalized string
-    alert("Script could not be installed " + e);
+    GM_alert("Script could not be installed " + e);
     throw e;
   }
 };
@@ -120,17 +126,14 @@ GM_ScriptDownloader.prototype.downloadNextDependency = function(){
   if (this.depQueue_.length > 0) {
     var dep = this.depQueue_.pop();
     try {
-      var persist = Components.classes[
-        "@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-        .createInstance(Components.interfaces.nsIWebBrowserPersist);
+      var persist = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+                        .createInstance(Ci.nsIWebBrowserPersist);
       persist.persistFlags =
         persist.PERSIST_FLAGS_BYPASS_CACHE |
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
-      var ioservice =
-        Components.classes["@mozilla.org/network/io-service;1"]
-        .getService(Components.interfaces.nsIIOService);
+
       var sourceUri = GM_uriFromUrl(dep.urlToDownload);
-      var sourceChannel = ioservice.newChannelFromURI(sourceUri);
+      var sourceChannel = ioService.newChannelFromURI(sourceUri);
       sourceChannel.notificationCallbacks = new NotificationCallbacks();
 
       var file = GM_getTempFile();
@@ -157,7 +160,7 @@ function(dep, file, channel) {
   GM_log("Dependency Download complete " + dep.urlToDownload);
   try {
     var httpChannel =
-      channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+      channel.QueryInterface(Ci.nsIHttpChannel);
   } catch(e) {
     var httpChannel = false;
   }
@@ -182,8 +185,6 @@ function(dep, file, channel) {
 };
 
 GM_ScriptDownloader.prototype.checkDependencyURL = function(url) {
-  var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                            .getService(Components.interfaces.nsIIOService);
   var scheme = ioService.extractScheme(url);
 
   switch (scheme) {
@@ -215,7 +216,7 @@ GM_ScriptDownloader.prototype.finishInstall = function(){
 GM_ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg){
   GM_log("Error loading dependency " + dep.urlToDownload + "\n" + msg);
   if (this.installOnCompletion_) {
-    alert("Error loading dependency " + dep.urlToDownload + "\n" + msg);
+    GM_alert("Error loading dependency " + dep.urlToDownload + "\n" + msg);
   } else {
     this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
   }
@@ -223,7 +224,7 @@ GM_ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg
 
 GM_ScriptDownloader.prototype.installScript = function(){
   if (this.dependencyError) {
-    alert(this.dependencyError);
+    GM_alert(this.dependencyError);
   } else if(this.dependenciesLoaded_) {
     this.win_.GM_BrowserUI.installScript(this.script)
   } else {
@@ -252,19 +253,20 @@ GM_ScriptDownloader.prototype.showScriptView = function() {
   this.win_.GM_BrowserUI.showScriptView(this);
 };
 
+
 function NotificationCallbacks() {}
 
 NotificationCallbacks.prototype.QueryInterface = function(aIID) {
-  if (aIID.equals(Components.interfaces.nsIInterfaceRequestor)) {
+  if (aIID.equals(Ci.nsIInterfaceRequestor)) {
     return this;
   }
   throw Components.results.NS_NOINTERFACE;
 };
 
 NotificationCallbacks.prototype.getInterface = function(aIID) {
-  if (aIID.equals(Components.interfaces.nsIAuthPrompt )) {
-     var winWat = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-                            .getService(Components.interfaces.nsIWindowWatcher);
+  if (aIID.equals(Ci.nsIAuthPrompt )) {
+     var winWat = Cc["@mozilla.org/embedcomp/window-watcher;1"]
+                      .getService(Ci.nsIWindowWatcher);
      return winWat.getNewAuthPrompter(winWat.activeWindow);
   }
   return undefined;
@@ -278,7 +280,7 @@ function PersistProgressListener(persist) {
 }
 
 PersistProgressListener.prototype.QueryInterface = function(aIID) {
- if (aIID.equals(Components.interfaces.nsIWebProgressListener)) {
+ if (aIID.equals(Ci.nsIWebProgressListener)) {
    return this;
  }
  throw Components.results.NS_NOINTERFACE;
@@ -297,5 +299,3 @@ PersistProgressListener.prototype.onStateChange =
       this.onFinish();
     }
   };
-
-})();

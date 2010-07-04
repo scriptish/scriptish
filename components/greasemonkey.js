@@ -1,147 +1,105 @@
-const CLASSNAME = "GM_GreasemonkeyService";
+
+// XPCOM info
+const DESCRIPTION = "GM_GreasemonkeyService";
 const CONTRACTID = "@greasemonkey.mozdev.org/greasemonkey-service;1";
-const CID = Components.ID("{77bf3650-1cd6-11da-8cd6-0800200c9a66}");
+const CLASSID = Components.ID("{77bf3650-1cd6-11da-8cd6-0800200c9a66}");
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 const appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
                  .getService(Ci.nsIAppShellService);
 
-const gmSvcFilename = Components.stack.filename;
+var getMaxJSVersion = function(){
+  var maxJSVersion = (function() {
+    var appInfo = Cc["@mozilla.org/xre/app-info;1"]
+        .getService(Ci.nsIXULAppInfo);
+    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
+        .getService(Ci.nsIVersionComparator);
 
-const maxJSVersion = (function getMaxJSVersion() {
-  var appInfo = Components
-      .classes["@mozilla.org/xre/app-info;1"]
-      .getService(Components.interfaces.nsIXULAppInfo);
-  var versionChecker = Components
-      .classes["@mozilla.org/xpcom/version-comparator;1"]
-      .getService(Components.interfaces.nsIVersionComparator);
-
-  // Firefox 3.5 and higher supports 1.8.
-  if (versionChecker.compare(appInfo.version, "3.5") >= 0) {
-    return "1.8";
-  }
-
-  // Everything else supports 1.6.
-  return "1.6";
-})();
-
-function alert(msg) {
-  Cc["@mozilla.org/embedcomp/prompt-service;1"]
-    .getService(Ci.nsIPromptService)
-    .alert(null, "Greasemonkey alert", msg);
-}
-
-// Examines the stack to determine if an API should be callable.
-function GM_apiLeakCheck(apiName) {
-  var stack = Components.stack;
-
-  do {
-    // Valid stack frames for GM api calls are: native and js when coming from
-    // chrome:// URLs and the greasemonkey.js component's file:// URL.
-    if (2 == stack.language) {
-      // NOTE: In FF 2.0.0.0, I saw that stack.filename can be null for JS/XPCOM
-      // services. This didn't happen in FF 2.0.0.11; I'm not sure when it
-      // changed.
-      if (stack.filename != null &&
-          stack.filename != gmSvcFilename &&
-          stack.filename.substr(0, 6) != "chrome") {
-        GM_logError(new Error("Greasemonkey access violation: unsafeWindow " +
-                    "cannot call " + apiName + "."));
-        return false;
-      }
+    // Firefox 3.5 and higher supports 1.8.
+    if (versionChecker.compare(appInfo.version, "3.5") >= 0) {
+      return "1.8";
     }
 
-    stack = stack.caller;
-  } while (stack);
+    // Everything else supports 1.6.
+    return "1.6";
+  })();
 
-  return true;
+  getMaxJSVersion = function() {
+    return maxJSVersion;
+  }
+
+  return maxJSVersion;
 }
 
-var greasemonkeyService = {
+function GM_GreasemonkeyService() {
+  this.wrappedJSObject = this;
+}
+
+GM_GreasemonkeyService.prototype = {
+  classDescription:  DESCRIPTION,
+  classID:           CLASSID,
+  contractID:        CONTRACTID,
+  _xpcom_categories: [{category: "app-startup",
+                       entry: DESCRIPTION,
+                       value: CONTRACTID,
+                       service: true},
+                      {category: "content-policy",
+                       entry: CONTRACTID,
+                       value: CONTRACTID,
+                       service: true}],
+
+  // nsISupports
+  QueryInterface: XPCOMUtils.generateQI([
+      Ci.nsIObserver,
+      Ci.nsISupports,
+      Ci.nsISupportsWeakReference,
+      Ci.nsIContentPolicy
+  ]),
+
+  get filename() { return Components.stack.filename; },
+
   _config: null,
   get config() {
     if (!this._config)
       this._config = new Config();
     return this._config;
   },
-  browserWindows: [],
-
-
-  // nsISupports
-  QueryInterface: function(aIID) {
-    if (!aIID.equals(Ci.nsIObserver) &&
-        !aIID.equals(Ci.nsISupports) &&
-        !aIID.equals(Ci.nsISupportsWeakReference) &&
-        !aIID.equals(Ci.gmIGreasemonkeyService) &&
-        !aIID.equals(Ci.nsIWindowMediatorListener) &&
-        !aIID.equals(Ci.nsIContentPolicy)) {
-      throw Components.results.NS_ERROR_NO_INTERFACE;
-    }
-
-    return this;
-  },
-
 
   // nsIObserver
   observe: function(aSubject, aTopic, aData) {
-    if (aTopic == "app-startup") {
-      this.startup();
+    switch (aTopic) {
+      case 'app-startup':
+      case 'profile-after-change':
+        this.startup();
+        break;
     }
   },
 
-
-  // gmIGreasemonkeyService
-  registerBrowser: function(browserWin) {
-    var existing;
-
-    for (var i = 0; existing = this.browserWindows[i]; i++) {
-      if (existing == browserWin) {
-        // NOTE: Unlocalised strings
-        throw new Error("Browser window has already been registered.");
-      }
-    }
-
-    this.browserWindows.push(browserWin);
-  },
-
-  unregisterBrowser: function(browserWin) {
-   var existing;
-
-    for (var i = 0; existing = this.browserWindows[i]; i++) {
-      if (existing == browserWin) {
-        this.browserWindows.splice(i, 1);
-        return;
-      }
-    }
-
-    throw new Error("Browser window is not registered.");
-  },
-
-  domContentLoaded: function(wrappedContentWin, chromeWin) {
+  domContentLoaded: function(wrappedContentWin, chromeWin, gmBrowser) {
     var url = wrappedContentWin.document.location.href;
     var scripts = this.initScripts(url, wrappedContentWin, chromeWin);
 
     if (scripts.length > 0) {
-      this.injectScripts(scripts, url, wrappedContentWin, chromeWin);
+      this.injectScripts(scripts, url, wrappedContentWin, chromeWin, gmBrowser);
     }
   },
 
   startup: function() {
-    var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
-      .getService(Ci.mozIJSSubScriptLoader);
-    loader.loadSubScript("chrome://global/content/XPCNativeWrapper.js");
-    loader.loadSubScript("chrome://greasemonkey/content/prefmanager.js");
-    loader.loadSubScript("chrome://greasemonkey/content/utils.js");
-    loader.loadSubScript("chrome://greasemonkey/content/config.js");
-    loader.loadSubScript("chrome://greasemonkey/content/script.js");
-    loader.loadSubScript("chrome://greasemonkey/content/scriptrequire.js");
-    loader.loadSubScript("chrome://greasemonkey/content/scriptresource.js");
-    loader.loadSubScript("chrome://greasemonkey/content/convert2RegExp.js");
-    loader.loadSubScript("chrome://greasemonkey/content/miscapis.js");
-    loader.loadSubScript("chrome://greasemonkey/content/xmlhttprequester.js");
-    loader.loadSubScript("chrome://greasemonkey/content/scriptdownloader.js");
+    Cc["@mozilla.org/moz/jssubscript-loader;1"]
+        .getService(Ci.mozIJSSubScriptLoader)
+        .loadSubScript("chrome://global/content/XPCNativeWrapper.js");
+    Cu.import("resource://greasemonkey/prefmanager.js");
+    Cu.import("resource://greasemonkey/utils.js");
+    Cu.import("resource://greasemonkey/config.js");
+    Cu.import("resource://greasemonkey/miscapis.js");
+    Cu.import("resource://greasemonkey/xmlhttprequester.js");
+
+    this.startup = function() {};
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
@@ -202,13 +160,13 @@ var greasemonkeyService = {
       return false;
     }
 
-    var fph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+    var fph = Cc["@mozilla.org/network/protocol;1?name=file"]
     .getService(Ci.nsIFileProtocolHandler);
 
     var file = fph.getFileFromURLSpec(uri.spec);
-    var tmpDir = Components.classes["@mozilla.org/file/directory_service;1"]
-    .getService(Components.interfaces.nsIProperties)
-    .get("TmpD", Components.interfaces.nsILocalFile);
+    var tmpDir = Cc["@mozilla.org/file/directory_service;1"]
+    .getService(Ci.nsIProperties)
+    .get("TmpD", Ci.nsILocalFile);
 
     return file.parent.equals(tmpDir) && file.leafName != "newscript.user.js";
   },
@@ -229,7 +187,7 @@ var greasemonkeyService = {
     return this.config.getMatchingScripts(testMatch);
   },
 
-  injectScripts: function(scripts, url, wrappedContentWin, chromeWin) {
+  injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {
     var sandbox;
     var script;
     var logger;
@@ -243,7 +201,7 @@ var greasemonkeyService = {
     var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
 
     for (var i = 0; script = scripts[i]; i++) {
-      sandbox = new Components.utils.Sandbox(wrappedContentWin);
+      sandbox = new Cu.Sandbox(wrappedContentWin);
 
       logger = new GM_ScriptLogger(script);
 
@@ -280,7 +238,8 @@ var greasemonkeyService = {
                                            "contentStartRequest");
       sandbox.GM_registerMenuCommand = GM_hitch(this,
                                                 "registerMenuCommand",
-                                                unsafeContentWin);
+                                                unsafeContentWin,
+                                                gmBrowser);
 
       sandbox.__proto__ = wrappedContentWin;
 
@@ -312,22 +271,20 @@ var greasemonkeyService = {
     }
   },
 
-  registerMenuCommand: function(unsafeContentWin, commandName, commandFunc,
-                                accelKey, accelModifiers, accessKey) {
+  registerMenuCommand: function(unsafeContentWin, gmBrowser, commandName,
+                                commandFunc, accelKey, accelModifiers,
+                                accessKey) {
     if (!GM_apiLeakCheck("GM_registerMenuCommand")) {
       return;
     }
 
-    var command = {name: commandName,
-                   accelKey: accelKey,
-                   accelModifiers: accelModifiers,
-                   accessKey: accessKey,
-                   doCommand: commandFunc,
-                   window: unsafeContentWin };
-
-    for (var i = 0; i < this.browserWindows.length; i++) {
-      this.browserWindows[i].registerMenuCommand(command);
-    }
+    gmBrowser.registerMenuCommand({
+      name: commandName,
+      accelKey: accelKey,
+      accelModifiers: accelModifiers,
+      accessKey: accessKey,
+      doCommand: commandFunc,
+      window: unsafeContentWin});
   },
 
   openInTab: function(safeContentWin, chromeWin, url) {
@@ -348,7 +305,7 @@ var greasemonkeyService = {
   },
 
   evalInSandbox: function(code, codebase, sandbox, script) {
-    if (!(Components.utils && Components.utils.Sandbox)) {
+    if (!(Cu && Cu.Sandbox)) {
       var e = new Error("Could not create sandbox.");
       GM_logError(e, 0, e.fileName, e.lineNumber);
       return true;
@@ -356,7 +313,7 @@ var greasemonkeyService = {
     try {
       // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
       var lineFinder = new Error();
-      Components.utils.evalInSandbox(code, sandbox, maxJSVersion);
+      Cu.evalInSandbox(code, sandbox, getMaxJSVersion());
     } catch (e) { // catches errors while running the script code
       try {
         if (e && "return not in function" == e.message)
@@ -479,68 +436,12 @@ var greasemonkeyService = {
   }
 };
 
-greasemonkeyService.wrappedJSObject = greasemonkeyService;
-
-
-
 /**
- * XPCOM Registration goop
- */
-var Module = new Object();
-
-Module.registerSelf = function(compMgr, fileSpec, location, type) {
-  compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
-  compMgr.registerFactoryLocation(CID,
-                                  CLASSNAME,
-                                  CONTRACTID,
-                                  fileSpec,
-                                  location,
-                                  type);
-
-  var catMgr = Cc["@mozilla.org/categorymanager;1"]
-                 .getService(Ci.nsICategoryManager);
-
-  catMgr.addCategoryEntry("app-startup",
-                          CLASSNAME,
-                          CONTRACTID,
-                          true,
-                          true);
-
-  catMgr.addCategoryEntry("content-policy",
-                          CONTRACTID,
-                          CONTRACTID,
-                          true,
-                          true);
-};
-
-Module.getClassObject = function(compMgr, cid, iid) {
-  if (!cid.equals(CID)) {
-    throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
-  }
-
-  if (!iid.equals(Ci.nsIFactory)) {
-    throw Components.results.NS_ERROR_NO_INTERFACE;
-  }
-
-  return Factory;
-};
-
-Module.canUnload = function(compMgr) {
-  return true;
-};
-
-
-var Factory = new Object();
-
-Factory.createInstance = function(outer, iid) {
-  if (outer != null) {
-    throw Components.results.NS_ERROR_NO_AGGREGATION;
-  }
-
-  return greasemonkeyService;
-};
-
-
-function NSGetModule(compMgr, fileSpec) {
-  return Module;
+* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+*/
+if (XPCOMUtils.generateNSGetFactory) {
+    var NSGetFactory = XPCOMUtils.generateNSGetFactory([GM_GreasemonkeyService]);
+} else {
+    var NSGetModule = XPCOMUtils.generateNSGetModule([GM_GreasemonkeyService]);
 }

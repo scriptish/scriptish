@@ -1,3 +1,7 @@
+
+Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://greasemonkey/third-party/mpl-utils.js");
+
 // Globals.
 var GM_config = GM_getConfig();
 var GM_uninstallQueue = {};
@@ -207,7 +211,7 @@ var greasemonkeyAddons = {
     var selectedListitem = gUserscriptsView.selectedItem;
     switch (command) {
     case 'cmd_userscript_edit':
-      GM_openInEditor(script);
+      GM_openInEditor(script, window);
       break;
     case 'cmd_userscript_show':
       GM_openFolder(script._file);

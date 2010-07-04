@@ -1,15 +1,22 @@
-function GM_MenuCommander() {
+// JSM exported symbols
+var EXPORTED_SYMBOLS = ["GM_MenuCommander"];
+
+Components.utils.import("resource://greasemonkey/utils.js");
+
+function GM_MenuCommander(aDocument) {
   GM_log("> GM_MenuCommander")
 
-  this.menu = document.getElementById("userscript-commands-sb");
-  this.keyset = document.getElementById("mainKeyset");
+  this.doc = aDocument;
+
+  this.menu = this.doc.getElementById("userscript-commands-sb");
+  this.keyset = this.doc.getElementById("mainKeyset");
   this.menuPopup = this.menu.firstChild;
 
   this.menuItems = [];
   this.keys = [];
   this.attached = false;
 
-  this.menu2 = document.getElementById("userscript-commands-sb2");
+  this.menu2 = this.doc.getElementById("userscript-commands-sb2");
   this.menuPopup2 = this.menu2.firstChild;
   this.menuItems2 = [];
 
@@ -104,7 +111,7 @@ GM_MenuCommander.prototype.createMenuItem =
 function(commandName, commandFunc, accessKey) {
   GM_log("> GM_MenuCommander.createMenuItem");
 
-  var menuItem = document.createElement("menuitem");
+  var menuItem = this.doc.createElement("menuitem");
   menuItem._commandFunc = commandFunc;
   menuItem.setAttribute("label", commandName);
   menuItem.setAttribute("oncommand", "this._commandFunc()");
@@ -125,7 +132,7 @@ GM_MenuCommander.prototype.createKey =
   function(commandFunc, accelKey, modifiers, menuItem) {
     GM_log("> GM_MenuCommander.createKey");
 
-    var key = document.createElement("key");
+    var key = this.doc.createElement("key");
 
     if ((typeof accelKey) == "number") {
       GM_log("keycode: " + accelKey);
