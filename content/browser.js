@@ -492,6 +492,24 @@ GM_BrowserUI.refreshStatus = function() {
   this.statusImage.style.opacity = "1.0";
 };
 
+GM_BrowserUI.openChromeWindow = function(url) {
+  var windowWatcher = Components
+    .classes["@mozilla.org/embedcomp/window-watcher;1"]
+    .getService(Components.interfaces.nsIWindowWatcher);
+  windowWatcher.openWindow(
+    window, url, null,
+    "chrome,dependent,centerscreen,resizable,dialog", null
+  );
+}
+
+GM_BrowserUI.newUserScript = function() {
+  GM_BrowserUI.openChromeWindow("chrome://greasemonkey/content/newscript.xul");
+};
+
+GM_BrowserUI.openOptionsWin = function() {
+  GM_BrowserUI.openChromeWindow("chrome://greasemonkey/content/options.xul");
+};
+
 GM_BrowserUI.showStatus = function(message, autoHide) {
   if (this.statusLabel.collapsed) {
     this.statusLabel.collapsed = false;

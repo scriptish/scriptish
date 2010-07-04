@@ -8,6 +8,8 @@
 <!ENTITY menu.new.accesskey "N">
 <!ENTITY menu.manage "Manage User Scripts...">
 <!ENTITY menu.manage.accesskey "M">
+<!ENTITY menu.options "Options...">
+<!ENTITY menu.options.accesskey "O">
 <!ENTITY statusbar.noscripts "No scripts installed!">
 <!ENTITY statusbar.enabled "Enabled">
 <!ENTITY statusbar.enabled.accesskey "E">
