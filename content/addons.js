@@ -156,9 +156,10 @@ var greasemonkeyAddons = {
           });
           break;
         case 'url':
+          if (!GM_isGreasemonkeyable(filterText)) return;
+
           var scripts = GM_config.getMatchingScripts(function(script) {
-            if (GM_isGreasemonkeyable(filterText) &&
-                script.matchesURL(filterText)) {
+            if (script.matchesURL(filterText)) {
               return true;
             }
             return false;
@@ -168,6 +169,8 @@ var greasemonkeyAddons = {
     } else {
       var scripts = GM_config.scripts;
     }
+
+    if (0 >= scripts.length) return;
 
     // Add a list item for each script.
     for (var i = 0, script; script = scripts[i]; i++) {
