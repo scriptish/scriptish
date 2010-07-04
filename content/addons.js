@@ -55,8 +55,7 @@ var observer = {
         greasemonkeyAddons.reselectLastSelected();
         break;
       case "modified":
-        var item = greasemonkeyAddons.listitemForScript(script);
-        gUserscriptsView.replaceChild(item, node);
+        greasemonkeyAddons.fillListItemFromScript(node, script);
         break;
     }
   }
@@ -172,6 +171,16 @@ var greasemonkeyAddons = {
   listitemForScript: function(script) {
     var item = document.createElement('richlistitem');
 
+    greasemonkeyAddons.fillListItemFromScript(item, script);
+
+    if (script.id in GM_uninstallQueue) {
+      item.setAttribute('opType', 'needs-uninstall');
+    }
+
+    return item;
+  },
+
+  fillListItemFromScript: function(item, script) {
     // Setting these attributes inherits the values into the same place they
     // would go for extensions.
     item.setAttribute('addonId', script.id);
@@ -180,9 +189,6 @@ var greasemonkeyAddons = {
     item.setAttribute('version', script.version);
     item.setAttribute('id', 'urn:greasemonkey:item:'+script.id);
     item.setAttribute('isDisabled', !script.enabled);
-    if (script.id in GM_uninstallQueue) {
-      item.setAttribute('opType', 'needs-uninstall');
-    }
 
     return item;
   },
