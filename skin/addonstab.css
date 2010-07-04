@@ -1,0 +1,4 @@
+#category-userscripts > .category-icon
+{
+  list-style-image: url("chrome://greasemonkey/skin/icon_medium.png");
+}
