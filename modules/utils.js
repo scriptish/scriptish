@@ -25,6 +25,7 @@ var EXPORTED_SYMBOLS = [
   "GM_setEnabled",
   "GM_uriFromUrl",
   "GM_sha1",
+  "GM_installUri",
   "GM_memoize",
   "GM_newUserScript"
 ];
@@ -410,6 +411,17 @@ GM_sha1 = function(aUnicode) {
   });
 
   return GM_sha1(aUnicode);
+}
+
+function GM_installUri(uri) {
+  var win = Cc['@mozilla.org/appshell/window-mediator;1']
+    .getService(Ci.nsIWindowMediator)
+    .getMostRecentWindow("navigator:browser");
+  if (win && win.GM_BrowserUI) {
+    win.GM_BrowserUI.startInstallScript(uri);
+    return true;
+  }
+  return false;
 }
 
 // Decorate a function with a memoization wrapper, with a limited-size cache

@@ -1,5 +1,6 @@
 
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/scriptdownloader.js");
 Components.utils.import("resource://scriptish/third-party/mpl-utils.js");
 
 // Globals.
@@ -76,10 +77,9 @@ window.addEventListener('load', function() {
       'select', greasemonkeyAddons.updateLastSelected, false);
   gUserscriptsView.addEventListener(
       'keypress', greasemonkeyAddons.onKeypress, false);
-  gUserscriptsView.addEventListener(
-      'dragover', greasemonkeyAddons.onDragOver, false);
-  gUserscriptsView.addEventListener(
-      'drop', greasemonkeyAddons.onDrop, false);
+
+  window.addEventListener('dragover', greasemonkeyAddons.onDragOver, false);
+  window.addEventListener('drop', greasemonkeyAddons.onDrop, false);
 
   GM_config.addObserver(observer);
 
@@ -146,25 +146,34 @@ var greasemonkeyAddons = {
     gExtensionsView.focus();
   },
 
-  onDragOver: function(event) {
+  urlFromDragEvent: function(event) {
     var types = event.dataTransfer.types;
-    var supportedTypes = ["text/x-moz-url"];
-    var requiredExtension = ".user.js";
-    types = supportedTypes.filter(function (value) types.contains(value));
-    if (types.length) {
-      var data = event.dataTransfer.getData(types[0]);
-      if (data.lastIndexOf(requiredExtension) == data.length-requiredExtension.length) {
-        event.preventDefault();
-      }
+    var url = null;
+    if (types.contains('text/uri-list')) {
+      url = event.dataTransfer.mozGetDataAt('text/uri-list', 0);
+    } else if (types.contains('application/x-moz-file')) {
+      var file = event.dataTransfer
+          .mozGetDataAt('application/x-moz-file', 0)
+          .QueryInterface(Components.interfaces.nsIFile);
+      url = GM_getUriFromFile(file).spec;
+    }
+    return url;
+  },
+
+  onDragOver: function(event) {
+    var url = greasemonkeyAddons.urlFromDragEvent(event);
+    if (url && url.match(/\.user\.js$/)) {
+      // Cancel the default do-not-allow behavior.
+      event.preventDefault();
     }
   },
 
   onDrop: function(event) {
-    //is validated during onDragOver (above)
-    var scriptURI = event.dataTransfer.getData("text/x-moz-url");
-    alert("NEXT STEP: Install this .user.js script: \n\n" + scriptURI);
+    var uri = GM_uriFromUrl(greasemonkeyAddons.urlFromDragEvent(event));
+    // TODO: Make this UI appear attached to addons, rather than the browser?
+    GM_installUri(uri);
   },
-
+  
   updateLastSelected: function() {
     if (!gUserscriptsView.selectedItem) return;
     var userscriptsRadio = document.getElementById('userscripts-view');
