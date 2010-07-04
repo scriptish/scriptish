@@ -617,4 +617,35 @@ GM_BrowserUI.viewContextItemClicked = function() {
   this.scriptDownloader_.startViewScript();
 };
 
+GM_BrowserUI.managePageMenuItemClicked = function() {
+  var attempts = 20;
+
+  BrowserOpenAddonsMgr('userscripts');
+
+  // wait a bit for the window to open
+  function tryToSetFilterLater() {
+    if (0 > attempts--) return;
+    setTimeout(setFilterToPage, 150);
+  }
+
+  function setFilterToPage() {
+    // get a reference to the extension manager window opened
+    var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                  .getService(Components.interfaces.nsIWindowMediator)
+                  .getMostRecentWindow("Extension:Manager");
+    if (!win) return tryToSetFilterLater();
+
+    var filterText = win.document.getElementById('userscriptsFilterText');
+    if (!filterText) return tryToSetFilterLater();
+    filterText.value = getBrowser().contentWindow.location.href;
+
+    var filterBy = win.document.getElementById('userscriptsFilterBy');
+    filterBy.selectedIndex = 1;
+
+    win.greasemonkeyAddons.fillList();
+  }
+
+  tryToSetFilterLater();
+};
+
 GM_BrowserUI.init();

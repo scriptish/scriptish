@@ -20,6 +20,18 @@ Hide native view/buttons, when user scripts view is open.
   display: -moz-box;
 }
 
+/*
+Filter Bar styles
+*/
+#userscriptsFilterBar
+{
+  -moz-box-align: center;
+  max-height:25px;
+}
+#userscriptsFilterText {
+  min-height:25px;
+}
+
 /* XBL Bindings */
 .userscripts richlistitem[opType="needs-uninstall"] hbox.addon-optype,
 .userscripts richlistitem[opType="needs-uninstall"] hbox.addon-description

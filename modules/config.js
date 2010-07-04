@@ -207,6 +207,22 @@ Config.prototype = {
     this._scripts.splice(to, 0, tmp);
     this._changed(script, "move", data);
   },
+  movePast: function(aScript, aReferenceScript) {
+    if (!aScript || !aReferenceScript) return;
+
+    var scripts = this._scripts;
+    var to = scripts.indexOf(aReferenceScript);
+    var from = scripts.indexOf(aScript);
+    var diff = (to - from);
+
+    // Don't need to move
+    if (0 == diff) return;
+
+    // Make sure that both scripts are installed.
+    if (-1 == to || -1 == from) return;
+
+    this.move(aScript, diff);
+  },
 
   sort: function() {
     var scripts = this._scripts;

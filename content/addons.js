@@ -34,6 +34,14 @@ var observer = {
       return;
     }
 
+    if ("move" == event) {
+      var filterText = document.getElementById('userscriptsFilterText').value;
+      if ("" != filterText) {
+        greasemonkeyAddons.fillList();
+        return;
+      }
+    }
+
     // find the script's node
     var node = document.getElementById('urn:greasemonkey:item:'+script.id);
     if (!node) return;
@@ -138,8 +146,39 @@ var greasemonkeyAddons = {
       gUserscriptsView.removeChild(gUserscriptsView.firstChild);
     }
 
+    // get filters
+    var filterText = document.getElementById('userscriptsFilterText').value.toLowerCase();
+    var filterBy = document.getElementById('userscriptsFilterBy').selectedItem.value;
+
+    if ("" != filterText) {
+      switch (filterBy) {
+        case 'name':
+          var scripts = GM_config.getMatchingScripts(function(script) {
+            if (0 <= script.name.toLowerCase().indexOf(filterText)) {
+              return true;
+            }
+            return false;
+          });
+          break;
+        case 'url':
+          if (!GM_isGreasemonkeyable(filterText)) return;
+
+          var scripts = GM_config.getMatchingScripts(function(script) {
+            if (script.matchesURL(filterText)) {
+              return true;
+            }
+            return false;
+          });
+          break;
+      }
+    } else {
+      var scripts = GM_config.scripts;
+    }
+
+    if (0 >= scripts.length) return;
+
     // Add a list item for each script.
-    for (var i = 0, script = null; script = GM_config.scripts[i]; i++) {
+    for (var i = 0, script; script = scripts[i]; i++) {
       greasemonkeyAddons.addScriptToList(script);
     }
 
@@ -199,10 +238,16 @@ var greasemonkeyAddons = {
 
   findSelectedScript: function() {
     if (!gUserscriptsView.selectedItem) return null;
-    var scripts = GM_config.scripts;
+
     var selectedScriptId = gUserscriptsView.selectedItem.getAttribute('addonId');
+
+    return greasemonkeyAddons.findScriptById(selectedScriptId);
+  },
+
+  findScriptById: function(scriptID) {
+    var scripts = GM_config.scripts;
     for (var i = 0, script = null; script = scripts[i]; i++) {
-      if (selectedScriptId == script.id) {
+      if (scriptID == script.id) {
         return script;
       }
     }
@@ -231,13 +276,19 @@ var greasemonkeyAddons = {
       script.enabled = false;
       break;
     case 'cmd_userscript_move_down':
-      GM_config.move(script, 1);
+      if (gUserscriptsView.selectedItem.nextSibling) {
+        var refScriptID = gUserscriptsView.selectedItem.nextSibling.getAttribute('addonId');
+        GM_config.movePast(script, greasemonkeyAddons.findScriptById(refScriptID));
+      }
       break;
     case 'cmd_userscript_move_bottom':
       GM_config.move(script, GM_config.scripts.length);
       break;
     case 'cmd_userscript_move_up':
-      GM_config.move(script, -1);
+      if (gUserscriptsView.selectedItem.previousSibling) {
+        var refScriptID = gUserscriptsView.selectedItem.previousSibling.getAttribute('addonId');
+        GM_config.movePast(script, greasemonkeyAddons.findScriptById(refScriptID));
+      }
       break;
     case 'cmd_userscript_move_top':
       GM_config.move(script, -1 * GM_config.scripts.length);
