@@ -43,6 +43,10 @@ var observer = {
         node.setAttribute('isDisabled', !data);
         break;
       case "uninstall":
+        if (1 < gUserscriptsView.childNodes.length) {
+          gUserscriptsView.selectedItem =
+              node.previousSibling || node.nextSibling;
+        }
         gUserscriptsView.removeChild(node);
         break;
       case "move":
