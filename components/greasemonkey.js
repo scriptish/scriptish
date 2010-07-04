@@ -227,7 +227,7 @@ GM_GreasemonkeyService.prototype = {
 
       // add our own APIs
       sandbox.GM_addStyle = function(css) {
-          tools.GM_addStyle(wrappedContentWin.document, css);
+        return tools.GM_addStyle(wrappedContentWin.document, css);
       };
       sandbox.GM_log = GM_hitch(logger, "log");
       sandbox.console = console;
