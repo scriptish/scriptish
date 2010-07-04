@@ -50,9 +50,7 @@ var observer = {
         gUserscriptsView.removeChild(node);
         break;
       case "move":
-        gUserscriptsView.removeChild(node);
-        gUserscriptsView.insertBefore(node, gUserscriptsView.childNodes[data]);
-        greasemonkeyAddons.reselectLastSelected();
+        gUserscriptsView.insertBefore(node, gUserscriptsView.childNodes[data.insertBefore]);
         break;
       case "modified":
         greasemonkeyAddons.fillListItemFromScript(node, script);

@@ -198,9 +198,14 @@ Config.prototype = {
 
     if (to == -1) return;
 
+    var data = {
+      "to": to, 
+      "insertBefore": (to > from) ? to+1 : to
+    }
+
     var tmp = this._scripts.splice(from, 1)[0];
     this._scripts.splice(to, 0, tmp);
-    this._changed(script, "move", to);
+    this._changed(script, "move", data);
   },
 
   sort: function() {
