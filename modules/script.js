@@ -4,9 +4,10 @@ var EXPORTED_SYMBOLS = ["Script"];
 const Cu = Components.utils;
 Cu.import("resource://greasemonkey/constants.js");
 Cu.import("resource://greasemonkey/utils.js");
-Cu.import("resource://greasemonkey/miscapis.js");
 Cu.import("resource://greasemonkey/convert2RegExp.js");
 Cu.import("resource://greasemonkey/scriptdownloader.js");
+Cu.import("resource://greasemonkey/scriptrequire.js");
+Cu.import("resource://greasemonkey/scriptresource.js");
 
 GM_apiAcceptableFile(Components.stack.filename);
 
@@ -30,6 +31,8 @@ function Script(config) {
   this._enabled = true;
   this._includes = [];
   this._excludes = [];
+  this._includeRegExps = [];
+  this._excludeRegExps = [];
   this._requires = [];
   this._resources = [];
   this._unwrap = false;
@@ -40,11 +43,11 @@ function Script(config) {
 
 Script.prototype = {
   matchesURL: function(url) {
-    function test(page) {
-      return convert2RegExp(page).test(url);
+    function test(regExp) {
+      return regExp.test(url);
     }
 
-    return this._includes.some(test) && !this._excludes.some(test);
+    return this._includeRegExps.some(test) && !this._excludeRegExps.some(test);
   },
 
   _changed: function(event, data) { this._config._changed(this, event, data); },
@@ -66,10 +69,14 @@ Script.prototype = {
 
   get includes() { return this._includes.concat(); },
   get excludes() { return this._excludes.concat(); },
-  addInclude: function(url) { this._includes.push(url); this._changed("edit-include-add", url); },
-  removeIncludeAt: function(index) { this._includes.splice(index, 1); this._changed("edit-include-remove", index); },
-  addExclude: function(url) { this._excludes.push(url); this._changed("edit-exclude-add", url); },
-  removeExcludeAt: function(index) { this._excludes.splice(index, 1); this._changed("edit-exclude-remove", index); },
+  addInclude: function(aPattern) {
+    this._includes.push(aPattern);
+    this._includeRegExps.push(GM_convert2RegExp(aPattern));
+  },
+  addExclude: function(aPattern) {
+    this._excludes.push(aPattern);
+    this._excludeRegExps.push(GM_convert2RegExp(aPattern));
+  },
 
   get requires() { return this._requires.concat(); },
   get resources() { return this._resources.concat(); },
@@ -151,14 +158,13 @@ Script.prototype = {
   },
 
   updateFromNewScript: function(newScript) {
-    // Empty cached values.
-    this._id = null;
-    this._prefroot = null;
-
     // Migrate preferences.
     if (this.prefroot != newScript.prefroot) {
-      var storageOld = new GM_ScriptStorage(this);
-      var storageNew = new GM_ScriptStorage(newScript);
+      var tools = {};
+      Cu.import("resource://greasemonkey/miscapis.js", tools);
+
+      var storageOld = new tools.GM_ScriptStorage(this);
+      var storageNew = new tools.GM_ScriptStorage(newScript);
 
       var names = storageOld.listValues();
       for (var i = 0, name = null; name = names[i]; i++) {
@@ -167,9 +173,15 @@ Script.prototype = {
       }
     }
 
+    // Empty cached values.
+    this._id = null;
+    this._prefroot = null;
+
     // Copy new values.
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
+    this._includeRegExps = newScript._includeRegExps;
+    this._excludeRegExps = newScript._excludeRegExps;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this._description = newScript._description;
@@ -198,5 +210,271 @@ Script.prototype = {
 
       this.delayInjection = true;
     }
+  },
+
+  createXMLNode: function(doc) {
+    var scriptNode = doc.createElement("Script");
+
+    for (var j = 0; j < this._includes.length; j++) {
+      var includeNode = doc.createElement("Include");
+      includeNode.appendChild(doc.createTextNode(this._includes[j]));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(includeNode);
+    }
+
+    for (var j = 0; j < this._excludes.length; j++) {
+      var excludeNode = doc.createElement("Exclude");
+      excludeNode.appendChild(doc.createTextNode(this._excludes[j]));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(excludeNode);
+    }
+
+    for (var j = 0; j < this._requires.length; j++) {
+      var req = this._requires[j];
+      var resourceNode = doc.createElement("Require");
+
+      resourceNode.setAttribute("filename", req._filename);
+
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(resourceNode);
+    }
+
+    for (var j = 0; j < this._resources.length; j++) {
+      var imp = this._resources[j];
+      var resourceNode = doc.createElement("Resource");
+
+      resourceNode.setAttribute("name", imp._name);
+      resourceNode.setAttribute("filename", imp._filename);
+      resourceNode.setAttribute("mimetype", imp._mimetype);
+      if (imp._charset) {
+        resourceNode.setAttribute("charset", imp._charset);
+      }
+
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(resourceNode);
+    }
+
+    if (this._unwrap) {
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(doc.createElement("Unwrap"));
+    }
+
+    scriptNode.appendChild(doc.createTextNode("\n\t"));
+
+    scriptNode.setAttribute("filename", this._filename);
+    scriptNode.setAttribute("name", this._name);
+    scriptNode.setAttribute("namespace", this._namespace);
+    scriptNode.setAttribute("description", this._description);
+    scriptNode.setAttribute("version", this._version);
+    scriptNode.setAttribute("enabled", this._enabled);
+    scriptNode.setAttribute("basedir", this._basedir);
+    scriptNode.setAttribute("modified", this._modified);
+    scriptNode.setAttribute("dependhash", this._dependhash);
+
+    if (this._downloadURL) {
+      scriptNode.setAttribute("installurl", this._downloadURL);
+    }
+
+    return scriptNode;
+  },
+
+  install: function() {
+    this._initFile(this._tempFile);
+    this._tempFile = null;
+
+    for (var i = 0; i < this._requires.length; i++) {
+      this._requires[i]._initFile();
+    }
+
+    for (var i = 0; i < this._resources.length; i++) {
+      this._resources[i]._initFile();
+    }
+
+    this._modified = this._file.lastModifiedTime;
+    this._metahash = GM_sha1(this._rawMeta);
   }
+};
+
+Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
+  var script = new Script(aConfig);
+
+  if (aURI) {
+    script._downloadURL = aURI.spec;
+    script._enabled = true;
+  }
+
+  // read one line at a time looking for start meta delimiter or EOF
+  var lines = aSource.match(/.+/g);
+  var lnIdx = 0;
+  var result = {};
+  var foundMeta = false;
+
+  while ((result = lines[lnIdx++])) {
+    if (result.indexOf("// ==UserScript==") == 0) {
+      foundMeta = true;
+      break;
+    }
+  }
+
+  // gather up meta lines
+  if (foundMeta) {
+    // used for duplicate resource name detection
+    var previousResourceNames = {};
+    script._rawMeta = "";
+
+    while ((result = lines[lnIdx++])) {
+      if (result.indexOf("// ==/UserScript==") == 0) {
+        break;
+      }
+
+      var match = result.match(/\/\/ \@(\S+)(?:\s+([^\n]+))?/);
+      if (match === null) continue;
+
+      var header = match[1];
+      var value = match[2];
+
+      if (!value) {
+        switch (header) {
+          case "unwrap":
+            script._unwrap = true;
+            break;
+          default:
+            continue;
+        }
+      }
+
+      switch (header) {
+        case "name":
+        case "namespace":
+        case "description":
+        case "version":
+          script["_" + header] = value;
+          break;
+        case "include":
+          script.addInclude(value);
+          break;
+        case "exclude":
+          script.addExclude(value);
+          break;
+        case "require":
+          try {
+            var reqUri = GM_uriFromUrl(value, aURI);
+            var scriptRequire = new ScriptRequire(script);
+            scriptRequire._downloadURL = reqUri.spec;
+            script._requires.push(scriptRequire);
+            script._rawMeta += header + '\0' + value + '\0';
+          } catch (e) {
+            if (aUpdate) {
+              script._dependFail = true;
+            } else {
+              throw new Error('Failed to @require '+ value);
+            }
+          }
+          break;
+        case "resource":
+          var res = value.match(/(\S+)\s+(.*)/);
+          if (res === null) {
+            // NOTE: Unlocalized strings
+            throw new Error("Invalid syntax for @resource declaration '" +
+                            value + "'. Resources are declared like: " +
+                            "@resource <name> <url>.");
+          }
+
+          var resName = res[1];
+          if (previousResourceNames[resName]) {
+            throw new Error("Duplicate resource name '" + resName + "' " +
+                            "detected. Each resource must have a unique " +
+                            "name.");
+          } else {
+            previousResourceNames[resName] = true;
+          }
+
+          try {
+            var resUri = GM_uriFromUrl(res[2], aURI);
+            var scriptResource = new ScriptResource(script);
+            scriptResource._name = resName;
+            scriptResource._downloadURL = resUri.spec;
+            script._resources.push(scriptResource);
+            script._rawMeta += header + '\0' + resName + '\0' + resUri.spec + '\0';
+          } catch (e) {
+            if (aUpdate) {
+              script._dependFail = true;
+            } else {
+              throw new Error('Failed to get @resource '+ resName +' from '+
+                              res[2]);
+            }
+          }
+          break;
+      }
+    }
+  }
+
+  // if no meta info, default to reasonable values
+  if (!script._name && aURI) script._name = GM_parseScriptName(aURI);
+  if (!script._namespace && aURI) script._namespace = aURI.host;
+  if (!script._description) script._description = "";
+  if (!script._version) script._version = "";
+  if (script._includes.length == 0) script.addInclude("*");
+
+  return script;
+};
+
+Script.load = function load(aConfig, aNode) {
+  var script = new Script(aConfig);
+  var fileModified = false;
+
+  script._filename = aNode.getAttribute("filename");
+  script._basedir = aNode.getAttribute("basedir") || ".";
+  script._downloadURL = aNode.getAttribute("installurl") || null;
+
+  if (!aNode.getAttribute("modified")
+      || !aNode.getAttribute("dependhash")
+      || !aNode.getAttribute("version")
+  ) {
+    script._modified = script._file.lastModifiedTime;
+    var parsedScript = Script.parse(
+        aConfig, GM_getContents(script._file), script._downloadURL, true);
+    script._dependhash = GM_sha1(parsedScript._rawMeta);
+    script._version = parsedScript._version;
+    fileModified = true;
+  } else {
+    script._modified = aNode.getAttribute("modified");
+    script._dependhash = aNode.getAttribute("dependhash");
+    script._version = aNode.getAttribute("version");
+  }
+
+  for (var i = 0, childNode; childNode = aNode.childNodes[i]; i++) {
+    switch (childNode.nodeName) {
+      case "Include":
+        script.addInclude(childNode.firstChild.nodeValue);
+        break;
+      case "Exclude":
+        script.addExclude(childNode.firstChild.nodeValue);
+        break;
+      case "Require":
+        var scriptRequire = new ScriptRequire(script);
+        scriptRequire._filename = childNode.getAttribute("filename");
+        script._requires.push(scriptRequire);
+        break;
+      case "Resource":
+        var scriptResource = new ScriptResource(script);
+        scriptResource._name = childNode.getAttribute("name");
+        scriptResource._filename = childNode.getAttribute("filename");
+        scriptResource._mimetype = childNode.getAttribute("mimetype");
+        scriptResource._charset = childNode.getAttribute("charset");
+        script._resources.push(scriptResource);
+        break;
+      case "Unwrap":
+        script._unwrap = true;
+        break;
+    }
+  }
+
+  script._name = aNode.getAttribute("name");
+  script._namespace = aNode.getAttribute("namespace");
+  script._description = aNode.getAttribute("description");
+  script._enabled = aNode.getAttribute("enabled") == true.toString();
+
+  aConfig.addScript(script);
+  return fileModified;
 };

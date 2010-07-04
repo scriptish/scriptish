@@ -62,11 +62,20 @@ GM_GreasemonkeyService.prototype = {
   ]),
 
   get filename() { return Components.stack.filename; },
+  _scriptFoldername: "gm_scripts",
 
   _config: null,
   get config() {
-    if (!this._config)
-      this._config = new Config();
+    if (!this._config) {
+      // check if GM was updated/installed
+      this.updateVersion();
+
+      var tools = {};
+      Cu.import("resource://greasemonkey/config.js", tools);
+
+      this._config = new tools.Config(this._scriptFoldername);
+    }
+
     return this._config;
   },
 
@@ -90,14 +99,8 @@ GM_GreasemonkeyService.prototype = {
   },
 
   startup: function() {
-    Cc["@mozilla.org/moz/jssubscript-loader;1"]
-        .getService(Ci.mozIJSSubScriptLoader)
-        .loadSubScript("chrome://global/content/XPCNativeWrapper.js");
     Cu.import("resource://greasemonkey/prefmanager.js");
     Cu.import("resource://greasemonkey/utils.js");
-    Cu.import("resource://greasemonkey/config.js");
-    Cu.import("resource://greasemonkey/miscapis.js");
-    Cu.import("resource://greasemonkey/xmlhttprequester.js");
 
     this.startup = function() {};
   },
@@ -129,15 +132,14 @@ GM_GreasemonkeyService.prototype = {
       dump("shouldload: " + cl.spec + "\n");
       dump("ignorescript: " + this.ignoreNextScript_ + "\n");
 
-      if (!this.ignoreNextScript_) {
-        if (!this.isTempScript(cl)) {
-          var win = Cc['@mozilla.org/appshell/window-mediator;1']
+      if (!this.ignoreNextScript_ && !this.isTempScript(cl)) {
+        var win = Cc['@mozilla.org/appshell/window-mediator;1']
             .getService(Ci.nsIWindowMediator)
             .getMostRecentWindow("navigator:browser");
-          if (win && win.GM_BrowserUI) {
-            win.GM_BrowserUI.startInstallScript(cl);
-            ret = Ci.nsIContentPolicy.REJECT_REQUEST;
-          }
+
+        if (win && win.GM_BrowserUI) {
+          win.GM_BrowserUI.startInstallScript(cl);
+          ret = Ci.nsIContentPolicy.REJECT_REQUEST;
         }
       }
     }
@@ -197,21 +199,24 @@ GM_GreasemonkeyService.prototype = {
     var resources;
     var unsafeContentWin = wrappedContentWin.wrappedJSObject;
 
+    var tools = {};
+    Cu.import("resource://greasemonkey/xmlhttprequester.js", tools);
+    Cu.import("resource://greasemonkey/miscapis.js", tools);
+
     // detect and grab reference to firebug console and context, if it exists
     var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
 
     for (var i = 0; script = scripts[i]; i++) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
 
-      logger = new GM_ScriptLogger(script);
+      logger = new tools.GM_ScriptLogger(script);
 
-      console = firebugConsole ? firebugConsole : new GM_console(script);
+      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
 
-      storage = new GM_ScriptStorage(script);
-      xmlhttpRequester = new GM_xmlhttpRequester(unsafeContentWin,
-                                                 appSvc.hiddenDOMWindow,
-                                                 url);
-      resources = new GM_Resources(script);
+      storage = new tools.GM_ScriptStorage(script);
+      xmlhttpRequester = new tools.GM_xmlhttpRequester(
+          unsafeContentWin, appSvc.hiddenDOMWindow, url);
+      resources = new tools.GM_Resources(script);
 
       sandbox.window = wrappedContentWin;
       sandbox.document = sandbox.window.document;
@@ -222,8 +227,8 @@ GM_GreasemonkeyService.prototype = {
 
       // add our own APIs
       sandbox.GM_addStyle = function(css) {
-            GM_addStyle(wrappedContentWin.document, css);
-          };
+          tools.GM_addStyle(wrappedContentWin.document, css);
+      };
       sandbox.GM_log = GM_hitch(logger, "log");
       sandbox.console = console;
       sandbox.GM_setValue = GM_hitch(storage, "setValue");
@@ -407,7 +412,11 @@ GM_GreasemonkeyService.prototype = {
       if (!fbConsole.isEnabled(fbContext)) return null;
 
       if (1.2 == fbVersion) {
-        var safeWin = new XPCNativeWrapper(unsafeContentWin);
+        var tools = {};
+        Cc["@mozilla.org/moz/jssubscript-loader;1"]
+            .getService(Ci.mozIJSSubScriptLoader)
+            .loadSubScript("chrome://global/content/XPCNativeWrapper.js", tools);
+        var safeWin = new tools.XPCNativeWrapper(unsafeContentWin);
 
         if (fbContext.consoleHandler) {
           for (var i = 0; i < fbContext.consoleHandler.length; i++) {
@@ -433,6 +442,71 @@ GM_GreasemonkeyService.prototype = {
     }
 
     return null;
+  },
+
+  /**
+   * Checks whether the version has changed since the last run and performs
+   * any necessary upgrades.
+   */
+  updateVersion: function() {
+    GM_log("> GM_updateVersion");
+
+    // this is the last version which has been run at least once
+    var initialized = GM_prefRoot.getValue("version", "0.0");
+
+    // check if this is the first launch
+    if ("0.0" == initialized) {
+      // find an open window.
+      var chromeWin = Cc['@mozilla.org/appshell/window-mediator;1']
+          .getService(Ci.nsIWindowMediator)
+          .getMostRecentWindow("navigator:browser");
+
+      // if we found it, use it to open a welcome tab
+      if (chromeWin.gBrowser) {
+        // the setTimeout makes sure we do not execute too early -- sometimes
+        // the window isn't quite ready to add a tab yet
+        chromeWin.setTimeout(
+            "gBrowser.selectedTab = gBrowser.addTab(" +
+            "'http://wiki.greasespot.net/Welcome')", 500);
+      }
+    }
+
+    // check if this is an upgrade from a version less than 0.8
+    if (GM_compareVersions(initialized, "0.8") == -1) {
+      /**
+       * In Greasemonkey 0.8 there was a format change to the gm_scripts folder and
+       * testing found several bugs where the entire folder would get nuked. So we
+       * are paranoid and backup the folder the first time 0.8 runs.
+       */
+      var scriptDir = GM_getProfileFile(this._scriptFoldername);
+      var scriptDirBackup = scriptDir.clone();
+      scriptDirBackup.leafName += "_08bak";
+      if (scriptDir.exists() && !scriptDirBackup.exists()) {
+        scriptDir.copyTo(scriptDirBackup.parent, scriptDirBackup.leafName);
+      }
+    }
+
+    // update the currently initialized version so we don't do this work again.
+    if ("@mozilla.org/extensions/manager;1" in Cc) {
+      // Firefox <= 3.6.*
+      var extMan = Cc["@mozilla.org/extensions/manager;1"]
+          .getService(Ci.nsIExtensionManager);
+      var item = extMan.getItemForID(GM_GUID);
+
+      GM_prefRoot.setValue("version", item.version);
+    } else {
+      // Firefox 3.7+
+      var tools = {};
+      Cu.import("resource://gre/modules/AddonManager.jsm", tools);
+
+      tools.AddonManager.getAddonByID(GM_GUID, function(addon) {
+         GM_prefRoot.setValue("version", addon.version);
+      });
+    }
+
+    this.updateVersion = function() {};
+
+    GM_log("< GM_updateVersion");
   }
 };
 

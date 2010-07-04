@@ -7,9 +7,7 @@ var GM_BrowserUI = new Object();
 
 Components.utils.import("resource://greasemonkey/prefmanager.js");
 Components.utils.import("resource://greasemonkey/utils.js");
-Components.utils.import("resource://greasemonkey/accelimation.js");
 Components.utils.import("resource://greasemonkey/scriptdownloader.js");
-Components.utils.import("resource://greasemonkey/menucommander.js");
 
 /**
  * nsISupports.QueryInterface
@@ -86,9 +84,8 @@ GM_BrowserUI.chromeLoad = function(e) {
                   .getService().wrappedJSObject;
   this.gmSvc = gmSvc;
 
-  // reference this once, so that the getter is called at least once, and the
-  // initialization routines will run, no matter what
-  setTimeout(function() {gmSvc.wrappedJSObject.config}, 0);
+  // check if GM was updated/installed
+  setTimeout(function() {gmSvc.updateVersion()}, 100);
 };
 
 /**
@@ -357,8 +354,11 @@ GM_BrowserUI.getCommander = function(unsafeWin) {
     }
   }
 
+  var tools = {};
+  Components.utils.import("resource://greasemonkey/menucommander.js", tools);
+
   // no commander found. create one and add it.
-  var commander = new GM_MenuCommander(document);
+  var commander = new tools.GM_MenuCommander(document);
   this.menuCommanders.push({win:unsafeWin, commander:commander});
 
   return commander;
@@ -513,8 +513,10 @@ GM_BrowserUI.showStatus = function(message, autoHide) {
   this.statusLabel.value = message;
   var max = label.boxObject.width;
 
-  this.showAnimation = new Accelimation(window, this.statusLabel.style,
-                                          "width", max, 300, 2, "px");
+  var tools = {};
+  Components.utils.import("resource://greasemonkey/accelimation.js", tools);
+  this.showAnimation = new tools.Accelimation(
+    window, this.statusLabel.style, "width", max, 300, 2, "px");
   this.showAnimation.onend = GM_hitch(this, "showStatusAnimationEnd", autoHide);
   this.showAnimation.start();
 };
@@ -558,8 +560,11 @@ GM_BrowserUI.hideStatusImmediately = function() {
 GM_BrowserUI.hideStatus = function() {
   if (!this.hideAnimation) {
     this.autoHideTimer = null;
-    this.hideAnimation = new Accelimation(window, this.statusLabel.style,
-                                            "width", 0, 300, 2, "px");
+
+    var tools = {};
+    Components.utils.import("resource://greasemonkey/accelimation.js", tools);
+    this.hideAnimation = new tools.Accelimation(
+      window, this.statusLabel.style, "width", 0, 300, 2, "px");
     this.hideAnimation.onend = GM_hitch(this, "hideStatusAnimationEnd");
     this.hideAnimation.start();
   }

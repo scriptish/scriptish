@@ -15,6 +15,7 @@ var EXPORTED_SYMBOLS = [
   "GM_launchApplicationWithDoc",
   "GM_parseScriptName",
   "GM_getTempFile",
+  "GM_getProfileFile",
   "GM_getBinaryContents",
   "GM_getContents",
   "GM_getWriteStream",
@@ -46,9 +47,15 @@ function GM_alert(msg) {
     .alert(null, "Greasemonkey alert", msg);
 }
 
-var GM_stringBundle = Cc["@mozilla.org/intl/stringbundle;1"]
-    .getService(Ci.nsIStringBundleService)
-    .createBundle("chrome://greasemonkey/locale/gm-browser.properties");
+GM_stringBundle = function() {
+  var stringBundle = Cc["@mozilla.org/intl/stringbundle;1"]
+      .getService(Ci.nsIStringBundleService)
+      .createBundle("chrome://greasemonkey/locale/gm-browser.properties");
+
+  GM_stringBundle = function() { return stringBundle; };
+
+  return stringBundle;
+}
 
 function GM_isDef(thing) {
   return typeof(thing) != "undefined";
@@ -126,7 +133,7 @@ function GM_openInEditor(script, parentWindow) {
   } catch (e) {
     // Something may be wrong with the editor the user selected. Remove so that
     // next time they can pick a different one.
-    GM_alert(GM_stringBundle.GetStringFromName("editor.could_not_launch") + "\n" + e);
+    GM_alert(GM_stringBundle().GetStringFromName("editor.could_not_launch") + "\n" + e);
     GM_prefRoot.remove("editor");
     throw e;
   }
@@ -162,7 +169,7 @@ function GM_getEditor(parentWindow, change) {
                          .createInstance(nsIFilePicker);
 
     filePicker.init(parentWindow,
-                    GM_stringBundle.GetStringFromName("editor.prompt"),
+                    GM_stringBundle().GetStringFromName("editor.prompt"),
                     nsIFilePicker.modeOpen);
     filePicker.appendFilters(nsIFilePicker.filterApplication);
     filePicker.appendFilters(nsIFilePicker.filterAll);
@@ -179,7 +186,7 @@ function GM_getEditor(parentWindow, change) {
       GM_prefRoot.setValue("editor", filePicker.file.path);
       return filePicker.file;
     } else {
-      GM_alert(GM_stringBundle.GetStringFromName("editor.please_pick_executable"));
+      GM_alert(GM_stringBundle().GetStringFromName("editor.please_pick_executable"));
     }
   }
 }
@@ -223,6 +230,16 @@ function GM_getTempFile() {
     Ci.nsILocalFile.NORMAL_FILE_TYPE,
     0640
   );
+
+  return file;
+}
+
+function GM_getProfileFile(aFilename) {
+  var file = Cc["@mozilla.org/file/directory_service;1"]
+      .getService(Ci.nsIProperties)
+      .get("ProfD", Ci.nsILocalFile);
+
+  file.append(aFilename);
 
   return file;
 }
@@ -360,28 +377,44 @@ function GM_uriFromUrl(url, baseUrl) {
     return null;
   }
 }
-GM_uriFromUrl = GM_memoize(GM_uriFromUrl);
+
+GM_uriFromUrl = function(aUrl, aBaseUrl) {
+  GM_uriFromUrl = GM_memoize(function(aUrl, aBaseUrl) {
+    var baseUri = null;
+    if (aBaseUrl) baseUri = GM_uriFromUrl(aBaseUrl);
+    try {
+      return ioService.newURI(aUrl, null, baseUri);
+    } catch (e) {
+      return null;
+    }
+  });
+
+  return GM_uriFromUrl(aUrl, aBaseUrl);
+}
 
 // UTF-8 encodes input, SHA-1 hashes it and returns the 40-char hex version.
-function GM_sha1(unicode) {
-  var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-      .createInstance(Ci.nsIScriptableUnicodeConverter);
-  unicodeConverter.charset = "UTF-8";
+GM_sha1 = function(aUnicode) {
+  GM_sha1 = GM_memoize(function(aUnicode) {
+    var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+        .createInstance(Ci.nsIScriptableUnicodeConverter);
+    unicodeConverter.charset = "UTF-8";
 
-  var data = unicodeConverter.convertToByteArray(unicode, {});
-  var ch = Cc["@mozilla.org/security/hash;1"]
-      .createInstance(Ci.nsICryptoHash);
-  ch.init(ch.SHA1);
-  ch.update(data, data.length);
-  var hash = ch.finish(false); // hash as raw octets
+    var data = unicodeConverter.convertToByteArray(aUnicode, {});
+    var ch = Cc["@mozilla.org/security/hash;1"]
+        .createInstance(Ci.nsICryptoHash);
+    ch.init(ch.SHA1);
+    ch.update(data, data.length);
+    var hash = ch.finish(false); // hash as raw octets
 
-  var hex = [];
-  for (var i = 0; i < hash.length; i++) {
-    hex.push( ("0" + hash.charCodeAt(i).toString(16)).slice(-2) );
-  }
-  return hex.join('');
+    var hex = [];
+    for (var i = 0; i < hash.length; i++) {
+      hex.push( ("0" + hash.charCodeAt(i).toString(16)).slice(-2) );
+    }
+    return hex.join('');
+  });
+
+  return GM_sha1(aUnicode);
 }
-GM_sha1 = GM_memoize(GM_sha1);
 
 // Decorate a function with a memoization wrapper, with a limited-size cache
 // to reduce peak memory utilization.  Simple usage:
