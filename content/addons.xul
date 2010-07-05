@@ -68,6 +68,7 @@
   />
 
   <button id="newUserscript"
+    insertafter="installFileButton"
     label="&NewScript;"
     accesskey="&NewScript.accesskey;"
     oncommand="GM_newUserScript(window)"
