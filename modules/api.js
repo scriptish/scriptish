@@ -32,21 +32,29 @@ function GM_apiLeakCheck(apiName) {
 };
 
 function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChromeWin, aGmBrowser) {
-  var _document = aDocument;
-  var _unsafeContentWin = aUnsafeContentWin;
-  var _chromeWin = aChromeWin;
-  var _gmBrowser = aGmBrowser;
+  var _xmlhttpRequester = null;
+  var _storage = null;
+  var _resources = null;
+  var _logger = null;
 
-  var _xmlhttpRequester = new GM_xmlhttpRequester(
-      aUnsafeContentWin, aChromeWindow, aURL);
-  var _storage = new GM_ScriptStorage(aScript);
-  var _resources = new GM_Resources(aScript);
-  var _logger = new GM_ScriptLogger(aScript);
+  function getXmlhttpRequester() {
+    return _xmlhttpRequester || (_xmlhttpRequester = new GM_xmlhttpRequester(
+      aUnsafeContentWin, aChromeWin, aURL));
+  }
+  function getStorage() {
+    return _storage ||( _storage = new GM_ScriptStorage(aScript));
+  }
+  function getResources() {
+   return _resources || (_resources = new GM_Resources(aScript));
+  }
+  function getLogger() {
+    return _logger || (_logger = new GM_ScriptLogger(aScript));
+  }
 
   this.GM_addStyle = function GM_addStyle(css) {
-    var head = _document.getElementsByTagName("head")[0];
+    var head = aDocument.getElementsByTagName("head")[0];
     if (head) {
-      var style = _document.createElement("style");
+      var style = aDocument.createElement("style");
       style.textContent = css;
       style.type = "text/css";
       head.appendChild(style);
@@ -55,44 +63,44 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   };
 
   this.GM_log = function GM_log(){
-    return _logger.log.apply(_logger, arguments)
+    return getLogger().log.apply(getLogger(), arguments)
   };
 
 
   this.GM_setValue = function GM_setValue() {
     if (!GM_apiLeakCheck()) return;
-    return _storage.setValue.apply(_storage, arguments);
+    return getStorage().setValue.apply(getStorage(), arguments);
   };
   this.GM_getValue = function GM_getValue() {
     if (!GM_apiLeakCheck()) return undefined;
-    return _storage.getValue.apply(_storage, arguments);
+    return getStorage().getValue.apply(getStorage(), arguments);
   };
   this.GM_deleteValue = function GM_deleteValue() {
     if (!GM_apiLeakCheck()) return undefined;
-    return _storage.deleteValue.apply(_storage, arguments);
+    return getStorage().deleteValue.apply(getStorage(), arguments);
   };
   this.GM_listValues = function GM_listValues() {
     if (!GM_apiLeakCheck()) return undefined;
-    return _storage.listValues.apply(_storage, arguments);
+    return getStorage().listValues.apply(getStorage(), arguments);
   };
 
   this.GM_getResourceURL = function GM_getResourceURL() {
     if (!GM_apiLeakCheck()) return undefined;
-    return _resources.getResourceURL.apply(_resources, arguments)
+    return getResources().getResourceURL.apply(getResources(), arguments)
   };
   this.GM_getResourceText = function GM_getResourceText() {
     if (!GM_apiLeakCheck()) return undefined;
-    return _resources.getResourceText.apply(_resources, arguments)
+    return getResources().getResourceText.apply(getResources(), arguments)
   };
 
   this.GM_openInTab = function GM_openInTab(aURL) {
     if (!GM_apiLeakCheck()) return undefined;
 
-    var newTab = _chromeWin.openNewTabWith(
-        aURL, _document, null, null, null, null);
+    var newTab = aChromeWin.openNewTabWith(
+        aURL, aDocument, null, null, null, null);
     // Source:
     // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
-    var newWindow = _chromeWin.gBrowser
+    var newWindow = aChromeWin.gBrowser
         .getBrowserForTab(newTab)
         .docShell
         .QueryInterface(Ci.nsIInterfaceRequestor)
@@ -103,8 +111,8 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
     if (!GM_apiLeakCheck()) return;
 
-    return _xmlhttpRequester.contentStartRequest.apply(
-        _xmlhttpRequester, arguments);
+    return getXmlhttpRequester().contentStartRequest.apply(
+        getXmlhttpRequester(), arguments);
   };
 
   this.GM_registerMenuCommand = function GM_registerMenuCommand(
@@ -115,13 +123,13 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
       aAccessKey) {
     if (!GM_apiLeakCheck()) return;
 
-    _gmBrowser.registerMenuCommand({
+    aGmBrowser.registerMenuCommand({
       name: aCommandName,
       accelKey: aAccelKey,
       accelModifiers: aAccelModifiers,
       accessKey: aAccessKey,
       doCommand: aCommandFunc,
-      window: _unsafeContentWin});
+      window: aUnsafeContentWin});
   };
 
   this.GM_worker = function GM_worker(resourceName) {
@@ -131,7 +139,7 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
     // https://developer.mozilla.org/En/DOM/Worker
     if (!aChromeWin.Worker) return undefined;
 
-    var worker = new aChromeWin.Worker(_resources.getFileURL(resourceName));
+    var worker = new aChromeWin.Worker(getResources().getFileURL(resourceName));
     var fakeWorker = {
       onmessage: function() {},
       onerror: function() {},
@@ -170,5 +178,5 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
     };
 
     return fakeWorker;
-  }
+  };
 }
