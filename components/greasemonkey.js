@@ -239,6 +239,7 @@ GM_GreasemonkeyService.prototype = {
       sandbox.GM_getResourceText = GM_hitch(resources, "getResourceText");
       sandbox.GM_openInTab = GM_hitch(
           this, "openInTab", wrappedContentWin, chromeWin);
+      sandbox.GM_worker = GM_hitch(this, "createWorker", resources, unsafeContentWin, chromeWin);
       sandbox.GM_xmlhttpRequest = GM_hitch(xmlhttpRequester,
                                            "contentStartRequest");
       sandbox.GM_registerMenuCommand = GM_hitch(this,
@@ -307,6 +308,52 @@ GM_GreasemonkeyService.prototype = {
       .QueryInterface(Ci.nsIInterfaceRequestor)
       .getInterface(Ci.nsIDOMWindow);
     return newWindow;
+  },
+
+  createWorker: function(resources, unsafeContentWin, chromeWin, resourceName) {
+    if (!GM_apiLeakCheck("GM_worker") || !chromeWin.Worker) {
+      return undefined;
+    }
+
+    var worker = new chromeWin.Worker(resources.getFileURL(resourceName));
+    var fakeWorker = {
+      onmessage: function() {},
+      onerror: function() {},
+      terminate: function() {
+        worker.terminate();
+      },
+      postMessage: function(msg) {
+        worker.postMessage(msg);
+      }
+    };
+
+    function doLater(func) {
+      // Pop back onto browser thread and call event handler.
+      new XPCNativeWrapper(unsafeContentWin, "setTimeout()")
+        .setTimeout(func, 0);
+    }
+
+    worker.onmessage = function(evt) {
+      doLater(function() {
+        fakeWorker.onmessage({
+          data: evt.data+''
+        });
+      });
+    };
+    worker.onerror = function(evt) {
+      doLater(function() {
+        fakeWorker.onerror({
+          message: evt.message+'',
+          filename: evt.filename+'',
+          lineno: evt.lineno,
+          preventDefault: function() {
+            evt.preventDefault();
+          }
+        });
+      });
+    };
+
+    return fakeWorker;
   },
 
   evalInSandbox: function(code, codebase, sandbox, script) {
