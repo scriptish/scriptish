@@ -2,3 +2,7 @@
 .project
 .settings
 .directory
+*.tmp
+BASE.*
+LOCAL.*
+REMOTE.*
