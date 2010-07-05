@@ -9,8 +9,6 @@ Cu.import("resource://greasemonkey/scriptdownloader.js");
 Cu.import("resource://greasemonkey/scriptrequire.js");
 Cu.import("resource://greasemonkey/scriptresource.js");
 
-GM_apiAcceptableFile(Components.stack.filename);
-
 function Script(config) {
   this._config = config;
   this._observers = [];

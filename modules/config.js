@@ -7,8 +7,6 @@ Cu.import("resource://greasemonkey/prefmanager.js");
 Cu.import("resource://greasemonkey/utils.js");
 Cu.import("resource://greasemonkey/script.js");
 
-GM_apiAcceptableFile(Components.stack.filename);
-
 function Config(aScriptDir) {
   this._saveTimer = null;
   this._scripts = null;

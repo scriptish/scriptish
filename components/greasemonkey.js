@@ -12,6 +12,8 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 const appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
                  .getService(Ci.nsIAppShellService);
 
+const serviceFilename = Components.stack.filename;
+
 var getMaxJSVersion = function(){
   var maxJSVersion = (function() {
     var appInfo = Cc["@mozilla.org/xre/app-info;1"]
@@ -60,7 +62,7 @@ ScriptishService.prototype = {
       Ci.nsIContentPolicy
   ]),
 
-  get filename() { return Components.stack.filename; },
+  get filename() { return serviceFilename; },
   _scriptFoldername: "gm_scripts",
 
   _config: null,
@@ -192,16 +194,13 @@ ScriptishService.prototype = {
   injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {
     var sandbox;
     var script;
-    var logger;
     var console;
-    var storage;
-    var xmlhttpRequester;
-    var resources;
     var unsafeContentWin = wrappedContentWin.wrappedJSObject;
 
     var tools = {};
-    Cu.import("resource://greasemonkey/xmlhttprequester.js", tools);
+    Cu.import("resource://greasemonkey/utils.js", tools);
     Cu.import("resource://greasemonkey/miscapis.js", tools);
+    Cu.import("resource://greasemonkey/api.js", tools);
 
     // detect and grab reference to firebug console and context, if it exists
     var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
@@ -209,14 +208,16 @@ ScriptishService.prototype = {
     for (var i = 0; script = scripts[i]; i++) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
 
-      logger = new tools.GM_ScriptLogger(script);
-
       console = firebugConsole ? firebugConsole : new tools.GM_console(script);
 
-      storage = new tools.GM_ScriptStorage(script);
-      xmlhttpRequester = new tools.GM_xmlhttpRequester(
-          unsafeContentWin, appSvc.hiddenDOMWindow, url);
-      resources = new tools.GM_Resources(script);
+      var GM_API = new tools.GM_API(
+          script,
+          url,
+          wrappedContentWin.document,
+          unsafeContentWin,
+          appSvc.hiddenDOMWindow,
+          chromeWin,
+          gmBrowser);
 
       sandbox.window = wrappedContentWin;
       sandbox.document = sandbox.window.document;
@@ -226,26 +227,10 @@ ScriptishService.prototype = {
       sandbox.XPathResult = Ci.nsIDOMXPathResult;
 
       // add our own APIs
-      sandbox.GM_addStyle = function(css) {
-        return tools.GM_addStyle(wrappedContentWin.document, css);
-      };
-      sandbox.GM_log = GM_hitch(logger, "log");
+      for (var funcName in GM_API) {
+        sandbox[funcName] = GM_API[funcName]
+      }
       sandbox.console = console;
-      sandbox.GM_setValue = GM_hitch(storage, "setValue");
-      sandbox.GM_getValue = GM_hitch(storage, "getValue");
-      sandbox.GM_deleteValue = GM_hitch(storage, "deleteValue");
-      sandbox.GM_listValues = GM_hitch(storage, "listValues");
-      sandbox.GM_getResourceURL = GM_hitch(resources, "getResourceURL");
-      sandbox.GM_getResourceText = GM_hitch(resources, "getResourceText");
-      sandbox.GM_openInTab = GM_hitch(
-          this, "openInTab", wrappedContentWin, chromeWin);
-      sandbox.GM_worker = GM_hitch(this, "createWorker", resources, unsafeContentWin, chromeWin);
-      sandbox.GM_xmlhttpRequest = GM_hitch(xmlhttpRequester,
-                                           "contentStartRequest");
-      sandbox.GM_registerMenuCommand = GM_hitch(this,
-                                                "registerMenuCommand",
-                                                unsafeContentWin,
-                                                gmBrowser);
 
       sandbox.__proto__ = wrappedContentWin;
 
@@ -275,87 +260,6 @@ ScriptishService.prototype = {
         this.evalInSandbox("(function(){"+ scriptSrc +"})()",
                            url, sandbox, script); // wrap anyway on early return
     }
-  },
-
-  registerMenuCommand: function(unsafeContentWin, gmBrowser, commandName,
-                                commandFunc, accelKey, accelModifiers,
-                                accessKey) {
-    if (!GM_apiLeakCheck("GM_registerMenuCommand")) {
-      return;
-    }
-
-    gmBrowser.registerMenuCommand({
-      name: commandName,
-      accelKey: accelKey,
-      accelModifiers: accelModifiers,
-      accessKey: accessKey,
-      doCommand: commandFunc,
-      window: unsafeContentWin});
-  },
-
-  openInTab: function(safeContentWin, chromeWin, url) {
-    if (!GM_apiLeakCheck("GM_openInTab")) {
-      return undefined;
-    }
-
-    var newTab = chromeWin.openNewTabWith(
-      url, safeContentWin.document, null, null, null, null);
-    // Source:
-    // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
-    var newWindow = chromeWin.gBrowser
-      .getBrowserForTab(newTab)
-      .docShell
-      .QueryInterface(Ci.nsIInterfaceRequestor)
-      .getInterface(Ci.nsIDOMWindow);
-    return newWindow;
-  },
-
-  createWorker: function(resources, unsafeContentWin, chromeWin, resourceName) {
-    if (!GM_apiLeakCheck("GM_worker")) return undefined;
-
-    // Worker was introduced in FF 3.5
-    // https://developer.mozilla.org/En/DOM/Worker
-    if (!chromeWin.Worker) return undefined;
-
-    var worker = new chromeWin.Worker(resources.getFileURL(resourceName));
-    var fakeWorker = {
-      onmessage: function() {},
-      onerror: function() {},
-      terminate: function() {
-        worker.terminate();
-      },
-      postMessage: function(msg) {
-        worker.postMessage(msg);
-      }
-    };
-
-    function doLater(func) {
-      // Pop back onto browser thread and call event handler.
-      new XPCNativeWrapper(unsafeContentWin, "setTimeout()")
-        .setTimeout(func, 0);
-    }
-
-    worker.onmessage = function(evt) {
-      doLater(function() {
-        fakeWorker.onmessage({
-          data: evt.data+''
-        });
-      });
-    };
-    worker.onerror = function(evt) {
-      doLater(function() {
-        fakeWorker.onerror({
-          message: evt.message+'',
-          filename: evt.filename+'',
-          lineno: evt.lineno,
-          preventDefault: function() {
-            evt.preventDefault();
-          }
-        });
-      });
-    };
-
-    return fakeWorker;
   },
 
   evalInSandbox: function(code, codebase, sandbox, script) {

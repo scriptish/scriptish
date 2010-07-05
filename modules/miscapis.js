@@ -9,7 +9,6 @@ var EXPORTED_SYMBOLS = [
 const Cu = Components.utils;
 Cu.import("resource://greasemonkey/prefmanager.js");
 Cu.import("resource://greasemonkey/utils.js");
-GM_apiAcceptableFile(Components.stack.filename);
 
 function GM_ScriptStorage(script) {
   this.prefMan = new GM_PrefManager(script.prefroot);
@@ -20,34 +19,18 @@ GM_ScriptStorage.prototype.setValue = function(name, val) {
     throw new Error("Second argument not specified: Value");
   }
 
-  if (!GM_apiLeakCheck("GM_setValue")) {
-    return;
-  }
-
   this.prefMan.setValue(name, val);
 };
 
 GM_ScriptStorage.prototype.getValue = function(name, defVal) {
-  if (!GM_apiLeakCheck("GM_getValue")) {
-    return undefined;
-  }
-
   return this.prefMan.getValue(name, defVal);
 };
 
 GM_ScriptStorage.prototype.deleteValue = function(name) {
-  if (!GM_apiLeakCheck("GM_deleteValue")) {
-    return undefined;
-  }
-
   return this.prefMan.remove(name);
 };
 
 GM_ScriptStorage.prototype.listValues = function() {
-  if (!GM_apiLeakCheck("GM_listValues")) {
-    return undefined;
-  }
-
   return this.prefMan.listValues();
 };
 
@@ -58,18 +41,10 @@ function GM_Resources(script){
 }
 
 GM_Resources.prototype.getResourceURL = function(name) {
-  if (!GM_apiLeakCheck("GM_getResourceURL")) {
-    return undefined;
-  }
-
   return this.getDep_(name).dataContent;
 };
 
 GM_Resources.prototype.getResourceText = function(name) {
-  if (!GM_apiLeakCheck("GM_getResourceText")) {
-    return undefined;
-  }
-
   return this.getDep_(name).textContent;
 };
 
@@ -103,19 +78,6 @@ function GM_ScriptLogger(script) {
 GM_ScriptLogger.prototype.log = function(message) {
   GM_log(this.prefix + message, true);
 };
-
-// \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ //
-
-function GM_addStyle(doc, css) {
-  var head = doc.getElementsByTagName("head")[0];
-  var style = doc.createElement("style");
-  if (head) {
-    style.textContent = css;
-    style.type = "text/css";
-    head.appendChild(style);
-  }
-  return style;
-}
 
 // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ //
 
