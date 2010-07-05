@@ -61,9 +61,6 @@ GM_Resources.prototype.getResourceText = function(name) {
 };
 
 GM_Resources.prototype.getFileURL = function(name) {
-  if (!GM_apiLeakCheck("GM_getResourceText")) {
-    return undefined;
-  }
   return GM_getUriFromFile(this.getDep_(name)._file).spec;
 };
 
