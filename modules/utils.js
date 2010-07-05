@@ -113,7 +113,8 @@ function GM_logError(e, opt_warn, fileName, lineNumber) {
 
 function GM_log(message, force) {
   if (force || GM_prefRoot.getValue("logChrome", false)) {
-    consoleService.logStringMessage(message);
+    // make sure message is a string, and remove NULL bytes which truncate it
+    consoleService.logStringMessage((message + '').replace("\0","","g"));
   }
 }
 
