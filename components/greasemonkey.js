@@ -311,9 +311,11 @@ GM_GreasemonkeyService.prototype = {
   },
 
   createWorker: function(resources, unsafeContentWin, chromeWin, resourceName) {
-    if (!GM_apiLeakCheck("GM_worker") || !chromeWin.Worker) {
-      return undefined;
-    }
+    if (!GM_apiLeakCheck("GM_worker")) return undefined;
+
+    // Worker was introduced in FF 3.5
+    // https://developer.mozilla.org/En/DOM/Worker
+    if (!chromeWin.Worker) return undefined;
 
     var worker = new chromeWin.Worker(resources.getFileURL(resourceName));
     var fakeWorker = {
