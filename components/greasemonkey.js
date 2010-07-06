@@ -524,21 +524,6 @@ ScriptishService.prototype = {
       }
     }
 
-    // check if this is an upgrade from a version less than 0.8
-    if (GM_compareVersions(initialized, "0.8") == -1) {
-      /**
-       * In Greasemonkey 0.8 there was a format change to the gm_scripts folder and
-       * testing found several bugs where the entire folder would get nuked. So we
-       * are paranoid and backup the folder the first time 0.8 runs.
-       */
-      var scriptDir = GM_getProfileFile(this._scriptFoldername);
-      var scriptDirBackup = scriptDir.clone();
-      scriptDirBackup.leafName += "_08bak";
-      if (scriptDir.exists() && !scriptDirBackup.exists()) {
-        scriptDir.copyTo(scriptDirBackup.parent, scriptDirBackup.leafName);
-      }
-    }
-
     // update the currently initialized version so we don't do this work again.
     if ("@mozilla.org/extensions/manager;1" in Cc) {
       // Firefox <= 3.6.*
