@@ -394,6 +394,8 @@ ScriptishService.prototype = {
 
     tools.GM_log("> GM_updateVersion");
 
+    var GUID = "scriptish@erikvold.com";
+
     // this is the last version which has been run at least once
     var initialized = tools.GM_prefRoot.getValue("version", "0.0");
 
@@ -423,14 +425,14 @@ ScriptishService.prototype = {
       // Firefox <= 3.6.*
       var extMan = Cc["@mozilla.org/extensions/manager;1"]
           .getService(Ci.nsIExtensionManager);
-      var item = extMan.getItemForID(tools.GM_GUID);
+      var item = extMan.getItemForID(GUID);
 
       tools.GM_prefRoot.setValue("version", item.version);
     } else {
       // Firefox 3.7+
       Cu.import("resource://gre/modules/AddonManager.jsm", tools);
 
-      tools.AddonManager.getAddonByID(tools.GM_GUID, function(addon) {
+      tools.AddonManager.getAddonByID(GUID, function(addon) {
         tools.GM_prefRoot.setValue("version", addon.version);
       });
     }

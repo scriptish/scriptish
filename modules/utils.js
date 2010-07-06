@@ -1,6 +1,5 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = [
-  "GM_GUID",
   "GM_alert",
   "GM_stringBundle",
   "GM_isDef",
@@ -33,8 +32,6 @@ var EXPORTED_SYMBOLS = [
 const Cu = Components.utils;
 Cu.import("resource://greasemonkey/constants.js");
 Cu.import("resource://greasemonkey/prefmanager.js");
-
-const GM_GUID = "scriptish@erikvold.com";
 
 const consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);
