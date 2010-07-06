@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE prefwindow [
-<!ENTITY % greasemonkeyDTD SYSTEM "chrome://greasemonkey/locale/greasemonkey.dtd">
+<!ENTITY % greasemonkeyDTD SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
 <!ENTITY % preferencesDTD SYSTEM "chrome://browser/locale/preferences/preferences.dtd">
 %greasemonkeyDTD;
 %preferencesDTD;
@@ -17,8 +17,8 @@
   persist="screenX screenY"
   onload="GM_onloadOptions()"
 >
-<script type="application/x-javascript" src="chrome://greasemonkey/content/prefmanager.js" />
-<script type="application/x-javascript" src="chrome://greasemonkey/content/options.js" />
+<script type="application/x-javascript" src="chrome://scriptish/content/prefmanager.js" />
+<script type="application/x-javascript" src="chrome://scriptish/content/options.js" />
 
 <dialogheader title="Greasemonkey" description="&prefWindow.titleWin;"/>
 

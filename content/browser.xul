@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE overlay SYSTEM "chrome://greasemonkey/locale/greasemonkey.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
 
 <overlay id="greasemonkey-browser-overlay"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/browser.js" />
+  <script type="application/x-javascript" src="chrome://scriptish/content/browser.js" />
 
   <popup id="contentAreaContextMenu">
     <menuitem id="view-userscript"
@@ -64,7 +64,7 @@
 
   <statusbar id="status-bar">
     <!-- NOTE: Local to statusbar tag scope -->
-    <stringbundle id="gm-browser-bundle" src="chrome://greasemonkey/locale/gm-browser.properties" />
+    <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/gm-browser.properties" />
 
     <statusbarpanel id="gm-status"
       insertafter="livemark-button"

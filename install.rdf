@@ -7,8 +7,8 @@
     <em:version>0.1a1pre</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:homepageURL>http://www.greasespot.net/</em:homepageURL>
-    <em:optionsURL>chrome://greasemonkey/content/options.xul</em:optionsURL>
-    <em:iconURL>chrome://greasemonkey/skin/icon_medium.png</em:iconURL>
+    <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
+    <em:iconURL>chrome://scriptish/skin/icon_medium.png</em:iconURL>
 
     <em:name>Scriptish</em:name>
     <em:description>A User Script Manager for Firefox</em:description>

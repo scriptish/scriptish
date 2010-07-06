@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<!DOCTYPE overlay SYSTEM "chrome://greasemonkey/locale/greasemonkey.dtd">
-<?xml-stylesheet href="chrome://greasemonkey/skin/addonstab.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
+<?xml-stylesheet href="chrome://scriptish/skin/addonstab.css" type="text/css"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<script type="application/x-javascript" src="chrome://greasemonkey/content/utils.js" />
-<script type="application/x-javascript" src="chrome://greasemonkey/content/prefmanager.js" />
-<script type="application/x-javascript" src="chrome://greasemonkey/content/addonstab.js" />
+<script type="application/x-javascript" src="chrome://scriptish/content/utils.js" />
+<script type="application/x-javascript" src="chrome://scriptish/content/prefmanager.js" />
+<script type="application/x-javascript" src="chrome://scriptish/content/addonstab.js" />
 
 <richlistbox id="categories">
   <richlistitem id="category-userscripts" class="category" name="&userscripts;"

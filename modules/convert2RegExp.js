@@ -1,7 +1,7 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_convert2RegExp"];
 
-Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://scriptish/utils.js");
 
 const tldRegExp = new RegExp("^(\\^(?:[^/]*)(?://)?(?:[^/]*))(\\\\\\.tld)((?:/.*)?)$");
 

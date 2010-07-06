@@ -2,10 +2,10 @@
 var EXPORTED_SYMBOLS = ["GM_API"];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/constants.js");
-Cu.import("resource://greasemonkey/utils.js");
-Cu.import("resource://greasemonkey/miscapis.js");
-Cu.import("resource://greasemonkey/xmlhttprequester.js");
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/miscapis.js");
+Cu.import("resource://scriptish/xmlhttprequester.js");
 
 const moduleFilename = Components.stack.filename;
 

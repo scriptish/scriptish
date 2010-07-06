@@ -30,8 +30,8 @@ var EXPORTED_SYMBOLS = [
 ];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/constants.js");
-Cu.import("resource://greasemonkey/prefmanager.js");
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/prefmanager.js");
 
 const consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);
@@ -45,7 +45,7 @@ function GM_alert(msg) {
 GM_stringBundle = function() {
   var stringBundle = Cc["@mozilla.org/intl/stringbundle;1"]
       .getService(Ci.nsIStringBundleService)
-      .createBundle("chrome://greasemonkey/locale/gm-browser.properties");
+      .createBundle("chrome://scriptish/locale/gm-browser.properties");
 
   GM_stringBundle = function() { return stringBundle; };
 
@@ -445,7 +445,7 @@ function GM_newUserScript(parentWindow) {
   var windowWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
     .getService(Ci.nsIWindowWatcher);
   windowWatcher.openWindow(
-    parentWindow, "chrome://greasemonkey/content/newscript.xul", null,
+    parentWindow, "chrome://scriptish/content/newscript.xul", null,
     "chrome,dependent,centerscreen,resizable,dialog", null
   );
 };

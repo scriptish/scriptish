@@ -1,7 +1,7 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_MenuCommander"];
 
-Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://scriptish/utils.js");
 
 function GM_MenuCommander(aDocument) {
   GM_log("> GM_MenuCommander")

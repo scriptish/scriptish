@@ -2,12 +2,12 @@
 var EXPORTED_SYMBOLS = ["Script"];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/constants.js");
-Cu.import("resource://greasemonkey/utils.js");
-Cu.import("resource://greasemonkey/convert2RegExp.js");
-Cu.import("resource://greasemonkey/scriptdownloader.js");
-Cu.import("resource://greasemonkey/scriptrequire.js");
-Cu.import("resource://greasemonkey/scriptresource.js");
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/convert2RegExp.js");
+Cu.import("resource://scriptish/scriptdownloader.js");
+Cu.import("resource://scriptish/scriptrequire.js");
+Cu.import("resource://scriptish/scriptresource.js");
 
 function Script(config) {
   this._config = config;
@@ -159,7 +159,7 @@ Script.prototype = {
     // Migrate preferences.
     if (this.prefroot != newScript.prefroot) {
       var tools = {};
-      Cu.import("resource://greasemonkey/miscapis.js", tools);
+      Cu.import("resource://scriptish/miscapis.js", tools);
 
       var storageOld = new tools.GM_ScriptStorage(this);
       var storageNew = new tools.GM_ScriptStorage(newScript);

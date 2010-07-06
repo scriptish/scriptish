@@ -3,18 +3,18 @@ component {ca39e060-88ab-11df-a4ee-0800200c9a66} components/greasemonkey.js
 contract  @scriptish.erikvold.com/scriptish-service;1 {ca39e060-88ab-11df-a4ee-0800200c9a66}
 category  content-policy @scriptish.erikvold.com/scriptish-service;1 @scriptish.erikvold.com/scriptish-service;1
 
-content    greasemonkey    content/
-resource   greasemonkey    modules/
-skin       greasemonkey    classic/1.0 skin/
+content    scriptish    content/
+resource   scriptish    modules/
+skin       scriptish    classic/1.0 skin/
 
-overlay    chrome://browser/content/browser.xul    chrome://greasemonkey/content/browser.xul
-overlay    chrome://mozapps/content/extensions/extensions.xul chrome://greasemonkey/content/addons.xul appversion<3.7a5pre
-overlay    about:addons chrome://greasemonkey/content/addonstab.xul appversion>=3.7a5pre
+overlay    chrome://browser/content/browser.xul    chrome://scriptish/content/browser.xul
+overlay    chrome://mozapps/content/extensions/extensions.xul chrome://scriptish/content/addons.xul appversion<3.7a5pre
+overlay    about:addons chrome://scriptish/content/addonstab.xul appversion>=3.7a5pre
 
-overlay    chrome://greasemonkey/content/install.xul chrome://greasemonkey/content/closewindow.xul
-overlay    chrome://greasemonkey/content/options.xul chrome://greasemonkey/content/closewindow.xul
-overlay    chrome://greasemonkey/content/newscript.xul chrome://greasemonkey/content/closewindow.xul
+overlay    chrome://scriptish/content/install.xul chrome://scriptish/content/closewindow.xul
+overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/closewindow.xul
+overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/closewindow.xul
 
-style      chrome://greasemonkey/content/addons.xul    chrome://greasemonkey/skin/addons-mac.css os=Darwin
+style      chrome://scriptish/content/addons.xul    chrome://scriptish/skin/addons-mac.css os=Darwin
 
-locale     greasemonkey  en-US  locale/en-US/
+locale     scriptish  en-US  locale/en-US/

@@ -1,7 +1,7 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 
-Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://scriptish/utils.js");
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
   this.unsafeContentWin = unsafeContentWin;

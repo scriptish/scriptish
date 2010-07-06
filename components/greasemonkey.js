@@ -67,7 +67,7 @@ ScriptishService.prototype = {
       this.updateVersion();
 
       var tools = {};
-      Cu.import("resource://greasemonkey/config.js", tools);
+      Cu.import("resource://scriptish/config.js", tools);
 
       this._config = new tools.Config(this._scriptFoldername);
     }
@@ -86,7 +86,7 @@ ScriptishService.prototype = {
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     var tools = {};
-    Cu.import("resource://greasemonkey/utils.js", tools);
+    Cu.import("resource://scriptish/utils.js", tools);
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
 
@@ -157,7 +157,7 @@ ScriptishService.prototype = {
 
   initScripts: function(url, wrappedContentWin, chromeWin) {
     var tools = {};
-    Cu.import("resource://greasemonkey/prefmanager.js", tools);
+    Cu.import("resource://scriptish/prefmanager.js", tools);
 
     function testMatch(script) {
       return !script.delayInjection && script.enabled && script.matchesURL(url);
@@ -181,9 +181,9 @@ ScriptishService.prototype = {
     var unsafeContentWin = wrappedContentWin.wrappedJSObject;
 
     var tools = {};
-    Cu.import("resource://greasemonkey/utils.js", tools);
-    Cu.import("resource://greasemonkey/miscapis.js", tools);
-    Cu.import("resource://greasemonkey/api.js", tools);
+    Cu.import("resource://scriptish/utils.js", tools);
+    Cu.import("resource://scriptish/miscapis.js", tools);
+    Cu.import("resource://scriptish/api.js", tools);
 
     // detect and grab reference to firebug console and context, if it exists
     var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
@@ -247,7 +247,7 @@ ScriptishService.prototype = {
 
   evalInSandbox: function(code, codebase, sandbox, script) {
     var tools = {};
-    Cu.import("resource://greasemonkey/utils.js", tools);
+    Cu.import("resource://scriptish/utils.js", tools);
 
     if (!(Cu && Cu.Sandbox)) {
       var e = new Error("Could not create sandbox.");
@@ -389,8 +389,8 @@ ScriptishService.prototype = {
    */
   updateVersion: function() {
     var tools = {};
-    Cu.import("resource://greasemonkey/utils.js", tools);
-    Cu.import("resource://greasemonkey/prefmanager.js", tools);
+    Cu.import("resource://scriptish/utils.js", tools);
+    Cu.import("resource://scriptish/prefmanager.js", tools);
 
     tools.GM_log("> GM_updateVersion");
 

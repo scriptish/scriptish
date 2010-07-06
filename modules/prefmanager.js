@@ -2,7 +2,7 @@
 var EXPORTED_SYMBOLS = ["GM_prefRoot", "GM_PrefManager"];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/constants.js");
+Cu.import("resource://scriptish/constants.js");
 
 const MIN_INT_32 = -0x80000000;
 const MAX_INT_32 = 0x7FFFFFFF;

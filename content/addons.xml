@@ -5,7 +5,7 @@
 %brandDTD;
 <!ENTITY % extensionsDTD SYSTEM "chrome://mozapps/locale/extensions/extensions.dtd">
 %extensionsDTD;
-<!ENTITY % greasemonkeyDTD SYSTEM "chrome://greasemonkey/locale/gm-addons.dtd">
+<!ENTITY % greasemonkeyDTD SYSTEM "chrome://scriptish/locale/gm-addons.dtd">
 %greasemonkeyDTD;
 ]>
 

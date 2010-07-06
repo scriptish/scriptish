@@ -1,6 +1,6 @@
 
-Components.utils.import("resource://greasemonkey/utils.js");
-Components.utils.import("resource://greasemonkey/third-party/mpl-utils.js");
+Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/third-party/mpl-utils.js");
 
 // Globals.
 var GM_config = GM_getConfig();

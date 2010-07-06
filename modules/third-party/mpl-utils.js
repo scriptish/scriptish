@@ -36,7 +36,7 @@ Contributor(s):
 var EXPORTED_SYMBOLS = ["GM_openFolder"];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/constants.js");
+Cu.import("resource://scriptish/constants.js");
 
 const protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
                             .getService(Ci.nsIExternalProtocolService);

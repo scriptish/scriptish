@@ -2,8 +2,8 @@
 var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/constants.js");
-Cu.import("resource://greasemonkey/utils.js");
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils.js");
 
 function GM_ScriptDownloader(win, uri, bundle) {
   this.win_ = win;
@@ -52,7 +52,7 @@ GM_ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
 
     // display "Fetching user script" msg in status bar
     this.win_.GM_BrowserUI.statusImage.src =
-      "chrome://greasemonkey/content/third-party/throbber.gif";
+      "chrome://scriptish/content/third-party/throbber.gif";
     this.win_.GM_BrowserUI.statusImage.style.opacity = "0.5";
     this.win_.GM_BrowserUI.statusImage.tooltipText =
         this.bundle_.getString("tooltip.loading");
@@ -263,7 +263,7 @@ GM_ScriptDownloader.prototype.showInstallDialog = function(timer) {
     return;
   }
   this.hideFetchMsg();
-  this.win_.openDialog("chrome://greasemonkey/content/install.xul", "",
+  this.win_.openDialog("chrome://scriptish/content/install.xul", "",
                        "chrome,centerscreen,modal,dialog,titlebar,resizable",
                        this);
 };

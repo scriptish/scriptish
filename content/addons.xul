@@ -5,18 +5,18 @@
 %brandDTD;
 <!ENTITY % extensionsDTD SYSTEM "chrome://mozapps/locale/extensions/extensions.dtd">
 %extensionsDTD;
-<!ENTITY % greasemonkeyDTD SYSTEM "chrome://greasemonkey/locale/greasemonkey.dtd">
+<!ENTITY % greasemonkeyDTD SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
 %greasemonkeyDTD;
-<!ENTITY % greasemonkeyAddonsDTD SYSTEM "chrome://greasemonkey/locale/gm-addons.dtd">
+<!ENTITY % greasemonkeyAddonsDTD SYSTEM "chrome://scriptish/locale/gm-addons.dtd">
 %greasemonkeyAddonsDTD;
 ]>
 
-<?xml-stylesheet href="chrome://greasemonkey/content/addons.css" type="text/css"?>
-<?xml-stylesheet href="chrome://greasemonkey/skin/addons.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scriptish/content/addons.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scriptish/skin/addons.css" type="text/css"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<script type="application/x-javascript" src="chrome://greasemonkey/content/addons.js" />
+<script type="application/x-javascript" src="chrome://scriptish/content/addons.js" />
 
 <radiogroup id="viewGroup">
   <radio id="userscripts-view" label="&userscripts;"

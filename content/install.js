@@ -1,5 +1,5 @@
 
-Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://scriptish/utils.js");
 
 var GMInstall = {
   init: function() {

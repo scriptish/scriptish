@@ -2,10 +2,10 @@
 var EXPORTED_SYMBOLS = ["Config"];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/constants.js");
-Cu.import("resource://greasemonkey/prefmanager.js");
-Cu.import("resource://greasemonkey/utils.js");
-Cu.import("resource://greasemonkey/script.js");
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/prefmanager.js");
+Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/script.js");
 
 function Config(aScriptDir) {
   this._saveTimer = null;

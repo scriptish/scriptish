@@ -2,8 +2,8 @@
 var EXPORTED_SYMBOLS = ["ScriptRequire"];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/constants.js");
-Cu.import("resource://greasemonkey/utils.js");
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils.js");
 
 function ScriptRequire(script) {
   this._script = script;

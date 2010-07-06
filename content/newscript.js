@@ -1,7 +1,7 @@
 /////////////////////////////// global variables ///////////////////////////////
 
-Components.utils.import("resource://greasemonkey/prefmanager.js");
-Components.utils.import("resource://greasemonkey/utils.js");
+Components.utils.import("resource://scriptish/prefmanager.js");
+Components.utils.import("resource://scriptish/utils.js");
 
 var bundle = null;
 window.addEventListener("load", function() {

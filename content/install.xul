@@ -4,7 +4,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://mozapps/skin/xpinstall/xpinstallConfirm.css" type="text/css"?>
 
-<!DOCTYPE overlay SYSTEM "chrome://greasemonkey/locale/greasemonkey.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
 
 <dialog
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -22,9 +22,9 @@
   buttonlabelextra1="&install.showscriptsource;"
   defaultButton="accept">
 
-  <stringbundle id="gm-browser-bundle" src="chrome://greasemonkey/locale/gm-browser.properties" />
+  <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/gm-browser.properties" />
 
-  <script type="application/x-javascript" src="chrome://greasemonkey/content/install.js" />
+  <script type="application/x-javascript" src="chrome://scriptish/content/install.js" />
 
   <vbox id="dialogContentBox"
     flex="1"

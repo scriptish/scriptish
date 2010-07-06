@@ -5,9 +5,9 @@
 
 var GM_BrowserUI = new Object();
 
-Components.utils.import("resource://greasemonkey/prefmanager.js");
-Components.utils.import("resource://greasemonkey/utils.js");
-Components.utils.import("resource://greasemonkey/scriptdownloader.js");
+Components.utils.import("resource://scriptish/prefmanager.js");
+Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/scriptdownloader.js");
 
 /**
  * nsISupports.QueryInterface
@@ -163,7 +163,7 @@ GM_BrowserUI.showInstallBanner = function(browser) {
   var notification = notificationBox.appendNotification(
     greeting,
     "install-userscript",
-    "chrome://greasemonkey/skin/icon_small.png",
+    "chrome://scriptish/skin/icon_small.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
     [{
       label: this.bundle.getString("greeting.btn"),
@@ -357,7 +357,7 @@ GM_BrowserUI.getCommander = function(unsafeWin) {
   }
 
   var tools = {};
-  Components.utils.import("resource://greasemonkey/menucommander.js", tools);
+  Components.utils.import("resource://scriptish/menucommander.js", tools);
 
   // no commander found. create one and add it.
   var commander = new tools.GM_MenuCommander(document);
@@ -484,10 +484,10 @@ function GM_popupClicked(aEvent) {
  */
 GM_BrowserUI.refreshStatus = function() {
   if (GM_getEnabled()) {
-    this.statusImage.src = "chrome://greasemonkey/skin/icon_small.png";
+    this.statusImage.src = "chrome://scriptish/skin/icon_small.png";
     this.statusImage.tooltipText = this.bundle.getString("tooltip.enabled");
   } else {
-    this.statusImage.src = "chrome://greasemonkey/skin/icon_small_disabled.png";
+    this.statusImage.src = "chrome://scriptish/skin/icon_small_disabled.png";
     this.statusImage.tooltipText = this.bundle.getString("tooltip.disabled");
   }
 
@@ -505,11 +505,11 @@ GM_BrowserUI.openChromeWindow = function(url) {
 }
 
 GM_BrowserUI.newUserScript = function() {
-  GM_BrowserUI.openChromeWindow("chrome://greasemonkey/content/newscript.xul");
+  GM_BrowserUI.openChromeWindow("chrome://scriptish/content/newscript.xul");
 };
 
 GM_BrowserUI.openOptionsWin = function() {
-  GM_BrowserUI.openChromeWindow("chrome://greasemonkey/content/options.xul");
+  GM_BrowserUI.openChromeWindow("chrome://scriptish/content/options.xul");
 };
 
 GM_BrowserUI.showStatus = function(message, autoHide) {
@@ -534,7 +534,7 @@ GM_BrowserUI.showStatus = function(message, autoHide) {
   var max = label.boxObject.width;
 
   var tools = {};
-  Components.utils.import("resource://greasemonkey/accelimation.js", tools);
+  Components.utils.import("resource://scriptish/accelimation.js", tools);
   this.showAnimation = new tools.Accelimation(
     window, this.statusLabel.style, "width", max, 300, 2, "px");
   this.showAnimation.onend = GM_hitch(this, "showStatusAnimationEnd", autoHide);
@@ -582,7 +582,7 @@ GM_BrowserUI.hideStatus = function() {
     this.autoHideTimer = null;
 
     var tools = {};
-    Components.utils.import("resource://greasemonkey/accelimation.js", tools);
+    Components.utils.import("resource://scriptish/accelimation.js", tools);
     this.hideAnimation = new tools.Accelimation(
       window, this.statusLabel.style, "width", 0, 300, 2, "px");
     this.hideAnimation.onend = GM_hitch(this, "hideStatusAnimationEnd");

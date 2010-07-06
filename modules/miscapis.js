@@ -7,8 +7,8 @@ var EXPORTED_SYMBOLS = [
     "GM_console"];
 
 const Cu = Components.utils;
-Cu.import("resource://greasemonkey/prefmanager.js");
-Cu.import("resource://greasemonkey/utils.js");
+Cu.import("resource://scriptish/prefmanager.js");
+Cu.import("resource://scriptish/utils.js");
 
 function GM_ScriptStorage(script) {
   this.prefMan = new GM_PrefManager(script.prefroot);
