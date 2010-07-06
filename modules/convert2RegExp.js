@@ -16,38 +16,39 @@ function convert2RegExp(aPattern) {
   var s = new String(aPattern);
   var res = new String("^");
 
-  var regExpChk = /^\/(.*)\/(i)?$/.exec(s);
+  var regExpChk = /^\/(.*)\/(i)?\n?$/.exec(s);
   if(regExpChk){
     return new RegExp(regExpChk[1], regExpChk[2]);
   }
 
   for (var i = 0 ; i < s.length; i++) {
     switch(s[i]) {
-      case "*" :
+      case "*":
         res += ".*";
         break;
 
-      case "." :
-      case "?" :
-      case "^" :
-      case "$" :
-      case "+" :
-      case "{" :
-      case "}" :
-      case "[" :
-      case "]" :
-      case "|" :
-      case "(" :
-      case ")" :
-      case "\\" :
+      case ".":
+      case "?":
+      case "^":
+      case "$":
+      case "+":
+      case "{":
+      case "}":
+      case "[":
+      case "]":
+      case "|":
+      case "(":
+      case ")":
+      case "\\":
         res += "\\" + s[i];
         break;
 
-      case " " :
-        // Remove spaces from URLs.
+      case " ":
+      case "\n":
+        // Remove spaces and newlines from URLs.
         break;
 
-      default :
+      default:
         res += s[i];
         break;
     }
