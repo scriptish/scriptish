@@ -1,4 +1,3 @@
-
 // XPCOM info
 const DESCRIPTION = "ScriptishService";
 const CONTRACTID = "@scriptish.erikvold.com/scriptish-service;1";
@@ -89,6 +88,11 @@ ScriptishService.prototype = {
     }
   },
 
+  startup: function() {
+    Cu.import("resource://greasemonkey/utils.js");
+    this.startup = function() {};
+  },
+
   domContentLoaded: function(wrappedContentWin, chromeWin, gmBrowser) {
     var url = wrappedContentWin.document.location.href;
     var scripts = this.initScripts(url, wrappedContentWin, chromeWin);
@@ -96,13 +100,6 @@ ScriptishService.prototype = {
     if (scripts.length > 0) {
       this.injectScripts(scripts, url, wrappedContentWin, chromeWin, gmBrowser);
     }
-  },
-
-  startup: function() {
-    Cu.import("resource://greasemonkey/prefmanager.js");
-    Cu.import("resource://greasemonkey/utils.js");
-
-    this.startup = function() {};
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
@@ -174,6 +171,9 @@ ScriptishService.prototype = {
   },
 
   initScripts: function(url, wrappedContentWin, chromeWin) {
+    var tools = {};
+    Cu.import("resource://greasemonkey/prefmanager.js", tools);
+
     function testMatch(script) {
       return !script.delayInjection && script.enabled && script.matchesURL(url);
     }
@@ -182,7 +182,7 @@ ScriptishService.prototype = {
     this.config.wrappedContentWin = wrappedContentWin;
     this.config.chromeWin = chromeWin;
 
-    if (GM_prefRoot.getValue('enableScriptRefreshing')) {
+    if (tools.GM_prefRoot.getValue('enableScriptRefreshing')) {
       this.config.updateModifiedScripts();
     }
 
@@ -500,8 +500,11 @@ ScriptishService.prototype = {
   updateVersion: function() {
     GM_log("> GM_updateVersion");
 
+    var tools = {};
+    Cu.import("resource://greasemonkey/prefmanager.js", tools);
+
     // this is the last version which has been run at least once
-    var initialized = GM_prefRoot.getValue("version", "0.0");
+    var initialized = tools.GM_prefRoot.getValue("version", "0.0");
 
     // check if this is the first launch
     if ("0.0" == initialized) {
@@ -514,7 +517,7 @@ ScriptishService.prototype = {
       if (chromeWin.gBrowser) {
         // set version to fake version number gt 0.0 so that it is not possible
         // for the welcome tab to be opened more than once.
-        GM_prefRoot.setValue("version", "0.0.1");
+        tools.GM_prefRoot.setValue("version", "0.0.1");
 
         // the setTimeout makes sure we do not execute too early -- sometimes
         // the window isn't quite ready to add a tab yet
@@ -531,14 +534,13 @@ ScriptishService.prototype = {
           .getService(Ci.nsIExtensionManager);
       var item = extMan.getItemForID(GM_GUID);
 
-      GM_prefRoot.setValue("version", item.version);
+      tools.GM_prefRoot.setValue("version", item.version);
     } else {
       // Firefox 3.7+
-      var tools = {};
       Cu.import("resource://gre/modules/AddonManager.jsm", tools);
 
       tools.AddonManager.getAddonByID(GM_GUID, function(addon) {
-         GM_prefRoot.setValue("version", addon.version);
+        tools.GM_prefRoot.setValue("version", addon.version);
       });
     }
 
