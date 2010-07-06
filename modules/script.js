@@ -436,10 +436,10 @@ Script.load = function load(aConfig, aNode) {
   for (var i = 0, childNode; childNode = aNode.childNodes[i]; i++) {
     switch (childNode.nodeName) {
       case "Include":
-        script.addInclude(childNode.firstChild.nodeValue);
+        script.addInclude(childNode.firstChild.nodeValue.replace(/\n/g, ''));
         break;
       case "Exclude":
-        script.addExclude(childNode.firstChild.nodeValue);
+        script.addExclude(childNode.firstChild.nodeValue.replace(/\n/g, ''));
         break;
       case "Require":
         var scriptRequire = new ScriptRequire(script);
