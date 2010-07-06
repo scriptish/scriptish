@@ -45,18 +45,13 @@ ScriptishService.prototype = {
   classDescription:  DESCRIPTION,
   classID:           CLASSID,
   contractID:        CONTRACTID,
-  _xpcom_categories: [{category: "app-startup",
-                       entry: DESCRIPTION,
-                       value: CONTRACTID,
-                       service: true},
-                      {category: "content-policy",
+  _xpcom_categories: [{category: "content-policy",
                        entry: CONTRACTID,
                        value: CONTRACTID,
                        service: true}],
 
   // nsISupports
   QueryInterface: XPCOMUtils.generateQI([
-      Ci.nsIObserver,
       Ci.nsISupports,
       Ci.nsISupportsWeakReference,
       Ci.nsIContentPolicy
@@ -80,21 +75,6 @@ ScriptishService.prototype = {
     return this._config;
   },
 
-  // nsIObserver
-  observe: function(aSubject, aTopic, aData) {
-    switch (aTopic) {
-      case 'app-startup':
-      case 'profile-after-change':
-        this.startup();
-        break;
-    }
-  },
-
-  startup: function() {
-    Cu.import("resource://greasemonkey/utils.js");
-    this.startup = function() {};
-  },
-
   domContentLoaded: function(wrappedContentWin, chromeWin, gmBrowser) {
     var url = wrappedContentWin.document.location.href;
     var scripts = this.initScripts(url, wrappedContentWin, chromeWin);
@@ -105,6 +85,9 @@ ScriptishService.prototype = {
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
+    var tools = {};
+    Cu.import("resource://greasemonkey/utils.js", tools);
+
     var ret = Ci.nsIContentPolicy.ACCEPT;
 
     // block content detection of greasemonkey by denying GM
@@ -115,7 +98,7 @@ ScriptishService.prototype = {
     }
 
     // don't intercept anything when GM is not enabled
-    if (!GM_getEnabled()) {
+    if (!tools.GM_getEnabled()) {
       return ret;
     }
 
@@ -263,9 +246,12 @@ ScriptishService.prototype = {
   },
 
   evalInSandbox: function(code, codebase, sandbox, script) {
+    var tools = {};
+    Cu.import("resource://greasemonkey/utils.js", tools);
+
     if (!(Cu && Cu.Sandbox)) {
       var e = new Error("Could not create sandbox.");
-      GM_logError(e, 0, e.fileName, e.lineNumber);
+      tools.GM_logError(e, 0, e.fileName, e.lineNumber);
       return true;
     }
     try {
@@ -293,14 +279,14 @@ ScriptishService.prototype = {
 
         if (line) {
           var err = this.findError(script, line - lineFinder.lineNumber - 1);
-          GM_logError(
+          tools.GM_logError(
             e, // error obj
             0, // 0 = error (1 = warning)
             err.uri,
             err.lineNumber
           );
         } else {
-          GM_logError(
+          tools.GM_logError(
             e, // error obj
             0, // 0 = error (1 = warning)
             script.fileURL,
@@ -402,10 +388,11 @@ ScriptishService.prototype = {
    * any necessary upgrades.
    */
   updateVersion: function() {
-    GM_log("> GM_updateVersion");
-
     var tools = {};
+    Cu.import("resource://greasemonkey/utils.js", tools);
     Cu.import("resource://greasemonkey/prefmanager.js", tools);
+
+    tools.GM_log("> GM_updateVersion");
 
     // this is the last version which has been run at least once
     var initialized = tools.GM_prefRoot.getValue("version", "0.0");
@@ -436,21 +423,21 @@ ScriptishService.prototype = {
       // Firefox <= 3.6.*
       var extMan = Cc["@mozilla.org/extensions/manager;1"]
           .getService(Ci.nsIExtensionManager);
-      var item = extMan.getItemForID(GM_GUID);
+      var item = extMan.getItemForID(tools.GM_GUID);
 
       tools.GM_prefRoot.setValue("version", item.version);
     } else {
       // Firefox 3.7+
       Cu.import("resource://gre/modules/AddonManager.jsm", tools);
 
-      tools.AddonManager.getAddonByID(GM_GUID, function(addon) {
+      tools.AddonManager.getAddonByID(tools.GM_GUID, function(addon) {
         tools.GM_prefRoot.setValue("version", addon.version);
       });
     }
 
     this.updateVersion = function() {};
 
-    GM_log("< GM_updateVersion");
+    tools.GM_log("< GM_updateVersion");
   }
 };
 

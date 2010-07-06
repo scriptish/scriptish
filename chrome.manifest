@@ -1,7 +1,6 @@
 
 component {ca39e060-88ab-11df-a4ee-0800200c9a66} components/greasemonkey.js
 contract  @scriptish.erikvold.com/scriptish-service;1 {ca39e060-88ab-11df-a4ee-0800200c9a66}
-category  profile-after-change @scriptish.erikvold.com/scriptish-service;1 @scriptish.erikvold.com/scriptish-service;1
 category  content-policy @scriptish.erikvold.com/scriptish-service;1 @scriptish.erikvold.com/scriptish-service;1
 
 content    greasemonkey    content/
