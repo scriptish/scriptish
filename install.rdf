@@ -2,23 +2,21 @@
 
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-
   <Description about="urn:mozilla:install-manifest">
-
     <em:id>scriptish@erikvold.com</em:id>
-    <em:version>0.9.0</em:version>
-    <em:creator>Aaron Boodman; http://youngpup.net/</em:creator>
+    <em:version>0.1a1pre</em:version>
+    <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:homepageURL>http://www.greasespot.net/</em:homepageURL>
     <em:optionsURL>chrome://greasemonkey/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://greasemonkey/skin/icon_medium.png</em:iconURL>
 
-    <em:name>Greasemonkey</em:name>
+    <em:name>Scriptish</em:name>
     <em:description>A User Script Manager for Firefox</em:description>
 
+    <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
     <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>
     <em:contributor>Chris Feldmann; http://axlotl.net/</em:contributor>
     <em:contributor>David Schontzler; http://stilleye.com/</em:contributor>
-    <em:contributor>Erik Vold; http://erikvold.com/</em:contributor>
     <em:contributor>Gareth Andrew; http://freegarethandrew.org/</em:contributor>
     <em:contributor>Hisateru Tanaka</em:contributor>
     <em:contributor>Jeremy Dunck; http://dunck.us/anabasis/</em:contributor>
@@ -46,7 +44,5 @@
         <em:maxVersion>4.0b2pre</em:maxVersion>
       </Description>
     </em:targetApplication>
-
   </Description>
-
 </RDF>
