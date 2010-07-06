@@ -1,8 +1,8 @@
 
 // XPCOM info
-const DESCRIPTION = "GM_GreasemonkeyService";
-const CONTRACTID = "@greasemonkey.mozdev.org/greasemonkey-service;1";
-const CLASSID = Components.ID("{77bf3650-1cd6-11da-8cd6-0800200c9a66}");
+const DESCRIPTION = "ScriptishService";
+const CONTRACTID = "@scriptish.erikvold.com/scriptish-service;1";
+const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -36,11 +36,11 @@ var getMaxJSVersion = function(){
   return maxJSVersion;
 }
 
-function GM_GreasemonkeyService() {
+function ScriptishService() {
   this.wrappedJSObject = this;
 }
 
-GM_GreasemonkeyService.prototype = {
+ScriptishService.prototype = {
   classDescription:  DESCRIPTION,
   classID:           CLASSID,
   contractID:        CONTRACTID,
@@ -568,7 +568,7 @@ GM_GreasemonkeyService.prototype = {
 * XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
 */
 if (XPCOMUtils.generateNSGetFactory) {
-    var NSGetFactory = XPCOMUtils.generateNSGetFactory([GM_GreasemonkeyService]);
+    var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
 } else {
-    var NSGetModule = XPCOMUtils.generateNSGetModule([GM_GreasemonkeyService]);
+    var NSGetModule = XPCOMUtils.generateNSGetModule([ScriptishService]);
 }

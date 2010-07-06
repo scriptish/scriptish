@@ -36,7 +36,7 @@ const Cu = Components.utils;
 Cu.import("resource://greasemonkey/constants.js");
 Cu.import("resource://greasemonkey/prefmanager.js");
 
-const GM_GUID = "{e4a8a97b-f2ed-450b-b12d-ee082ba24781}";
+const GM_GUID = "scriptish@erikvold.com";
 
 const consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);

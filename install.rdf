@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
 
-    <em:id>{e4a8a97b-f2ed-450b-b12d-ee082ba24781}</em:id>
+    <em:id>scriptish@erikvold.com</em:id>
     <em:version>0.9.0</em:version>
     <em:creator>Aaron Boodman; http://youngpup.net/</em:creator>
     <em:homepageURL>http://www.greasespot.net/</em:homepageURL>
