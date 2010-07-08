@@ -71,7 +71,8 @@ function(safeUrl, details, req) {
 
   if (details.mozBackgroundRequest) { req.mozBackgroundRequest = true; }
 
-  req.open(details.method, safeUrl);
+  req.open(details.method, safeUrl, true,
+      details.user || "", details.password || "");
 
   if (details.overrideMimeType) {
     req.overrideMimeType(details.overrideMimeType);
