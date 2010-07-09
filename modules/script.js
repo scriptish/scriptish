@@ -423,7 +423,7 @@ Script.load = function load(aConfig, aNode) {
   ) {
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
-        aConfig, GM_getContents(script._file), script._downloadURL, true);
+        aConfig, GM_getContents(script._file), {spec: script._downloadURL}, true);
     script._dependhash = GM_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;
