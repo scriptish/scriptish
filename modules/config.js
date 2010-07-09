@@ -278,7 +278,7 @@ Config.prototype = {
 
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
-          GM_getContents(script._file), script._downloadURL, true);
+          GM_getContents(script._file), {spec: script._downloadURL}, true);
       script.updateFromNewScript(parsedScript);
       this._changed(script, "modified", null, true);
     }
