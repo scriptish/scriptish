@@ -334,7 +334,12 @@ function GM_compareVersions(aV1, aV2) {
 }
 
 function GM_isGreasemonkeyable(url) {
-  var scheme = ioService.extractScheme(url);
+  // if the url provide is not a valid url, then an error could be thrown
+  try {
+    var scheme = ioService.extractScheme(url);
+  } catch (e) {
+    return false;
+  }
 
   switch (scheme) {
     case "http":
