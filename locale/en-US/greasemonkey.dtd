@@ -11,7 +11,7 @@
 <!ENTITY menu.manage.accesskey "M">
 <!ENTITY menu.options "Options...">
 <!ENTITY menu.options.accesskey "O">
-<!ENTITY statusbar.noscripts "No scripts installed!">
+<!ENTITY statusbar.noscripts "No scripts for page!">
 <!ENTITY statusbar.enabled "Enabled">
 <!ENTITY statusbar.enabled.accesskey "E">
 <!ENTITY install.title "User Script Installation">
