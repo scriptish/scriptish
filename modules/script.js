@@ -156,6 +156,8 @@ Script.prototype = {
   },
 
   updateFromNewScript: function(newScript) {
+    var tools = {};
+
     // Migrate preferences.
     if (this.prefroot != newScript.prefroot) {
       var tools = {};
@@ -186,6 +188,8 @@ Script.prototype = {
 
     var dependhash = GM_sha1(newScript._rawMeta);
     if (dependhash != this._dependhash && !newScript._dependFail) {
+      Cu.import("resource://scriptish/scriptdownloader.js", tools);
+
       this._dependhash = dependhash;
       this._requires = newScript._requires;
       this._resources = newScript._resources;
@@ -199,7 +203,7 @@ Script.prototype = {
       }
 
       // Redownload dependencies.
-      var scriptDownloader = new GM_ScriptDownloader(null, null, null);
+      var scriptDownloader = new tools.GM_ScriptDownloader(null, null, null);
       scriptDownloader.script = this;
       scriptDownloader.updateScript = true;
       scriptDownloader.fetchDependencies();
