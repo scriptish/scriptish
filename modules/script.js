@@ -9,6 +9,8 @@ Cu.import("resource://scriptish/scriptdownloader.js");
 Cu.import("resource://scriptish/scriptrequire.js");
 Cu.import("resource://scriptish/scriptresource.js");
 
+const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\n]+))?)/g;
+
 function Script(config) {
   this._config = config;
   this._observers = [];
@@ -304,24 +306,21 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
   }
 
   // read one line at a time looking for start meta delimiter or EOF
-  var lineRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\n]+))?)/g;
-  var result = {};
+  var lines = aSource.match(metaRegExp);
+  var i = 0;
+  var result;
   var foundMeta = false;
 
   // used for duplicate resource name detection
   var previousResourceNames = {};
   script._rawMeta = "";
 
-  while (result = lineRegExp(aSource)) {
-    result = result[0];
+  while (result = lines[i++]) {
+    if (!foundMeta) {
+      if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
 
-    if (!foundMeta && result.indexOf("// ==UserScript==") == 0) {
-      foundMeta = true;
       continue;
     }
-
-    if (!foundMeta) continue;
-    // gather up meta lines
 
     if (result.indexOf("// ==/UserScript==") == 0) {
       // done gathering up meta lines
