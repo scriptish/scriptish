@@ -26,6 +26,7 @@ function Script(config) {
   this._namespace = null;
   this._id = null;
   this._prefroot = null;
+  this._author = null;
   this._description = null;
   this._version = null;
   this._enabled = true;
@@ -62,6 +63,7 @@ Script.prototype = {
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
   },
+  get author() { return this._author; },
   get description() { return this._description; },
   get version() { return this._version; },
   get enabled() { return this._enabled; },
@@ -184,6 +186,7 @@ Script.prototype = {
     this._excludeRegExps = newScript._excludeRegExps;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
+    this._author = newScript._author;
     this._description = newScript._description;
     this._unwrap = newScript._unwrap;
     this._version = newScript._version;
@@ -266,6 +269,7 @@ Script.prototype = {
     scriptNode.setAttribute("filename", this._filename);
     scriptNode.setAttribute("name", this._name);
     scriptNode.setAttribute("namespace", this._namespace);
+    scriptNode.setAttribute("author", this._author);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
     scriptNode.setAttribute("enabled", this._enabled);
@@ -336,6 +340,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
     switch (header) {
       case "name":
       case "namespace":
+      case "author":
       case "description":
       case "version":
         script["_" + header] = value;
@@ -465,6 +470,7 @@ Script.load = function load(aConfig, aNode) {
 
   script._name = aNode.getAttribute("name");
   script._namespace = aNode.getAttribute("namespace");
+  script._author = aNode.getAttribute("author");
   script._description = aNode.getAttribute("description");
   script._enabled = aNode.getAttribute("enabled") == true.toString();
 
