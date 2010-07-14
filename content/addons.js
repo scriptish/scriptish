@@ -232,6 +232,12 @@ var greasemonkeyAddons = {
     // Setting these attributes inherits the values into the same place they
     // would go for extensions.
     item.setAttribute('addonId', script.id);
+
+    if (script.homepageURL) {
+      item.setAttribute('homepageURL', script.homepageURL);
+    } else {
+      item.removeAttribute('homepageURL');
+    }
     item.setAttribute('name', script.name);
     item.setAttribute('description', script.description);
     item.setAttribute('version', script.version);
@@ -275,6 +281,13 @@ var greasemonkeyAddons = {
     var selectedListitem = gUserscriptsView.selectedItem;
     var toBottom = false;
     switch (command) {
+    case 'cmd_userscript_homepage':
+      if (!selectedListitem) return;
+      var homepageURL = selectedListitem.getAttribute("homepageURL");
+      // only allow http(s) homepages
+      if (!isSafeURI(homepageURL)) return;
+      openURL(homepageURL);
+      return;
     case 'cmd_userscript_edit':
       GM_openInEditor(script, window);
       break;
@@ -373,6 +386,12 @@ var greasemonkeyAddons = {
       // Set visibility.
       setItemsHidden(false, standardItems);
       setItemsHidden(false, script.enabled ? ['disable'] : ['enable']);
+
+      // Set homepage visibility
+      if (selectedItem.getAttribute('homepageURL')) {
+        setItemsHidden(false, ['homepage', 'misc_separator']);
+      }
+
       // Set disabled.
       var atBottom = !selectedItem.nextSibling;
       var atTop = !selectedItem.previousSibling;

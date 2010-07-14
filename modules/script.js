@@ -15,6 +15,7 @@ function Script(config) {
   this._config = config;
   this._observers = [];
 
+  this._homepageURL = null; // Only for scripts not installed
   this._downloadURL = null; // Only for scripts not installed
   this._tempFile = null; // Only for scripts not installed
   this._basedir = null;
@@ -53,6 +54,7 @@ Script.prototype = {
 
   _changed: function(event, data) { this._config._changed(this, event, data); },
 
+  get homepageURL() { return this._homepageURL; },
   get name() { return this._name; },
   get namespace() { return this._namespace; },
   get id() {
@@ -184,6 +186,7 @@ Script.prototype = {
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
     this._excludeRegExps = newScript._excludeRegExps;
+    this._homepageURL = newScript._homepageURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this._author = newScript._author;
@@ -277,6 +280,10 @@ Script.prototype = {
     scriptNode.setAttribute("modified", this._modified);
     scriptNode.setAttribute("dependhash", this._dependhash);
 
+    if (this.homepageURL) {
+      scriptNode.setAttribute("homepageURL", this.homepageURL);
+    }
+
     if (this._downloadURL) {
       scriptNode.setAttribute("installurl", this._downloadURL);
     }
@@ -344,6 +351,9 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
       case "description":
       case "version":
         script["_" + header] = value;
+        continue;
+      case "homepageurl":
+        script._homepageURL = value;
         continue;
       case "include":
         script.addInclude(value);
@@ -425,6 +435,7 @@ Script.load = function load(aConfig, aNode) {
   script._filename = aNode.getAttribute("filename");
   script._basedir = aNode.getAttribute("basedir") || ".";
   script._downloadURL = aNode.getAttribute("installurl") || null;
+  script._homepageURL = aNode.getAttribute("homepageURL") || null;
 
   if (!aNode.getAttribute("modified")
       || !aNode.getAttribute("dependhash")
