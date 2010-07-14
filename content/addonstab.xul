@@ -10,7 +10,7 @@
 
 <richlistbox id="categories">
   <richlistitem id="category-userscripts" class="category" name="&userscripts;"
-    insertafter="category-plugins" value="addons://list/userscripts">
+    insertafter="category-plugins" value="addons://list/userscript">
   </richlistitem>
 </richlistbox>
 

@@ -8,8 +8,12 @@ Cu.import("resource://scriptish/convert2RegExp.js");
 Cu.import("resource://scriptish/scriptdownloader.js");
 Cu.import("resource://scriptish/scriptrequire.js");
 Cu.import("resource://scriptish/scriptresource.js");
+try {
+  Cu.import("resource://gre/modules/AddonManager.jsm");
+} catch (e) {}
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\n]+))?)/g;
+const scope = (typeof AddonManager != 'undefined') ? AddonManager.SCOPE_PROFILE : null;
 
 function Script(config) {
   this._config = config;
@@ -42,6 +46,44 @@ function Script(config) {
 }
 
 Script.prototype = {
+  isCompatible: true,
+  providesUpdatesSecurely: true,
+  blocklistState: 0,
+  appDisabled: false,
+  scope: scope,
+  isActive: true,
+  pendingOperations: 0,
+  type: "userscript",
+  get userDisabled() { return !this.enabled; },
+  set userDisabled(val) {
+    if (val == this.userDisabled) return val;
+
+    AddonManagerPrivate.callAddonListeners(
+        val ? "onEnabling" : "onDisabling", this, false);
+    this.enabled = !val;
+    AddonManagerPrivate.callAddonListeners(
+        val ? "onEnabled" : "onDisabled", this);
+  },
+
+  isCompatibleWith: function() { return true; },
+
+  get permissions() {
+    var perms = AddonManager.PERM_CAN_UNINSTALL;
+    perms |= this.userDisabled ? AddonManager.PERM_CAN_ENABLE : AddonManager.PERM_CAN_DISABLE;
+    return perms;
+  },
+
+  findUpdates: function(aListener) {
+    if ("onNoCompatibilityUpdateAvailable" in aListener)
+      aListener.onNoCompatibilityUpdateAvailable(this);
+    if ("onNoUpdateAvailable" in aListener)
+      aListener.onNoUpdateAvailable(this);
+    if ("onUpdateFinished" in aListener)
+      aListener.onUpdateFinished(this);
+  },
+
+  uninstall: function() { this._config.uninstall(this); },
+
   matchesURL: function(url) {
     function test(regExp) {
       return regExp.test(url);
@@ -62,7 +104,9 @@ Script.prototype = {
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
   },
+  get creator() { return null },
   get description() { return this._description; },
+  get homepageURL() { return null },
   get version() { return this._version; },
   get enabled() { return this._enabled; },
   set enabled(enabled) { this._enabled = enabled; this._changed("edit-enabled", enabled); },

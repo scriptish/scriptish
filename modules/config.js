@@ -6,6 +6,9 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/script.js");
+try {
+  Cu.import("resource://gre/modules/AddonManager.jsm");
+} catch (e) {}
 
 function Config(aScriptDir) {
   this._saveTimer = null;
@@ -68,6 +71,16 @@ Config.prototype = {
     }
 
     return -1;
+  },
+
+  getScriptById: function(aId) {
+    for (var i = 0, script; script = this._scripts[i]; i++) {
+      if (script.id === aId) {
+        return script;
+      }
+    }
+
+    return null;
   },
 
   _load: function() {
@@ -147,11 +160,19 @@ Config.prototype = {
 
     this.addScript(script);
     this._changed(script, "install", null);
+    if (typeof AddonManagerPrivate != "undefined") {
+      AddonManagerPrivate.callInstallListeners(
+          "onNewInstall", null, script, null, false);
+    }
 
     GM_log("< Config.install");
   },
 
   uninstall: function(script) {
+    if (typeof AddonManagerPrivate != "undefined") {
+      AddonManagerPrivate.callAddonListeners("onUninstalling", script, false);
+    }
+
     var idx = this._find(script);
     this._scripts.splice(idx, 1);
     this._changed(script, "uninstall", null);
@@ -168,6 +189,10 @@ Config.prototype = {
     if (GM_prefRoot.getValue("uninstallPreferences")) {
       // Remove saved preferences
       GM_prefRoot.remove(script.prefroot);
+    }
+
+    if (typeof AddonManagerPrivate != "undefined") {
+      AddonManagerPrivate.callAddonListeners("onUninstalled", script);
     }
   },
 
