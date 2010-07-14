@@ -1,5 +1,5 @@
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_API"];
+var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -30,6 +30,15 @@ function GM_apiLeakCheck(apiName) {
 
   return true;
 };
+
+function GM_apiSafeCallback(aWindow, aThis, aCallback, aArgs) {
+  // Pop back onto browser thread and call event handler.
+  // Have to use nested function here instead of GM_hitch because
+  // otherwise details[event].apply can point to window.setTimeout, which
+  // can be abused to get increased priveledges.
+  new XPCNativeWrapper(aWindow, "setTimeout()")
+      .setTimeout(function() { aCallback.apply(aThis, aArgs); }, 0);
+}
 
 function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChromeWin, aGmBrowser) {
   var _xmlhttpRequester = null;

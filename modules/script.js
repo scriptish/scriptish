@@ -12,13 +12,14 @@ try {
   Cu.import("resource://gre/modules/AddonManager.jsm");
 } catch (e) {}
 
-const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\n]+))?)/g;
+const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
 const scope = (typeof AddonManager != 'undefined') ? AddonManager.SCOPE_PROFILE : null;
 
 function Script(config) {
   this._config = config;
   this._observers = [];
 
+  this._homepageURL = null; // Only for scripts not installed
   this._downloadURL = null; // Only for scripts not installed
   this._tempFile = null; // Only for scripts not installed
   this._basedir = null;
@@ -30,6 +31,7 @@ function Script(config) {
   this._namespace = null;
   this._id = null;
   this._prefroot = null;
+  this._author = null;
   this._description = null;
   this._version = null;
   this._enabled = true;
@@ -94,6 +96,7 @@ Script.prototype = {
 
   _changed: function(event, data) { this._config._changed(this, event, data); },
 
+  get homepageURL() { return this._homepageURL; },
   get name() { return this._name; },
   get namespace() { return this._namespace; },
   get id() {
@@ -104,9 +107,9 @@ Script.prototype = {
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
   },
-  get creator() { return null },
+  get creator() { return this.author; },
+  get author() { return this._author; },
   get description() { return this._description; },
-  get homepageURL() { return null },
   get version() { return this._version; },
   get enabled() { return this._enabled; },
   set enabled(enabled) { this._enabled = enabled; this._changed("edit-enabled", enabled); },
@@ -226,8 +229,10 @@ Script.prototype = {
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
     this._excludeRegExps = newScript._excludeRegExps;
+    this._homepageURL = newScript._homepageURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
+    this._author = newScript._author;
     this._description = newScript._description;
     this._unwrap = newScript._unwrap;
     this._version = newScript._version;
@@ -310,12 +315,17 @@ Script.prototype = {
     scriptNode.setAttribute("filename", this._filename);
     scriptNode.setAttribute("name", this._name);
     scriptNode.setAttribute("namespace", this._namespace);
+    scriptNode.setAttribute("author", this._author);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
     scriptNode.setAttribute("enabled", this._enabled);
     scriptNode.setAttribute("basedir", this._basedir);
     scriptNode.setAttribute("modified", this._modified);
     scriptNode.setAttribute("dependhash", this._dependhash);
+
+    if (this.homepageURL) {
+      scriptNode.setAttribute("homepageURL", this.homepageURL);
+    }
 
     if (this._downloadURL) {
       scriptNode.setAttribute("installurl", this._downloadURL);
@@ -371,7 +381,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
       break;
     }
 
-    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\n]+))?/);
+    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
     if (match === null) continue;
 
     var header = match[1].toLowerCase();
@@ -380,9 +390,13 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
     switch (header) {
       case "name":
       case "namespace":
+      case "author":
       case "description":
       case "version":
         script["_" + header] = value;
+        continue;
+      case "homepageurl":
+        script._homepageURL = value;
         continue;
       case "include":
         script.addInclude(value);
@@ -459,10 +473,12 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
 Script.load = function load(aConfig, aNode) {
   var script = new Script(aConfig);
   var fileModified = false;
+  var rightTrim = /\s*$/g;
 
   script._filename = aNode.getAttribute("filename");
   script._basedir = aNode.getAttribute("basedir") || ".";
   script._downloadURL = aNode.getAttribute("installurl") || null;
+  script._homepageURL = aNode.getAttribute("homepageURL") || null;
 
   if (!aNode.getAttribute("modified")
       || !aNode.getAttribute("dependhash")
@@ -483,10 +499,10 @@ Script.load = function load(aConfig, aNode) {
   for (var i = 0, childNode; childNode = aNode.childNodes[i]; i++) {
     switch (childNode.nodeName) {
       case "Include":
-        script.addInclude(childNode.firstChild.nodeValue.replace(/\n/g, ''));
+        script.addInclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
         break;
       case "Exclude":
-        script.addExclude(childNode.firstChild.nodeValue.replace(/\n/g, ''));
+        script.addExclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
         break;
       case "Require":
         var scriptRequire = new ScriptRequire(script);
@@ -509,6 +525,7 @@ Script.load = function load(aConfig, aNode) {
 
   script._name = aNode.getAttribute("name");
   script._namespace = aNode.getAttribute("namespace");
+  script._author = aNode.getAttribute("author");
   script._description = aNode.getAttribute("description");
   script._enabled = aNode.getAttribute("enabled") == true.toString();
 

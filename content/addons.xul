@@ -78,6 +78,8 @@
 <window id="extensionsManager">
   <commandset id="userscripts-commands"
       oncommand="greasemonkeyAddons.doCommand(event.target.id);">
+    <command id="cmd_userscript_homepage"/>
+
     <command id="cmd_userscript_edit"/>
     <command id="cmd_userscript_show"/>
     <command id="cmd_userscript_enable"/>
@@ -114,6 +116,12 @@
     />
 
     <menuseparator id="userscript_context_move_separator"/>
+
+    <menuitem id="userscript_context_homepage" command="cmd_userscript_homepage"
+      label="&Homepage;" accesskey="&Homepage.accesskey;"
+    />
+
+    <menuseparator id="userscript_context_misc_separator"/>
 
     <menuitem id="userscript_context_edit" command="cmd_userscript_edit"
       label="&Edit;" accesskey="&Edit.accesskey;"

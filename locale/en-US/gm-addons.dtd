@@ -1,3 +1,5 @@
+<!ENTITY Homepage "Visit Home Page">
+<!ENTITY Homepage.accesskey "H">
 <!ENTITY Edit "Edit">
 <!ENTITY Edit.accesskey "E">
 <!ENTITY Edit.tooltip "Edit this User Script">
