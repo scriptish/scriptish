@@ -9,7 +9,7 @@ Cu.import("resource://scriptish/scriptdownloader.js");
 Cu.import("resource://scriptish/scriptrequire.js");
 Cu.import("resource://scriptish/scriptresource.js");
 
-const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\n]+))?)/g;
+const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
 
 function Script(config) {
   this._config = config;
@@ -331,7 +331,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
       break;
     }
 
-    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\n]+))?/);
+    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
     if (match === null) continue;
 
     var header = match[1].toLowerCase();
@@ -420,6 +420,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
 Script.load = function load(aConfig, aNode) {
   var script = new Script(aConfig);
   var fileModified = false;
+  var rightTrim = /\s*$/g;
 
   script._filename = aNode.getAttribute("filename");
   script._basedir = aNode.getAttribute("basedir") || ".";
@@ -444,10 +445,10 @@ Script.load = function load(aConfig, aNode) {
   for (var i = 0, childNode; childNode = aNode.childNodes[i]; i++) {
     switch (childNode.nodeName) {
       case "Include":
-        script.addInclude(childNode.firstChild.nodeValue.replace(/\n/g, ''));
+        script.addInclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
         break;
       case "Exclude":
-        script.addExclude(childNode.firstChild.nodeValue.replace(/\n/g, ''));
+        script.addExclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
         break;
       case "Require":
         var scriptRequire = new ScriptRequire(script);
