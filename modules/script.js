@@ -10,6 +10,7 @@ Cu.import("resource://scriptish/scriptrequire.js");
 Cu.import("resource://scriptish/scriptresource.js");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
+const nonIdChars = /[^\w@\.\-]+/g;
 
 function Script(config) {
   this._config = config;
@@ -23,9 +24,9 @@ function Script(config) {
   this._modified = null;
   this._dependhash = null;
 
+  this._id = null;
   this._name = null;
   this._namespace = null;
-  this._id = null;
   this._prefroot = null;
   this._author = null;
   this._contributors = [];
@@ -55,13 +56,16 @@ Script.prototype = {
 
   _changed: function(event, data) { this._config._changed(this, event, data); },
 
+  get id() {
+    if (!this._id) this.id = this.namespace + "/" + this.name;
+    return this._id;
+  },
+  set id(aId) {
+    this._id = aId.substr(0, 52);
+  },
   get homepageURL() { return this._homepageURL; },
   get name() { return this._name; },
   get namespace() { return this._namespace; },
-  get id() {
-    if (!this._id) this._id = this._namespace + "/" + this._name;
-    return this._id;
-  },
   get prefroot() { 
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
@@ -283,8 +287,9 @@ Script.prototype = {
     scriptNode.appendChild(doc.createTextNode("\n\t"));
 
     scriptNode.setAttribute("filename", this._filename);
-    scriptNode.setAttribute("name", this._name);
-    scriptNode.setAttribute("namespace", this._namespace);
+    scriptNode.setAttribute("id", this.id);
+    scriptNode.setAttribute("name", this.name);
+    scriptNode.setAttribute("namespace", this.namespace);
     scriptNode.setAttribute("author", this._author);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
@@ -358,6 +363,11 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
     var value = match[2];
 
     switch (header) {
+      case "id":
+        value = value.replace(nonIdChars, ''); // remove unacceptable chars
+        if (!value) continue; // ignore falsy @id values
+        script.id = value;
+        continue;
       case "name":
       case "namespace":
       case "author":
@@ -499,6 +509,7 @@ Script.load = function load(aConfig, aNode) {
     }
   }
 
+  script._id = aNode.getAttribute("id") || null;
   script._name = aNode.getAttribute("name");
   script._namespace = aNode.getAttribute("namespace");
   script._author = aNode.getAttribute("author");
