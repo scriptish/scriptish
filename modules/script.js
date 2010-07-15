@@ -53,18 +53,25 @@ Script.prototype = {
   blocklistState: 0,
   appDisabled: false,
   scope: scope,
-  isActive: true,
+  get isActive() { return !this.appDisabled || !this.userDisabled },
   pendingOperations: 0,
   type: "userscript",
-  get userDisabled() { return !this.enabled; },
+  get userDisabled() { return !this._enabled; },
   set userDisabled(val) {
     if (val == this.userDisabled) return val;
 
-    AddonManagerPrivate.callAddonListeners(
-        val ? "onEnabling" : "onDisabling", this, false);
-    this.enabled = !val;
-    AddonManagerPrivate.callAddonListeners(
-        val ? "onEnabled" : "onDisabled", this);
+    if (typeof AddonManagerPrivate != "undefined") {
+      AddonManagerPrivate.callAddonListeners(
+          val ? "onEnabling" : "onDisabling", this, false);
+    }
+
+    this._enabled = !val;
+    this._changed("edit-enabled", this._enabled);
+
+    if (typeof AddonManagerPrivate != "undefined") {
+      AddonManagerPrivate.callAddonListeners(
+          val ? "onEnabled" : "onDisabled", this);
+    }
   },
 
   isCompatibleWith: function() { return true; },
@@ -100,7 +107,7 @@ Script.prototype = {
   get name() { return this._name; },
   get namespace() { return this._namespace; },
   get id() {
-    if (!this._id) this._id = this._namespace + "/" + this._name;
+    if (!this._id) this._id = this.namespace + "/" + this.name;
     return this._id;
   },
   get prefroot() { 
@@ -112,7 +119,7 @@ Script.prototype = {
   get description() { return this._description; },
   get version() { return this._version; },
   get enabled() { return this._enabled; },
-  set enabled(enabled) { this._enabled = enabled; this._changed("edit-enabled", enabled); },
+  set enabled(enabled) { this.userDisabled = !enabled; },
 
   get includes() { return this._includes.concat(); },
   get excludes() { return this._excludes.concat(); },
