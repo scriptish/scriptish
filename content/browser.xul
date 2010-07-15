@@ -43,7 +43,7 @@
       <menuitem
         accesskey="&menu.manage.accesskey;"
         label="&menu.manage;"
-        oncommand="BrowserOpenAddonsMgr('userscripts');" />
+        oncommand="GM_showUserscriptList();" />
       <menuitem id="userscript-tools-new"
         accesskey="&menu.new.accesskey;"
         label="&menu.new;"
@@ -100,7 +100,7 @@
           oncommand="GM_newUserScript(window);" />
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
-          oncommand="BrowserOpenAddonsMgr('userscripts');" />
+          oncommand="GM_showUserscriptList();" />
         <menuitem label="&menu.managePage;"
           oncommand="GM_BrowserUI.managePageMenuItemClicked();" />
         <menuseparator />

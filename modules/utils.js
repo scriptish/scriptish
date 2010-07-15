@@ -26,7 +26,8 @@ var EXPORTED_SYMBOLS = [
   "GM_uriFromUrl",
   "GM_sha1",
   "GM_memoize",
-  "GM_newUserScript"
+  "GM_newUserScript",
+  "GM_showUserscriptList"
 ];
 
 const Cu = Components.utils;
@@ -35,6 +36,15 @@ Cu.import("resource://scriptish/prefmanager.js");
 
 const consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);
+
+function GM_showUserscriptList() {
+  var chromeWin = Cc['@mozilla.org/appshell/window-mediator;1']
+      .getService(Ci.nsIWindowMediator)
+      .getMostRecentWindow("navigator:browser");
+
+  chromeWin.BrowserOpenAddonsMgr(
+      GM_firefoxVersion == '4.0' ? 'addons://list/userscripts' : 'userscripts');
+}
 
 function GM_alert(msg) {
   Cc["@mozilla.org/embedcomp/prompt-service;1"]
