@@ -7,7 +7,6 @@ var GM_BrowserUI = new Object();
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
-Components.utils.import("resource://scriptish/scriptdownloader.js");
 
 /**
  * nsISupports.QueryInterface
@@ -186,7 +185,10 @@ GM_BrowserUI.startInstallScript = function(uri, timer) {
     return;
   }
 
-  this.scriptDownloader_ = new GM_ScriptDownloader(window, uri, this.bundle);
+  var tools = {};
+  Components.utils.import("resource://scriptish/scriptdownloader.js", tools);
+
+  this.scriptDownloader_ = new tools.GM_ScriptDownloader(window, uri, this.bundle);
   this.scriptDownloader_.startInstall();
 };
 
@@ -613,9 +615,12 @@ GM_BrowserUI.installMenuItemClicked = function() {
 };
 
 GM_BrowserUI.viewContextItemClicked = function() {
+  var tools = {};
+  Components.utils.import("resource://scriptish/scriptdownloader.js", tools);
+
   var uri = GM_BrowserUI.getUserScriptLinkUnderPointer();
 
-  this.scriptDownloader_ = new GM_ScriptDownloader(window, uri, this.bundle);
+  this.scriptDownloader_ = new tools.GM_ScriptDownloader(window, uri, this.bundle);
   this.scriptDownloader_.startViewScript();
 };
 
