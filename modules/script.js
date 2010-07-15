@@ -10,6 +10,30 @@ Cu.import("resource://scriptish/scriptrequire.js");
 Cu.import("resource://scriptish/scriptresource.js");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
+const allowedJSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
+
+var getMaxJSVersion = function(){
+  var maxJSVersion = (function() {
+    var appInfo = Cc["@mozilla.org/xre/app-info;1"]
+        .getService(Ci.nsIXULAppInfo);
+    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
+        .getService(Ci.nsIVersionComparator);
+
+    // Firefox 3.5 and higher supports 1.8 (first version to support this arg)
+    if (versionChecker.compare(appInfo.version, "3.5") >= 0) {
+      return "1.8";
+    }
+
+    // Everything else supports 1.6.
+    return "1.6";
+  })();
+
+  getMaxJSVersion = function() {
+    return maxJSVersion;
+  }
+
+  return maxJSVersion;
+}
 
 function Script(config) {
   this._config = config;
@@ -41,6 +65,7 @@ function Script(config) {
   this._dependFail = false
   this.delayInjection = false;
   this._rawMeta = null;
+  this._jsversion = null;
 }
 
 Script.prototype = {
@@ -85,6 +110,7 @@ Script.prototype = {
   get requires() { return this._requires.concat(); },
   get resources() { return this._resources.concat(); },
   get unwrap() { return this._unwrap; },
+  get jsversion() { return this._jsversion || getMaxJSVersion() },
 
   get _file() {
     var file = this._basedirFile;
@@ -191,6 +217,7 @@ Script.prototype = {
     this._namespace = newScript._namespace;
     this._author = newScript._author;
     this._description = newScript._description;
+    this._jsversion = newScript._jsversion;
     this._unwrap = newScript._unwrap;
     this._version = newScript._version;
 
@@ -279,6 +306,7 @@ Script.prototype = {
     scriptNode.setAttribute("basedir", this._basedir);
     scriptNode.setAttribute("modified", this._modified);
     scriptNode.setAttribute("dependhash", this._dependhash);
+    if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
 
     if (this.homepageURL) {
       scriptNode.setAttribute("homepageURL", this.homepageURL);
@@ -329,7 +357,6 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
   while (result = lines[i++]) {
     if (!foundMeta) {
       if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
-
       continue;
     }
 
@@ -354,6 +381,14 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         continue;
       case "homepageurl":
         script._homepageURL = value;
+      case "jsversion":
+        var jsVerIndx = JSVersions.indexOf(value);
+        if (!jsVerIndx || // a crazy value
+            jsVerIndx > JSVersions.indexOf(getMaxJSVersion())) {
+          // TO DO: something.
+        } else {
+          script._jsversion = value;
+        }
         continue;
       case "include":
         script.addInclude(value);
@@ -436,6 +471,7 @@ Script.load = function load(aConfig, aNode) {
   script._basedir = aNode.getAttribute("basedir") || ".";
   script._downloadURL = aNode.getAttribute("installurl") || null;
   script._homepageURL = aNode.getAttribute("homepageURL") || null;
+  script._jsversion = aNode.getAttribute("jsversion") || null;
 
   if (!aNode.getAttribute("modified")
       || !aNode.getAttribute("dependhash")

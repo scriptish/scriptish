@@ -14,29 +14,6 @@ const appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
 
 const serviceFilename = Components.stack.filename;
 
-var getMaxJSVersion = function(){
-  var maxJSVersion = (function() {
-    var appInfo = Cc["@mozilla.org/xre/app-info;1"]
-        .getService(Ci.nsIXULAppInfo);
-    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
-        .getService(Ci.nsIVersionComparator);
-
-    // Firefox 3.5 and higher supports 1.8.
-    if (versionChecker.compare(appInfo.version, "3.5") >= 0) {
-      return "1.8";
-    }
-
-    // Everything else supports 1.6.
-    return "1.6";
-  })();
-
-  getMaxJSVersion = function() {
-    return maxJSVersion;
-  }
-
-  return maxJSVersion;
-}
-
 function ScriptishService() {
   this.wrappedJSObject = this;
 }
@@ -257,7 +234,7 @@ ScriptishService.prototype = {
     try {
       // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
       var lineFinder = new Error();
-      Cu.evalInSandbox(code, sandbox, getMaxJSVersion());
+      Cu.evalInSandbox(code, sandbox, script.jsversion);
     } catch (e) { // catches errors while running the script code
       try {
         if (e && "return not in function" == e.message)
