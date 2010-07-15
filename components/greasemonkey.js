@@ -377,7 +377,7 @@ ScriptishService.prototype = {
         return findActiveContext();
       }
     } catch (e) {
-      dump('Greasemonkey getFirebugConsole() error:\n'+uneval(e)+'\n');
+      dump('Scriptish getFirebugConsole() error:\n'+uneval(e)+'\n');
     }
 
     return null;

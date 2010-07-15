@@ -27,7 +27,7 @@
   -->
   <menu id="gm_general_menu" class="menu-iconic"
     accesskey="G"
-    label="Greasemonkey"
+    label="Scriptish"
   >
     <menupopup
       onpopupshowing="GM_showGeneralPopup(event); event.stopPropagation();"

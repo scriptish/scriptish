@@ -39,7 +39,7 @@ const consoleService = Cc["@mozilla.org/consoleservice;1"]
 function GM_alert(msg) {
   Cc["@mozilla.org/embedcomp/prompt-service;1"]
     .getService(Ci.nsIPromptService)
-    .alert(null, "Greasemonkey alert", msg);
+    .alert(null, "Scriptish alert", msg);
 }
 
 GM_stringBundle = function() {

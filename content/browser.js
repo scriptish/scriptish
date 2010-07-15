@@ -1,5 +1,5 @@
 // this file is the JavaScript backing for the UI wrangling which happens in
-// browser.xul. It also initializes the Greasemonkey singleton which contains
+// browser.xul. It also initializes the Scriptish singleton which contains
 // all the main injection logic, though that should probably be a proper XPCOM
 // service and wouldn't need to be initialized in that case.
 
