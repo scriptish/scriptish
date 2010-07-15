@@ -22,12 +22,9 @@
       insertbefore="javascriptConsole" />
   </menupopup>
 
-  <!--
-  NOTE: Unlocalized accesskey & label in menu tags; possibly unaccessible
-  -->
   <menu id="gm_general_menu" class="menu-iconic"
-    accesskey="G"
-    label="Scriptish"
+    accesskey="&menu.title.accesskey;"
+    label="&menu.title;"
   >
     <menupopup
       onpopupshowing="GM_showGeneralPopup(event); event.stopPropagation();"
