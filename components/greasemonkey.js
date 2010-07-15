@@ -58,7 +58,7 @@ ScriptishService.prototype = {
   ]),
 
   get filename() { return serviceFilename; },
-  _scriptFoldername: "gm_scripts",
+  _scriptFoldername: "scriptish_scripts",
 
   _config: null,
   get config() {
