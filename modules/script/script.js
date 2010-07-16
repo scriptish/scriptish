@@ -5,8 +5,8 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
-Cu.import("resource://scriptish/scriptrequire.js");
-Cu.import("resource://scriptish/scriptresource.js");
+Cu.import("resource://scriptish/script/scriptrequire.js");
+Cu.import("resource://scriptish/script/scriptresource.js");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
 
@@ -202,7 +202,7 @@ Script.prototype = {
 
     var dependhash = tools.GM_sha1(newScript._rawMeta);
     if (dependhash != this._dependhash && !newScript._dependFail) {
-      Cu.import("resource://scriptish/scriptdownloader.js", tools);
+      Cu.import("resource://scriptish/script/scriptdownloader.js", tools);
 
       this._dependhash = dependhash;
       this._requires = newScript._requires;

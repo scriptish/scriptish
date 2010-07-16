@@ -194,7 +194,7 @@ GM_BrowserUI.startInstallScript = function(uri, timer) {
   }
 
   var tools = {};
-  Components.utils.import("resource://scriptish/scriptdownloader.js", tools);
+  Components.utils.import("resource://scriptish/script/scriptdownloader.js", tools);
 
   this.scriptDownloader_ = new tools.GM_ScriptDownloader(window, uri, this.bundle);
   this.scriptDownloader_.startInstall();
