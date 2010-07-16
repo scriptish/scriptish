@@ -5,7 +5,7 @@ var EXPORTED_SYMBOLS = ["GM_newUserScript"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-function GM_newUserScript(parentWindow) {
+const GM_newUserScript = function(parentWindow) {
   var windowWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
     .getService(Ci.nsIWindowWatcher);
 

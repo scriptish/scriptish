@@ -7,7 +7,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
 
-function GM_openInEditor(script, parentWindow) {
+const GM_openInEditor = function(script, parentWindow) {
   var file = script.editFile;
   var editor = GM_getEditor(parentWindow);
   if (!editor) {

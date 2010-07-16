@@ -6,7 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/GM_firefoxVersion.js");
 
-function GM_showUserscriptList() {
+const GM_showUserscriptList = function() {
   var chromeWin = Cc['@mozilla.org/appshell/window-mediator;1']
       .getService(Ci.nsIWindowMediator)
       .getMostRecentWindow("navigator:browser");

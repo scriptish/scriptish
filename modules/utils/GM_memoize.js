@@ -11,7 +11,7 @@ var EXPORTED_SYMBOLS = ["GM_memoize"];
 // The memoized function may have any number of arguments, but they must be
 // be serializable, and uniquely.  It's safest to use this only on functions
 // that accept primitives.
-function GM_memoize(func, limit) {
+const GM_memoize = function(func, limit) {
   limit = limit || 3000;
   var cache = {__proto__: null};
   var keylist = [];

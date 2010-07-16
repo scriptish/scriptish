@@ -6,7 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
 
-GM_uriFromUrl = function(aUrl, aBaseUrl) {
+const GM_uriFromUrl = function(aUrl, aBaseUrl) {
   var baseUri = null;
   if (aBaseUrl) baseUri = GM_uriFromUrl(aBaseUrl);
   try {
