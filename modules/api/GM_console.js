@@ -1,9 +1,8 @@
+
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_console"];
 
 const Cu = Components.utils;
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/api/GM_ScriptLogger.js");
 
 // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ //

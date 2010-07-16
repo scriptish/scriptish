@@ -172,7 +172,7 @@ Script.prototype = {
     // Migrate preferences.
     if (this.prefroot != newScript.prefroot) {
       var tools = {};
-      Cu.import("resource://scriptish/miscapis.js", tools);
+      Cu.import("resource://scriptish/api/GM_ScriptStorage.js", tools);
 
       var storageOld = new tools.GM_ScriptStorage(this);
       var storageNew = new tools.GM_ScriptStorage(newScript);

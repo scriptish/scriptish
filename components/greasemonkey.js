@@ -177,7 +177,7 @@ ScriptishService.prototype = {
 
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
-    Cu.import("resource://scriptish/miscapis.js", tools);
+    Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
 
     // detect and grab reference to firebug console and context, if it exists
@@ -185,8 +185,6 @@ ScriptishService.prototype = {
 
     for (var i = 0; script = scripts[i]; i++) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
-
-      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
 
       var GM_API = new tools.GM_API(
           script,
@@ -208,6 +206,8 @@ ScriptishService.prototype = {
       for (var funcName in GM_API) {
         sandbox[funcName] = GM_API[funcName]
       }
+
+      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
       sandbox.console = console;
 
       sandbox.__proto__ = wrappedContentWin;
