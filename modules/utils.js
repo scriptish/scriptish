@@ -4,7 +4,6 @@ var EXPORTED_SYMBOLS = [
   "GM_stringBundle",
   "GM_getConfig",
   "GM_hitch",
-  "GM_listen",
   "GM_logError",
   "GM_log",
   "GM_getContents",
@@ -59,10 +58,6 @@ function GM_hitch(obj, meth) {
     // list of static and dynamic arguments.
     return obj[meth].apply(obj, args);
   };
-}
-
-function GM_listen(source, event, listener, opt_capture) {
-  Cu.lookupMethod(source, "addEventListener")(event, listener, opt_capture);
 }
 
 /**
