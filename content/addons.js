@@ -1,7 +1,8 @@
 
 Components.utils.import("resource://scriptish/utils.js");
-Components.utils.import("resource://scriptish/script/scriptdownloader.js");
 Components.utils.import("resource://scriptish/utils/GM_newUserScript.js");
+Components.utils.import("resource://scriptish/utils/GM_isGreasemonkeyable.js");
+Components.utils.import("resource://scriptish/script/scriptdownloader.js");
 Components.utils.import("resource://scriptish/third-party/mpl-utils.js");
 
 // Globals.

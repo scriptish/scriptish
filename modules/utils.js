@@ -10,7 +10,6 @@ var EXPORTED_SYMBOLS = [
   "GM_log",
   "GM_getContents",
   "GM_getUriFromFile",
-  "GM_isGreasemonkeyable",
   "GM_getEnabled",
   "GM_setEnabled"
 ];
@@ -128,34 +127,6 @@ function GM_getContents(file, charset) {
 
 function GM_getUriFromFile(file) {
   return ioService.newFileURI(file);
-}
-
-function GM_isGreasemonkeyable(url) {
-  // if the url provide is not a valid url, then an error could be thrown
-  try {
-    var scheme = ioService.extractScheme(url);
-  } catch (e) {
-    return false;
-  }
-
-  switch (scheme) {
-    case "http":
-    case "https":
-    case "ftp":
-    case "data":
-      return true;
-    case "about":
-      // Always allow "about:blank".
-      if (/^about:blank/.test(url)) return true;
-      // Conditionally allow the rest of "about:".
-      return GM_prefRoot.getValue('aboutIsGreaseable');
-    case "file":
-      return GM_prefRoot.getValue('fileIsGreaseable');
-    case "unmht":
-      return GM_prefRoot.getValue('unmhtIsGreaseable');
-  }
-
-  return false;
 }
 
 function GM_getEnabled() {
