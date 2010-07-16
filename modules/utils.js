@@ -8,7 +8,6 @@ var EXPORTED_SYMBOLS = [
   "GM_unlisten",
   "GM_logError",
   "GM_log",
-  "GM_getProfileFile",
   "GM_getBinaryContents",
   "GM_getContents",
   "GM_getWriteStream",
@@ -96,16 +95,6 @@ function GM_log(message, force) {
     // make sure message is a string, and remove NULL bytes which truncate it
     consoleService.logStringMessage((message + '').replace("\0","","g"));
   }
-}
-
-function GM_getProfileFile(aFilename) {
-  var file = Cc["@mozilla.org/file/directory_service;1"]
-      .getService(Ci.nsIProperties)
-      .get("ProfD", Ci.nsILocalFile);
-
-  file.append(aFilename);
-
-  return file;
 }
 
 function GM_getBinaryContents(file) {

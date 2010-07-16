@@ -241,7 +241,9 @@ Config.prototype = {
   },
 
   get _scriptDir() {
-    return GM_getProfileFile(this._scriptFoldername);
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_getProfileFile.js", tools);
+    return tools.GM_getProfileFile(this._scriptFoldername);
   },
 
   /**
