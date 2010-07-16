@@ -9,7 +9,6 @@ var EXPORTED_SYMBOLS = [
   "GM_unlisten",
   "GM_logError",
   "GM_log",
-  "GM_openInEditor",
   "GM_getEditor",
   "GM_launchApplicationWithDoc",
   "GM_parseScriptName",
@@ -110,28 +109,6 @@ function GM_log(message, force) {
   if (force || GM_prefRoot.getValue("logChrome", false)) {
     // make sure message is a string, and remove NULL bytes which truncate it
     consoleService.logStringMessage((message + '').replace("\0","","g"));
-  }
-}
-
-// TODO: this stuff was copied wholesale and not refactored at all. Lots of
-// the UI and Config rely on it. Needs rethinking.
-
-function GM_openInEditor(script, parentWindow) {
-  var file = script.editFile;
-  var editor = GM_getEditor(parentWindow);
-  if (!editor) {
-    // The user did not choose an editor.
-    return;
-  }
-
-  try {
-    GM_launchApplicationWithDoc(editor, file);
-  } catch (e) {
-    // Something may be wrong with the editor the user selected. Remove so that
-    // next time they can pick a different one.
-    GM_alert(GM_stringBundle().GetStringFromName("editor.could_not_launch") + "\n" + e);
-    GM_prefRoot.remove("editor");
-    throw e;
   }
 }
 

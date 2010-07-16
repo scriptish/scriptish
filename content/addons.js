@@ -272,6 +272,8 @@ var greasemonkeyAddons = {
   },
 
   doCommand: function(command) {
+    var tools = {};
+
     var script = greasemonkeyAddons.findSelectedScript();
     if (!script) {
       dump("greasemonkeyAddons.doCommand() could not find selected script.\n");
@@ -289,7 +291,8 @@ var greasemonkeyAddons = {
       openURL(homepageURL);
       return;
     case 'cmd_userscript_edit':
-      GM_openInEditor(script, window);
+      Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
+      tools.GM_openInEditor(script, window);
       break;
     case 'cmd_userscript_show':
       GM_openFolder(script._file);

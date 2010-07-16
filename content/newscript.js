@@ -23,6 +23,8 @@ window.addEventListener("load", function() {
 ////////////////////////////////// functions ///////////////////////////////////
 
 function doInstall() {
+  var tools = {};
+
   var script = createScriptSource();
   if (!script) return false;
 
@@ -49,8 +51,10 @@ function doInstall() {
   // install this script
   config.install(script);
 
+  Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
+
   // and fire up the editor!
-  GM_openInEditor(script, window);
+  tools.GM_openInEditor(script, window);
 
   // persist namespace value
   GM_prefRoot.setValue("newscript_namespace", script.namespace);
