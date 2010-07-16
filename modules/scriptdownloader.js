@@ -138,6 +138,7 @@ GM_ScriptDownloader.prototype.fetchDependencies = function(){
 };
 
 GM_ScriptDownloader.prototype.downloadNextDependency = function(){
+  var tools = {};
   if (this.depQueue_.length > 0) {
     var dep = this.depQueue_.pop();
     try {
@@ -147,7 +148,9 @@ GM_ScriptDownloader.prototype.downloadNextDependency = function(){
         persist.PERSIST_FLAGS_BYPASS_CACHE |
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
 
-      var sourceUri = GM_uriFromUrl(dep.urlToDownload);
+      Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+
+      var sourceUri = tools.GM_uriFromUrl(dep.urlToDownload);
       var sourceChannel = ioService.newChannelFromURI(sourceUri);
       sourceChannel.notificationCallbacks = new NotificationCallbacks();
 

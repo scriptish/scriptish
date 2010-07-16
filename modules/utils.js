@@ -22,7 +22,6 @@ var EXPORTED_SYMBOLS = [
   "GM_isGreasemonkeyable",
   "GM_getEnabled",
   "GM_setEnabled",
-  "GM_uriFromUrl",
   "GM_memoize",
   "GM_newUserScript"
 ];
@@ -343,30 +342,6 @@ function GM_getEnabled() {
 
 function GM_setEnabled(enabled) {
   GM_prefRoot.setValue("enabled", enabled);
-}
-
-function GM_uriFromUrl(url, baseUrl) {
-  var baseUri = null;
-  if (baseUrl) baseUri = GM_uriFromUrl(baseUrl);
-  try {
-    return ioService.newURI(url, null, baseUri);
-  } catch (e) {
-    return null;
-  }
-}
-
-GM_uriFromUrl = function(aUrl, aBaseUrl) {
-  GM_uriFromUrl = GM_memoize(function(aUrl, aBaseUrl) {
-    var baseUri = null;
-    if (aBaseUrl) baseUri = GM_uriFromUrl(aBaseUrl);
-    try {
-      return ioService.newURI(aUrl, null, baseUri);
-    } catch (e) {
-      return null;
-    }
-  });
-
-  return GM_uriFromUrl(aUrl, aBaseUrl);
 }
 
 // Decorate a function with a memoization wrapper, with a limited-size cache

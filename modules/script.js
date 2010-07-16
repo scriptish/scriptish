@@ -325,6 +325,9 @@ Script.prototype = {
 };
 
 Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
+  var tools = {};
+  Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+
   var script = new Script(aConfig);
 
   if (aURI) {
@@ -382,7 +385,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         continue;
       case "require":
         try {
-          var reqUri = GM_uriFromUrl(value, aURI);
+          var reqUri = tools.GM_uriFromUrl(value, aURI);
           var scriptRequire = new ScriptRequire(script);
           scriptRequire._downloadURL = reqUri.spec;
           script._requires.push(scriptRequire);
@@ -412,7 +415,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
           previousResourceNames[resName] = true;
         }
         try {
-          var resUri = GM_uriFromUrl(res[2], aURI);
+          var resUri = tools.GM_uriFromUrl(res[2], aURI);
           var scriptResource = new ScriptResource(script);
           scriptResource._name = resName;
           scriptResource._downloadURL = resUri.spec;

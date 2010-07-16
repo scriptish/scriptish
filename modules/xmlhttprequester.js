@@ -21,9 +21,12 @@ function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
 GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
   GM_log("> GM_xmlhttpRequest.contentStartRequest");
 
+  var tools = {};
+  Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+
   try {
     // Validate and parse the (possibly relative) given URL.
-    var uri = GM_uriFromUrl(details.url, this.originUrl);
+    var uri = tools.GM_uriFromUrl(details.url, this.originUrl);
     var url = uri.spec;
   } catch (e) {
     // A malformed URL won't be parsed properly.
