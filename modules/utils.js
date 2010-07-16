@@ -23,7 +23,6 @@ var EXPORTED_SYMBOLS = [
   "GM_getEnabled",
   "GM_setEnabled",
   "GM_uriFromUrl",
-  "GM_sha1",
   "GM_memoize",
   "GM_newUserScript"
 ];
@@ -368,30 +367,6 @@ GM_uriFromUrl = function(aUrl, aBaseUrl) {
   });
 
   return GM_uriFromUrl(aUrl, aBaseUrl);
-}
-
-// UTF-8 encodes input, SHA-1 hashes it and returns the 40-char hex version.
-GM_sha1 = function(aUnicode) {
-  GM_sha1 = GM_memoize(function(aUnicode) {
-    var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-        .createInstance(Ci.nsIScriptableUnicodeConverter);
-    unicodeConverter.charset = "UTF-8";
-
-    var data = unicodeConverter.convertToByteArray(aUnicode, {});
-    var ch = Cc["@mozilla.org/security/hash;1"]
-        .createInstance(Ci.nsICryptoHash);
-    ch.init(ch.SHA1);
-    ch.update(data, data.length);
-    var hash = ch.finish(false); // hash as raw octets
-
-    var hex = [];
-    for (var i = 0; i < hash.length; i++) {
-      hex.push( ("0" + hash.charCodeAt(i).toString(16)).slice(-2) );
-    }
-    return hex.join('');
-  });
-
-  return GM_sha1(aUnicode);
 }
 
 // Decorate a function with a memoization wrapper, with a limited-size cache

@@ -1,3 +1,4 @@
+
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_openInEditor"];
 
