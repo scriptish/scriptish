@@ -4,6 +4,7 @@ var EXPORTED_SYMBOLS = ["GM_getBinaryContents"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils.js");
 
 const GM_getBinaryContents = function(aFile) {
     var channel = ioService.newChannelFromURI(GM_getUriFromFile(aFile));
