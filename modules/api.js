@@ -51,16 +51,20 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
       aUnsafeContentWin, aChromeWin, aURL));
   }
   function getStorage() {
-    return _storage ||( _storage = new GM_ScriptStorage(aScript));
+    if (!_storage) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_ScriptStorage.js", tools);
+      _storage = new tools.GM_ScriptStorage(aScript);
+    }
+    return _storage;
   }
   function getResources() {
-    if (_resources) {
-      return _resources;
-    } else {
+    if (!_resources) {
       var tools = {};
       Cu.import("resource://scriptish/api/GM_Resources.js", tools);
       return _resources = new tools.GM_Resources(aScript);
     }
+    return _resources;
   }
   function getLogger() {
     return _logger || (_logger = new GM_ScriptLogger(aScript));
