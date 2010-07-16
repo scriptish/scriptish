@@ -5,7 +5,6 @@ var EXPORTED_SYMBOLS = [
   "GM_getConfig",
   "GM_hitch",
   "GM_listen",
-  "GM_unlisten",
   "GM_logError",
   "GM_log",
   "GM_getContents",
@@ -64,10 +63,6 @@ function GM_hitch(obj, meth) {
 
 function GM_listen(source, event, listener, opt_capture) {
   Cu.lookupMethod(source, "addEventListener")(event, listener, opt_capture);
-}
-
-function GM_unlisten(source, event, listener, opt_capture) {
-  Cu.lookupMethod(source, "removeEventListener")(event, listener, opt_capture);
 }
 
 /**
