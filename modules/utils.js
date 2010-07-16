@@ -8,7 +8,6 @@ var EXPORTED_SYMBOLS = [
   "GM_unlisten",
   "GM_logError",
   "GM_log",
-  "GM_getBinaryContents",
   "GM_getContents",
   "GM_getWriteStream",
   "GM_getUriFromFile",
@@ -95,19 +94,6 @@ function GM_log(message, force) {
     // make sure message is a string, and remove NULL bytes which truncate it
     consoleService.logStringMessage((message + '').replace("\0","","g"));
   }
-}
-
-function GM_getBinaryContents(file) {
-    var channel = ioService.newChannelFromURI(GM_getUriFromFile(file));
-    var input = channel.open();
-
-    var bstream = Cc["@mozilla.org/binaryinputstream;1"]
-                            .createInstance(Ci.nsIBinaryInputStream);
-    bstream.setInputStream(input);
-
-    var bytes = bstream.readBytes(bstream.available());
-
-    return bytes;
 }
 
 function GM_getContents(file, charset) {
