@@ -3,7 +3,6 @@ var EXPORTED_SYMBOLS = [
     "GM_ScriptStorage",
     "GM_Resources",
     "GM_ScriptLogger",
-    "GM_addStyle",
     "GM_console"];
 
 const Cu = Components.utils;
