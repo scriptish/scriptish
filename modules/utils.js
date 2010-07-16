@@ -2,7 +2,6 @@
 var EXPORTED_SYMBOLS = [
   "GM_alert",
   "GM_stringBundle",
-  "GM_isDef",
   "GM_getConfig",
   "GM_hitch",
   "GM_listen",
@@ -44,10 +43,6 @@ GM_stringBundle = function() {
   GM_stringBundle = function() { return stringBundle; };
 
   return stringBundle;
-}
-
-function GM_isDef(thing) {
-  return typeof(thing) != "undefined";
 }
 
 function GM_getConfig() {
