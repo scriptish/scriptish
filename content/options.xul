@@ -9,7 +9,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
 <dialog
-  title="Greasemonkey - &prefWindow.titleWin;"
+  title="Scriptish - &prefWindow.titleWin;"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   buttons="accept"
 
@@ -20,7 +20,7 @@
 <script type="application/x-javascript" src="chrome://scriptish/content/prefmanager.js" />
 <script type="application/x-javascript" src="chrome://scriptish/content/options.js" />
 
-<dialogheader title="Greasemonkey" description="&prefWindow.titleWin;"/>
+<dialogheader title="Scriptish" description="&prefWindow.titleWin;"/>
 
 <vbox>
   <groupbox>

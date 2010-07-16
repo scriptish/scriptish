@@ -5,7 +5,6 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/convert2RegExp.js");
-Cu.import("resource://scriptish/scriptdownloader.js");
 Cu.import("resource://scriptish/scriptrequire.js");
 Cu.import("resource://scriptish/scriptresource.js");
 try {
@@ -32,6 +31,7 @@ function Script(config) {
   this._id = null;
   this._prefroot = null;
   this._author = null;
+  this._contributors = [];
   this._description = null;
   this._version = null;
   this._enabled = true;
@@ -116,6 +116,10 @@ Script.prototype = {
   },
   get creator() { return this.author; },
   get author() { return this._author; },
+  get contributors() { return this._contributors },
+  addContributor: function(aContributor) {
+    this._contributors.push(aContributor);
+  },
   get description() { return this._description; },
   get version() { return this._version; },
   get enabled() { return this._enabled; },
@@ -240,6 +244,7 @@ Script.prototype = {
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this._author = newScript._author;
+    this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._unwrap = newScript._unwrap;
     this._version = newScript._version;
@@ -272,6 +277,13 @@ Script.prototype = {
 
   createXMLNode: function(doc) {
     var scriptNode = doc.createElement("Script");
+
+    for (var j = 0; j < this.contributors.length; j++) {
+      var contributorNode = doc.createElement("Contributor");
+      contributorNode.appendChild(doc.createTextNode(this.contributors[j]));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(contributorNode);
+    }
 
     for (var j = 0; j < this._includes.length; j++) {
       var includeNode = doc.createElement("Include");
@@ -405,6 +417,9 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
       case "homepageurl":
         script._homepageURL = value;
         continue;
+      case "contributor":
+        script.addContributor(value);
+        continue;
       case "include":
         script.addInclude(value);
         continue;
@@ -505,6 +520,9 @@ Script.load = function load(aConfig, aNode) {
 
   for (var i = 0, childNode; childNode = aNode.childNodes[i]; i++) {
     switch (childNode.nodeName) {
+      case "Contributor":
+        script.addContributor(childNode.firstChild.nodeValue.replace(rightTrim, ''));
+        break;
       case "Include":
         script.addInclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
         break;

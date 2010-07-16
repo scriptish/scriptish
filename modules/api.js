@@ -22,7 +22,7 @@ function GM_apiLeakCheck(apiName) {
         stack.filename != gmService.filename &&
         stack.filename.substr(0, 6) != "chrome") {
       GM_logError(new Error(
-          "Greasemonkey access violation: unsafeWindow cannot call " +
+          "Scriptish access violation: unsafeWindow cannot call " +
           apiName + "."));
       return false;
     }
