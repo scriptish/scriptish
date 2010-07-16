@@ -87,6 +87,7 @@ ScriptishService.prototype = {
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
+    Cu.import("resource://scriptish/utils/GM_installUri.js", tools);
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
 

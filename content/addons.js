@@ -172,12 +172,13 @@ var greasemonkeyAddons = {
   onDrop: function(event) {
     var tools = {};
     Components.utils.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+    Components.utils.import("resource://scriptish/utils/GM_installUri.js", tools);
 
     var url = greasemonkeyAddons.urlFromDragEvent(event);
     var uri = tools.GM_uriFromUrl(url);
 
     // TODO: Make this UI appear attached to addons, rather than the browser?
-    GM_installUri(uri);
+    tools.GM_installUri(uri);
   },
   
   updateLastSelected: function() {
