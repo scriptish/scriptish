@@ -4,12 +4,14 @@ var EXPORTED_SYMBOLS = ["GM_sha1"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
 
 // UTF-8 encodes input, SHA-1 hashes it and returns the 40-char hex version.
 const GM_sha1 = function(aUnicode) { return sha1(aUnicode); };
 var sha1 = function(aUnicode) {
-  sha1 = GM_memoize(function(aUnicode) {
+  var tools = {};
+  Cu.import("resource://scriptish/utils/GM_memoize.js", tools);
+
+  sha1 = tools.GM_memoize(function(aUnicode) {
     var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
         .createInstance(Ci.nsIScriptableUnicodeConverter);
     unicodeConverter.charset = "UTF-8";

@@ -1,7 +1,8 @@
+
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_convert2RegExp"];
 
-Components.utils.import("resource://scriptish/utils.js");
+const Cu = Components.utils;
 
 const tldRegExp = new RegExp("^(\\^(?:[^/]*)(?://)?(?:[^/]*))(\\\\\\.tld)((?:/.*)?)$");
 
@@ -65,7 +66,10 @@ function convert2RegExp(aPattern) {
 
 GM_convert2RegExp = function(aPattern) { return temp_convert2RegExp(aPattern); };
 temp_convert2RegExp = function(aPattern) {
+  var tools = {};
+  Cu.import("resource://scriptish/utils/GM_memoize.js", tools);
+
   // memoize convert2RegExp on the first execution of this function
-  temp_convert2RegExp = GM_memoize(convert2RegExp);
+  temp_convert2RegExp = tools.GM_memoize(convert2RegExp);
   return temp_convert2RegExp(aPattern);
 }
