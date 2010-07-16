@@ -4,7 +4,7 @@ var EXPORTED_SYMBOLS = ["Script"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/convert2RegExp.js");
+Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
 Cu.import("resource://scriptish/scriptrequire.js");
 Cu.import("resource://scriptish/scriptresource.js");
 
