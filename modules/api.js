@@ -54,7 +54,13 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
     return _storage ||( _storage = new GM_ScriptStorage(aScript));
   }
   function getResources() {
-   return _resources || (_resources = new GM_Resources(aScript));
+    if (_resources) {
+      return _resources;
+    } else {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_Resources.js", tools);
+      return _resources = new tools.GM_Resources(aScript);
+    }
   }
   function getLogger() {
     return _logger || (_logger = new GM_ScriptLogger(aScript));
