@@ -2,6 +2,7 @@
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/api.js");
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
   this.unsafeContentWin = unsafeContentWin;
@@ -20,9 +21,12 @@ function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
 GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
   GM_log("> GM_xmlhttpRequest.contentStartRequest");
 
+  var tools = {};
+  Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+
   try {
     // Validate and parse the (possibly relative) given URL.
-    var uri = GM_uriFromUrl(details.url, this.originUrl);
+    var uri = tools.GM_uriFromUrl(details.url, this.originUrl);
     var url = uri.spec;
   } catch (e) {
     // A malformed URL won't be parsed properly.
@@ -124,12 +128,8 @@ function(unsafeContentWin, req, event, details) {
         responseState.finalUrl = req.channel.URI.spec;
       }
 
-      // Pop back onto browser thread and call event handler.
-      // Have to use nested function here instead of GM_hitch because
-      // otherwise details[event].apply can point to window.setTimeout, which
-      // can be abused to get increased priveledges.
-      new XPCNativeWrapper(unsafeContentWin, "setTimeout()")
-        .setTimeout(function(){details[event](responseState);}, 0);
+      GM_apiSafeCallback(
+          unsafeContentWin, details, details[event], [responseState]);
 
       GM_log("< GM_xmlhttpRequester -- callback for " + event);
     }

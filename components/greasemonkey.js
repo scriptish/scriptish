@@ -58,7 +58,7 @@ ScriptishService.prototype = {
   ]),
 
   get filename() { return serviceFilename; },
-  _scriptFoldername: "gm_scripts",
+  _scriptFoldername: "scriptish_scripts",
 
   _config: null,
   get config() {
@@ -372,7 +372,7 @@ ScriptishService.prototype = {
         return findActiveContext();
       }
     } catch (e) {
-      dump('Greasemonkey getFirebugConsole() error:\n'+uneval(e)+'\n');
+      dump('Scriptish getFirebugConsole() error:\n'+uneval(e)+'\n');
     }
 
     return null;

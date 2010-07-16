@@ -11,7 +11,7 @@
     <em:iconURL>chrome://scriptish/skin/icon_medium.png</em:iconURL>
 
     <em:name>Scriptish</em:name>
-    <em:description>A User Script Manager for Firefox</em:description>
+    <em:description>A Script Extension Manager for Firefox</em:description>
 
     <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
     <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>

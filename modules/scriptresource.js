@@ -31,11 +31,14 @@ ScriptResource.prototype = {
   get textContent() { return GM_getContents(this._file); },
 
   get dataContent() {
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_getBinaryContents.js", tools);
+
     var appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
                      .getService(Ci.nsIAppShellService);
 
     var window = appSvc.hiddenDOMWindow;
-    var binaryContents = GM_getBinaryContents(this._file);
+    var binaryContents = tools.GM_getBinaryContents(this._file);
 
     var mimetype = this._mimetype;
     if (this._charset && this._charset.length > 0) {

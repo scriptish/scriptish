@@ -1,6 +1,7 @@
 
 Components.utils.import("resource://scriptish/utils.js");
 Components.utils.import("resource://scriptish/scriptdownloader.js");
+Components.utils.import("resource://scriptish/utils/GM_newUserScript.js");
 Components.utils.import("resource://scriptish/third-party/mpl-utils.js");
 
 // Globals.
@@ -169,7 +170,12 @@ var greasemonkeyAddons = {
   },
 
   onDrop: function(event) {
-    var uri = GM_uriFromUrl(greasemonkeyAddons.urlFromDragEvent(event));
+    var tools = {};
+    Components.utils.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+
+    var url = greasemonkeyAddons.urlFromDragEvent(event);
+    var uri = tools.GM_uriFromUrl(url);
+
     // TODO: Make this UI appear attached to addons, rather than the browser?
     GM_installUri(uri);
   },
@@ -264,6 +270,12 @@ var greasemonkeyAddons = {
     // Setting these attributes inherits the values into the same place they
     // would go for extensions.
     item.setAttribute('addonId', script.id);
+
+    if (script.homepageURL) {
+      item.setAttribute('homepageURL', script.homepageURL);
+    } else {
+      item.removeAttribute('homepageURL');
+    }
     item.setAttribute('name', script.name);
     item.setAttribute('description', script.description);
     item.setAttribute('version', script.version);
@@ -298,6 +310,8 @@ var greasemonkeyAddons = {
   },
 
   doCommand: function(command) {
+    var tools = {};
+
     var script = greasemonkeyAddons.findSelectedScript();
     if (!script) {
       dump("greasemonkeyAddons.doCommand() could not find selected script.\n");
@@ -307,8 +321,16 @@ var greasemonkeyAddons = {
     var selectedListitem = gUserscriptsView.selectedItem;
     var toBottom = false;
     switch (command) {
+    case 'cmd_userscript_homepage':
+      if (!selectedListitem) return;
+      var homepageURL = selectedListitem.getAttribute("homepageURL");
+      // only allow http(s) homepages
+      if (!isSafeURI(homepageURL)) return;
+      openURL(homepageURL);
+      return;
     case 'cmd_userscript_edit':
-      GM_openInEditor(script, window);
+      Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
+      tools.GM_openInEditor(script, window);
       break;
     case 'cmd_userscript_show':
       GM_openFolder(script._file);
@@ -405,6 +427,12 @@ var greasemonkeyAddons = {
       // Set visibility.
       setItemsHidden(false, standardItems);
       setItemsHidden(false, script.enabled ? ['disable'] : ['enable']);
+
+      // Set homepage visibility
+      if (selectedItem.getAttribute('homepageURL')) {
+        setItemsHidden(false, ['homepage', 'misc_separator']);
+      }
+
       // Set disabled.
       var atBottom = !selectedItem.nextSibling;
       var atTop = !selectedItem.previousSibling;

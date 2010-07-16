@@ -22,12 +22,9 @@
       insertbefore="javascriptConsole" />
   </menupopup>
 
-  <!--
-  NOTE: Unlocalized accesskey & label in menu tags; possibly unaccessible
-  -->
   <menu id="gm_general_menu" class="menu-iconic"
-    accesskey="G"
-    label="Greasemonkey"
+    accesskey="&menu.title.accesskey;"
+    label="&menu.title;"
   >
     <menupopup
       onpopupshowing="GM_showGeneralPopup(event); event.stopPropagation();"
@@ -46,7 +43,7 @@
       <menuitem
         accesskey="&menu.manage.accesskey;"
         label="&menu.manage;"
-        oncommand="BrowserOpenAddonsMgr('userscripts');" />
+        oncommand="GM_BrowserUI.showUserscriptList();" />
       <menuitem id="userscript-tools-new"
         accesskey="&menu.new.accesskey;"
         label="&menu.new;"
@@ -103,7 +100,7 @@
           oncommand="GM_newUserScript(window);" />
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
-          oncommand="BrowserOpenAddonsMgr('userscripts');" />
+          oncommand="GM_BrowserUI.showUserscriptList();" />
         <menuitem label="&menu.managePage;"
           oncommand="GM_BrowserUI.managePageMenuItemClicked();" />
         <menuseparator />

@@ -4,15 +4,17 @@ var EXPORTED_SYMBOLS = ["Script"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/convert2RegExp.js");
-Cu.import("resource://scriptish/scriptdownloader.js");
+Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
 Cu.import("resource://scriptish/scriptrequire.js");
 Cu.import("resource://scriptish/scriptresource.js");
+
+const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
 
 function Script(config) {
   this._config = config;
   this._observers = [];
 
+  this._homepageURL = null; // Only for scripts not installed
   this._downloadURL = null; // Only for scripts not installed
   this._tempFile = null; // Only for scripts not installed
   this._basedir = null;
@@ -24,6 +26,8 @@ function Script(config) {
   this._namespace = null;
   this._id = null;
   this._prefroot = null;
+  this._author = null;
+  this._contributors = [];
   this._description = null;
   this._version = null;
   this._enabled = true;
@@ -50,6 +54,7 @@ Script.prototype = {
 
   _changed: function(event, data) { this._config._changed(this, event, data); },
 
+  get homepageURL() { return this._homepageURL; },
   get name() { return this._name; },
   get namespace() { return this._namespace; },
   get id() {
@@ -59,6 +64,11 @@ Script.prototype = {
   get prefroot() { 
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
+  },
+  get author() { return this._author; },
+  get contributors() { return this._contributors },
+  addContributor: function(aContributor) {
+    this._contributors.push(aContributor);
   },
   get description() { return this._description; },
   get version() { return this._version; },
@@ -156,6 +166,9 @@ Script.prototype = {
   },
 
   updateFromNewScript: function(newScript) {
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
+
     // Migrate preferences.
     if (this.prefroot != newScript.prefroot) {
       var tools = {};
@@ -178,14 +191,19 @@ Script.prototype = {
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
     this._excludeRegExps = newScript._excludeRegExps;
+    this._homepageURL = newScript._homepageURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
+    this._author = newScript._author;
+    this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._unwrap = newScript._unwrap;
     this._version = newScript._version;
 
-    var dependhash = GM_sha1(newScript._rawMeta);
+    var dependhash = tools.GM_sha1(newScript._rawMeta);
     if (dependhash != this._dependhash && !newScript._dependFail) {
+      Cu.import("resource://scriptish/scriptdownloader.js", tools);
+
       this._dependhash = dependhash;
       this._requires = newScript._requires;
       this._resources = newScript._resources;
@@ -199,7 +217,7 @@ Script.prototype = {
       }
 
       // Redownload dependencies.
-      var scriptDownloader = new GM_ScriptDownloader(null, null, null);
+      var scriptDownloader = new tools.GM_ScriptDownloader(null, null, null);
       scriptDownloader.script = this;
       scriptDownloader.updateScript = true;
       scriptDownloader.fetchDependencies();
@@ -210,6 +228,13 @@ Script.prototype = {
 
   createXMLNode: function(doc) {
     var scriptNode = doc.createElement("Script");
+
+    for (var j = 0; j < this.contributors.length; j++) {
+      var contributorNode = doc.createElement("Contributor");
+      contributorNode.appendChild(doc.createTextNode(this.contributors[j]));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(contributorNode);
+    }
 
     for (var j = 0; j < this._includes.length; j++) {
       var includeNode = doc.createElement("Include");
@@ -260,12 +285,17 @@ Script.prototype = {
     scriptNode.setAttribute("filename", this._filename);
     scriptNode.setAttribute("name", this._name);
     scriptNode.setAttribute("namespace", this._namespace);
+    scriptNode.setAttribute("author", this._author);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
     scriptNode.setAttribute("enabled", this._enabled);
     scriptNode.setAttribute("basedir", this._basedir);
     scriptNode.setAttribute("modified", this._modified);
     scriptNode.setAttribute("dependhash", this._dependhash);
+
+    if (this.homepageURL) {
+      scriptNode.setAttribute("homepageURL", this.homepageURL);
+    }
 
     if (this._downloadURL) {
       scriptNode.setAttribute("installurl", this._downloadURL);
@@ -286,12 +316,18 @@ Script.prototype = {
       this._resources[i]._initFile();
     }
 
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
+
     this._modified = this._file.lastModifiedTime;
-    this._metahash = GM_sha1(this._rawMeta);
+    this._metahash = tools.GM_sha1(this._rawMeta);
   }
 };
 
 Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
+  var tools = {};
+  Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+
   var script = new Script(aConfig);
 
   if (aURI) {
@@ -300,31 +336,28 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
   }
 
   // read one line at a time looking for start meta delimiter or EOF
-  var lineRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\n]+))?)/g;
-  var result = {};
+  var lines = aSource.match(metaRegExp);
+  var i = 0;
+  var result;
   var foundMeta = false;
 
   // used for duplicate resource name detection
   var previousResourceNames = {};
   script._rawMeta = "";
 
-  while (result = lineRegExp(aSource)) {
-    result = result[0];
+  while (result = lines[i++]) {
+    if (!foundMeta) {
+      if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
 
-    if (!foundMeta && result.indexOf("// ==UserScript==") == 0) {
-      foundMeta = true;
       continue;
     }
-
-    if (!foundMeta) continue;
-    // gather up meta lines
 
     if (result.indexOf("// ==/UserScript==") == 0) {
       // done gathering up meta lines
       break;
     }
 
-    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\n]+))?/);
+    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
     if (match === null) continue;
 
     var header = match[1].toLowerCase();
@@ -333,9 +366,16 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
     switch (header) {
       case "name":
       case "namespace":
+      case "author":
       case "description":
       case "version":
         script["_" + header] = value;
+        continue;
+      case "homepageurl":
+        script._homepageURL = value;
+        continue;
+      case "contributor":
+        script.addContributor(value);
         continue;
       case "include":
         script.addInclude(value);
@@ -345,7 +385,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         continue;
       case "require":
         try {
-          var reqUri = GM_uriFromUrl(value, aURI);
+          var reqUri = tools.GM_uriFromUrl(value, aURI);
           var scriptRequire = new ScriptRequire(script);
           scriptRequire._downloadURL = reqUri.spec;
           script._requires.push(scriptRequire);
@@ -375,7 +415,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
           previousResourceNames[resName] = true;
         }
         try {
-          var resUri = GM_uriFromUrl(res[2], aURI);
+          var resUri = tools.GM_uriFromUrl(res[2], aURI);
           var scriptResource = new ScriptResource(script);
           scriptResource._name = resName;
           scriptResource._downloadURL = resUri.spec;
@@ -400,7 +440,10 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
   }
 
   // if no meta info, default to reasonable values
-  if (!script._name && aURI) script._name = GM_parseScriptName(aURI);
+  if (!script._name && aURI) {
+    Cu.import("resource://scriptish/utils/GM_parseScriptName.js", tools);
+    script._name = tools.GM_parseScriptName(aURI);
+  }
   if (!script._namespace && aURI) script._namespace = aURI.host;
   if (!script._description) script._description = "";
   if (!script._version) script._version = "";
@@ -412,19 +455,23 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
 Script.load = function load(aConfig, aNode) {
   var script = new Script(aConfig);
   var fileModified = false;
+  var rightTrim = /\s*$/g;
 
   script._filename = aNode.getAttribute("filename");
   script._basedir = aNode.getAttribute("basedir") || ".";
   script._downloadURL = aNode.getAttribute("installurl") || null;
+  script._homepageURL = aNode.getAttribute("homepageURL") || null;
 
   if (!aNode.getAttribute("modified")
       || !aNode.getAttribute("dependhash")
-      || !aNode.getAttribute("version")
-  ) {
+      || !aNode.getAttribute("version")) {
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
+
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
-        aConfig, GM_getContents(script._file), script._downloadURL, true);
-    script._dependhash = GM_sha1(parsedScript._rawMeta);
+        aConfig, GM_getContents(script._file), {spec: script._downloadURL}, true);
+    script._dependhash = tools.GM_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;
   } else {
@@ -435,11 +482,14 @@ Script.load = function load(aConfig, aNode) {
 
   for (var i = 0, childNode; childNode = aNode.childNodes[i]; i++) {
     switch (childNode.nodeName) {
+      case "Contributor":
+        script.addContributor(childNode.firstChild.nodeValue.replace(rightTrim, ''));
+        break;
       case "Include":
-        script.addInclude(childNode.firstChild.nodeValue.replace(/\n/g, ''));
+        script.addInclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
         break;
       case "Exclude":
-        script.addExclude(childNode.firstChild.nodeValue.replace(/\n/g, ''));
+        script.addExclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
         break;
       case "Require":
         var scriptRequire = new ScriptRequire(script);
@@ -462,6 +512,7 @@ Script.load = function load(aConfig, aNode) {
 
   script._name = aNode.getAttribute("name");
   script._namespace = aNode.getAttribute("namespace");
+  script._author = aNode.getAttribute("author");
   script._description = aNode.getAttribute("description");
   script._enabled = aNode.getAttribute("enabled") == true.toString();
 

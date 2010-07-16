@@ -7,12 +7,14 @@ Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/script.js");
 
-function Config(aScriptDir) {
+function Config(aBaseDir) {
   this._saveTimer = null;
   this._scripts = null;
-  this._scriptFoldername = aScriptDir;
+  this._scriptFoldername = aBaseDir;
+
   this._configFile = this._scriptDir;
   this._configFile.append("config.xml");
+
   this._initScriptDir();
 
   this._observers = [];
@@ -239,7 +241,9 @@ Config.prototype = {
   },
 
   get _scriptDir() {
-    return GM_getProfileFile(this._scriptFoldername);
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_getProfileFile.js", tools);
+    return tools.GM_getProfileFile(this._scriptFoldername);
   },
 
   /**
@@ -248,9 +252,11 @@ Config.prototype = {
   _initScriptDir: function() {
     var dir = this._scriptDir;
 
+    // if the folder does not exist
     if (!dir.exists()) {
       dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
 
+      // create config.xml file
       var configStream = GM_getWriteStream(this._configFile);
       var xml = "<UserScriptConfig/>";
       configStream.write(xml, xml.length);
@@ -278,7 +284,7 @@ Config.prototype = {
 
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
-          GM_getContents(script._file), script._downloadURL, true);
+          GM_getContents(script._file), {spec: script._downloadURL}, true);
       script.updateFromNewScript(parsedScript);
       this._changed(script, "modified", null, true);
     }
