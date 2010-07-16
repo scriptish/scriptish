@@ -87,6 +87,13 @@ GM_BrowserUI.chromeLoad = function(e) {
   setTimeout(function() {gmSvc.updateVersion()}, 100);
 };
 
+GM_BrowserUI.showUserscriptList = function() {
+  var tools = {};
+  Components.utils.import(
+    "resource://scriptish/utils/GM_showUserscriptList.js", tools);
+  tools.GM_showUserscriptList();
+}
+
 /**
  * registerMenuCommand
  */
