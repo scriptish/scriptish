@@ -11,7 +11,6 @@ var EXPORTED_SYMBOLS = [
   "GM_log",
   "GM_getEditor",
   "GM_launchApplicationWithDoc",
-  "GM_parseScriptName",
   "GM_getTempFile",
   "GM_getProfileFile",
   "GM_getBinaryContents",
@@ -180,13 +179,6 @@ function GM_launchApplicationWithDoc(appFile, docFile) {
                     .createInstance(Ci.nsIProcess);
   process.init(appFile);
   process.run(false, args, args.length);
-}
-
-function GM_parseScriptName(sourceUri) {
-  var name = sourceUri.spec;
-  name = name.substring(0, name.indexOf(".user.js"));
-  name = name.substring(name.lastIndexOf("/") + 1);
-  return name;
 }
 
 function GM_getTempFile() {
