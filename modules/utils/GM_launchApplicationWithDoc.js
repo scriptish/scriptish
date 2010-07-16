@@ -4,15 +4,13 @@ var EXPORTED_SYMBOLS = ["GM_launchApplicationWithDoc"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils/GM_os.js");
 
 const GM_launchApplicationWithDoc = function(appFile, docFile) {
   var args = [docFile.path];
 
   // For the mac, wrap with a call to "open".
-  var xulRuntime = Cc["@mozilla.org/xre/app-info;1"]
-      .getService(Ci.nsIXULRuntime);
-
-  if ("Darwin" == xulRuntime.OS) {
+  if ("Darwin" == GM_os) {
     args = ["-a", appFile.path, docFile.path];
 
     appFile = Cc["@mozilla.org/file/local;1"]
