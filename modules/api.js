@@ -62,12 +62,17 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
     if (!_resources) {
       var tools = {};
       Cu.import("resource://scriptish/api/GM_Resources.js", tools);
-      return _resources = new tools.GM_Resources(aScript);
+      _resources = new tools.GM_Resources(aScript);
     }
     return _resources;
   }
   function getLogger() {
-    return _logger || (_logger = new GM_ScriptLogger(aScript));
+    if (!_logger) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_ScriptLogger.js", tools);
+      _logger = new tools.GM_ScriptLogger(aScript);
+    }
+    return _logger;
   }
 
   this.GM_addStyle = function GM_addStyle(css) {
