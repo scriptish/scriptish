@@ -63,9 +63,9 @@ function convert2RegExp(aPattern) {
   return new RegExp(res + "$", "i");
 }
 
-GM_convert2RegExp = function(aPattern) {
+GM_convert2RegExp = function(aPattern) { return temp_convert2RegExp(aPattern); };
+temp_convert2RegExp = function(aPattern) {
   // memoize convert2RegExp on the first execution of this function
-  GM_convert2RegExp = GM_memoize(convert2RegExp);
-
-  return GM_convert2RegExp(aPattern);
+  temp_convert2RegExp = GM_memoize(convert2RegExp);
+  return temp_convert2RegExp(aPattern);
 }
