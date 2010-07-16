@@ -8,7 +8,6 @@ var EXPORTED_SYMBOLS = [
   "GM_unlisten",
   "GM_logError",
   "GM_log",
-  "GM_launchApplicationWithDoc",
   "GM_getTempFile",
   "GM_getProfileFile",
   "GM_getBinaryContents",
@@ -99,29 +98,6 @@ function GM_log(message, force) {
     // make sure message is a string, and remove NULL bytes which truncate it
     consoleService.logStringMessage((message + '').replace("\0","","g"));
   }
-}
-
-
-function GM_launchApplicationWithDoc(appFile, docFile) {
-  var args = [docFile.path];
-
-  // For the mac, wrap with a call to "open".
-  var xulRuntime = Cc["@mozilla.org/xre/app-info;1"]
-                       .getService(Ci.nsIXULRuntime);
-
-  if ("Darwin" == xulRuntime.OS) {
-    args = ["-a", appFile.path, docFile.path];
-
-    appFile = Cc["@mozilla.org/file/local;1"]
-                  .createInstance(Ci.nsILocalFile);
-    appFile.followLinks = true;
-    appFile.initWithPath("/usr/bin/open");
-  }
-
-  var process = Cc["@mozilla.org/process/util;1"]
-                    .createInstance(Ci.nsIProcess);
-  process.init(appFile);
-  process.run(false, args, args.length);
 }
 
 function GM_getTempFile() {
