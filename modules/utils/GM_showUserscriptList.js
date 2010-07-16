@@ -1,3 +1,4 @@
+
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_showUserscriptList"];
 
@@ -9,5 +10,5 @@ function GM_showUserscriptList() {
       .getService(Ci.nsIWindowMediator)
       .getMostRecentWindow("navigator:browser");
   chromeWin.BrowserOpenAddonsMgr(
-      GM_firefoxVersion == '4.0' ? 'addons://list/userscripts' : 'userscripts');
+      GM_firefoxVersion() == '4.0' ? 'addons://list/userscripts' : 'userscripts');
 }
