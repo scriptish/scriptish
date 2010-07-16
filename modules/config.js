@@ -5,6 +5,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
 Cu.import("resource://scriptish/script/script.js");
 
 function Config(aBaseDir) {

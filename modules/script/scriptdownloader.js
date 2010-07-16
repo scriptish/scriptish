@@ -4,6 +4,7 @@ var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
 
 function GM_ScriptDownloader(win, uri, bundle) {
   this.win_ = win;

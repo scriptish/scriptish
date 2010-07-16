@@ -9,7 +9,6 @@ var EXPORTED_SYMBOLS = [
   "GM_logError",
   "GM_log",
   "GM_getContents",
-  "GM_getWriteStream",
   "GM_getUriFromFile",
   "GM_isGreasemonkeyable",
   "GM_getEnabled",
@@ -125,15 +124,6 @@ function GM_getContents(file, charset) {
   } catch( e ) {
     return str;
   }
-}
-
-function GM_getWriteStream(file) {
-  var stream = Cc["@mozilla.org/network/file-output-stream;1"]
-                   .createInstance(Ci.nsIFileOutputStream);
-
-  stream.init(file, 0x02 | 0x08 | 0x20, 420, -1);
-
-  return stream;
 }
 
 function GM_getUriFromFile(file) {
