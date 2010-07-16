@@ -13,6 +13,7 @@ var EXPORTED_SYMBOLS = [
   "GM_getUriFromFile",
   "GM_isGreasemonkeyable",
   "GM_getEnabled",
+  "GM_installUri",
   "GM_setEnabled"
 ];
 
@@ -174,4 +175,15 @@ function GM_getEnabled() {
 
 function GM_setEnabled(enabled) {
   GM_prefRoot.setValue("enabled", enabled);
+}
+
+function GM_installUri(uri) {
+  var win = Cc['@mozilla.org/appshell/window-mediator;1']
+    .getService(Ci.nsIWindowMediator)
+    .getMostRecentWindow("navigator:browser");
+  if (win && win.GM_BrowserUI) {
+    win.GM_BrowserUI.startInstallScript(uri);
+    return true;
+  }
+  return false;
 }
