@@ -1,8 +1,10 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 
-Components.utils.import("resource://scriptish/utils.js");
-Components.utils.import("resource://scriptish/api.js");
+const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/api.js");
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
   this.unsafeContentWin = unsafeContentWin;

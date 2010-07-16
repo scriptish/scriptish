@@ -4,7 +4,6 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/xmlhttprequester.js");
 
 const moduleFilename = Components.stack.filename;
 
@@ -46,8 +45,13 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   var _logger = null;
 
   function getXmlhttpRequester() {
-    return _xmlhttpRequester || (_xmlhttpRequester = new GM_xmlhttpRequester(
-      aUnsafeContentWin, aChromeWin, aURL));
+    if (!_xmlhttpRequester) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_xmlhttpRequester.js", tools);
+      _xmlhttpRequester = new tools.GM_xmlhttpRequester(
+          aUnsafeContentWin, aChromeWin, aURL);
+    }
+    return _xmlhttpRequester;
   }
   function getStorage() {
     if (!_storage) {
