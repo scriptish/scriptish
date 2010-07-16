@@ -21,8 +21,7 @@ var EXPORTED_SYMBOLS = [
   "GM_compareVersions",
   "GM_isGreasemonkeyable",
   "GM_getEnabled",
-  "GM_setEnabled",
-  "GM_newUserScript"
+  "GM_setEnabled"
 ];
 
 const Cu = Components.utils;
@@ -342,12 +341,3 @@ function GM_getEnabled() {
 function GM_setEnabled(enabled) {
   GM_prefRoot.setValue("enabled", enabled);
 }
-
-function GM_newUserScript(parentWindow) {
-  var windowWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
-    .getService(Ci.nsIWindowWatcher);
-  windowWatcher.openWindow(
-    parentWindow, "chrome://scriptish/content/newscript.xul", null,
-    "chrome,dependent,centerscreen,resizable,dialog", null
-  );
-};
