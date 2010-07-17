@@ -172,10 +172,6 @@ Config.prototype = {
   },
 
   uninstall: function(script) {
-    if (typeof AddonManagerPrivate != "undefined") {
-      AddonManagerPrivate.callAddonListeners("onUninstalling", script, false);
-    }
-
     var idx = this._find(script);
     this._scripts.splice(idx, 1);
     this._changed(script, "uninstall", null);
@@ -192,10 +188,6 @@ Config.prototype = {
     if (GM_prefRoot.getValue("uninstallPreferences")) {
       // Remove saved preferences
       GM_prefRoot.remove(script.prefroot);
-    }
-
-    if (typeof AddonManagerPrivate != "undefined") {
-      AddonManagerPrivate.callAddonListeners("onUninstalled", script);
     }
   },
 

@@ -92,7 +92,25 @@ Script.prototype = {
       aListener.onUpdateFinished(this);
   },
 
-  uninstall: function() { this._config.uninstall(this); },
+  uninstall: function() {
+    if (typeof AddonManagerPrivate != "undefined") {
+      AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
+    }
+
+    this.needsUninstall = true;
+
+    if (typeof AddonManagerPrivate != "undefined") {
+      AddonManagerPrivate.callAddonListeners("onUninstalled", this);
+    }
+  },
+
+  cancelUninstall: function() {
+    this.needsUninstall = false;
+
+    if (typeof AddonManagerPrivate != "undefined") {
+      AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
+    }
+  },
 
   matchesURL: function(url) {
     function test(regExp) {

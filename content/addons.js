@@ -370,12 +370,12 @@ var greasemonkeyAddons = {
       break;
     case 'cmd_userscript_uninstall':
       GM_uninstallQueue[script.id] = script;
-      script.needsUninstall = true;
+      script.uninstall();
       selectedListitem.setAttribute('opType', 'needs-uninstall');
       break;
     case 'cmd_userscript_uninstall_cancel':
       delete(GM_uninstallQueue[script.id]);
-      script.needsUninstall = false;
+      script.cancelUninstall();
       selectedListitem.removeAttribute('opType');
       break;
     case 'cmd_userscript_uninstall_now':
