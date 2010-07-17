@@ -1,5 +1,8 @@
 
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/utils/GM_newUserScript.js");
+Components.utils.import("resource://scriptish/utils/GM_isGreasemonkeyable.js");
+Components.utils.import("resource://scriptish/script/scriptdownloader.js");
 Components.utils.import("resource://scriptish/third-party/mpl-utils.js");
 
 // Globals.
@@ -77,6 +80,9 @@ window.addEventListener('load', function() {
   gUserscriptsView.addEventListener(
       'keypress', greasemonkeyAddons.onKeypress, false);
 
+  window.addEventListener('dragover', greasemonkeyAddons.onDragOver, false);
+  window.addEventListener('drop', greasemonkeyAddons.onDrop, false);
+
   GM_config.addObserver(observer);
 
   // Work-around for any exentsion which does not update gView in
@@ -142,6 +148,40 @@ var greasemonkeyAddons = {
     gExtensionsView.focus();
   },
 
+  urlFromDragEvent: function(event) {
+    var types = event.dataTransfer.types;
+    var url = null;
+    if (types.contains('text/uri-list')) {
+      url = event.dataTransfer.mozGetDataAt('text/uri-list', 0);
+    } else if (types.contains('application/x-moz-file')) {
+      var file = event.dataTransfer
+          .mozGetDataAt('application/x-moz-file', 0)
+          .QueryInterface(Components.interfaces.nsIFile);
+      url = GM_getUriFromFile(file).spec;
+    }
+    return url;
+  },
+
+  onDragOver: function(event) {
+    var url = greasemonkeyAddons.urlFromDragEvent(event);
+    if (url && url.match(/\.user\.js$/)) {
+      // Cancel the default do-not-allow behavior.
+      event.preventDefault();
+    }
+  },
+
+  onDrop: function(event) {
+    var tools = {};
+    Components.utils.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+    Components.utils.import("resource://scriptish/utils/GM_installUri.js", tools);
+
+    var url = greasemonkeyAddons.urlFromDragEvent(event);
+    var uri = tools.GM_uriFromUrl(url);
+
+    // TODO: Make this UI appear attached to addons, rather than the browser?
+    tools.GM_installUri(uri);
+  },
+  
   updateLastSelected: function() {
     if (!gUserscriptsView.selectedItem) return;
     var userscriptsRadio = document.getElementById('userscripts-view');
@@ -272,6 +312,8 @@ var greasemonkeyAddons = {
   },
 
   doCommand: function(command) {
+    var tools = {};
+
     var script = greasemonkeyAddons.findSelectedScript();
     if (!script) {
       dump("greasemonkeyAddons.doCommand() could not find selected script.\n");
@@ -289,7 +331,8 @@ var greasemonkeyAddons = {
       openURL(homepageURL);
       return;
     case 'cmd_userscript_edit':
-      GM_openInEditor(script, window);
+      Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
+      tools.GM_openInEditor(script, window);
       break;
     case 'cmd_userscript_show':
       GM_openFolder(script._file);
@@ -327,16 +370,12 @@ var greasemonkeyAddons = {
       break;
     case 'cmd_userscript_uninstall':
       GM_uninstallQueue[script.id] = script;
-      // Todo: This without dipping into private members?
-      script.needsUninstallEnabled = script._enabled;
-      script._enabled = false;
+      script.needsUninstall = true;
       selectedListitem.setAttribute('opType', 'needs-uninstall');
       break;
     case 'cmd_userscript_uninstall_cancel':
       delete(GM_uninstallQueue[script.id]);
-      // Todo: This without dipping into private members?
-      script._enabled = script.needsUninstallEnabled;
-      delete(script.needsUninstallDisabled);
+      script.needsUninstall = false;
       selectedListitem.removeAttribute('opType');
       break;
     case 'cmd_userscript_uninstall_now':

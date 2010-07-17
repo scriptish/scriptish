@@ -5,7 +5,8 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/script.js");
+Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
+Cu.import("resource://scriptish/script/script.js");
 try {
   Cu.import("resource://gre/modules/AddonManager.jsm");
 } catch (e) {}
@@ -266,7 +267,9 @@ Config.prototype = {
   },
 
   get _scriptDir() {
-    return GM_getProfileFile(this._scriptFoldername);
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_getProfileFile.js", tools);
+    return tools.GM_getProfileFile(this._scriptFoldername);
   },
 
   /**
@@ -294,7 +297,7 @@ Config.prototype = {
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
-    if (script.enabled && script.matchesURL(href)) {
+    if (script.enabled && !script.needsUninstall && script.matchesURL(href)) {
       gmService.injectScripts([script], href, unsafeWin, this.chromeWin);
     }
   },

@@ -4,8 +4,6 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/miscapis.js");
-Cu.import("resource://scriptish/xmlhttprequester.js");
 
 const moduleFilename = Components.stack.filename;
 
@@ -47,17 +45,37 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   var _logger = null;
 
   function getXmlhttpRequester() {
-    return _xmlhttpRequester || (_xmlhttpRequester = new GM_xmlhttpRequester(
-      aUnsafeContentWin, aChromeWin, aURL));
+    if (!_xmlhttpRequester) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_xmlhttpRequester.js", tools);
+      _xmlhttpRequester = new tools.GM_xmlhttpRequester(
+          aUnsafeContentWin, aChromeWin, aURL);
+    }
+    return _xmlhttpRequester;
   }
   function getStorage() {
-    return _storage ||( _storage = new GM_ScriptStorage(aScript));
+    if (!_storage) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_ScriptStorage.js", tools);
+      _storage = new tools.GM_ScriptStorage(aScript);
+    }
+    return _storage;
   }
   function getResources() {
-   return _resources || (_resources = new GM_Resources(aScript));
+    if (!_resources) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_Resources.js", tools);
+      _resources = new tools.GM_Resources(aScript);
+    }
+    return _resources;
   }
   function getLogger() {
-    return _logger || (_logger = new GM_ScriptLogger(aScript));
+    if (!_logger) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_ScriptLogger.js", tools);
+      _logger = new tools.GM_ScriptLogger(aScript);
+    }
+    return _logger;
   }
 
   this.GM_addStyle = function GM_addStyle(css) {

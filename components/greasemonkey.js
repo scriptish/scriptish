@@ -87,6 +87,7 @@ ScriptishService.prototype = {
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
+    Cu.import("resource://scriptish/utils/GM_installUri.js", tools);
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
 
@@ -114,15 +115,10 @@ ScriptishService.prototype = {
       dump("shouldload: " + cl.spec + "\n");
       dump("ignorescript: " + this.ignoreNextScript_ + "\n");
 
-      if (!this.ignoreNextScript_ && !this.isTempScript(cl)) {
-        var win = Cc['@mozilla.org/appshell/window-mediator;1']
-            .getService(Ci.nsIWindowMediator)
-            .getMostRecentWindow("navigator:browser");
-
-        if (win && win.GM_BrowserUI) {
-          win.GM_BrowserUI.startInstallScript(cl);
-          ret = Ci.nsIContentPolicy.REJECT_REQUEST;
-        }
+      if (!this.ignoreNextScript_ &&
+          !this.isTempScript(cl) &&
+          tools.GM_installUri(cl)) {
+        ret = Ci.nsIContentPolicy.REJECT_REQUEST;
       }
     }
 
@@ -159,10 +155,6 @@ ScriptishService.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/prefmanager.js", tools);
 
-    function testMatch(script) {
-      return !script.delayInjection && script.enabled && script.matchesURL(url);
-    }
-
     // Todo: Try to implement this w/out global state.
     this.config.wrappedContentWin = wrappedContentWin;
     this.config.chromeWin = chromeWin;
@@ -171,7 +163,12 @@ ScriptishService.prototype = {
       this.config.updateModifiedScripts();
     }
 
-    return this.config.getMatchingScripts(testMatch);
+    return this.config.getMatchingScripts(function(script) {
+      return !script.delayInjection &&
+          script.enabled &&
+          !script.needsUninstall &&
+          script.matchesURL(url);
+    });
   },
 
   injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {
@@ -182,7 +179,7 @@ ScriptishService.prototype = {
 
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
-    Cu.import("resource://scriptish/miscapis.js", tools);
+    Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
 
     // detect and grab reference to firebug console and context, if it exists
@@ -190,8 +187,6 @@ ScriptishService.prototype = {
 
     for (var i = 0; script = scripts[i]; i++) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
-
-      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
 
       var GM_API = new tools.GM_API(
           script,
@@ -213,6 +208,8 @@ ScriptishService.prototype = {
       for (var funcName in GM_API) {
         sandbox[funcName] = GM_API[funcName]
       }
+
+      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
       sandbox.console = console;
 
       sandbox.__proto__ = wrappedContentWin;

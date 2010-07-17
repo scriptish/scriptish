@@ -4,9 +4,9 @@ var EXPORTED_SYMBOLS = ["Script"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/convert2RegExp.js");
-Cu.import("resource://scriptish/scriptrequire.js");
-Cu.import("resource://scriptish/scriptresource.js");
+Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
+Cu.import("resource://scriptish/script/scriptrequire.js");
+Cu.import("resource://scriptish/script/scriptresource.js");
 try {
   Cu.import("resource://gre/modules/AddonManager.jsm");
 } catch (e) {}
@@ -35,6 +35,7 @@ function Script(config) {
   this._description = null;
   this._version = null;
   this._enabled = true;
+  this.needsUninstall = false;
   this._includes = [];
   this._excludes = [];
   this._includeRegExps = [];
@@ -217,11 +218,12 @@ Script.prototype = {
 
   updateFromNewScript: function(newScript) {
     var tools = {};
+    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
 
     // Migrate preferences.
     if (this.prefroot != newScript.prefroot) {
       var tools = {};
-      Cu.import("resource://scriptish/miscapis.js", tools);
+      Cu.import("resource://scriptish/api/GM_ScriptStorage.js", tools);
 
       var storageOld = new tools.GM_ScriptStorage(this);
       var storageNew = new tools.GM_ScriptStorage(newScript);
@@ -249,9 +251,9 @@ Script.prototype = {
     this._unwrap = newScript._unwrap;
     this._version = newScript._version;
 
-    var dependhash = GM_sha1(newScript._rawMeta);
+    var dependhash = tools.GM_sha1(newScript._rawMeta);
     if (dependhash != this._dependhash && !newScript._dependFail) {
-      Cu.import("resource://scriptish/scriptdownloader.js", tools);
+      Cu.import("resource://scriptish/script/scriptdownloader.js", tools);
 
       this._dependhash = dependhash;
       this._requires = newScript._requires;
@@ -365,12 +367,18 @@ Script.prototype = {
       this._resources[i]._initFile();
     }
 
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
+
     this._modified = this._file.lastModifiedTime;
-    this._metahash = GM_sha1(this._rawMeta);
+    this._metahash = tools.GM_sha1(this._rawMeta);
   }
 };
 
 Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
+  var tools = {};
+  Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+
   var script = new Script(aConfig);
 
   if (aURI) {
@@ -428,7 +436,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         continue;
       case "require":
         try {
-          var reqUri = GM_uriFromUrl(value, aURI);
+          var reqUri = tools.GM_uriFromUrl(value, aURI);
           var scriptRequire = new ScriptRequire(script);
           scriptRequire._downloadURL = reqUri.spec;
           script._requires.push(scriptRequire);
@@ -458,7 +466,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
           previousResourceNames[resName] = true;
         }
         try {
-          var resUri = GM_uriFromUrl(res[2], aURI);
+          var resUri = tools.GM_uriFromUrl(res[2], aURI);
           var scriptResource = new ScriptResource(script);
           scriptResource._name = resName;
           scriptResource._downloadURL = resUri.spec;
@@ -483,7 +491,10 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
   }
 
   // if no meta info, default to reasonable values
-  if (!script._name && aURI) script._name = GM_parseScriptName(aURI);
+  if (!script._name && aURI) {
+    Cu.import("resource://scriptish/utils/GM_parseScriptName.js", tools);
+    script._name = tools.GM_parseScriptName(aURI);
+  }
   if (!script._namespace && aURI) script._namespace = aURI.host;
   if (!script._description) script._description = "";
   if (!script._version) script._version = "";
@@ -504,12 +515,14 @@ Script.load = function load(aConfig, aNode) {
 
   if (!aNode.getAttribute("modified")
       || !aNode.getAttribute("dependhash")
-      || !aNode.getAttribute("version")
-  ) {
+      || !aNode.getAttribute("version")) {
+    var tools = {};
+    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
+
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
         aConfig, GM_getContents(script._file), {spec: script._downloadURL}, true);
-    script._dependhash = GM_sha1(parsedScript._rawMeta);
+    script._dependhash = tools.GM_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;
   } else {

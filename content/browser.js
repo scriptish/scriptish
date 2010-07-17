@@ -7,6 +7,9 @@ var GM_BrowserUI = new Object();
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/utils/GM_listen.js");
+Components.utils.import("resource://scriptish/utils/GM_isGreasemonkeyable.js");
+Components.utils.import("resource://scriptish/utils/GM_newUserScript.js");
 
 /**
  * nsISupports.QueryInterface
@@ -86,6 +89,13 @@ GM_BrowserUI.chromeLoad = function(e) {
   // check if GM was updated/installed
   setTimeout(function() {gmSvc.updateVersion()}, 100);
 };
+
+GM_BrowserUI.showUserscriptList = function() {
+  var tools = {};
+  Components.utils.import(
+    "resource://scriptish/utils/GM_showUserscriptList.js", tools);
+  tools.GM_showUserscriptList();
+}
 
 /**
  * registerMenuCommand
@@ -186,7 +196,7 @@ GM_BrowserUI.startInstallScript = function(uri, timer) {
   }
 
   var tools = {};
-  Components.utils.import("resource://scriptish/scriptdownloader.js", tools);
+  Components.utils.import("resource://scriptish/script/scriptdownloader.js", tools);
 
   this.scriptDownloader_ = new tools.GM_ScriptDownloader(window, uri, this.bundle);
   this.scriptDownloader_.startInstall();
@@ -408,6 +418,7 @@ function GM_showPopup(aEvent) {
   }
 
   function appendScriptToPopup(script) {
+    if (script.needsUninstall) return;
     var mi = document.createElement("menuitem");
     mi.setAttribute("label", script.name);
     mi.script = script;
@@ -466,14 +477,18 @@ function GM_showPopup(aEvent) {
  * state, rihgt-click opens in an editor.
  */
 function GM_popupClicked(aEvent) {
+  var tools = {};
+
   if (aEvent.button == 0 || aEvent.button == 2) {
     var script = aEvent.target.script;
     if (!script) return;
 
     if (aEvent.button == 0) // left-click: toggle enabled state
       script.enabled =! script.enabled;
-    else // right-click: open in editor
-      GM_openInEditor(script, window);
+    else { // right-click: open in editor
+      Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
+      tools.GM_openInEditor(script, window);
+    }
 
     closeMenus(aEvent.target);
   }
