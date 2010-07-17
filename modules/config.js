@@ -272,7 +272,7 @@ Config.prototype = {
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
-    if (script.enabled && script.matchesURL(href)) {
+    if (script.enabled && !script.needsUninstall && script.matchesURL(href)) {
       gmService.injectScripts([script], href, unsafeWin, this.chromeWin);
     }
   },

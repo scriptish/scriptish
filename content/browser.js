@@ -418,6 +418,7 @@ function GM_showPopup(aEvent) {
   }
 
   function appendScriptToPopup(script) {
+    if (script.needsUninstall) return;
     var mi = document.createElement("menuitem");
     mi.setAttribute("label", script.name);
     mi.script = script;

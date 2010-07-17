@@ -155,10 +155,6 @@ ScriptishService.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/prefmanager.js", tools);
 
-    function testMatch(script) {
-      return !script.delayInjection && script.enabled && script.matchesURL(url);
-    }
-
     // Todo: Try to implement this w/out global state.
     this.config.wrappedContentWin = wrappedContentWin;
     this.config.chromeWin = chromeWin;
@@ -167,7 +163,12 @@ ScriptishService.prototype = {
       this.config.updateModifiedScripts();
     }
 
-    return this.config.getMatchingScripts(testMatch);
+    return this.config.getMatchingScripts(function(script) {
+      return !script.delayInjection &&
+          script.enabled &&
+          !script.needsUninstall &&
+          script.matchesURL(url);
+    });
   },
 
   injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {
