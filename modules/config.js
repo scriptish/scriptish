@@ -165,7 +165,7 @@ Config.prototype = {
     this._changed(script, "install", null);
     if (typeof AddonManagerPrivate != "undefined") {
       AddonManagerPrivate.callInstallListeners(
-          "onNewInstall", null, script, null, false);
+          "onExternalInstall", null, script, null, false);
     }
 
     GM_log("< Config.install");
