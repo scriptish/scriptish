@@ -8,13 +8,10 @@ resource   scriptish    modules/
 skin       scriptish    classic/1.0 skin/
 
 overlay    chrome://browser/content/browser.xul    chrome://scriptish/content/browser.xul
-overlay    chrome://mozapps/content/extensions/extensions.xul chrome://scriptish/content/addons.xul appversion<3.7a5pre
-overlay    about:addons chrome://scriptish/content/addonstab.xul appversion>=3.7a5pre
+overlay    about:addons chrome://scriptish/content/addonstab.xul
 
 overlay    chrome://scriptish/content/install.xul chrome://scriptish/content/closewindow.xul
 overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/closewindow.xul
 overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/closewindow.xul
-
-style      chrome://scriptish/content/addons.xul    chrome://scriptish/skin/addons-mac.css os=Darwin
 
 locale     scriptish  en-US  locale/en-US/
