@@ -7,7 +7,6 @@ var GM_BrowserUI = new Object();
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
-Components.utils.import("resource://scriptish/utils/GM_listen.js");
 Components.utils.import("resource://scriptish/utils/GM_isGreasemonkeyable.js");
 Components.utils.import("resource://scriptish/utils/GM_newUserScript.js");
 
@@ -33,8 +32,8 @@ GM_BrowserUI.init = function() {
   this.menuCommanders = [];
   this.currentMenuCommander = null;
 
-  GM_listen(window, "load", GM_hitch(this, "chromeLoad"));
-  GM_listen(window, "unload", GM_hitch(this, "chromeUnload"));
+  window.addEventListener("load", GM_hitch(this, "chromeLoad"), false);
+  window.addEventListener("unload", GM_hitch(this, "chromeUnload"), false);
 };
 
 /**
@@ -44,15 +43,11 @@ GM_BrowserUI.init = function() {
 GM_BrowserUI.chromeLoad = function(e) {
   // get all required DOM elements
   this.tabBrowser = document.getElementById("content");
-  this.appContent = document.getElementById("appcontent");
-  this.sidebar = document.getElementById("sidebar");
-  this.contextMenu = document.getElementById("contentAreaContextMenu");
   this.statusImage = document.getElementById("gm-status-image");
   this.statusLabel = document.getElementById("gm-status-label");
   this.statusPopup = document.getElementById("gm-status-popup");
   this.statusEnabledItem = document.getElementById("gm-status-enabled-item");
   this.generalMenuEnabledItem = document.getElementById("gm-general-menu-enabled-item");
-  this.toolsMenu = document.getElementById("menu_ToolsPopup");
   this.bundle = document.getElementById("gm-browser-bundle");
 
   // update visual status when enabled state changes
@@ -60,10 +55,14 @@ GM_BrowserUI.chromeLoad = function(e) {
   GM_prefRoot.watch("enabled", this.enabledWatcher);
 
   // hook various events
-  GM_listen(this.appContent, "DOMContentLoaded", GM_hitch(this, "contentLoad"), true);
-  GM_listen(this.sidebar, "DOMContentLoaded", GM_hitch(this, "contentLoad"), true);
-  GM_listen(this.contextMenu, "popupshowing", GM_hitch(this, "contextMenuShowing"));
-  GM_listen(this.toolsMenu, "popupshowing", GM_hitch(this, "toolsMenuShowing"));
+  document.getElementById("appcontent").addEventListener(
+    "DOMContentLoaded", GM_hitch(this, "contentLoad"), true);
+  document.getElementById("sidebar").addEventListener(
+    "DOMContentLoaded", GM_hitch(this, "contentLoad"), true);
+  document.getElementById("contentAreaContextMenu").addEventListener(
+    "popupshowing", GM_hitch(this, "contextMenuShowing"), false);
+  document.getElementById("menu_ToolsPopup").addEventListener(
+    "popupshowing", GM_hitch(this, "toolsMenuShowing"), false);
 
   // listen for clicks on the install bar
   Components.classes["@mozilla.org/observer-service;1"]
@@ -136,7 +135,7 @@ GM_BrowserUI.contentLoad = function(e) {
 
     this.gmSvc.domContentLoaded(safeWin, window, this);
 
-    GM_listen(unsafeWin, "pagehide", GM_hitch(this, "contentUnload"));
+    safeWin.addEventListener("pagehide", GM_hitch(this, "contentUnload"), false);
   }
 
   // Show the greasemonkey install banner if we are navigating to a .user.js
