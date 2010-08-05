@@ -217,13 +217,14 @@ Script.prototype = {
         if (!nextFile.equals(this._file)) nextFile.remove(true);
       }
 
+      // This flag needs to be set now so the scriptDownloader can turn it off
+      this.delayInjection = true;
+
       // Redownload dependencies.
       var scriptDownloader = new tools.GM_ScriptDownloader(null, null, null);
       scriptDownloader.script = this;
       scriptDownloader.updateScript = true;
       scriptDownloader.fetchDependencies();
-
-      this.delayInjection = true;
     }
   },
 
