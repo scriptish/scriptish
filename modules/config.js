@@ -7,9 +7,7 @@ Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
 Cu.import("resource://scriptish/script/script.js");
-try {
-  Cu.import("resource://gre/modules/AddonManager.jsm");
-} catch (e) {}
+Cu.import("resource://gre/modules/AddonManager.jsm");
 
 function Config(aBaseDir) {
   this._saveTimer = null;
@@ -163,10 +161,8 @@ Config.prototype = {
 
     this.addScript(script);
     this._changed(script, "install", null);
-    if (typeof AddonManagerPrivate != "undefined") {
-      AddonManagerPrivate.callInstallListeners(
-          "onExternalInstall", null, script, null, false);
-    }
+    AddonManagerPrivate.callInstallListeners(
+        "onExternalInstall", null, script, null, false);
 
     GM_log("< Config.install");
   },

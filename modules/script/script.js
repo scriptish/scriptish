@@ -7,12 +7,9 @@ Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
-try {
-  Cu.import("resource://gre/modules/AddonManager.jsm");
-} catch (e) {}
+Cu.import("resource://gre/modules/AddonManager.jsm");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
-const scope = (typeof AddonManager != 'undefined') ? AddonManager.SCOPE_PROFILE : null;
 
 function Script(config) {
   this._config = config;
@@ -53,7 +50,7 @@ Script.prototype = {
   providesUpdatesSecurely: true,
   blocklistState: 0,
   appDisabled: false,
-  scope: scope,
+  scope: AddonManager.SCOPE_PROFILE,
   get isActive() { return !this.appDisabled || !this.userDisabled },
   pendingOperations: 0,
   type: "userscript",
@@ -61,18 +58,14 @@ Script.prototype = {
   set userDisabled(val) {
     if (val == this.userDisabled) return val;
 
-    if (typeof AddonManagerPrivate != "undefined") {
-      AddonManagerPrivate.callAddonListeners(
-          val ? "onEnabling" : "onDisabling", this, false);
-    }
+    AddonManagerPrivate.callAddonListeners(
+        val ? "onEnabling" : "onDisabling", this, false);
 
     this._enabled = !val;
     this._changed("edit-enabled", this._enabled);
 
-    if (typeof AddonManagerPrivate != "undefined") {
-      AddonManagerPrivate.callAddonListeners(
-          val ? "onEnabled" : "onDisabled", this);
-    }
+    AddonManagerPrivate.callAddonListeners(
+        val ? "onEnabled" : "onDisabled", this);
   },
 
   isCompatibleWith: function() { return true; },
@@ -93,23 +86,17 @@ Script.prototype = {
   },
 
   uninstall: function() {
-    if (typeof AddonManagerPrivate != "undefined") {
-      AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
-    }
+    AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
 
     this.needsUninstall = true;
 
-    if (typeof AddonManagerPrivate != "undefined") {
-      AddonManagerPrivate.callAddonListeners("onUninstalled", this);
-    }
+    AddonManagerPrivate.callAddonListeners("onUninstalled", this);
   },
 
   cancelUninstall: function() {
     this.needsUninstall = false;
 
-    if (typeof AddonManagerPrivate != "undefined") {
-      AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
-    }
+    AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
   },
 
   matchesURL: function(url) {
