@@ -1,7 +1,9 @@
+
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_convert2RegExp"];
 
-Components.utils.import("resource://scriptish/utils.js");
+const Cu = Components.utils;
+Cu.import("resource://scriptish/utils/GM_memoize.js");
 
 const tldRegExp = new RegExp("^(\\^(?:[^/]*)(?://)?(?:[^/]*))(\\\\\\.tld)((?:/.*)?)$");
 
@@ -12,7 +14,7 @@ const regExpChk = /^\/(.*)\/(i)?$/;
 
 // Converts a pattern in this programs simple notation to a regular expression.
 // thanks AdBlock! http://www.mozdev.org/source/browse/adblock/adblock/
-function convert2RegExp(aPattern) {
+const GM_convert2RegExp = GM_memoize(function(aPattern) {
   var s = new String(aPattern);
   var res = new String("^");
 
@@ -61,11 +63,4 @@ function convert2RegExp(aPattern) {
   }
 
   return new RegExp(res + "$", "i");
-}
-
-GM_convert2RegExp = function(aPattern) {
-  // memoize convert2RegExp on the first execution of this function
-  GM_convert2RegExp = GM_memoize(convert2RegExp);
-
-  return GM_convert2RegExp(aPattern);
-}
+});

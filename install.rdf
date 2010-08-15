@@ -11,7 +11,7 @@
     <em:iconURL>chrome://scriptish/skin/icon_medium.png</em:iconURL>
 
     <em:name>Scriptish</em:name>
-    <em:description>A User Script Manager for Firefox</em:description>
+    <em:description>A Script Extension Manager for Firefox</em:description>
 
     <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
     <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>
@@ -40,8 +40,8 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>4.0b2pre</em:maxVersion>
+        <em:minVersion>4.0b1pre</em:minVersion>
+        <em:maxVersion>4.0b4pre</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>

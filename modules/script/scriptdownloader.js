@@ -1,9 +1,11 @@
+
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
 
 function GM_ScriptDownloader(win, uri, bundle) {
   this.win_ = win;
@@ -138,6 +140,7 @@ GM_ScriptDownloader.prototype.fetchDependencies = function(){
 };
 
 GM_ScriptDownloader.prototype.downloadNextDependency = function(){
+  var tools = {};
   if (this.depQueue_.length > 0) {
     var dep = this.depQueue_.pop();
     try {
@@ -147,11 +150,14 @@ GM_ScriptDownloader.prototype.downloadNextDependency = function(){
         persist.PERSIST_FLAGS_BYPASS_CACHE |
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
 
-      var sourceUri = GM_uriFromUrl(dep.urlToDownload);
+      Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+      Cu.import("resource://scriptish/utils/GM_getTempFile.js", tools);
+
+      var sourceUri = tools.GM_uriFromUrl(dep.urlToDownload);
       var sourceChannel = ioService.newChannelFromURI(sourceUri);
       sourceChannel.notificationCallbacks = new NotificationCallbacks();
 
-      var file = GM_getTempFile();
+      var file = tools.GM_getTempFile();
       this.tempFiles_.push(file);
 
       var progressListener = new PersistProgressListener(persist);

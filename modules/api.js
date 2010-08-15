@@ -4,15 +4,13 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/miscapis.js");
-Cu.import("resource://scriptish/xmlhttprequester.js");
 
 const moduleFilename = Components.stack.filename;
 
 // Examines the stack to determine if an API should be callable.
 function GM_apiLeakCheck(apiName) {
   var stack = Components.stack;
-  apiName = apiName || arguments.callee.caller.name;
+  apiName = apiName;
 
   do {
     // Valid stack frames for GM api calls are: native and js when coming from
@@ -47,17 +45,37 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   var _logger = null;
 
   function getXmlhttpRequester() {
-    return _xmlhttpRequester || (_xmlhttpRequester = new GM_xmlhttpRequester(
-      aUnsafeContentWin, aChromeWin, aURL));
+    if (!_xmlhttpRequester) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_xmlhttpRequester.js", tools);
+      _xmlhttpRequester = new tools.GM_xmlhttpRequester(
+          aUnsafeContentWin, aChromeWin, aURL);
+    }
+    return _xmlhttpRequester;
   }
   function getStorage() {
-    return _storage ||( _storage = new GM_ScriptStorage(aScript));
+    if (!_storage) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_ScriptStorage.js", tools);
+      _storage = new tools.GM_ScriptStorage(aScript);
+    }
+    return _storage;
   }
   function getResources() {
-   return _resources || (_resources = new GM_Resources(aScript));
+    if (!_resources) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_Resources.js", tools);
+      _resources = new tools.GM_Resources(aScript);
+    }
+    return _resources;
   }
   function getLogger() {
-    return _logger || (_logger = new GM_ScriptLogger(aScript));
+    if (!_logger) {
+      var tools = {};
+      Cu.import("resource://scriptish/api/GM_ScriptLogger.js", tools);
+      _logger = new tools.GM_ScriptLogger(aScript);
+    }
+    return _logger;
   }
 
   this.GM_addStyle = function GM_addStyle(css) {
@@ -77,33 +95,33 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
 
 
   this.GM_setValue = function GM_setValue() {
-    if (!GM_apiLeakCheck()) return;
+    if (!GM_apiLeakCheck("GM_setValue")) return;
     return getStorage().setValue.apply(getStorage(), arguments);
   };
   this.GM_getValue = function GM_getValue() {
-    if (!GM_apiLeakCheck()) return undefined;
+    if (!GM_apiLeakCheck("GM_getValue")) return undefined;
     return getStorage().getValue.apply(getStorage(), arguments);
   };
   this.GM_deleteValue = function GM_deleteValue() {
-    if (!GM_apiLeakCheck()) return undefined;
+    if (!GM_apiLeakCheck("GM_deleteValue")) return undefined;
     return getStorage().deleteValue.apply(getStorage(), arguments);
   };
   this.GM_listValues = function GM_listValues() {
-    if (!GM_apiLeakCheck()) return undefined;
+    if (!GM_apiLeakCheck("GM_listValues")) return undefined;
     return getStorage().listValues.apply(getStorage(), arguments);
   };
 
   this.GM_getResourceURL = function GM_getResourceURL() {
-    if (!GM_apiLeakCheck()) return undefined;
+    if (!GM_apiLeakCheck("GM_getResourceURL")) return undefined;
     return getResources().getResourceURL.apply(getResources(), arguments)
   };
   this.GM_getResourceText = function GM_getResourceText() {
-    if (!GM_apiLeakCheck()) return undefined;
+    if (!GM_apiLeakCheck("GM_getResourceText")) return undefined;
     return getResources().getResourceText.apply(getResources(), arguments)
   };
 
   this.GM_openInTab = function GM_openInTab(aURL) {
-    if (!GM_apiLeakCheck()) return undefined;
+    if (!GM_apiLeakCheck("GM_openInTab")) return undefined;
 
     var newTab = aChromeWin.openNewTabWith(
         aURL, aDocument, null, null, null, null);
@@ -118,7 +136,7 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   };
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
-    if (!GM_apiLeakCheck()) return;
+    if (!GM_apiLeakCheck("GM_xmlhttpRequest")) return;
 
     return getXmlhttpRequester().contentStartRequest.apply(
         getXmlhttpRequester(), arguments);
@@ -130,7 +148,7 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
       aAccelKey,
       aAccelModifiers,
       aAccessKey) {
-    if (!GM_apiLeakCheck()) return;
+    if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
 
     aGmBrowser.registerMenuCommand({
       name: aCommandName,
@@ -142,7 +160,7 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   };
 
   this.GM_worker = function GM_worker(resourceName) {
-    if (!GM_apiLeakCheck()) return undefined;
+    if (!GM_apiLeakCheck("GM_worker")) return undefined;
 
     // Worker was introduced in FF 3.5
     // https://developer.mozilla.org/En/DOM/Worker
