@@ -14,29 +14,6 @@ const appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
 
 const serviceFilename = Components.stack.filename;
 
-var getMaxJSVersion = function(){
-  var maxJSVersion = (function() {
-    var appInfo = Cc["@mozilla.org/xre/app-info;1"]
-        .getService(Ci.nsIXULAppInfo);
-    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
-        .getService(Ci.nsIVersionComparator);
-
-    // Firefox 3.5 and higher supports 1.8.
-    if (versionChecker.compare(appInfo.version, "3.5") >= 0) {
-      return "1.8";
-    }
-
-    // Everything else supports 1.6.
-    return "1.6";
-  })();
-
-  getMaxJSVersion = function() {
-    return maxJSVersion;
-  }
-
-  return maxJSVersion;
-}
-
 function ScriptishService() {
   this.wrappedJSObject = this;
 }
@@ -254,7 +231,7 @@ ScriptishService.prototype = {
     try {
       // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
       var lineFinder = new Error();
-      Cu.evalInSandbox(code, sandbox, getMaxJSVersion());
+      Cu.evalInSandbox(code, sandbox, "1.8");
     } catch (e) { // catches errors while running the script code
       try {
         if (e && "return not in function" == e.message)
@@ -411,28 +388,20 @@ ScriptishService.prototype = {
 
         // the setTimeout makes sure we do not execute too early -- sometimes
         // the window isn't quite ready to add a tab yet
+/*
         chromeWin.setTimeout(
             "gBrowser.selectedTab = gBrowser.addTab(" +
             "'http://wiki.greasespot.net/Welcome')", 500);
+*/
       }
     }
 
     // update the currently initialized version so we don't do this work again.
-    if ("@mozilla.org/extensions/manager;1" in Cc) {
-      // Firefox <= 3.6.*
-      var extMan = Cc["@mozilla.org/extensions/manager;1"]
-          .getService(Ci.nsIExtensionManager);
-      var item = extMan.getItemForID(GUID);
+    Cu.import("resource://gre/modules/AddonManager.jsm", tools);
 
-      tools.GM_prefRoot.setValue("version", item.version);
-    } else {
-      // Firefox 3.7+
-      Cu.import("resource://gre/modules/AddonManager.jsm", tools);
-
-      tools.AddonManager.getAddonByID(GUID, function(addon) {
-        tools.GM_prefRoot.setValue("version", addon.version);
-      });
-    }
+    tools.AddonManager.getAddonByID(GUID, function(addon) {
+      tools.GM_prefRoot.setValue("version", addon.version);
+    });
 
     this.updateVersion = function() {};
 
@@ -440,12 +409,5 @@ ScriptishService.prototype = {
   }
 };
 
-/**
-* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
-* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
-*/
-if (XPCOMUtils.generateNSGetFactory) {
-    var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
-} else {
-    var NSGetModule = XPCOMUtils.generateNSGetModule([ScriptishService]);
-}
+// XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
