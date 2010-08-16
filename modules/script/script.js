@@ -9,8 +9,8 @@ Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
-const allowedJSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
-var getMaxJSVersion = function(){ return allowedJSVersions[2]; }
+const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
+var getMaxJSVersion = function(){ return JSVersions[2]; }
 
 function Script(config) {
   this._config = config;
@@ -382,11 +382,13 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         script._homepageURL = value;
       case "jsversion":
         var jsVerIndx = JSVersions.indexOf(value);
-        if (!jsVerIndx || // a crazy value
-            jsVerIndx > JSVersions.indexOf(getMaxJSVersion())) {
-          // TO DO: something.
+        if (jsVerIndx === -1) {
+          throw new Error("'" + value + "' is an invalid value for @jsversion.");
+        } else if (jsVerIndx > JSVersions.indexOf(getMaxJSVersion())) {
+          throw new Error("The @jsversion value '" + value + "' is not "
+              + "supported by this version of Firefox.");
         } else {
-          script._jsversion = value;
+          script._jsversion = JSVersions[jsVerIndx];
         }
         continue;
       case "contributor":
