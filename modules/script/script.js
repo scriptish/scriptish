@@ -373,8 +373,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
     switch (header) {
       case "id":
         value = value.replace(nonIdChars, ''); // remove unacceptable chars
-        if (!value) continue; // ignore falsy @id values
-        script.id = value;
+        if (value) script.id = value;
         continue;
       case "name":
       case "namespace":
