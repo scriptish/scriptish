@@ -35,7 +35,7 @@ ScriptishService.prototype = {
   ]),
 
   get filename() { return serviceFilename; },
-  _scriptFoldername: "gm_scripts",
+  _scriptFoldername: "scriptish_scripts",
 
   _config: null,
   get config() {
@@ -64,6 +64,7 @@ ScriptishService.prototype = {
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
+    Cu.import("resource://scriptish/utils/GM_installUri.js", tools);
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
 
@@ -91,15 +92,10 @@ ScriptishService.prototype = {
       dump("shouldload: " + cl.spec + "\n");
       dump("ignorescript: " + this.ignoreNextScript_ + "\n");
 
-      if (!this.ignoreNextScript_ && !this.isTempScript(cl)) {
-        var win = Cc['@mozilla.org/appshell/window-mediator;1']
-            .getService(Ci.nsIWindowMediator)
-            .getMostRecentWindow("navigator:browser");
-
-        if (win && win.GM_BrowserUI) {
-          win.GM_BrowserUI.startInstallScript(cl);
-          ret = Ci.nsIContentPolicy.REJECT_REQUEST;
-        }
+      if (!this.ignoreNextScript_ &&
+          !this.isTempScript(cl) &&
+          tools.GM_installUri(cl)) {
+        ret = Ci.nsIContentPolicy.REJECT_REQUEST;
       }
     }
 
@@ -136,10 +132,6 @@ ScriptishService.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/prefmanager.js", tools);
 
-    function testMatch(script) {
-      return !script.delayInjection && script.enabled && script.matchesURL(url);
-    }
-
     // Todo: Try to implement this w/out global state.
     this.config.wrappedContentWin = wrappedContentWin;
     this.config.chromeWin = chromeWin;
@@ -148,7 +140,12 @@ ScriptishService.prototype = {
       this.config.updateModifiedScripts();
     }
 
-    return this.config.getMatchingScripts(testMatch);
+    return this.config.getMatchingScripts(function(script) {
+      return !script.delayInjection &&
+          script.enabled &&
+          !script.needsUninstall &&
+          script.matchesURL(url);
+    });
   },
 
   injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {
@@ -159,7 +156,7 @@ ScriptishService.prototype = {
 
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
-    Cu.import("resource://scriptish/miscapis.js", tools);
+    Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
 
     // detect and grab reference to firebug console and context, if it exists
@@ -167,8 +164,6 @@ ScriptishService.prototype = {
 
     for (var i = 0; script = scripts[i]; i++) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
-
-      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
 
       var GM_API = new tools.GM_API(
           script,
@@ -190,6 +185,8 @@ ScriptishService.prototype = {
       for (var funcName in GM_API) {
         sandbox[funcName] = GM_API[funcName]
       }
+
+      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
       sandbox.console = console;
 
       sandbox.__proto__ = wrappedContentWin;
@@ -354,7 +351,7 @@ ScriptishService.prototype = {
         return findActiveContext();
       }
     } catch (e) {
-      dump('Greasemonkey getFirebugConsole() error:\n'+uneval(e)+'\n');
+      dump('Scriptish getFirebugConsole() error:\n'+uneval(e)+'\n');
     }
 
     return null;
@@ -391,28 +388,20 @@ ScriptishService.prototype = {
 
         // the setTimeout makes sure we do not execute too early -- sometimes
         // the window isn't quite ready to add a tab yet
+/*
         chromeWin.setTimeout(
             "gBrowser.selectedTab = gBrowser.addTab(" +
             "'http://wiki.greasespot.net/Welcome')", 500);
+*/
       }
     }
 
     // update the currently initialized version so we don't do this work again.
-    if ("@mozilla.org/extensions/manager;1" in Cc) {
-      // Firefox <= 3.6.*
-      var extMan = Cc["@mozilla.org/extensions/manager;1"]
-          .getService(Ci.nsIExtensionManager);
-      var item = extMan.getItemForID(GUID);
+    Cu.import("resource://gre/modules/AddonManager.jsm", tools);
 
-      tools.GM_prefRoot.setValue("version", item.version);
-    } else {
-      // Firefox 3.7+
-      Cu.import("resource://gre/modules/AddonManager.jsm", tools);
-
-      tools.AddonManager.getAddonByID(GUID, function(addon) {
-        tools.GM_prefRoot.setValue("version", addon.version);
-      });
-    }
+    tools.AddonManager.getAddonByID(GUID, function(addon) {
+      tools.GM_prefRoot.setValue("version", addon.version);
+    });
 
     this.updateVersion = function() {};
 
@@ -420,12 +409,5 @@ ScriptishService.prototype = {
   }
 };
 
-/**
-* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
-* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
-*/
-if (XPCOMUtils.generateNSGetFactory) {
-    var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
-} else {
-    var NSGetModule = XPCOMUtils.generateNSGetModule([ScriptishService]);
-}
+// XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);

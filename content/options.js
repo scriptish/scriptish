@@ -1,6 +1,7 @@
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/utils/GM_getEditor.js");
 
 function GM_onloadOptions() {
   document.getElementById("check-uninstall")

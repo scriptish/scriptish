@@ -23,12 +23,17 @@ window.addEventListener("load", function() {
 ////////////////////////////////// functions ///////////////////////////////////
 
 function doInstall() {
+  var tools = {};
+  Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
+  Components.utils.import("resource://scriptish/utils/GM_getTempFile.js", tools);
+  Components.utils.import("resource://scriptish/utils/GM_getWriteStream.js", tools);
+
   var script = createScriptSource();
   if (!script) return false;
 
   // put this created script into a file -- only way to install it
-  var tempFile = GM_getTempFile();
-  var foStream = GM_getWriteStream(tempFile);
+  var tempFile = tools.GM_getTempFile();
+  var foStream = tools.GM_getWriteStream(tempFile);
   foStream.write(script, script.length);
   foStream.close();
 
@@ -50,7 +55,7 @@ function doInstall() {
   config.install(script);
 
   // and fire up the editor!
-  GM_openInEditor(script, window);
+  tools.GM_openInEditor(script, window);
 
   // persist namespace value
   GM_prefRoot.setValue("newscript_namespace", script.namespace);

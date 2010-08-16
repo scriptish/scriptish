@@ -1,7 +1,7 @@
 Scriptish is Open Source, released under the terms of the MIT license;
 see the LICENSE.mit file.
 
-Scriptish was forked from Greasemonkey on Mon, July 5 2010, and contains more
+Scriptish was forked from Greasemonkey on Monday, July 5 2010, and contains more
 code derived from Greasemonkey. Greasemonkey is Open Source, released under
 the terms of the MIT license.
 
@@ -13,5 +13,9 @@ Firefox ( http://mozilla.org/ ).  This code is reused under the MPL license;
 see the LICENSE.mpl file.  All such code is located in the content/third-party/
 directory, and all such files contain the appropriate licensing disclaimers
 and notifications.
+
+The icon used is taken from the PICOL icon library http://www.picol.org/icon_library.php
+This library is released under the Creative Commons-License BY-SA
+http://creativecommons.org/licenses/by-sa/3.0/
 
 License copies can be found in the license directory.
