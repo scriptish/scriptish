@@ -57,7 +57,7 @@ Script.prototype = {
   _changed: function(event, data) { this._config._changed(this, event, data); },
 
   get id() {
-    if (!this._id) this.id = this.namespace + "/" + this.name;
+    if (!this._id) this.id = this.name + "@" + this.namespace;
     return this._id;
   },
   set id(aId) {
