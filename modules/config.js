@@ -60,14 +60,11 @@ Config.prototype = {
   },
 
   _find: function(aScript) {
-    var namespace = aScript._namespace.toLowerCase();
-    var name = aScript._name.toLowerCase();
+    var id = aScript.id;
+    var scripts = this._scripts;
 
-    for (var i = 0, script; script = this._scripts[i]; i++) {
-      if (script._namespace.toLowerCase() == namespace
-        && script._name.toLowerCase() == name) {
-        return i;
-      }
+    for (var i = 0, script; script = scripts[i]; i++) {
+      if (script.id == id) return i;
     }
 
     return -1;

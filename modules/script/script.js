@@ -9,8 +9,9 @@ Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
+const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
-var getMaxJSVersion = function(){ return JSVersions[2]; }
+var getMaxJSVersion = function(){ return JSVersions[2]; };
 
 function Script(config) {
   this._config = config;
@@ -24,9 +25,9 @@ function Script(config) {
   this._modified = null;
   this._dependhash = null;
 
+  this._id = null;
   this._name = null;
   this._namespace = null;
-  this._id = null;
   this._prefroot = null;
   this._author = null;
   this._contributors = [];
@@ -58,13 +59,16 @@ Script.prototype = {
 
   _changed: function(event, data) { this._config._changed(this, event, data); },
 
+  get id() {
+    if (!this._id) this.id = this.name + "@" + this.namespace;
+    return this._id;
+  },
+  set id(aId) {
+    this._id = aId.replace(nonIdChars, ''); // remove unacceptable chars
+  },
   get homepageURL() { return this._homepageURL; },
   get name() { return this._name; },
   get namespace() { return this._namespace; },
-  get id() {
-    if (!this._id) this._id = this._namespace + "/" + this._name;
-    return this._id;
-  },
   get prefroot() { 
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
@@ -123,14 +127,11 @@ Script.prototype = {
       name = name.substring(0, dotIndex);
     }
 
-    name = name.replace(/\s+/g, "_").replace(/[^-_A-Z0-9]+/gi, "");
+    name = name.replace(/[^-_A-Z0-9@]+/gi, "");
     ext = ext.replace(/\s+/g, "_").replace(/[^-_A-Z0-9]+/gi, "");
 
     // If no Latin characters found - use default
     if (!name) name = "gm_script";
-
-    // 24 is a totally arbitrary max length
-    if (name.length > 24) name = name.substring(0, 24);
 
     if (ext) name += "." + ext;
 
@@ -139,7 +140,7 @@ Script.prototype = {
 
   _initFile: function(tempFile) {
     var file = this._config._scriptDir;
-    var name = this._initFileName(this._name, false);
+    var name = this._initFileName(this.id, false);
 
     file.append(name);
     file.createUnique(Ci.nsIFile.DIRECTORY_TYPE, 0755);
@@ -174,24 +175,7 @@ Script.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
 
-    // Migrate preferences.
-    if (this.prefroot != newScript.prefroot) {
-      var tools = {};
-      Cu.import("resource://scriptish/api/GM_ScriptStorage.js", tools);
-
-      var storageOld = new tools.GM_ScriptStorage(this);
-      var storageNew = new tools.GM_ScriptStorage(newScript);
-
-      var names = storageOld.listValues();
-      for (var i = 0, name = null; name = names[i]; i++) {
-        storageNew.setValue(name, storageOld.getValue(name));
-        storageOld.deleteValue(name);
-      }
-    }
-
     // Copy new values.
-    this._id = newScript.id;
-    this._prefroot = newScript.prefroot;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
@@ -290,8 +274,9 @@ Script.prototype = {
     scriptNode.appendChild(doc.createTextNode("\n\t"));
 
     scriptNode.setAttribute("filename", this._filename);
-    scriptNode.setAttribute("name", this._name);
-    scriptNode.setAttribute("namespace", this._namespace);
+    scriptNode.setAttribute("id", this.id);
+    scriptNode.setAttribute("name", this.name);
+    scriptNode.setAttribute("namespace", this.namespace);
     scriptNode.setAttribute("author", this._author);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
@@ -371,6 +356,9 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
     var value = match[2];
 
     switch (header) {
+      case "id":
+        if (value) script.id = value;
+        continue;
       case "name":
       case "namespace":
       case "author":
@@ -528,6 +516,7 @@ Script.load = function load(aConfig, aNode) {
     }
   }
 
+  script._id = aNode.getAttribute("id") || null;
   script._name = aNode.getAttribute("name");
   script._namespace = aNode.getAttribute("namespace");
   script._author = aNode.getAttribute("author");
