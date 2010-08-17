@@ -231,7 +231,7 @@ ScriptishService.prototype = {
     try {
       // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
       var lineFinder = new Error();
-      Cu.evalInSandbox(code, sandbox, "1.8");
+      Cu.evalInSandbox(code, sandbox, script.jsversion);
     } catch (e) { // catches errors while running the script code
       try {
         if (e && "return not in function" == e.message)
