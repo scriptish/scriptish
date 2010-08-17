@@ -9,7 +9,7 @@ Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
-const nonIdChars = /[^\w@\.\-]+/g;
+const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 
 function Script(config) {
   this._config = config;
@@ -61,7 +61,7 @@ Script.prototype = {
     return this._id;
   },
   set id(aId) {
-    this._id = aId.substr(0, 52);
+    this._id = aId.replace(nonIdChars, ''); // remove unacceptable chars
   },
   get homepageURL() { return this._homepageURL; },
   get name() { return this._name; },
@@ -123,14 +123,11 @@ Script.prototype = {
       name = name.substring(0, dotIndex);
     }
 
-    name = name.replace(/\s+/g, "_").replace(/[^-_A-Z0-9]+/gi, "");
+    name = name.replace(/[^-_A-Z0-9@]+/gi, "");
     ext = ext.replace(/\s+/g, "_").replace(/[^-_A-Z0-9]+/gi, "");
 
     // If no Latin characters found - use default
     if (!name) name = "gm_script";
-
-    // 24 is a totally arbitrary max length
-    if (name.length > 24) name = name.substring(0, 24);
 
     if (ext) name += "." + ext;
 
@@ -139,7 +136,7 @@ Script.prototype = {
 
   _initFile: function(tempFile) {
     var file = this._config._scriptDir;
-    var name = this._initFileName(this._name, false);
+    var name = this._initFileName(this.id, false);
 
     file.append(name);
     file.createUnique(Ci.nsIFile.DIRECTORY_TYPE, 0755);
@@ -174,24 +171,7 @@ Script.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
 
-    // Migrate preferences.
-    if (this.prefroot != newScript.prefroot) {
-      var tools = {};
-      Cu.import("resource://scriptish/api/GM_ScriptStorage.js", tools);
-
-      var storageOld = new tools.GM_ScriptStorage(this);
-      var storageNew = new tools.GM_ScriptStorage(newScript);
-
-      var names = storageOld.listValues();
-      for (var i = 0, name = null; name = names[i]; i++) {
-        storageNew.setValue(name, storageOld.getValue(name));
-        storageOld.deleteValue(name);
-      }
-    }
-
     // Copy new values.
-    this._id = newScript.id;
-    this._prefroot = newScript.prefroot;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
@@ -372,7 +352,6 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
 
     switch (header) {
       case "id":
-        value = value.replace(nonIdChars, ''); // remove unacceptable chars
         if (value) script.id = value;
         continue;
       case "name":
