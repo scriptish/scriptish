@@ -101,8 +101,8 @@
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
           oncommand="GM_BrowserUI.showUserscriptList();" />
-        <menuitem label="&menu.managePage;"
-          oncommand="GM_BrowserUI.managePageMenuItemClicked();" />
+        <!-- <menuitem label="&menu.managePage;"
+          oncommand="GM_BrowserUI.managePageMenuItemClicked();" /> -->
         <menuseparator />
         <menuitem accesskey="&menu.options.accesskey;"
           label="&menu.options;"
