@@ -154,7 +154,7 @@ Config.prototype = {
       this.uninstall(this._scripts[existingIndex]);
     }
 
-    script.install();
+    script.installProcess();
 
     this.addScript(script);
     this._changed(script, "install", null);

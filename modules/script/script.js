@@ -360,7 +360,7 @@ Script.prototype = {
     return scriptNode;
   },
 
-  install: function() {
+  installProcess: function() {
     this._initFile(this._tempFile);
     this._tempFile = null;
 
