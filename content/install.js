@@ -1,7 +1,7 @@
 
 Components.utils.import("resource://scriptish/utils.js");
 
-var GMInstall = {
+var Scriptish_Install = {
   init: function() {
     var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
                               .getService(Components.interfaces.nsIIOService);
@@ -60,7 +60,7 @@ var GMInstall = {
       window.clearInterval(this.timer_);
     }
 
-    this.timer_ = window.setInterval(function() { GMInstall.onInterval() }, 500);
+    this.timer_ = window.setInterval(function() { Scriptish_Install.onInterval() }, 500);
   },
 
   onInterval: function() {
@@ -119,7 +119,5 @@ var GMInstall = {
   }
 };
 
-// See: closewindow.xul .
-function GM_onClose() {
-  GMInstall.onCancel();
-}
+// See: closewindow.xul
+function Scriptish_onClose() { Scriptish.onCancel(); }
