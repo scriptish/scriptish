@@ -14,6 +14,7 @@ const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 var getMaxJSVersion = function(){ return JSVersions[2]; };
 
+// Implements Addon https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
 function Script(config) {
   this._config = config;
   this._observers = [];
