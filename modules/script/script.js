@@ -5,6 +5,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
+Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
@@ -35,6 +36,7 @@ function Script(config) {
   this._contributors = [];
   this._description = null;
   this._version = null;
+  this._icon = new ScriptIcon(this);
   this._enabled = true;
   this.needsUninstall = false;
   this._includes = [];
@@ -136,6 +138,8 @@ Script.prototype = {
   },
   get description() { return this._description; },
   get version() { return this._version; },
+  get icon() { return this._icon; },
+  get iconURL() { return this._icon.fileURL; },
   get enabled() { return this._enabled; },
   set enabled(enabled) { this.userDisabled = !enabled; },
 
@@ -258,6 +262,7 @@ Script.prototype = {
       Cu.import("resource://scriptish/script/scriptdownloader.js", tools);
 
       this._dependhash = dependhash;
+      this._icon = newScript._icon;
       this._requires = newScript._requires;
       this._resources = newScript._resources;
 
@@ -343,6 +348,7 @@ Script.prototype = {
     scriptNode.setAttribute("author", this._author);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
+    scriptNode.setAttribute("icon", this.icon.filename);
     scriptNode.setAttribute("enabled", this._enabled);
     scriptNode.setAttribute("basedir", this._basedir);
     scriptNode.setAttribute("modified", this._modified);
@@ -363,6 +369,11 @@ Script.prototype = {
   installProcess: function() {
     this._initFile(this._tempFile);
     this._tempFile = null;
+
+    // if icon had a file to download, then move the file
+    if (this.icon.hasDownloadURL()) {
+      this.icon._initFile();
+    }
 
     for (var i = 0; i < this._requires.length; i++) {
       this._requires[i]._initFile();
@@ -450,6 +461,25 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         continue;
       case "exclude":
         script.addExclude(value);
+        continue;
+      case "icon":
+      case "iconurl":
+        script._rawMeta += header + '\0' + value + '\0';
+        // aceept data uri schemes for image MIME types
+        if (/^data:image\//i.test(value)){
+          script.icon._dataURI = value;
+          break;
+       }
+       try {
+          var iconUri = tools.GM_uriFromUrl(value, aURI);
+          script.icon._downloadURL = iconUri.spec;
+        } catch (e) {
+          if (aUpdate) {
+            script._dependFail = true;
+          } else {
+            throw new Error('Failed to get @icon '+ value);
+          }
+        }
         continue;
       case "require":
         try {
@@ -584,6 +614,7 @@ Script.load = function load(aConfig, aNode) {
   script._namespace = aNode.getAttribute("namespace");
   script._author = aNode.getAttribute("author");
   script._description = aNode.getAttribute("description");
+  script.icon.fileURL = aNode.getAttribute("icon");
   script._enabled = aNode.getAttribute("enabled") == true.toString();
 
   aConfig.addScript(script);
