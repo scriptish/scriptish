@@ -12,7 +12,7 @@
       accesskey="&menu.show.accesskey;"
       label="&menu.show;"
       insertbefore="context-openlink"
-      oncommand="GM_BrowserUI.viewContextItemClicked(event);" />
+      oncommand="Scriptish_BrowserUI.viewContextItemClicked(event);" />
     <menuseparator id="install-userscript-sep"
       insertbefore="context-openlink" />
   </popup>
@@ -39,11 +39,11 @@
         accesskey="&menu.install.accesskey;"
         label="&menu.install;"
         hidden="true"
-        oncommand="GM_BrowserUI.installMenuItemClicked(event);" />
+        oncommand="Scriptish_BrowserUI.installMenuItemClicked(event);" />
       <menuitem
         accesskey="&menu.manage.accesskey;"
         label="&menu.manage;"
-        oncommand="GM_BrowserUI.showUserscriptList();" />
+        oncommand="Scriptish_BrowserUI.showUserscriptList();" />
       <menuitem id="userscript-tools-new"
         accesskey="&menu.new.accesskey;"
         label="&menu.new;"
@@ -100,13 +100,13 @@
           oncommand="GM_newUserScript(window);" />
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
-          oncommand="GM_BrowserUI.showUserscriptList();" />
+          oncommand="Scriptish_BrowserUI.showUserscriptList();" />
         <!-- <menuitem label="&menu.managePage;"
-          oncommand="GM_BrowserUI.managePageMenuItemClicked();" /> -->
+          oncommand="Scriptish_BrowserUI.managePageMenuItemClicked();" /> -->
         <menuseparator />
         <menuitem accesskey="&menu.options.accesskey;"
           label="&menu.options;"
-          oncommand="GM_BrowserUI.openOptionsWin();" />
+          oncommand="Scriptish_BrowserUI.openOptionsWin();" />
         <menuitem id="gm-status-enabled-item"
           accesskey="&statusbar.enabled.accesskey;"
           label="&statusbar.enabled;"

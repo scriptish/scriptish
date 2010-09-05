@@ -53,12 +53,12 @@ GM_ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
     }
 
     // display "Fetching user script" msg in status bar
-    this.win_.GM_BrowserUI.statusImage.src =
+    this.win_.Scriptish_BrowserUI.statusImage.src =
       "chrome://scriptish/content/third-party/throbber.gif";
-    this.win_.GM_BrowserUI.statusImage.style.opacity = "0.5";
-    this.win_.GM_BrowserUI.statusImage.tooltipText =
+    this.win_.Scriptish_BrowserUI.statusImage.style.opacity = "0.5";
+    this.win_.Scriptish_BrowserUI.statusImage.tooltipText =
         this.bundle_.getString("tooltip.loading");
-    this.win_.GM_BrowserUI.showStatus("Fetching user script", false);
+    this.win_.Scriptish_BrowserUI.showStatus("Fetching user script", false);
   }
 };
 
@@ -264,7 +264,7 @@ GM_ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
     GM_alert(this.dependencyError);
   } else if(this.dependenciesLoaded_) {
-    this.win_.GM_BrowserUI.installScript(this.script)
+    this.win_.Scriptish_BrowserUI.installScript(this.script)
   } else {
     this.installOnCompletion_ = true;
   }
@@ -289,12 +289,12 @@ GM_ScriptDownloader.prototype.showInstallDialog = function(timer) {
 };
 
 GM_ScriptDownloader.prototype.hideFetchMsg = function() {
-  this.win_.GM_BrowserUI.refreshStatus();
-  this.win_.GM_BrowserUI.hideStatusImmediately();
+  this.win_.Scriptish_BrowserUI.refreshStatus();
+  this.win_.Scriptish_BrowserUI.hideStatusImmediately();
 };
 
 GM_ScriptDownloader.prototype.showScriptView = function() {
-  this.win_.GM_BrowserUI.showScriptView(this);
+  this.win_.Scriptish_BrowserUI.showScriptView(this);
 };
 
 

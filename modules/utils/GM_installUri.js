@@ -10,8 +10,8 @@ function GM_installUri(uri) {
       .getService(Ci.nsIWindowMediator)
       .getMostRecentWindow("navigator:browser");
 
-  if (win && win.GM_BrowserUI) {
-    win.GM_BrowserUI.startInstallScript(uri);
+  if (win && win.Scriptish_BrowserUI) {
+    win.Scriptish_BrowserUI.startInstallScript(uri);
     return true;
   }
   return false;

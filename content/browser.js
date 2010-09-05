@@ -3,7 +3,7 @@
 // all the main injection logic, though that should probably be a proper XPCOM
 // service and wouldn't need to be initialized in that case.
 
-var GM_BrowserUI = new Object();
+var Scriptish_BrowserUI = new Object();
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
@@ -13,7 +13,7 @@ Components.utils.import("resource://scriptish/utils/GM_newUserScript.js");
 /**
  * nsISupports.QueryInterface
  */
-GM_BrowserUI.QueryInterface = function(aIID) {
+Scriptish_BrowserUI.QueryInterface = function(aIID) {
   if (!aIID.equals(Components.interfaces.nsISupports) &&
       !aIID.equals(Components.interfaces.nsISupportsWeakReference) &&
       !aIID.equals(Components.interfaces.nsIWebProgressListener))
@@ -28,7 +28,7 @@ GM_BrowserUI.QueryInterface = function(aIID) {
  * do version checking, and set up listeners for browser xul load and location
  * changes.
  */
-GM_BrowserUI.init = function() {
+Scriptish_BrowserUI.init = function() {
   this.menuCommanders = [];
   this.currentMenuCommander = null;
 
@@ -40,7 +40,7 @@ GM_BrowserUI.init = function() {
  * The browser XUL has loaded. Find the elements we need and set up our
  * listeners and wrapper objects.
  */
-GM_BrowserUI.chromeLoad = function(e) {
+Scriptish_BrowserUI.chromeLoad = function(e) {
   // get all required DOM elements
   this.tabBrowser = document.getElementById("content");
   this.statusImage = document.getElementById("gm-status-image");
@@ -89,7 +89,7 @@ GM_BrowserUI.chromeLoad = function(e) {
   setTimeout(function() {gmSvc.updateVersion()}, 100);
 };
 
-GM_BrowserUI.showUserscriptList = function() {
+Scriptish_BrowserUI.showUserscriptList = function() {
   var tools = {};
   Components.utils.import(
     "resource://scriptish/utils/GM_showUserscriptList.js", tools);
@@ -99,7 +99,7 @@ GM_BrowserUI.showUserscriptList = function() {
 /**
  * registerMenuCommand
  */
-GM_BrowserUI.registerMenuCommand = function(menuCommand) {
+Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   var commander = this.getCommander(menuCommand.window);
 
   commander.registerMenuCommand(menuCommand.name,
@@ -114,7 +114,7 @@ GM_BrowserUI.registerMenuCommand = function(menuCommand) {
  * If that document is in in the top-level window of the focused tab, find
  * it's menu items and activate them.
  */
-GM_BrowserUI.contentLoad = function(e) {
+Scriptish_BrowserUI.contentLoad = function(e) {
   var safeWin;
   var unsafeWin;
   var href;
@@ -154,7 +154,7 @@ GM_BrowserUI.contentLoad = function(e) {
  * Shows the install banner across the top of the tab that is displayed when
  * a user selects "show script source" in the install dialog.
  */
-GM_BrowserUI.showInstallBanner = function(browser) {
+Scriptish_BrowserUI.showInstallBanner = function(browser) {
   var greeting = this.bundle.getString("greeting.msg");
 
   var notificationBox = this.tabBrowser.getNotificationBox(browser);
@@ -185,11 +185,11 @@ GM_BrowserUI.showInstallBanner = function(browser) {
 /**
  * Called from greasemonkey service when we should load a user script.
  */
-GM_BrowserUI.startInstallScript = function(uri, timer) {
+Scriptish_BrowserUI.startInstallScript = function(uri, timer) {
   if (!timer) {
     // docs for nsicontentpolicy say we're not supposed to block, so short
     // timer.
-    setTimeout(function() { GM_BrowserUI.startInstallScript(uri, true) }, 0);
+    setTimeout(function() { Scriptish_BrowserUI.startInstallScript(uri, true) }, 0);
 
     return;
   }
@@ -206,7 +206,7 @@ GM_BrowserUI.startInstallScript = function(uri, timer) {
  * Open the tab to show the contents of a script and display the banner to let
  * the user install it.
  */
-GM_BrowserUI.showScriptView = function(scriptDownloader) {
+Scriptish_BrowserUI.showScriptView = function(scriptDownloader) {
   this.scriptDownloader_ = scriptDownloader;
 
   var tab = this.tabBrowser.addTab(scriptDownloader.script.previewURL);
@@ -219,7 +219,7 @@ GM_BrowserUI.showScriptView = function(scriptDownloader) {
  * Implements nsIObserve.observe. Right now we're only observing our own
  * install-userscript, which happens when the install bar is clicked.
  */
-GM_BrowserUI.observe = function(subject, topic, data) {
+Scriptish_BrowserUI.observe = function(subject, topic, data) {
   if (topic == "install-userscript") {
     if (window == this.winWat.activeWindow) {
       this.installCurrentScript();
@@ -232,11 +232,11 @@ GM_BrowserUI.observe = function(subject, topic, data) {
 /**
  * Handles the install button getting clicked.
  */
-GM_BrowserUI.installCurrentScript = function() {
+Scriptish_BrowserUI.installCurrentScript = function() {
   this.scriptDownloader_.installScript();
 };
 
-GM_BrowserUI.installScript = function(script){
+Scriptish_BrowserUI.installScript = function(script){
   GM_getConfig().install(script);
   this.showHorrayMessage(script.name);
 };
@@ -246,7 +246,7 @@ GM_BrowserUI.installScript = function(script){
  * of tab switching we need to change the list of commands displayed in the
  * User Script Commands submenu.
  */
-GM_BrowserUI.onLocationChange = function(a,b,c) {
+Scriptish_BrowserUI.onLocationChange = function(a,b,c) {
   if (this.currentMenuCommander != null) {
     this.currentMenuCommander.detach();
     this.currentMenuCommander = null;
@@ -265,7 +265,7 @@ GM_BrowserUI.onLocationChange = function(a,b,c) {
  * A content document has unloaded. We need to remove it's menuCommander to
  * avoid leaking it's memory.
  */
-GM_BrowserUI.contentUnload = function(e) {
+Scriptish_BrowserUI.contentUnload = function(e) {
   if (e.persisted || !this.menuCommanders || 0 == this.menuCommanders.length) {
     return;
   }
@@ -296,7 +296,7 @@ GM_BrowserUI.contentUnload = function(e) {
  * changes. And we need to let go of the progress listener so that we don't
  * leak it's memory.
  */
-GM_BrowserUI.chromeUnload = function() {
+Scriptish_BrowserUI.chromeUnload = function() {
   GM_prefRoot.unwatch("enabled", this.enabledWatcher);
   this.tabBrowser.removeProgressListener(this);
   delete this.menuCommanders;
@@ -306,7 +306,7 @@ GM_BrowserUI.chromeUnload = function() {
  * Called when the content area context menu is showing. We figure out whether
  * to show our context items.
  */
-GM_BrowserUI.contextMenuShowing = function() {
+Scriptish_BrowserUI.contextMenuShowing = function() {
   var contextItem = document.getElementById("view-userscript");
   var contextSep = document.getElementById("install-userscript-sep");
 
@@ -322,7 +322,7 @@ GM_BrowserUI.contextMenuShowing = function() {
 };
 
 
-GM_BrowserUI.getUserScriptLinkUnderPointer = function() {
+Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
   var culprit = document.popupNode;
 
   while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a") {
@@ -341,7 +341,7 @@ GM_BrowserUI.getUserScriptLinkUnderPointer = function() {
   return uri;
 };
 
-GM_BrowserUI.toolsMenuShowing = function() {
+Scriptish_BrowserUI.toolsMenuShowing = function() {
   var installItem = document.getElementById("userscript-tools-install");
   var hidden = true;
 
@@ -360,7 +360,7 @@ GM_BrowserUI.toolsMenuShowing = function() {
  * Helper method which gets the menuCommander corresponding to a given
  * document
  */
-GM_BrowserUI.getCommander = function(unsafeWin) {
+Scriptish_BrowserUI.getCommander = function(unsafeWin) {
   for (var i = 0; i < this.menuCommanders.length; i++) {
     if (this.menuCommanders[i].win == unsafeWin) {
       return this.menuCommanders[i].commander;
@@ -379,7 +379,7 @@ GM_BrowserUI.getCommander = function(unsafeWin) {
 
 function GM_showGeneralPopup(aEvent) {
   // set the enabled/disabled state
-  GM_BrowserUI.generalMenuEnabledItem.setAttribute("checked", GM_getEnabled());
+  Scriptish_BrowserUI.generalMenuEnabledItem.setAttribute("checked", GM_getEnabled());
 }
 
 function GM_showPopup(aEvent) {
@@ -430,7 +430,7 @@ function GM_showPopup(aEvent) {
   var tail = document.getElementById("gm-status-no-scripts-sep");
 
   // set the enabled/disabled state
-  GM_BrowserUI.statusEnabledItem.setAttribute("checked", GM_getEnabled());
+  Scriptish_BrowserUI.statusEnabledItem.setAttribute("checked", GM_getEnabled());
 
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; i >= 0; i--) {
@@ -498,7 +498,7 @@ function GM_popupClicked(aEvent) {
  * the icon in this window, clicking it in another window, or even changing
  * the mozilla preference that backs it directly.
  */
-GM_BrowserUI.refreshStatus = function() {
+Scriptish_BrowserUI.refreshStatus = function() {
   if (GM_getEnabled()) {
     this.statusImage.src = "chrome://scriptish/skin/icon_small.png";
     this.statusImage.tooltipText = this.bundle.getString("tooltip.enabled");
@@ -510,7 +510,7 @@ GM_BrowserUI.refreshStatus = function() {
   this.statusImage.style.opacity = "1.0";
 };
 
-GM_BrowserUI.openChromeWindow = function(url) {
+Scriptish_BrowserUI.openChromeWindow = function(url) {
   var windowWatcher = Components
     .classes["@mozilla.org/embedcomp/window-watcher;1"]
     .getService(Components.interfaces.nsIWindowWatcher);
@@ -520,15 +520,15 @@ GM_BrowserUI.openChromeWindow = function(url) {
   );
 }
 
-GM_BrowserUI.newUserScript = function() {
-  GM_BrowserUI.openChromeWindow("chrome://scriptish/content/newscript.xul");
+Scriptish_BrowserUI.newUserScript = function() {
+  Scriptish_BrowserUI.openChromeWindow("chrome://scriptish/content/newscript.xul");
 };
 
-GM_BrowserUI.openOptionsWin = function() {
-  GM_BrowserUI.openChromeWindow("chrome://scriptish/content/options.xul");
+Scriptish_BrowserUI.openOptionsWin = function() {
+  Scriptish_BrowserUI.openChromeWindow("chrome://scriptish/content/options.xul");
 };
 
-GM_BrowserUI.showStatus = function(message, autoHide) {
+Scriptish_BrowserUI.showStatus = function(message, autoHide) {
   if (this.statusLabel.collapsed) {
     this.statusLabel.collapsed = false;
   }
@@ -557,7 +557,7 @@ GM_BrowserUI.showStatus = function(message, autoHide) {
   this.showAnimation.start();
 };
 
-GM_BrowserUI.showStatusAnimationEnd = function(autoHide) {
+Scriptish_BrowserUI.showStatusAnimationEnd = function(autoHide) {
   this.showAnimation = null;
 
   if (autoHide) {
@@ -565,7 +565,7 @@ GM_BrowserUI.showStatusAnimationEnd = function(autoHide) {
   }
 };
 
-GM_BrowserUI.setAutoHideTimer = function() {
+Scriptish_BrowserUI.setAutoHideTimer = function() {
   if (this.autoHideTimer) {
     window.clearTimeout(this.autoHideTimer);
   }
@@ -573,7 +573,7 @@ GM_BrowserUI.setAutoHideTimer = function() {
   this.autoHideTimer = window.setTimeout(GM_hitch(this, "hideStatus"), 3000);
 };
 
-GM_BrowserUI.hideStatusImmediately = function() {
+Scriptish_BrowserUI.hideStatusImmediately = function() {
   if (this.showAnimation) {
     this.showAnimation.stop();
     this.showAnimation = null;
@@ -593,7 +593,7 @@ GM_BrowserUI.hideStatusImmediately = function() {
   this.statusLabel.collapsed = true;
 };
 
-GM_BrowserUI.hideStatus = function() {
+Scriptish_BrowserUI.hideStatus = function() {
   if (!this.hideAnimation) {
     this.autoHideTimer = null;
 
@@ -606,39 +606,39 @@ GM_BrowserUI.hideStatus = function() {
   }
 };
 
-GM_BrowserUI.hideStatusAnimationEnd = function() {
+Scriptish_BrowserUI.hideStatusAnimationEnd = function() {
   this.hideAnimation = null;
   this.statusLabel.collapsed = true;
 };
 
 // necessary for webProgressListener implementation
-GM_BrowserUI.onProgressChange = function(webProgress,b,c,d,e,f){};
-GM_BrowserUI.onStateChange = function(a,b,c,d){};
-GM_BrowserUI.onStatusChange = function(a,b,c,d){};
-GM_BrowserUI.onSecurityChange = function(a,b,c){};
-GM_BrowserUI.onLinkIconAvailable = function(a){};
+Scriptish_BrowserUI.onProgressChange = function(webProgress,b,c,d,e,f){};
+Scriptish_BrowserUI.onStateChange = function(a,b,c,d){};
+Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
+Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
+Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
-GM_BrowserUI.showHorrayMessage = function(scriptName) {
+Scriptish_BrowserUI.showHorrayMessage = function(scriptName) {
   this.showStatus("'" + scriptName + "' " + this.bundle.getString("statusbar.installed"), true);
 };
 
-GM_BrowserUI.installMenuItemClicked = function() {
-  GM_BrowserUI.startInstallScript(
+Scriptish_BrowserUI.installMenuItemClicked = function() {
+  Scriptish_BrowserUI.startInstallScript(
     gBrowser.currentURI
   );
 };
 
-GM_BrowserUI.viewContextItemClicked = function() {
+Scriptish_BrowserUI.viewContextItemClicked = function() {
   var tools = {};
   Components.utils.import("resource://scriptish/scriptdownloader.js", tools);
 
-  var uri = GM_BrowserUI.getUserScriptLinkUnderPointer();
+  var uri = Scriptish_BrowserUI.getUserScriptLinkUnderPointer();
 
   this.scriptDownloader_ = new tools.GM_ScriptDownloader(window, uri, this.bundle);
   this.scriptDownloader_.startViewScript();
 };
 
-GM_BrowserUI.managePageMenuItemClicked = function() {
+Scriptish_BrowserUI.managePageMenuItemClicked = function() {
   var attempts = 20;
 
   BrowserOpenAddonsMgr('userscripts');
@@ -669,4 +669,4 @@ GM_BrowserUI.managePageMenuItemClicked = function() {
   tryToSetFilterLater();
 };
 
-GM_BrowserUI.init();
+Scriptish_BrowserUI.init();
