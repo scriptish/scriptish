@@ -1,6 +1,5 @@
 
 Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/utils.js");
 
 function Scriptish_onloadOptions() {
   document.getElementById("check-uninstall")

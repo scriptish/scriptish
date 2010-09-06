@@ -5,7 +5,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_getContents"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
 function Scriptish_getContents(file, charset) {
   if (!charset) charset = "UTF-8";
@@ -17,7 +17,7 @@ function Scriptish_getContents(file, charset) {
     .createInstance(Ci.nsIScriptableUnicodeConverter);
   unicodeConverter.charset = charset;
 
-  var channel = ioService.newChannelFromURI(GM_getUriFromFile(file));
+  var channel = ioService.newChannelFromURI(Scriptish_getUriFromFile(file));
   try {
     var input = channel.open();
   } catch (e) {

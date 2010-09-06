@@ -5,7 +5,6 @@ var EXPORTED_SYMBOLS = ["GM_openInEditor"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/GM_getEditor.js");
 Cu.import("resource://scriptish/utils/GM_launchApplicationWithDoc.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");

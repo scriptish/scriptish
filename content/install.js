@@ -1,6 +1,4 @@
 
-Components.utils.import("resource://scriptish/utils.js");
-
 var Scriptish_Install = {
   init: function() {
     var ioservice = Components.classes["@mozilla.org/network/io-service;1"]

@@ -63,7 +63,6 @@ ScriptishService.prototype = {
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     var tools = {};
-    Cu.import("resource://scriptish/utils.js", tools);
     Cu.import("resource://scriptish/utils/GM_installUri.js", tools);
     Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js", tools);
 
@@ -156,7 +155,6 @@ ScriptishService.prototype = {
     var unsafeContentWin = wrappedContentWin.wrappedJSObject;
 
     var tools = {};
-    Cu.import("resource://scriptish/utils.js", tools);
     Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
 
@@ -222,7 +220,6 @@ ScriptishService.prototype = {
 
   evalInSandbox: function(code, codebase, sandbox, script) {
     var tools = {};
-    Cu.import("resource://scriptish/utils.js", tools);
     Cu.import("resource://scriptish/logging.js", tools);
 
     if (!(Cu && Cu.Sandbox)) {
@@ -365,7 +362,6 @@ ScriptishService.prototype = {
    */
   updateVersion: function() {
     var tools = {};
-    Cu.import("resource://scriptish/utils.js", tools);
     Cu.import("resource://scriptish/logging.js", tools);
     Cu.import("resource://scriptish/prefmanager.js", tools);
 

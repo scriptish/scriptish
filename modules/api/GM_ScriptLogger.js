@@ -3,7 +3,6 @@
 var EXPORTED_SYMBOLS = ["GM_ScriptLogger"];
 
 const Cu = Components.utils;
-Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/logging.js");
 
 function GM_ScriptLogger(script) {

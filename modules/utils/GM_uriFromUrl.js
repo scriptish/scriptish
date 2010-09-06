@@ -4,7 +4,6 @@ var EXPORTED_SYMBOLS = ["GM_uriFromUrl"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
 
 const GM_uriFromUrl = function(aUrl, aBaseUrl) {
   var baseUri = null;

@@ -4,7 +4,6 @@ var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");

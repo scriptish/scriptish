@@ -1,7 +1,6 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_MenuCommander"];
 
-Components.utils.import("resource://scriptish/utils.js");
 Components.utils.import("resource://scriptish/logging.js");
 
 function GM_MenuCommander(aDocument) {

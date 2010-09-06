@@ -1,7 +1,6 @@
 /////////////////////////////// global variables ///////////////////////////////
 
 Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/utils.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 
 var bundle = null;
