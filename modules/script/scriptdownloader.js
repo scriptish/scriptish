@@ -6,6 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
+Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 
 function GM_ScriptDownloader(win, uri, bundle) {
   this.win_ = win;
@@ -67,7 +68,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     // If loading from file, status might be zero on success
     if (this.req_.status != 200 && this.req_.status != 0) {
       // NOTE: Unlocalized string
-      GM_alert("Error loading user script:\n" +
+      Scriptish_alert("Error loading user script:\n" +
       this.req_.status + ": " +
       this.req_.statusText);
       return;
@@ -118,7 +119,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   } catch (e) {
     this.hideFetchMsg();
     // NOTE: unlocalized string
-    GM_alert("Script could not be installed " + e);
+    Scriptish_alert("Script could not be installed " + e);
     throw e;
   }
 };
@@ -262,7 +263,7 @@ GM_ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg
 
 GM_ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
-    GM_alert(this.dependencyError);
+    Scriptish_alert(this.dependencyError);
   } else if(this.dependenciesLoaded_) {
     this.win_.Scriptish_BrowserUI.installScript(this.script)
   } else {
