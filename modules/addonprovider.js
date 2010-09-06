@@ -1,12 +1,12 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = [ "GM_AddonProvider" ];
+var EXPORTED_SYMBOLS = [];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
-GM_AddonProvider = {
+Scriptish_AddonProvider = {
   getAddonByID: function(aId, aCallback) {
     aCallback(gmService.config.getScriptById(aId));
   },
@@ -17,4 +17,4 @@ GM_AddonProvider = {
   }
 }
 
-AddonManagerPrivate.registerProvider(GM_AddonProvider);
+AddonManagerPrivate.registerProvider(Scriptish_AddonProvider);
