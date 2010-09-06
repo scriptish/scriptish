@@ -541,8 +541,8 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
 
   // if no meta info, default to reasonable values
   if (!script._name && aURI) {
-    Cu.import("resource://scriptish/utils/GM_parseScriptName.js", tools);
-    script._name = tools.GM_parseScriptName(aURI);
+    Cu.import("resource://scriptish/utils/Scriptish_parseScriptName.js", tools);
+    script._name = tools.Scriptish_parseScriptName(aURI);
   }
   if (!script._namespace && aURI) script._namespace = aURI.host;
   if (!script._description) script._description = "";
