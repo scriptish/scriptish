@@ -7,7 +7,6 @@ var Scriptish_BrowserUI = new Object();
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
-Components.utils.import("resource://scriptish/utils/GM_isGreasemonkeyable.js");
 Components.utils.import("resource://scriptish/utils/GM_newUserScript.js");
 
 /**
@@ -115,17 +114,17 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
  * it's menu items and activate them.
  */
 Scriptish_BrowserUI.contentLoad = function(e) {
-  var safeWin;
-  var unsafeWin;
-  var href;
+  var tools = {};
+  Components.utils.import(
+      "resource://scriptish/utils/GM_isGreasemonkeyable.js", tools);
 
   if (!GM_getEnabled()) return;
 
-  safeWin = e.target.defaultView;
-  unsafeWin = safeWin.wrappedJSObject;
-  href = safeWin.location.href;
+  var safeWin = e.target.defaultView;
+  var unsafeWin = safeWin.wrappedJSObject;
+  var href = safeWin.location.href;
 
-  if (GM_isGreasemonkeyable(href)) {
+  if (tools.GM_isGreasemonkeyable(href)) {
     // if this content load is in the focused tab, attach the menuCommaander
     if (unsafeWin == this.tabBrowser.selectedBrowser.contentWindow) {
       var commander = this.getCommander(safeWin);
