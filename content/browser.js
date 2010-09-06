@@ -199,7 +199,7 @@ Scriptish_BrowserUI.startInstallScript = function(uri, timer) {
   var tools = {};
   Components.utils.import("resource://scriptish/script/scriptdownloader.js", tools);
 
-  this.scriptDownloader_ = new tools.GM_ScriptDownloader(window, uri, this.bundle);
+  this.scriptDownloader_ = new tools.ScriptDownloader(window, uri, this.bundle);
   this.scriptDownloader_.startInstall();
 };
 
@@ -638,7 +638,7 @@ Scriptish_BrowserUI.viewContextItemClicked = function() {
 
   var uri = Scriptish_BrowserUI.getUserScriptLinkUnderPointer();
 
-  this.scriptDownloader_ = new tools.GM_ScriptDownloader(window, uri, this.bundle);
+  this.scriptDownloader_ = new tools.ScriptDownloader(window, uri, this.bundle);
   this.scriptDownloader_.startViewScript();
 };
 

@@ -280,7 +280,7 @@ Script.prototype = {
       this.delayInjection = true;
 
       // Redownload dependencies.
-      var scriptDownloader = new tools.GM_ScriptDownloader(null, null, null);
+      var scriptDownloader = new tools.ScriptDownloader(null, null, null);
       scriptDownloader.script = this;
       scriptDownloader.updateScript = true;
       scriptDownloader.fetchDependencies();
