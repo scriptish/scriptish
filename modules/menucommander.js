@@ -1,10 +1,10 @@
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_MenuCommander"];
+var EXPORTED_SYMBOLS = ["Scriptish_MenuCommander"];
 
 Components.utils.import("resource://scriptish/logging.js");
 
-function GM_MenuCommander(aDocument) {
-  Scriptish_log("> GM_MenuCommander")
+function Scriptish_MenuCommander(aDocument) {
+  Scriptish_log("> Scriptish_MenuCommander")
 
   this.doc = aDocument;
 
@@ -20,12 +20,12 @@ function GM_MenuCommander(aDocument) {
   this.menuPopup2 = this.menu2.firstChild;
   this.menuItems2 = [];
 
-  Scriptish_log("< GM_MenuCommander")
+  Scriptish_log("< Scriptish_MenuCommander")
 }
 
-GM_MenuCommander.prototype.registerMenuCommand =
+Scriptish_MenuCommander.prototype.registerMenuCommand =
   function(commandName, commandFunc, accelKey, accelModifiers, accessKey) {
-    Scriptish_log("> GM_MenuCommander.registerMenuCommand");
+    Scriptish_log("> Scriptish_MenuCommander.registerMenuCommand");
 
     // Protection against item duplication
     for (var i = 0; i < this.menuItems.length; i++) {
@@ -64,8 +64,8 @@ GM_MenuCommander.prototype.registerMenuCommand =
     Scriptish_log("< GM_MenuCommmander.registerMenuCommand")
   };
 
-GM_MenuCommander.prototype.attach = function() {
-  Scriptish_log("> GM_MenuCommander.attach");
+Scriptish_MenuCommander.prototype.attach = function() {
+  Scriptish_log("> Scriptish_MenuCommander.attach");
 
   for (var i = 0; i < this.menuItems.length; i++) {
     this.menuPopup.appendChild(this.menuItems[i]);
@@ -79,11 +79,11 @@ GM_MenuCommander.prototype.attach = function() {
   this.setDisabled(this.menuItems.length == 0);
   this.attached = true;
 
-  Scriptish_log("< GM_MenuCommander.attach");
+  Scriptish_log("< Scriptish_MenuCommander.attach");
 };
 
-GM_MenuCommander.prototype.detach = function() {
-  Scriptish_log("> GM_MenuCommander.detach");
+Scriptish_MenuCommander.prototype.detach = function() {
+  Scriptish_log("> Scriptish_MenuCommander.detach");
   Scriptish_log("* this.menuPopup: " + this.menuPopup);
   Scriptish_log("* this.menuPopup2: " + this.menuPopup2);
 
@@ -99,7 +99,7 @@ GM_MenuCommander.prototype.detach = function() {
   this.setDisabled(true);
   this.attached = false;
 
-  Scriptish_log("< GM_MenuCommander.detach");
+  Scriptish_log("< Scriptish_MenuCommander.detach");
 };
 
 //TODO: restructure accel/access validation to be at register time.
@@ -107,9 +107,9 @@ GM_MenuCommander.prototype.detach = function() {
 //This has side effect of one script's bad reg affecting another script's.
 
 
-GM_MenuCommander.prototype.createMenuItem =
+Scriptish_MenuCommander.prototype.createMenuItem =
 function(commandName, commandFunc, accessKey) {
-  Scriptish_log("> GM_MenuCommander.createMenuItem");
+  Scriptish_log("> Scriptish_MenuCommander.createMenuItem");
 
   var menuItem = this.doc.createElement("menuitem");
   menuItem._commandFunc = commandFunc;
@@ -124,13 +124,13 @@ function(commandName, commandFunc, accessKey) {
     }
   }
 
-  Scriptish_log("< GM_MenuCommander.createMenuItem");
+  Scriptish_log("< Scriptish_MenuCommander.createMenuItem");
   return menuItem;
 };
 
-GM_MenuCommander.prototype.createKey =
+Scriptish_MenuCommander.prototype.createKey =
   function(commandFunc, accelKey, modifiers, menuItem) {
-    Scriptish_log("> GM_MenuCommander.createKey");
+    Scriptish_log("> Scriptish_MenuCommander.createKey");
 
     var key = this.doc.createElement("key");
 
@@ -157,11 +157,11 @@ GM_MenuCommander.prototype.createKey =
     key.setAttribute("id", id);
     menuItem.setAttribute("key", id);
 
-    Scriptish_log("< GM_MenuCommander.createKey");
+    Scriptish_log("< Scriptish_MenuCommander.createKey");
     return key;
   };
 
-GM_MenuCommander.prototype.setDisabled = function(disabled) {
+Scriptish_MenuCommander.prototype.setDisabled = function(disabled) {
   var menu = this.menu;
   var marker = menu.nextSibling;
   var parent = menu.parentNode;

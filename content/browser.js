@@ -373,7 +373,7 @@ Scriptish_BrowserUI.getCommander = function(unsafeWin) {
   Components.utils.import("resource://scriptish/menucommander.js", tools);
 
   // no commander found. create one and add it.
-  var commander = new tools.GM_MenuCommander(document);
+  var commander = new tools.Scriptish_MenuCommander(document);
   this.menuCommanders.push({win:unsafeWin, commander:commander});
 
   return commander;
