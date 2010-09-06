@@ -1,11 +1,11 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_installUri"];
+var EXPORTED_SYMBOLS = ["Scriptish_installUri"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-function GM_installUri(uri) {
+function Scriptish_installUri(uri) {
   var win = Cc['@mozilla.org/appshell/window-mediator;1']
       .getService(Ci.nsIWindowMediator)
       .getMostRecentWindow("navigator:browser");

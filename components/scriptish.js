@@ -63,7 +63,7 @@ ScriptishService.prototype = {
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     var tools = {};
-    Cu.import("resource://scriptish/utils/GM_installUri.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_installUri.js", tools);
     Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js", tools);
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
@@ -94,7 +94,7 @@ ScriptishService.prototype = {
 
       if (!this.ignoreNextScript_ &&
           !this.isTempScript(cl) &&
-          tools.GM_installUri(cl)) {
+          tools.Scriptish_installUri(cl)) {
         ret = Ci.nsIContentPolicy.REJECT_REQUEST;
       }
     }
