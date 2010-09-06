@@ -22,7 +22,7 @@
   buttonlabelextra1="&install.showscriptsource;"
   defaultButton="accept">
 
-  <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/gm-browser.properties" />
+  <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
 
   <script type="application/x-javascript" src="chrome://scriptish/content/install.js" />
 

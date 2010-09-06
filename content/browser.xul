@@ -61,7 +61,7 @@
 
   <statusbar id="status-bar">
     <!-- NOTE: Local to statusbar tag scope -->
-    <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/gm-browser.properties" />
+    <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
 
     <statusbarpanel id="gm-status"
       insertafter="livemark-button"
