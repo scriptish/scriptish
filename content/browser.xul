@@ -33,7 +33,7 @@
         accesskey="&statusbar.enabled.accesskey;"
         label="&statusbar.enabled;"
         type="checkbox"
-        oncommand="GM_setEnabled(!Scriptish_getEnabled());" />
+        oncommand="Scriptish_setEnabled(!Scriptish_getEnabled());" />
       <menuseparator />
       <menuitem id="userscript-tools-install"
         accesskey="&menu.install.accesskey;"
@@ -74,7 +74,7 @@
         width="16"
         height="16"
         mousethrough="never"
-        onclick="if (!event.button) GM_setEnabled(!Scriptish_getEnabled());
+        onclick="if (!event.button) Scriptish_setEnabled(!Scriptish_getEnabled());
                     else if (event.button == 1) BrowserOpenAddonsMgr('userscripts');"
         context="gm-status-popup" />
       <menupopup id="gm-status-popup"
@@ -111,7 +111,7 @@
           accesskey="&statusbar.enabled.accesskey;"
           label="&statusbar.enabled;"
           type="checkbox"
-          oncommand="GM_setEnabled(!Scriptish_getEnabled());" />
+          oncommand="Scriptish_setEnabled(!Scriptish_getEnabled());" />
       </menupopup>
     </statusbarpanel>
   </statusbar>

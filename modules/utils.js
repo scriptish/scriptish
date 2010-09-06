@@ -5,8 +5,7 @@ var EXPORTED_SYMBOLS = [
   "GM_logError",
   "GM_log",
   "GM_getContents",
-  "GM_getUriFromFile",
-  "GM_setEnabled"
+  "GM_getUriFromFile"
 ];
 
 const Cu = Components.utils;
@@ -77,8 +76,4 @@ function GM_getContents(file, charset) {
 
 function GM_getUriFromFile(file) {
   return ioService.newFileURI(file);
-}
-
-function GM_setEnabled(enabled) {
-  Scriptish_prefRoot.setValue("enabled", enabled);
 }

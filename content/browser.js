@@ -10,6 +10,7 @@ Components.utils.import("resource://scriptish/utils.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_newUserScript.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_setEnabled.js");
 
 /**
  * nsISupports.QueryInterface
