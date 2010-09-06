@@ -4,6 +4,7 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/api.js");
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
@@ -42,7 +43,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     case "https":
     case "ftp":
         var req = new this.chromeWindow.XMLHttpRequest();
-        GM_hitch(this, "chromeStartRequest", url, details, req)();
+        Scriptish_hitch(this, "chromeStartRequest", url, details, req)();
       break;
     default:
       throw new Error("Disallowed scheme in URL: " + details.url);

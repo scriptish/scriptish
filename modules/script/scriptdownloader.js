@@ -5,6 +5,7 @@ var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 
@@ -35,8 +36,8 @@ GM_ScriptDownloader.prototype.startDownload = function() {
   this.req_ = new this.win_.XMLHttpRequest();
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
-  this.req_.onreadystatechange = GM_hitch(this, "checkContentTypeBeforeDownload");
-  this.req_.onload = GM_hitch(this, "handleScriptDownloadComplete");
+  this.req_.onreadystatechange = Scriptish_hitch(this, "checkContentTypeBeforeDownload");
+  this.req_.onload = Scriptish_hitch(this, "handleScriptDownloadComplete");
   this.req_.send(null);
 };
 
@@ -101,7 +102,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script.setDownloadedFile(file);
 
-    this.win_.setTimeout(GM_hitch(this, "fetchDependencies"), 0);
+    this.win_.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
 
     if (this.installing_) {
       this._callback = function() {
@@ -168,7 +169,7 @@ GM_ScriptDownloader.prototype.downloadNextDependency = function(){
       this.tempFiles_.push(file);
 
       var progressListener = new PersistProgressListener(persist);
-      progressListener.onFinish = GM_hitch(this,
+      progressListener.onFinish = Scriptish_hitch(this,
         "handleDependencyDownloadComplete", dep, file, sourceChannel);
       persist.progressListener = progressListener;
 
@@ -280,7 +281,7 @@ GM_ScriptDownloader.prototype.cleanupTempFiles = function() {
 GM_ScriptDownloader.prototype.showInstallDialog = function(timer) {
   if (!timer) {
     // otherwise, the status bar stays in the loading state.
-    this.win_.setTimeout(GM_hitch(this, "showInstallDialog", true), 0);
+    this.win_.setTimeout(Scriptish_hitch(this, "showInstallDialog", true), 0);
     return;
   }
   this.hideFetchMsg();

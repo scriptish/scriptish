@@ -5,6 +5,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
 Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
@@ -113,7 +114,7 @@ Config.prototype = {
       this._saveTimer = Cc["@mozilla.org/timer;1"]
           .createInstance(Ci.nsITimer);
 
-      var _save = GM_hitch(this, "_save"); // dereference 'this' for the closure
+      var _save = Scriptish_hitch(this, "_save"); // dereference 'this' for the closure
       this._saveTimer.initWithCallback(
           {'notify': function() { _save(true); }}, 250,
           Ci.nsITimer.TYPE_ONE_SHOT);

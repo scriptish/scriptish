@@ -7,6 +7,7 @@ var Scriptish_BrowserUI = new Object();
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_newUserScript.js");
 
 /**
@@ -31,8 +32,8 @@ Scriptish_BrowserUI.init = function() {
   this.menuCommanders = [];
   this.currentMenuCommander = null;
 
-  window.addEventListener("load", GM_hitch(this, "chromeLoad"), false);
-  window.addEventListener("unload", GM_hitch(this, "chromeUnload"), false);
+  window.addEventListener("load", Scriptish_hitch(this, "chromeLoad"), false);
+  window.addEventListener("unload", Scriptish_hitch(this, "chromeUnload"), false);
 };
 
 /**
@@ -50,18 +51,18 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.bundle = document.getElementById("gm-browser-bundle");
 
   // update visual status when enabled state changes
-  this.enabledWatcher = GM_hitch(this, "refreshStatus");
+  this.enabledWatcher = Scriptish_hitch(this, "refreshStatus");
   Scriptish_prefRoot.watch("enabled", this.enabledWatcher);
 
   // hook various events
   document.getElementById("appcontent").addEventListener(
-    "DOMContentLoaded", GM_hitch(this, "contentLoad"), true);
+    "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
   document.getElementById("sidebar").addEventListener(
-    "DOMContentLoaded", GM_hitch(this, "contentLoad"), true);
+    "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
   document.getElementById("contentAreaContextMenu").addEventListener(
-    "popupshowing", GM_hitch(this, "contextMenuShowing"), false);
+    "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
   document.getElementById("menu_ToolsPopup").addEventListener(
-    "popupshowing", GM_hitch(this, "toolsMenuShowing"), false);
+    "popupshowing", Scriptish_hitch(this, "toolsMenuShowing"), false);
 
   // listen for clicks on the install bar
   Components.classes["@mozilla.org/observer-service;1"]
@@ -134,7 +135,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
 
     this.gmSvc.domContentLoaded(safeWin, window, this);
 
-    safeWin.addEventListener("pagehide", GM_hitch(this, "contentUnload"), false);
+    safeWin.addEventListener("pagehide", Scriptish_hitch(this, "contentUnload"), false);
   }
 
   // Show the greasemonkey install banner if we are navigating to a .user.js
@@ -176,7 +177,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
       label: this.bundle.getString("greeting.btn"),
       accessKey: this.bundle.getString("greeting.btnAccess"),
       popup: null,
-      callback: GM_hitch(this, "installCurrentScript")
+      callback: Scriptish_hitch(this, "installCurrentScript")
     }]
   );
 };
@@ -552,7 +553,7 @@ Scriptish_BrowserUI.showStatus = function(message, autoHide) {
   Components.utils.import("resource://scriptish/accelimation.js", tools);
   this.showAnimation = new tools.Accelimation(
     window, this.statusLabel.style, "width", max, 300, 2, "px");
-  this.showAnimation.onend = GM_hitch(this, "showStatusAnimationEnd", autoHide);
+  this.showAnimation.onend = Scriptish_hitch(this, "showStatusAnimationEnd", autoHide);
   this.showAnimation.start();
 };
 
@@ -569,7 +570,7 @@ Scriptish_BrowserUI.setAutoHideTimer = function() {
     window.clearTimeout(this.autoHideTimer);
   }
 
-  this.autoHideTimer = window.setTimeout(GM_hitch(this, "hideStatus"), 3000);
+  this.autoHideTimer = window.setTimeout(Scriptish_hitch(this, "hideStatus"), 3000);
 };
 
 Scriptish_BrowserUI.hideStatusImmediately = function() {
@@ -600,7 +601,7 @@ Scriptish_BrowserUI.hideStatus = function() {
     Components.utils.import("resource://scriptish/accelimation.js", tools);
     this.hideAnimation = new tools.Accelimation(
       window, this.statusLabel.style, "width", 0, 300, 2, "px");
-    this.hideAnimation.onend = GM_hitch(this, "hideStatusAnimationEnd");
+    this.hideAnimation.onend = Scriptish_hitch(this, "hideStatusAnimationEnd");
     this.hideAnimation.start();
   }
 };
