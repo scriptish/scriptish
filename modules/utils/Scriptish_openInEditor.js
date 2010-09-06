@@ -1,6 +1,6 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_openInEditor"];
+var EXPORTED_SYMBOLS = ["Scriptish_openInEditor"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -10,7 +10,7 @@ Cu.import("resource://scriptish/utils/GM_launchApplicationWithDoc.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-const GM_openInEditor = function(script, parentWindow) {
+const Scriptish_openInEditor = function(script, parentWindow) {
   var file = script.editFile;
   var editor = Scriptish_getEditor(parentWindow);
   if (!editor) {

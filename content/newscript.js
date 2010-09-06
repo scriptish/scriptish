@@ -24,7 +24,7 @@ window.addEventListener("load", function() {
 
 function doInstall() {
   var tools = {};
-  Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
+  Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
   Components.utils.import("resource://scriptish/utils/GM_getTempFile.js", tools);
   Components.utils.import("resource://scriptish/utils/GM_getWriteStream.js", tools);
 
@@ -55,7 +55,7 @@ function doInstall() {
   config.install(script);
 
   // and fire up the editor!
-  tools.GM_openInEditor(script, window);
+  tools.Scriptish_openInEditor(script, window);
 
   // persist namespace value
   Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);

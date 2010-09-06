@@ -489,8 +489,8 @@ function GM_popupClicked(aEvent) {
     if (aEvent.button == 0) // left-click: toggle enabled state
       script.enabled =! script.enabled;
     else { // right-click: open in editor
-      Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
-      tools.GM_openInEditor(script, window);
+      Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
+      tools.Scriptish_openInEditor(script, window);
     }
 
     closeMenus(aEvent.target);
