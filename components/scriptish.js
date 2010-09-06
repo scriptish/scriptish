@@ -140,11 +140,11 @@ ScriptishService.prototype = {
       this.config.updateModifiedScripts();
     }
 
+    var isTopWin = wrappedContentWin === wrappedContentWin.top;
     return this.config.getMatchingScripts(function(script) {
-      return !script.delayInjection &&
-          script.enabled &&
-          !script.needsUninstall &&
-          script.matchesURL(url);
+      return !script.delayInjection && script.enabled &&
+          !script.needsUninstall && script.matchesURL(url) &&
+         (isTopWin || !script.noframes);
     });
   },
 
