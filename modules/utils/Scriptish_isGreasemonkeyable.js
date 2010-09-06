@@ -1,12 +1,12 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_isGreasemonkeyable"];
+var EXPORTED_SYMBOLS = ["Scriptish_isGreasemonkeyable"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 
-const GM_isGreasemonkeyable = function(url) {
+const Scriptish_isGreasemonkeyable = function(url) {
   // if the url provide is not a valid url, then an error could be thrown
   try {
     var scheme = ioService.extractScheme(url);

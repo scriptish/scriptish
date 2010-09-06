@@ -119,7 +119,7 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
 Scriptish_BrowserUI.contentLoad = function(e) {
   var tools = {};
   Components.utils.import(
-      "resource://scriptish/utils/GM_isGreasemonkeyable.js", tools);
+      "resource://scriptish/utils/Scriptish_isGreasemonkeyable.js", tools);
 
   if (!Scriptish_getEnabled()) return;
 
@@ -127,7 +127,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
   var unsafeWin = safeWin.wrappedJSObject;
   var href = safeWin.location.href;
 
-  if (tools.GM_isGreasemonkeyable(href)) {
+  if (tools.Scriptish_isGreasemonkeyable(href)) {
     // if this content load is in the focused tab, attach the menuCommaander
     if (unsafeWin == this.tabBrowser.selectedBrowser.contentWindow) {
       var commander = this.getCommander(safeWin);
