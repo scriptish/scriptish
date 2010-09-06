@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE prefwindow [
-<!ENTITY % greasemonkeyDTD SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
+<!ENTITY % greasemonkeyDTD SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 <!ENTITY % preferencesDTD SYSTEM "chrome://browser/locale/preferences/preferences.dtd">
 %greasemonkeyDTD;
 %preferencesDTD;

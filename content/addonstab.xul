@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 <?xml-stylesheet href="chrome://scriptish/skin/addonstab.css" type="text/css"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">

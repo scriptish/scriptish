@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 
 <overlay id="greasemonkey-browser-overlay"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
