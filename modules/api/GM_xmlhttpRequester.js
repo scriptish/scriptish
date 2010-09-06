@@ -25,11 +25,11 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
   Scriptish_log("> GM_xmlhttpRequest.contentStartRequest");
 
   var tools = {};
-  Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+  Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
 
   try {
     // Validate and parse the (possibly relative) given URL.
-    var uri = tools.GM_uriFromUrl(details.url, this.originUrl);
+    var uri = tools.Scriptish_uriFromUrl(details.url, this.originUrl);
     var url = uri.spec;
   } catch (e) {
     // A malformed URL won't be parsed properly.
