@@ -12,7 +12,7 @@ Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
-const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:\s+(?:[^\r\f\n]+))?)/g;
+const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?: +(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 var getMaxJSVersion = function(){ return JSVersions[2]; };
@@ -48,6 +48,7 @@ function Script(config) {
   this._requires = [];
   this._resources = [];
   this._unwrap = false;
+  this._noframes = false;
   this._dependFail = false
   this.delayInjection = false;
   this._rawMeta = null;
@@ -159,6 +160,7 @@ Script.prototype = {
   get requires() { return this._requires.concat(); },
   get resources() { return this._resources.concat(); },
   get unwrap() { return this._unwrap; },
+  get noframes() { return this._noframes; },
   get jsversion() { return this._jsversion || getMaxJSVersion() },
 
   get _file() {
@@ -257,6 +259,7 @@ Script.prototype = {
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
     this._unwrap = newScript._unwrap;
+    this._noframes = newScript._noframes;
     this._version = newScript._version;
 
     var dependhash = tools.Scriptish_sha1(newScript._rawMeta);
@@ -339,6 +342,10 @@ Script.prototype = {
     if (this._unwrap) {
       scriptNode.appendChild(doc.createTextNode("\n\t\t"));
       scriptNode.appendChild(doc.createElement("Unwrap"));
+    }
+    if (this._noframes) {
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(doc.createElement("Noframes"));
     }
 
     scriptNode.appendChild(doc.createTextNode("\n\t"));
@@ -532,7 +539,8 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         }
         continue;
       case "unwrap":
-        if (!value) script._unwrap = true;
+      case "noframes":
+        if (!value) script["_" + header] = true;
         continue;
       default:
         continue;
@@ -606,8 +614,9 @@ Script.load = function load(aConfig, aNode) {
         scriptResource._charset = childNode.getAttribute("charset");
         script._resources.push(scriptResource);
         break;
+      case "Noframes":
       case "Unwrap":
-        script._unwrap = true;
+        script["_" + childNode.nodeName] = true;
         break;
     }
   }
