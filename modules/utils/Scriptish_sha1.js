@@ -4,10 +4,10 @@ var EXPORTED_SYMBOLS = ["Scriptish_sha1"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/GM_memoize.js");
+Cu.import("resource://scriptish/utils/Scriptish_memoize.js");
 
 // UTF-8 encodes input, SHA-1 hashes it and returns the 40-char hex version.
-const Scriptish_sha1 = GM_memoize(function(aUnicode) {
+const Scriptish_sha1 = Scriptish_memoize(function(aUnicode) {
   var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
       .createInstance(Ci.nsIScriptableUnicodeConverter);
   unicodeConverter.charset = "UTF-8";

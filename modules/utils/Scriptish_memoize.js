@@ -1,17 +1,17 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_memoize"];
+var EXPORTED_SYMBOLS = ["Scriptish_memoize"];
 
 // Decorate a function with a memoization wrapper, with a limited-size cache
 // to reduce peak memory utilization.  Simple usage:
 //
 // function foo(arg1, arg2) { /* complex operation */ }
-// foo = GM_memoize(foo);
+// foo = Scriptish_memoize(foo);
 //
 // The memoized function may have any number of arguments, but they must be
 // be serializable, and uniquely.  It's safest to use this only on functions
 // that accept primitives.
-const GM_memoize = function(func, limit) {
+const Scriptish_memoize = function(func, limit) {
   limit = limit || 3000;
   var cache = {__proto__: null};
   var keylist = [];

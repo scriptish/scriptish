@@ -3,7 +3,7 @@
 var EXPORTED_SYMBOLS = ["Scriptish_convert2RegExp"];
 
 const Cu = Components.utils;
-Cu.import("resource://scriptish/utils/GM_memoize.js");
+Cu.import("resource://scriptish/utils/Scriptish_memoize.js");
 
 const tldRegExp = new RegExp("^(\\^(?:[^/]*)(?://)?(?:[^/]*))(\\\\\\.tld)((?:/.*)?)$");
 
@@ -14,7 +14,7 @@ const regExpChk = /^\/(.*)\/(i)?$/;
 
 // Converts a pattern in this programs simple notation to a regular expression.
 // thanks AdBlock! http://www.mozdev.org/source/browse/adblock/adblock/
-const Scriptish_convert2RegExp = GM_memoize(function(aPattern) {
+const Scriptish_convert2RegExp = Scriptish_memoize(function(aPattern) {
   var s = new String(aPattern);
   var res = new String("^");
 
