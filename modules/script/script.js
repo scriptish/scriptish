@@ -242,7 +242,7 @@ Script.prototype = {
 
   updateFromNewScript: function(newScript) {
     var tools = {};
-    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
     // Copy new values.
     this._includes = newScript._includes;
@@ -259,7 +259,7 @@ Script.prototype = {
     this._unwrap = newScript._unwrap;
     this._version = newScript._version;
 
-    var dependhash = tools.GM_sha1(newScript._rawMeta);
+    var dependhash = tools.Scriptish_sha1(newScript._rawMeta);
     if (dependhash != this._dependhash && !newScript._dependFail) {
       Cu.import("resource://scriptish/script/scriptdownloader.js", tools);
 
@@ -386,10 +386,10 @@ Script.prototype = {
     }
 
     var tools = {};
-    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
     this._modified = this._file.lastModifiedTime;
-    this._metahash = tools.GM_sha1(this._rawMeta);
+    this._metahash = tools.Scriptish_sha1(this._rawMeta);
   }
 };
 
@@ -567,13 +567,13 @@ Script.load = function load(aConfig, aNode) {
       || !aNode.getAttribute("dependhash")
       || !aNode.getAttribute("version")) {
     var tools = {};
-    Cu.import("resource://scriptish/utils/GM_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
         aConfig, Scriptish_getContents(script._file), 
         {spec: script._downloadURL}, true);
-    script._dependhash = tools.GM_sha1(parsedScript._rawMeta);
+    script._dependhash = tools.Scriptish_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;
   } else {
