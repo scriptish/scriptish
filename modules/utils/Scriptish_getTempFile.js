@@ -1,13 +1,13 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_getTempFile"];
+var EXPORTED_SYMBOLS = ["Scriptish_getTempFile"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
 const tempFilename = "scriptish-temp";
 
-const GM_getTempFile = function() {
+const Scriptish_getTempFile = function() {
   var file = Cc["@mozilla.org/file/directory_service;1"]
       .getService(Ci.nsIProperties)
       .get("TmpD", Ci.nsILocalFile);

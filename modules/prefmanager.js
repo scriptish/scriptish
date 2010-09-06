@@ -1,5 +1,5 @@
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_prefRoot", "GM_PrefManager"];
+var EXPORTED_SYMBOLS = ["Scriptish_prefRoot", "Scriptish_PrefManager"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -7,19 +7,19 @@ Cu.import("resource://scriptish/constants.js");
 const MIN_INT_32 = -0x80000000;
 const MAX_INT_32 = 0x7FFFFFFF;
 
-var GM_prefRoot = new GM_PrefManager();
+var Scriptish_prefRoot = new Scriptish_PrefManager();
 
 /**
- * Simple API on top of preferences for greasemonkey.
+ * Simple API on top of preferences for extensions.scriptish.
  * Construct an instance by passing the startPoint of a preferences subtree.
- * "greasemonkey." prefix is assumed.
+ * "extensions.scriptish." prefix is assumed.
  */
-function GM_PrefManager(startPoint) {
+function Scriptish_PrefManager(startPoint) {
   if (!startPoint) {
     startPoint = "";
   }
 
-  startPoint = "greasemonkey." + startPoint;
+  startPoint = "extensions.scriptish." + startPoint;
 
   var pref = Cc["@mozilla.org/preferences-service;1"]
                  .getService(Ci.nsIPrefService)

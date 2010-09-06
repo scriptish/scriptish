@@ -1,11 +1,11 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_newUserScript"];
+var EXPORTED_SYMBOLS = ["Scriptish_newUserScript"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-const GM_newUserScript = function(parentWindow) {
+const Scriptish_newUserScript = function(parentWindow) {
   var windowWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
     .getService(Ci.nsIWindowWatcher);
 

@@ -6,7 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/prefmanager.js");
 
 function GM_ScriptStorage(script) {
-  this.prefMan = new GM_PrefManager(script.prefroot);
+  this.prefMan = new Scriptish_PrefManager(script.prefroot);
 }
 
 GM_ScriptStorage.prototype.setValue = function(name, val) {

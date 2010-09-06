@@ -3,7 +3,7 @@
 var EXPORTED_SYMBOLS = ["GM_Resources"];
 
 const Cu = Components.utils;
-Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
 function GM_Resources(script){
   this.script = script;
@@ -18,7 +18,7 @@ GM_Resources.prototype.getResourceText = function(name) {
 }
 
 GM_Resources.prototype.getFileURL = function(name) {
-  return GM_getUriFromFile(this.getDep_(name)._file).spec;
+  return Scriptish_getUriFromFile(this.getDep_(name)._file).spec;
 }
 
 GM_Resources.prototype.getDep_ = function(name) {

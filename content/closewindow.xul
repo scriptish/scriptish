@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<overlay id="greasemonkey-close-window-overlay"
+<overlay id="scriptish-close-window-overlay"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 <commandset>

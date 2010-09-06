@@ -33,7 +33,7 @@ Contributor(s):
 ***** END LICENSE BLOCK ****/
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_openFolder"];
+var EXPORTED_SYMBOLS = ["Scriptish_openFolder"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -41,7 +41,7 @@ Cu.import("resource://scriptish/constants.js");
 const protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
                             .getService(Ci.nsIExternalProtocolService);
 
-function GM_openFolder(aFile) {
+function Scriptish_openFolder(aFile) {
   try {
     // Show the directory containing the file and select the file.
     aFile.reveal();

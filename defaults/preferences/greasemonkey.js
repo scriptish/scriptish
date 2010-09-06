@@ -1,6 +1,6 @@
-pref("extensions.scriptish@erikvold.com.description", "chrome://scriptish/locale/greasemonkey.properties");
-pref("greasemonkey.aboutIsGreaseable", false);
-pref("greasemonkey.fileIsGreaseable", false);
-pref("greasemonkey.unmhtIsGreaseable", false);
-pref("greasemonkey.enableScriptRefreshing", true);
-pref("greasemonkey.uninstallPreferences", true);
+pref("extensions.scriptish@erikvold.com.description", "chrome://scriptish/locale/scriptish.properties");
+pref("extensions.scriptish.aboutIsGreaseable", false);
+pref("extensions.scriptish.fileIsGreaseable", false);
+pref("extensions.scriptish.unmhtIsGreaseable", false);
+pref("extensions.scriptish.enableScriptRefreshing", true);
+pref("extensions.scriptish.uninstallPreferences", true);

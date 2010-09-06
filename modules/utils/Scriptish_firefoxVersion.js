@@ -1,11 +1,11 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_firefoxVersion"];
+var EXPORTED_SYMBOLS = ["Scriptish_firefoxVersion"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-const GM_firefoxVersion = (function() {
+const Scriptish_firefoxVersion = (function() {
   var version = Cc["@mozilla.org/xre/app-info;1"]  
       .getService(Ci.nsIXULAppInfo).version;
   var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]

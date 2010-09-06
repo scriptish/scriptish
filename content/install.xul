@@ -4,13 +4,13 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://mozapps/skin/xpinstall/xpinstallConfirm.css" type="text/css"?>
 
-<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 
 <dialog
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns:html="http://www.w3.org/1999/xhtml"
 
-  id="greasemonkey"
+  id="scriptish"
   title="&install.title;"
   style="width: 32em; height:32em;"
   onload="Scriptish_Install.init();"
@@ -22,7 +22,7 @@
   buttonlabelextra1="&install.showscriptsource;"
   defaultButton="accept">
 
-  <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/gm-browser.properties" />
+  <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
 
   <script type="application/x-javascript" src="chrome://scriptish/content/install.js" />
 

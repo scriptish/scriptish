@@ -4,8 +4,10 @@ var EXPORTED_SYMBOLS = ["Config"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
+Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
+Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
@@ -85,7 +87,7 @@ Config.prototype = {
     var domParser = Cc["@mozilla.org/xmlextras/domparser;1"]
         .createInstance(Ci.nsIDOMParser);
 
-    var configContents = GM_getContents(this._configFile);
+    var configContents = Scriptish_getContents(this._configFile);
     var doc = domParser.parseFromString(configContents, "text/xml");
     var nodes = doc.evaluate("/UserScriptConfig/Script", doc, null, 0, null);
     var fileModified = false;
@@ -113,7 +115,7 @@ Config.prototype = {
       this._saveTimer = Cc["@mozilla.org/timer;1"]
           .createInstance(Ci.nsITimer);
 
-      var _save = GM_hitch(this, "_save"); // dereference 'this' for the closure
+      var _save = Scriptish_hitch(this, "_save"); // dereference 'this' for the closure
       this._saveTimer.initWithCallback(
           {'notify': function() { _save(true); }}, 250,
           Ci.nsITimer.TYPE_ONE_SHOT);
@@ -131,7 +133,7 @@ Config.prototype = {
 
     doc.firstChild.appendChild(doc.createTextNode("\n"));
 
-    var configStream = GM_getWriteStream(this._configFile);
+    var configStream = Scriptish_getWriteStream(this._configFile);
     Cc["@mozilla.org/xmlextras/xmlserializer;1"]
       .createInstance(Ci.nsIDOMSerializer)
       .serializeToStream(doc, configStream, "utf-8");
@@ -143,7 +145,7 @@ Config.prototype = {
   },
 
   install: function(script) {
-    GM_log("> Config.install");
+    Scriptish_log("> Config.install");
 
     var existingIndex = this._find(script);
     if (existingIndex > -1) {
@@ -161,7 +163,7 @@ Config.prototype = {
     AddonManagerPrivate.callInstallListeners(
         "onExternalInstall", null, script, null, false);
 
-    GM_log("< Config.install");
+    Scriptish_log("< Config.install");
   },
 
   uninstall: function(script) {
@@ -169,7 +171,7 @@ Config.prototype = {
     this._scripts.splice(idx, 1);
     this._changed(script, "uninstall", null);
 
-    // watch out for cases like basedir="." and basedir="../gm_scripts"
+    // watch out for cases like basedir="." and basedir="../scriptish_scripts"
     if (!script._basedirFile.equals(this._scriptDir)) {
       // if script has its own dir, remove the dir + contents
       script._basedirFile.remove(true);
@@ -178,9 +180,9 @@ Config.prototype = {
       script._file.remove(false);
     }
 
-    if (GM_prefRoot.getValue("uninstallPreferences")) {
+    if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
       // Remove saved preferences
-      GM_prefRoot.remove(script.prefroot);
+      Scriptish_prefRoot.remove(script.prefroot);
     }
   },
 
@@ -253,8 +255,8 @@ Config.prototype = {
 
   get _scriptDir() {
     var tools = {};
-    Cu.import("resource://scriptish/utils/GM_getProfileFile.js", tools);
-    return tools.GM_getProfileFile(this._scriptFoldername);
+    Cu.import("resource://scriptish/utils/Scriptish_getProfileFile.js", tools);
+    return tools.Scriptish_getProfileFile(this._scriptFoldername);
   },
 
   /**
@@ -268,7 +270,7 @@ Config.prototype = {
       dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
 
       // create config.xml file
-      var configStream = GM_getWriteStream(this._configFile);
+      var configStream = Scriptish_getWriteStream(this._configFile);
       var xml = "<UserScriptConfig/>";
       configStream.write(xml, xml.length);
       configStream.close();
@@ -295,7 +297,7 @@ Config.prototype = {
 
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
-          GM_getContents(script._file), {spec: script._downloadURL}, true);
+          Scriptish_getContents(script._file), {spec: script._downloadURL}, true);
       script.updateFromNewScript(parsedScript);
       this._changed(script, "modified", null, true);
     }

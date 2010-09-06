@@ -40,7 +40,7 @@ ScriptishService.prototype = {
   _config: null,
   get config() {
     if (!this._config) {
-      // check if GM was updated/installed
+      // check if Scriptish was updated/installed
       this.updateVersion();
 
       var tools = {};
@@ -63,20 +63,20 @@ ScriptishService.prototype = {
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     var tools = {};
-    Cu.import("resource://scriptish/utils.js", tools);
-    Cu.import("resource://scriptish/utils/GM_installUri.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_installUri.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js", tools);
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
 
-    // block content detection of greasemonkey by denying GM
+    // block content detection of scriptish by denying it
     // chrome content, unless loaded from chrome
     if (org && org.scheme != "chrome" && cl.scheme == "chrome" &&
-        cl.host == "greasemonkey") {
+        cl.host == "scriptish") {
       return Ci.nsIContentPolicy.REJECT_SERVER;
     }
 
-    // don't intercept anything when GM is not enabled
-    if (!tools.GM_getEnabled()) {
+    // don't intercept anything when Scriptish is not enabled
+    if (!tools.Scriptish_getEnabled()) {
       return ret;
     }
 
@@ -94,7 +94,7 @@ ScriptishService.prototype = {
 
       if (!this.ignoreNextScript_ &&
           !this.isTempScript(cl) &&
-          tools.GM_installUri(cl)) {
+          tools.Scriptish_installUri(cl)) {
         ret = Ci.nsIContentPolicy.REJECT_REQUEST;
       }
     }
@@ -136,7 +136,7 @@ ScriptishService.prototype = {
     this.config.wrappedContentWin = wrappedContentWin;
     this.config.chromeWin = chromeWin;
 
-    if (tools.GM_prefRoot.getValue('enableScriptRefreshing')) {
+    if (tools.Scriptish_prefRoot.getValue('enableScriptRefreshing')) {
       this.config.updateModifiedScripts();
     }
 
@@ -155,7 +155,6 @@ ScriptishService.prototype = {
     var unsafeContentWin = wrappedContentWin.wrappedJSObject;
 
     var tools = {};
-    Cu.import("resource://scriptish/utils.js", tools);
     Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
 
@@ -221,11 +220,11 @@ ScriptishService.prototype = {
 
   evalInSandbox: function(code, codebase, sandbox, script) {
     var tools = {};
-    Cu.import("resource://scriptish/utils.js", tools);
+    Cu.import("resource://scriptish/logging.js", tools);
 
     if (!(Cu && Cu.Sandbox)) {
       var e = new Error("Could not create sandbox.");
-      tools.GM_logError(e, 0, e.fileName, e.lineNumber);
+      tools.Scriptish_logError(e, 0, e.fileName, e.lineNumber);
       return true;
     }
     try {
@@ -253,14 +252,14 @@ ScriptishService.prototype = {
 
         if (line) {
           var err = this.findError(script, line - lineFinder.lineNumber - 1);
-          tools.GM_logError(
+          tools.Scriptish_logError(
             e, // error obj
             0, // 0 = error (1 = warning)
             err.uri,
             err.lineNumber
           );
         } else {
-          tools.GM_logError(
+          tools.Scriptish_logError(
             e, // error obj
             0, // 0 = error (1 = warning)
             script.fileURL,
@@ -363,15 +362,13 @@ ScriptishService.prototype = {
    */
   updateVersion: function() {
     var tools = {};
-    Cu.import("resource://scriptish/utils.js", tools);
+    //Cu.import("resource://scriptish/logging.js", tools);
     Cu.import("resource://scriptish/prefmanager.js", tools);
-
-    tools.GM_log("> GM_updateVersion");
 
     var GUID = "scriptish@erikvold.com";
 
     // this is the last version which has been run at least once
-    var initialized = tools.GM_prefRoot.getValue("version", "0.0");
+    var initialized = tools.Scriptish_prefRoot.getValue("version", "0.0");
 
     // check if this is the first launch
     if ("0.0" == initialized) {
@@ -384,7 +381,7 @@ ScriptishService.prototype = {
       if (chromeWin.gBrowser) {
         // set version to fake version number gt 0.0 so that it is not possible
         // for the welcome tab to be opened more than once.
-        tools.GM_prefRoot.setValue("version", "0.0.1");
+        tools.Scriptish_prefRoot.setValue("version", "0.0.1");
 
         // the setTimeout makes sure we do not execute too early -- sometimes
         // the window isn't quite ready to add a tab yet
@@ -400,12 +397,10 @@ ScriptishService.prototype = {
     Cu.import("resource://gre/modules/AddonManager.jsm", tools);
 
     tools.AddonManager.getAddonByID(GUID, function(addon) {
-      tools.GM_prefRoot.setValue("version", addon.version);
+      tools.Scriptish_prefRoot.setValue("version", addon.version);
     });
 
     this.updateVersion = function() {};
-
-    tools.GM_log("< GM_updateVersion");
   }
 };
 

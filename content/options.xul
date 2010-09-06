@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE prefwindow [
-<!ENTITY % greasemonkeyDTD SYSTEM "chrome://scriptish/locale/greasemonkey.dtd">
+<!ENTITY % scriptishDTD SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 <!ENTITY % preferencesDTD SYSTEM "chrome://browser/locale/preferences/preferences.dtd">
-%greasemonkeyDTD;
+%scriptishDTD;
 %preferencesDTD;
 ]>
 
@@ -13,11 +13,10 @@
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   buttons="accept"
 
-  id="greasemonkey-options-dialog"
+  id="scriptish-options-dialog"
   persist="screenX screenY"
-  onload="GM_onloadOptions()"
+  onload="Scriptish_onloadOptions()"
 >
-<script type="application/x-javascript" src="chrome://scriptish/content/prefmanager.js" />
 <script type="application/x-javascript" src="chrome://scriptish/content/options.js" />
 
 <dialogheader title="Scriptish" description="&prefWindow.titleWin;"/>
@@ -25,7 +24,7 @@
 <vbox>
   <groupbox>
     <caption label="&options.editor;" />
-    <button oncommand="GM_getEditor(window, true)">
+    <button oncommand="Scriptish_getEditor()">
       <label>&options.changeEditor;</label>
     </button>
   </groupbox>
@@ -34,7 +33,7 @@
     <caption label="&Uninstall;" />
     <checkbox id="check-uninstall"
       label="&AlsoUninstallPrefs;" 
-      oncommand="GM_setUninstallPrefs(this)" />
+      oncommand="Scriptish_setUninstallPrefs(this)" />
   </groupbox>
 </vbox>
 

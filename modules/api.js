@@ -3,7 +3,6 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
 
 const moduleFilename = Components.stack.filename;
 
@@ -19,7 +18,7 @@ function GM_apiLeakCheck(apiName) {
         stack.filename != moduleFilename &&
         stack.filename != gmService.filename &&
         stack.filename.substr(0, 6) != "chrome") {
-      GM_logError(new Error(
+      Scriptish_logError(new Error(
           "Scriptish access violation: unsafeWindow cannot call " +
           apiName + "."));
       return false;
@@ -31,7 +30,7 @@ function GM_apiLeakCheck(apiName) {
 
 function GM_apiSafeCallback(aWindow, aThis, aCallback, aArgs) {
   // Pop back onto browser thread and call event handler.
-  // Have to use nested function here instead of GM_hitch because
+  // Have to use nested function here instead of Scriptish_hitch because
   // otherwise details[event].apply can point to window.setTimeout, which
   // can be abused to get increased priveledges.
   new XPCNativeWrapper(aWindow, "setTimeout()")

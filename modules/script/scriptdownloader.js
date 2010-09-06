@@ -1,13 +1,16 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
+var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
-Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
+Cu.import("resource://scriptish/utils/Scriptish_getConfig.js");
+Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
+Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
+Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 
-function GM_ScriptDownloader(win, uri, bundle) {
+function ScriptDownloader(win, uri, bundle) {
   this.win_ = win;
   this.uri_ = uri;
   this.bundle_ = bundle;
@@ -20,26 +23,26 @@ function GM_ScriptDownloader(win, uri, bundle) {
   this.updateScript = false;
 }
 
-GM_ScriptDownloader.prototype.startInstall = function() {
+ScriptDownloader.prototype.startInstall = function() {
   this.installing_ = true;
   this.startDownload();
 };
 
-GM_ScriptDownloader.prototype.startViewScript = function(uri) {
+ScriptDownloader.prototype.startViewScript = function(uri) {
   this.installing_ = false;
   this.startDownload();
 };
 
-GM_ScriptDownloader.prototype.startDownload = function() {
+ScriptDownloader.prototype.startDownload = function() {
   this.req_ = new this.win_.XMLHttpRequest();
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
-  this.req_.onreadystatechange = GM_hitch(this, "checkContentTypeBeforeDownload");
-  this.req_.onload = GM_hitch(this, "handleScriptDownloadComplete");
+  this.req_.onreadystatechange = Scriptish_hitch(this, "checkContentTypeBeforeDownload");
+  this.req_.onload = Scriptish_hitch(this, "handleScriptDownloadComplete");
   this.req_.send(null);
 };
 
-GM_ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
+ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
   if (this.req_.readyState == 2) {
     // If there is a 'Content-Type' header and it contains 'text/html',
     // then do not install the file, and display it instead.
@@ -53,21 +56,21 @@ GM_ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
     }
 
     // display "Fetching user script" msg in status bar
-    this.win_.GM_BrowserUI.statusImage.src =
+    this.win_.Scriptish_BrowserUI.statusImage.src =
       "chrome://scriptish/content/third-party/throbber.gif";
-    this.win_.GM_BrowserUI.statusImage.style.opacity = "0.5";
-    this.win_.GM_BrowserUI.statusImage.tooltipText =
+    this.win_.Scriptish_BrowserUI.statusImage.style.opacity = "0.5";
+    this.win_.Scriptish_BrowserUI.statusImage.tooltipText =
         this.bundle_.getString("tooltip.loading");
-    this.win_.GM_BrowserUI.showStatus("Fetching user script", false);
+    this.win_.Scriptish_BrowserUI.showStatus("Fetching user script", false);
   }
 };
 
-GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
+ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   try {
     // If loading from file, status might be zero on success
     if (this.req_.status != 200 && this.req_.status != 0) {
       // NOTE: Unlocalized string
-      GM_alert("Error loading user script:\n" +
+      Scriptish_alert("Error loading user script:\n" +
       this.req_.status + ": " +
       this.req_.statusText);
       return;
@@ -75,7 +78,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     var source = this.req_.responseText;
 
-    this.script = GM_getConfig().parse(source, this.uri_);
+    this.script = Scriptish_getConfig().parse(source, this.uri_);
 
     var file = Cc["@mozilla.org/file/directory_service;1"]
                    .getService(Ci.nsIProperties)
@@ -94,13 +97,13 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     converter.charset = "UTF-8";
     source = converter.ConvertFromUnicode(source);
 
-    var ws = GM_getWriteStream(file);
+    var ws = Scriptish_getWriteStream(file);
     ws.write(source, source.length);
     ws.close();
 
     this.script.setDownloadedFile(file);
 
-    this.win_.setTimeout(GM_hitch(this, "fetchDependencies"), 0);
+    this.win_.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
 
     if (this.installing_) {
       this._callback = function() {
@@ -118,13 +121,13 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   } catch (e) {
     this.hideFetchMsg();
     // NOTE: unlocalized string
-    GM_alert("Script could not be installed " + e);
+    Scriptish_alert("Script could not be installed " + e);
     throw e;
   }
 };
 
-GM_ScriptDownloader.prototype.fetchDependencies = function(){
-  GM_log("Fetching Dependencies");
+ScriptDownloader.prototype.fetchDependencies = function(){
+  Scriptish_log("Fetching Dependencies");
 
   var deps = this.script.requires.concat(this.script.resources);
   // if this.script.icon._filename exists then the icon is a data scheme
@@ -145,7 +148,7 @@ GM_ScriptDownloader.prototype.fetchDependencies = function(){
   this.downloadNextDependency();
 };
 
-GM_ScriptDownloader.prototype.downloadNextDependency = function(){
+ScriptDownloader.prototype.downloadNextDependency = function(){
   var tools = {};
   if (this.depQueue_.length > 0) {
     var dep = this.depQueue_.pop();
@@ -156,24 +159,24 @@ GM_ScriptDownloader.prototype.downloadNextDependency = function(){
         persist.PERSIST_FLAGS_BYPASS_CACHE |
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
 
-      Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
-      Cu.import("resource://scriptish/utils/GM_getTempFile.js", tools);
+      Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
+      Cu.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
 
-      var sourceUri = tools.GM_uriFromUrl(dep.urlToDownload);
+      var sourceUri = tools.Scriptish_uriFromUrl(dep.urlToDownload);
       var sourceChannel = ioService.newChannelFromURI(sourceUri);
       sourceChannel.notificationCallbacks = new NotificationCallbacks();
 
-      var file = tools.GM_getTempFile();
+      var file = tools.Scriptish_getTempFile();
       this.tempFiles_.push(file);
 
       var progressListener = new PersistProgressListener(persist);
-      progressListener.onFinish = GM_hitch(this,
+      progressListener.onFinish = Scriptish_hitch(this,
         "handleDependencyDownloadComplete", dep, file, sourceChannel);
       persist.progressListener = progressListener;
 
       persist.saveChannel(sourceChannel,  file);
     } catch(e) {
-      GM_log("Download exception " + e);
+      Scriptish_log("Download exception " + e);
       this.errorInstallDependency(this.script, dep, e);
     }
   } else {
@@ -183,9 +186,9 @@ GM_ScriptDownloader.prototype.downloadNextDependency = function(){
   }
 };
 
-GM_ScriptDownloader.prototype.handleDependencyDownloadComplete =
+ScriptDownloader.prototype.handleDependencyDownloadComplete =
 function(dep, file, channel) {
-  GM_log("Dependency Download complete " + dep.urlToDownload);
+  Scriptish_log("Dependency Download complete " + dep.urlToDownload);
   try {
     var httpChannel =
       channel.QueryInterface(Ci.nsIHttpChannel);
@@ -220,7 +223,7 @@ function(dep, file, channel) {
   }
 };
 
-GM_ScriptDownloader.prototype.checkDependencyURL = function(url) {
+ScriptDownloader.prototype.checkDependencyURL = function(url) {
   var scheme = ioService.extractScheme(url);
 
   switch (scheme) {
@@ -236,7 +239,7 @@ GM_ScriptDownloader.prototype.checkDependencyURL = function(url) {
   }
 };
 
-GM_ScriptDownloader.prototype.finishInstall = function(){
+ScriptDownloader.prototype.finishInstall = function(){
   if (this.updateScript) {
     // Inject the script now that we have the new dependencies
     this.script._config.injectScript(this.script);
@@ -249,9 +252,9 @@ GM_ScriptDownloader.prototype.finishInstall = function(){
   }
 };
 
-GM_ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg) {
+ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg) {
   this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
-  GM_log(this.dependencyError)
+  Scriptish_log(this.dependencyError)
   if (this.installOnCompletion_) {
     alert(this.dependencyError);
   }
@@ -260,26 +263,26 @@ GM_ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg
   }
 };
 
-GM_ScriptDownloader.prototype.installScript = function() {
+ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
-    GM_alert(this.dependencyError);
+    Scriptish_alert(this.dependencyError);
   } else if(this.dependenciesLoaded_) {
-    this.win_.GM_BrowserUI.installScript(this.script)
+    this.win_.Scriptish_BrowserUI.installScript(this.script)
   } else {
     this.installOnCompletion_ = true;
   }
 };
 
-GM_ScriptDownloader.prototype.cleanupTempFiles = function() {
+ScriptDownloader.prototype.cleanupTempFiles = function() {
   for (var i = 0, file = null; file = this.tempFiles_[i]; i++) {
     file.remove(false);
   }
 };
 
-GM_ScriptDownloader.prototype.showInstallDialog = function(timer) {
+ScriptDownloader.prototype.showInstallDialog = function(timer) {
   if (!timer) {
     // otherwise, the status bar stays in the loading state.
-    this.win_.setTimeout(GM_hitch(this, "showInstallDialog", true), 0);
+    this.win_.setTimeout(Scriptish_hitch(this, "showInstallDialog", true), 0);
     return;
   }
   this.hideFetchMsg();
@@ -288,13 +291,13 @@ GM_ScriptDownloader.prototype.showInstallDialog = function(timer) {
                        this);
 };
 
-GM_ScriptDownloader.prototype.hideFetchMsg = function() {
-  this.win_.GM_BrowserUI.refreshStatus();
-  this.win_.GM_BrowserUI.hideStatusImmediately();
+ScriptDownloader.prototype.hideFetchMsg = function() {
+  this.win_.Scriptish_BrowserUI.refreshStatus();
+  this.win_.Scriptish_BrowserUI.hideStatusImmediately();
 };
 
-GM_ScriptDownloader.prototype.showScriptView = function() {
-  this.win_.GM_BrowserUI.showScriptView(this);
+ScriptDownloader.prototype.showScriptView = function() {
+  this.win_.Scriptish_BrowserUI.showScriptView(this);
 };
 
 
@@ -339,7 +342,7 @@ PersistProgressListener.prototype.onProgressChange =
 PersistProgressListener.prototype.onStateChange =
   function(aWebProgress, aRequest, aStateFlags, aStatus) {
     if (this.persist.currentState == this.persist.PERSIST_STATE_FINISHED) {
-      GM_log("Persister: Download complete " + aRequest.status);
+      Scriptish_log("Persister: Download complete " + aRequest.status);
       this.onFinish();
     }
   };

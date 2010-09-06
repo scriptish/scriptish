@@ -3,7 +3,7 @@
 var EXPORTED_SYMBOLS = ["GM_ScriptLogger"];
 
 const Cu = Components.utils;
-Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/logging.js");
 
 function GM_ScriptLogger(script) {
   var namespace = script.namespace;
@@ -16,5 +16,5 @@ function GM_ScriptLogger(script) {
 }
 
 GM_ScriptLogger.prototype.log = function(message) {
-  GM_log(this.prefix + message, true);
+  Scriptish_log(this.prefix + message, true);
 };

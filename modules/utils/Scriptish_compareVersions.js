@@ -1,6 +1,6 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_compareVersions"];
+var EXPORTED_SYMBOLS = ["Scriptish_compareVersions"];
 
 // Todo: replace with nsIVersionComparator?
 /**
@@ -13,7 +13,7 @@ var EXPORTED_SYMBOLS = ["GM_compareVersions"];
  *                 0 if arguments are equal
  *                 -1 if second argument is higher
  */
-function GM_compareVersions(aV1, aV2) {
+function Scriptish_compareVersions(aV1, aV2) {
   var v1 = aV1.split(".");
   var v2 = aV2.split(".");
   var numSubversions = (v1.length > v2.length) ? v1.length : v2.length;

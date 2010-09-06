@@ -3,7 +3,9 @@ var EXPORTED_SYMBOLS = ["ScriptRequire"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
+Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 
 function ScriptRequire(script) {
   this._script = script;
@@ -22,8 +24,8 @@ ScriptRequire.prototype = {
     return file;
   },
 
-  get fileURL() { return GM_getUriFromFile(this._file).spec; },
-  get textContent() { return GM_getContents(this._file); },
+  get fileURL() { return Scriptish_getUriFromFile(this._file).spec; },
+  get textContent() { return Scriptish_getContents(this._file); },
 
   _initFile: function() {
     var name = this._downloadURL.substr(this._downloadURL.lastIndexOf("/") + 1);
@@ -37,7 +39,7 @@ ScriptRequire.prototype = {
     file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
     this._filename = file.leafName;
 
-    GM_log("Moving dependency file from " + this._tempFile.path + " to " + file.path);
+    Scriptish_log("Moving dependency file from " + this._tempFile.path + " to " + file.path);
 
     file.remove(true);
     this._tempFile.moveTo(file.parent, file.leafName);

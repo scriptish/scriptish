@@ -3,7 +3,8 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/api.js");
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
@@ -21,14 +22,14 @@ function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
 // can't support mimetype because i think it's only used for forcing
 // text/xml and we can't support that
 GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
-  GM_log("> GM_xmlhttpRequest.contentStartRequest");
+  Scriptish_log("> GM_xmlhttpRequest.contentStartRequest");
 
   var tools = {};
-  Cu.import("resource://scriptish/utils/GM_uriFromUrl.js", tools);
+  Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
 
   try {
     // Validate and parse the (possibly relative) given URL.
-    var uri = tools.GM_uriFromUrl(details.url, this.originUrl);
+    var uri = tools.Scriptish_uriFromUrl(details.url, this.originUrl);
     var url = uri.spec;
   } catch (e) {
     // A malformed URL won't be parsed properly.
@@ -42,13 +43,13 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     case "https":
     case "ftp":
         var req = new this.chromeWindow.XMLHttpRequest();
-        GM_hitch(this, "chromeStartRequest", url, details, req)();
+        Scriptish_hitch(this, "chromeStartRequest", url, details, req)();
       break;
     default:
       throw new Error("Disallowed scheme in URL: " + details.url);
   }
 
-  GM_log("< GM_xmlhttpRequest.contentStartRequest");
+  Scriptish_log("< GM_xmlhttpRequest.contentStartRequest");
 
   return {
     abort: function() {
@@ -61,7 +62,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
 // that it can access other domains without security warning
 GM_xmlhttpRequester.prototype.chromeStartRequest =
 function(safeUrl, details, req) {
-  GM_log("> GM_xmlhttpRequest.chromeStartRequest");
+  Scriptish_log("> GM_xmlhttpRequest.chromeStartRequest");
 
   this.setupRequestEvent(this.unsafeContentWin, req, "onload", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onerror", details);
@@ -93,7 +94,7 @@ function(safeUrl, details, req) {
       var err = new Error("Unavailable feature: " +
               "This version of Firefox does not support sending binary data " +
               "(you should consider upgrading to version 3 or newer.)");
-      GM_logError(err);
+      Scriptish_logError(err);
       throw err;
     }
     req.sendAsBinary(body);
@@ -101,7 +102,7 @@ function(safeUrl, details, req) {
     req.send(body);
   }
 
-  GM_log("< GM_xmlhttpRequest.chromeStartRequest");
+  Scriptish_log("< GM_xmlhttpRequest.chromeStartRequest");
 }
 
 // arranges for the specified 'event' on xmlhttprequest 'req' to call the
@@ -109,11 +110,11 @@ function(safeUrl, details, req) {
 // window's security context.
 GM_xmlhttpRequester.prototype.setupRequestEvent =
 function(unsafeContentWin, req, event, details) {
-  GM_log("> GM_xmlhttpRequester.setupRequestEvent");
+  Scriptish_log("> GM_xmlhttpRequester.setupRequestEvent");
 
   if (details[event]) {
     req[event] = function() {
-      GM_log("> GM_xmlhttpRequester -- callback for " + event);
+      Scriptish_log("> GM_xmlhttpRequester -- callback for " + event);
 
       var responseState = {
         // can't support responseXML because security won't
@@ -135,9 +136,9 @@ function(unsafeContentWin, req, event, details) {
       GM_apiSafeCallback(
           unsafeContentWin, details, details[event], [responseState]);
 
-      GM_log("< GM_xmlhttpRequester -- callback for " + event);
+      Scriptish_log("< GM_xmlhttpRequester -- callback for " + event);
     }
   }
 
-  GM_log("< GM_xmlhttpRequester.setupRequestEvent");
+  Scriptish_log("< GM_xmlhttpRequester.setupRequestEvent");
 };

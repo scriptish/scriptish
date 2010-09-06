@@ -1,16 +1,16 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_launchApplicationWithDoc"];
+var EXPORTED_SYMBOLS = ["Scriptish_launchApplicationWithDoc"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/GM_os.js");
+Cu.import("resource://scriptish/utils/Scriptish_os.js");
 
-const GM_launchApplicationWithDoc = function(appFile, docFile) {
+const Scriptish_launchApplicationWithDoc = function(appFile, docFile) {
   var args = [docFile.path];
 
   // For the mac, wrap with a call to "open".
-  if ("Darwin" == GM_os) {
+  if ("Darwin" == Scriptish_os) {
     args = ["-a", appFile.path, docFile.path];
 
     appFile = Cc["@mozilla.org/file/local;1"]

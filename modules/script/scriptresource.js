@@ -3,7 +3,8 @@ var EXPORTED_SYMBOLS = ["ScriptResource"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
+Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 
 function ScriptResource(script) {
@@ -29,18 +30,18 @@ ScriptResource.prototype = {
     return file;
   },
 
-  get fileURL() { return GM_getUriFromFile(this._file).spec; },
-  get textContent() { return GM_getContents(this._file); },
+  get fileURL() { return Scriptish_getUriFromFile(this._file).spec; },
+  get textContent() { return Scriptish_getContents(this._file); },
 
   get dataContent() {
     var tools = {};
-    Cu.import("resource://scriptish/utils/GM_getBinaryContents.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_getBinaryContents.js", tools);
 
     var appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
                      .getService(Ci.nsIAppShellService);
 
     var window = appSvc.hiddenDOMWindow;
-    var binaryContents = tools.GM_getBinaryContents(this._file);
+    var binaryContents = tools.Scriptish_getBinaryContents(this._file);
 
     var mimetype = this._mimetype;
     if (this._charset && this._charset.length > 0) {

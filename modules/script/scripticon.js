@@ -3,7 +3,7 @@ var EXPORTED_SYMBOLS = ["ScriptIcon"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 
 function ScriptIcon(script) {
@@ -38,7 +38,7 @@ ScriptIcon.prototype = {
   get fileURL() {
     if (this._dataURI) return this._dataURI;
 
-    if (this._filename) return GM_getUriFromFile(this._file).spec;
+    if (this._filename) return Scriptish_getUriFromFile(this._file).spec;
 
     return null;
   },

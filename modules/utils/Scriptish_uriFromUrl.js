@@ -1,14 +1,13 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_uriFromUrl"];
+var EXPORTED_SYMBOLS = ["Scriptish_uriFromUrl"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils.js");
 
-const GM_uriFromUrl = function(aUrl, aBaseUrl) {
+const Scriptish_uriFromUrl = function(aUrl, aBaseUrl) {
   var baseUri = null;
-  if (aBaseUrl) baseUri = GM_uriFromUrl(aBaseUrl);
+  if (aBaseUrl) baseUri = Scriptish_uriFromUrl(aBaseUrl);
   try {
     return ioService.newURI(aUrl, null, baseUri);
   } catch (e) {

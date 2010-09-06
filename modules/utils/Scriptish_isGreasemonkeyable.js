@@ -1,12 +1,12 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_isGreasemonkeyable"];
+var EXPORTED_SYMBOLS = ["Scriptish_isGreasemonkeyable"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 
-const GM_isGreasemonkeyable = function(url) {
+const Scriptish_isGreasemonkeyable = function(url) {
   // if the url provide is not a valid url, then an error could be thrown
   try {
     var scheme = ioService.extractScheme(url);
@@ -24,11 +24,11 @@ const GM_isGreasemonkeyable = function(url) {
       // Always allow "about:blank".
       if (/^about:blank/.test(url)) return true;
       // Conditionally allow the rest of "about:".
-      return GM_prefRoot.getValue('aboutIsGreaseable');
+      return Scriptish_prefRoot.getValue('aboutIsGreaseable');
     case "file":
-      return GM_prefRoot.getValue('fileIsGreaseable');
+      return Scriptish_prefRoot.getValue('fileIsGreaseable');
     case "unmht":
-      return GM_prefRoot.getValue('unmhtIsGreaseable');
+      return Scriptish_prefRoot.getValue('unmhtIsGreaseable');
   }
 
   return false;

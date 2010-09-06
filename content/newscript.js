@@ -1,7 +1,7 @@
 /////////////////////////////// global variables ///////////////////////////////
 
 Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 
 var bundle = null;
 window.addEventListener("load", function() {
@@ -10,7 +10,7 @@ window.addEventListener("load", function() {
 
   // load default namespace from pref
   document.getElementById("namespace").value =
-      GM_prefRoot.getValue("newscript_namespace", "");
+      Scriptish_prefRoot.getValue("newscript_namespace", "");
 
   // default the includes with the current page's url
   var content = window.opener.document.getElementById("content");
@@ -24,20 +24,20 @@ window.addEventListener("load", function() {
 
 function doInstall() {
   var tools = {};
-  Components.utils.import("resource://scriptish/utils/GM_openInEditor.js", tools);
-  Components.utils.import("resource://scriptish/utils/GM_getTempFile.js", tools);
-  Components.utils.import("resource://scriptish/utils/GM_getWriteStream.js", tools);
+  Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
+  Components.utils.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
+  Components.utils.import("resource://scriptish/utils/Scriptish_getWriteStream.js", tools);
 
   var script = createScriptSource();
   if (!script) return false;
 
   // put this created script into a file -- only way to install it
-  var tempFile = tools.GM_getTempFile();
-  var foStream = tools.GM_getWriteStream(tempFile);
+  var tempFile = tools.Scriptish_getTempFile();
+  var foStream = tools.Scriptish_getWriteStream(tempFile);
   foStream.write(script, script.length);
   foStream.close();
 
-  var config = GM_getConfig();
+  var config = Scriptish_getConfig();
 
   // create a script object with parsed metadata,
   script = config.parse(script);
@@ -55,10 +55,10 @@ function doInstall() {
   config.install(script);
 
   // and fire up the editor!
-  tools.GM_openInEditor(script, window);
+  tools.Scriptish_openInEditor(script, window);
 
   // persist namespace value
-  GM_prefRoot.setValue("newscript_namespace", script.namespace);
+  Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
 
   return true;
 }
