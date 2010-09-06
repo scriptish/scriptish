@@ -9,6 +9,7 @@ Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/GM_getEditor.js");
 Cu.import("resource://scriptish/utils/GM_launchApplicationWithDoc.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const GM_openInEditor = function(script, parentWindow) {
   var file = script.editFile;
@@ -23,7 +24,7 @@ const GM_openInEditor = function(script, parentWindow) {
   } catch (e) {
     // Something may be wrong with the editor the user selected. Remove so that
     // next time they can pick a different one.
-    Scriptish_alert(GM_stringBundle().GetStringFromName("editor.could_not_launch") + "\n" + e);
+    Scriptish_alert(Scriptish_stringBundle.GetStringFromName("editor.could_not_launch") + "\n" + e);
     Scriptish_prefRoot.remove("editor");
     throw e;
   }

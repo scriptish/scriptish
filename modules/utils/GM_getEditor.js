@@ -7,6 +7,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const GM_getEditor = function(parentWindow, change) {
   var editorPath = Scriptish_prefRoot.getValue("editor");
@@ -38,7 +39,7 @@ const GM_getEditor = function(parentWindow, change) {
                          .createInstance(nsIFilePicker);
 
     filePicker.init(parentWindow,
-                    GM_stringBundle().GetStringFromName("editor.prompt"),
+                    Scriptish_stringBundle.GetStringFromName("editor.prompt"),
                     nsIFilePicker.modeOpen);
     filePicker.appendFilters(nsIFilePicker.filterApplication);
     filePicker.appendFilters(nsIFilePicker.filterAll);
@@ -55,7 +56,7 @@ const GM_getEditor = function(parentWindow, change) {
       Scriptish_prefRoot.setValue("editor", filePicker.file.path);
       return filePicker.file;
     } else {
-      Scriptish_alert(GM_stringBundle().GetStringFromName("editor.please_pick_executable"));
+      Scriptish_alert(Scriptish_stringBundle.GetStringFromName("editor.please_pick_executable"));
     }
   }
 }

@@ -1,7 +1,6 @@
 
 // JSM exported symbols
 var EXPORTED_SYMBOLS = [
-  "GM_stringBundle",
   "GM_getConfig",
   "GM_hitch",
   "GM_logError",
@@ -18,16 +17,6 @@ Cu.import("resource://scriptish/prefmanager.js");
 
 const consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);
-
-GM_stringBundle = function() {
-  var stringBundle = Cc["@mozilla.org/intl/stringbundle;1"]
-      .getService(Ci.nsIStringBundleService)
-      .createBundle("chrome://scriptish/locale/gm-browser.properties");
-
-  GM_stringBundle = function() { return stringBundle; };
-
-  return stringBundle;
-}
 
 function GM_getConfig() {
   return gmService.config;
