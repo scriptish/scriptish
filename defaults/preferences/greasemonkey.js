@@ -1,4 +1,4 @@
-pref("extensions.scriptish@erikvold.com.description", "chrome://scriptish/locale/greasemonkey.properties");
+pref("extensions.scriptish@erikvold.com.description", "chrome://scriptish/locale/scriptish.properties");
 pref("extensions.scriptish.aboutIsGreaseable", false);
 pref("extensions.scriptish.fileIsGreaseable", false);
 pref("extensions.scriptish.unmhtIsGreaseable", false);
