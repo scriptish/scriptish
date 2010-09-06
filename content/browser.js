@@ -94,8 +94,8 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 Scriptish_BrowserUI.showUserscriptList = function() {
   var tools = {};
   Components.utils.import(
-    "resource://scriptish/utils/GM_showUserscriptList.js", tools);
-  tools.GM_showUserscriptList();
+    "resource://scriptish/utils/Scriptish_showUserscriptList.js", tools);
+  tools.Scriptish_showUserscriptList();
 }
 
 /**
