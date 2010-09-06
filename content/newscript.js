@@ -25,14 +25,14 @@ window.addEventListener("load", function() {
 function doInstall() {
   var tools = {};
   Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
-  Components.utils.import("resource://scriptish/utils/GM_getTempFile.js", tools);
+  Components.utils.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
   Components.utils.import("resource://scriptish/utils/GM_getWriteStream.js", tools);
 
   var script = createScriptSource();
   if (!script) return false;
 
   // put this created script into a file -- only way to install it
-  var tempFile = tools.GM_getTempFile();
+  var tempFile = tools.Scriptish_getTempFile();
   var foStream = tools.GM_getWriteStream(tempFile);
   foStream.write(script, script.length);
   foStream.close();

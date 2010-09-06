@@ -160,13 +160,13 @@ ScriptDownloader.prototype.downloadNextDependency = function(){
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
 
       Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
-      Cu.import("resource://scriptish/utils/GM_getTempFile.js", tools);
+      Cu.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
 
       var sourceUri = tools.Scriptish_uriFromUrl(dep.urlToDownload);
       var sourceChannel = ioService.newChannelFromURI(sourceUri);
       sourceChannel.notificationCallbacks = new NotificationCallbacks();
 
-      var file = tools.GM_getTempFile();
+      var file = tools.Scriptish_getTempFile();
       this.tempFiles_.push(file);
 
       var progressListener = new PersistProgressListener(persist);
