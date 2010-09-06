@@ -9,6 +9,7 @@ Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_newUserScript.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
 
 /**
  * nsISupports.QueryInterface
@@ -119,7 +120,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
   Components.utils.import(
       "resource://scriptish/utils/GM_isGreasemonkeyable.js", tools);
 
-  if (!GM_getEnabled()) return;
+  if (!Scriptish_getEnabled()) return;
 
   var safeWin = e.target.defaultView;
   var unsafeWin = safeWin.wrappedJSObject;
@@ -379,7 +380,8 @@ Scriptish_BrowserUI.getCommander = function(unsafeWin) {
 
 function GM_showGeneralPopup(aEvent) {
   // set the enabled/disabled state
-  Scriptish_BrowserUI.generalMenuEnabledItem.setAttribute("checked", GM_getEnabled());
+  Scriptish_BrowserUI.generalMenuEnabledItem.setAttribute(
+      "checked", Scriptish_getEnabled());
 }
 
 function GM_showPopup(aEvent) {
@@ -430,7 +432,8 @@ function GM_showPopup(aEvent) {
   var tail = document.getElementById("gm-status-no-scripts-sep");
 
   // set the enabled/disabled state
-  Scriptish_BrowserUI.statusEnabledItem.setAttribute("checked", GM_getEnabled());
+  Scriptish_BrowserUI.statusEnabledItem.setAttribute(
+      "checked", Scriptish_getEnabled());
 
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; i >= 0; i--) {
@@ -499,7 +502,7 @@ function GM_popupClicked(aEvent) {
  * the mozilla preference that backs it directly.
  */
 Scriptish_BrowserUI.refreshStatus = function() {
-  if (GM_getEnabled()) {
+  if (Scriptish_getEnabled()) {
     this.statusImage.src = "chrome://scriptish/skin/icon_small.png";
     this.statusImage.tooltipText = this.bundle.getString("tooltip.enabled");
   } else {

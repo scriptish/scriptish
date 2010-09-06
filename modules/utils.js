@@ -6,7 +6,6 @@ var EXPORTED_SYMBOLS = [
   "GM_log",
   "GM_getContents",
   "GM_getUriFromFile",
-  "GM_getEnabled",
   "GM_setEnabled"
 ];
 
@@ -78,10 +77,6 @@ function GM_getContents(file, charset) {
 
 function GM_getUriFromFile(file) {
   return ioService.newFileURI(file);
-}
-
-function GM_getEnabled() {
-  return Scriptish_prefRoot.getValue("enabled", true);
 }
 
 function GM_setEnabled(enabled) {

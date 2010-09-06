@@ -65,6 +65,7 @@ ScriptishService.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
     Cu.import("resource://scriptish/utils/GM_installUri.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js", tools);
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
 
@@ -76,7 +77,7 @@ ScriptishService.prototype = {
     }
 
     // don't intercept anything when GM is not enabled
-    if (!tools.GM_getEnabled()) {
+    if (!tools.Scriptish_getEnabled()) {
       return ret;
     }
 
