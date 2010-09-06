@@ -101,8 +101,6 @@
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
           oncommand="Scriptish_BrowserUI.showUserscriptList();" />
-        <!-- <menuitem label="&menu.managePage;"
-          oncommand="Scriptish_BrowserUI.managePageMenuItemClicked();" /> -->
         <menuseparator />
         <menuitem accesskey="&menu.options.accesskey;"
           label="&menu.options;"
