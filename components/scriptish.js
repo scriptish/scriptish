@@ -68,10 +68,10 @@ ScriptishService.prototype = {
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
 
-    // block content detection of greasemonkey by denying GM
+    // block content detection of scriptish by denying it
     // chrome content, unless loaded from chrome
     if (org && org.scheme != "chrome" && cl.scheme == "chrome" &&
-        cl.host == "greasemonkey") {
+        cl.host == "scriptish") {
       return Ci.nsIContentPolicy.REJECT_SERVER;
     }
 

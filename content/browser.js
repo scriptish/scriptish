@@ -82,7 +82,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   // update enabled icon
   this.refreshStatus();
 
-  // register for notifications from greasemonkey-service about ui type things
+  // register for notifications from scriptish-service about ui type things
   var gmSvc = Components.classes["@scriptish.erikvold.com/scriptish-service;1"]
                   .getService().wrappedJSObject;
   this.gmSvc = gmSvc;
@@ -140,7 +140,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
     safeWin.addEventListener("pagehide", Scriptish_hitch(this, "contentUnload"), false);
   }
 
-  // Show the greasemonkey install banner if we are navigating to a .user.js
+  // Show the scriptish install banner if we are navigating to a .user.js
   // file in a top-level tab.  If the file was previously cached it might have
   // been given a number after .user, like gmScript.user-12.js
   if (safeWin == safeWin.top &&
@@ -185,7 +185,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
 };
 
 /**
- * Called from greasemonkey service when we should load a user script.
+ * Called from scriptish service when we should load a user script.
  */
 Scriptish_BrowserUI.startInstallScript = function(uri, timer) {
   if (!timer) {
@@ -294,7 +294,7 @@ Scriptish_BrowserUI.contentUnload = function(e) {
 
 /**
  * The browser XUL has unloaded. We need to let go of the pref watcher so
- * that a non-existant window is not informed when greasemonkey enabled state
+ * that a non-existant window is not informed when scriptish enabled state
  * changes. And we need to let go of the progress listener so that we don't
  * leak it's memory.
  */
