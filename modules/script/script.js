@@ -6,7 +6,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
-Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
+Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
@@ -149,11 +149,11 @@ Script.prototype = {
   get excludes() { return this._excludes.concat(); },
   addInclude: function(aPattern) {
     this._includes.push(aPattern);
-    this._includeRegExps.push(GM_convert2RegExp(aPattern));
+    this._includeRegExps.push(Scriptish_convert2RegExp(aPattern));
   },
   addExclude: function(aPattern) {
     this._excludes.push(aPattern);
-    this._excludeRegExps.push(GM_convert2RegExp(aPattern));
+    this._excludeRegExps.push(Scriptish_convert2RegExp(aPattern));
   },
 
   get requires() { return this._requires.concat(); },

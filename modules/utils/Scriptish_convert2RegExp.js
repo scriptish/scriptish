@@ -1,6 +1,6 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_convert2RegExp"];
+var EXPORTED_SYMBOLS = ["Scriptish_convert2RegExp"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/utils/GM_memoize.js");
@@ -14,7 +14,7 @@ const regExpChk = /^\/(.*)\/(i)?$/;
 
 // Converts a pattern in this programs simple notation to a regular expression.
 // thanks AdBlock! http://www.mozdev.org/source/browse/adblock/adblock/
-const GM_convert2RegExp = GM_memoize(function(aPattern) {
+const Scriptish_convert2RegExp = GM_memoize(function(aPattern) {
   var s = new String(aPattern);
   var res = new String("^");
 
