@@ -1,11 +1,11 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_getWriteStream"];
+var EXPORTED_SYMBOLS = ["Scriptish_getWriteStream"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-const GM_getWriteStream = function(file) {
+const Scriptish_getWriteStream = function(file) {
   var stream = Cc["@mozilla.org/network/file-output-stream;1"]
       .createInstance(Ci.nsIFileOutputStream);
 

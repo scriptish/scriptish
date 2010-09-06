@@ -7,7 +7,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
-Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
+Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 
 function ScriptDownloader(win, uri, bundle) {
@@ -97,7 +97,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     converter.charset = "UTF-8";
     source = converter.ConvertFromUnicode(source);
 
-    var ws = GM_getWriteStream(file);
+    var ws = Scriptish_getWriteStream(file);
     ws.write(source, source.length);
     ws.close();
 

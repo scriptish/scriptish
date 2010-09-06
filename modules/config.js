@@ -7,7 +7,7 @@ Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
-Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
+Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
@@ -133,7 +133,7 @@ Config.prototype = {
 
     doc.firstChild.appendChild(doc.createTextNode("\n"));
 
-    var configStream = GM_getWriteStream(this._configFile);
+    var configStream = Scriptish_getWriteStream(this._configFile);
     Cc["@mozilla.org/xmlextras/xmlserializer;1"]
       .createInstance(Ci.nsIDOMSerializer)
       .serializeToStream(doc, configStream, "utf-8");
@@ -270,7 +270,7 @@ Config.prototype = {
       dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
 
       // create config.xml file
-      var configStream = GM_getWriteStream(this._configFile);
+      var configStream = Scriptish_getWriteStream(this._configFile);
       var xml = "<UserScriptConfig/>";
       configStream.write(xml, xml.length);
       configStream.close();
