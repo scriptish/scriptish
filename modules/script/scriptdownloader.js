@@ -5,6 +5,7 @@ var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
@@ -126,7 +127,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 };
 
 GM_ScriptDownloader.prototype.fetchDependencies = function(){
-  GM_log("Fetching Dependencies");
+  Scriptish_log("Fetching Dependencies");
 
   var deps = this.script.requires.concat(this.script.resources);
   // if this.script.icon._filename exists then the icon is a data scheme
@@ -175,7 +176,7 @@ GM_ScriptDownloader.prototype.downloadNextDependency = function(){
 
       persist.saveChannel(sourceChannel,  file);
     } catch(e) {
-      GM_log("Download exception " + e);
+      Scriptish_log("Download exception " + e);
       this.errorInstallDependency(this.script, dep, e);
     }
   } else {
@@ -187,7 +188,7 @@ GM_ScriptDownloader.prototype.downloadNextDependency = function(){
 
 GM_ScriptDownloader.prototype.handleDependencyDownloadComplete =
 function(dep, file, channel) {
-  GM_log("Dependency Download complete " + dep.urlToDownload);
+  Scriptish_log("Dependency Download complete " + dep.urlToDownload);
   try {
     var httpChannel =
       channel.QueryInterface(Ci.nsIHttpChannel);
@@ -253,7 +254,7 @@ GM_ScriptDownloader.prototype.finishInstall = function(){
 
 GM_ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg) {
   this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
-  GM_log(this.dependencyError)
+  Scriptish_log(this.dependencyError)
   if (this.installOnCompletion_) {
     alert(this.dependencyError);
   }
@@ -341,7 +342,7 @@ PersistProgressListener.prototype.onProgressChange =
 PersistProgressListener.prototype.onStateChange =
   function(aWebProgress, aRequest, aStateFlags, aStatus) {
     if (this.persist.currentState == this.persist.PERSIST_STATE_FINISHED) {
-      GM_log("Persister: Download complete " + aRequest.status);
+      Scriptish_log("Persister: Download complete " + aRequest.status);
       this.onFinish();
     }
   };

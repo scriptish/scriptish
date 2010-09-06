@@ -2,9 +2,10 @@
 var EXPORTED_SYMBOLS = ["GM_MenuCommander"];
 
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/logging.js");
 
 function GM_MenuCommander(aDocument) {
-  GM_log("> GM_MenuCommander")
+  Scriptish_log("> GM_MenuCommander")
 
   this.doc = aDocument;
 
@@ -20,12 +21,12 @@ function GM_MenuCommander(aDocument) {
   this.menuPopup2 = this.menu2.firstChild;
   this.menuItems2 = [];
 
-  GM_log("< GM_MenuCommander")
+  Scriptish_log("< GM_MenuCommander")
 }
 
 GM_MenuCommander.prototype.registerMenuCommand =
   function(commandName, commandFunc, accelKey, accelModifiers, accessKey) {
-    GM_log("> GM_MenuCommander.registerMenuCommand");
+    Scriptish_log("> GM_MenuCommander.registerMenuCommand");
 
     // Protection against item duplication
     for (var i = 0; i < this.menuItems.length; i++) {
@@ -34,9 +35,9 @@ GM_MenuCommander.prototype.registerMenuCommand =
       }
     }
 
-    GM_log("accelKey: " + accelKey);
-    GM_log("modifiers: " + accelModifiers);
-    GM_log("accessKey: " + accessKey);
+    Scriptish_log("accelKey: " + accelKey);
+    Scriptish_log("modifiers: " + accelModifiers);
+    Scriptish_log("accessKey: " + accessKey);
 
     var menuItem = this.createMenuItem(commandName, commandFunc, accessKey);
     var menuItem2 = this.createMenuItem(commandName, commandFunc, accessKey);
@@ -61,11 +62,11 @@ GM_MenuCommander.prototype.registerMenuCommand =
       this.setDisabled(false);
     }
 
-    GM_log("< GM_MenuCommmander.registerMenuCommand")
+    Scriptish_log("< GM_MenuCommmander.registerMenuCommand")
   };
 
 GM_MenuCommander.prototype.attach = function() {
-  GM_log("> GM_MenuCommander.attach");
+  Scriptish_log("> GM_MenuCommander.attach");
 
   for (var i = 0; i < this.menuItems.length; i++) {
     this.menuPopup.appendChild(this.menuItems[i]);
@@ -79,13 +80,13 @@ GM_MenuCommander.prototype.attach = function() {
   this.setDisabled(this.menuItems.length == 0);
   this.attached = true;
 
-  GM_log("< GM_MenuCommander.attach");
+  Scriptish_log("< GM_MenuCommander.attach");
 };
 
 GM_MenuCommander.prototype.detach = function() {
-  GM_log("> GM_MenuCommander.detach");
-  GM_log("* this.menuPopup: " + this.menuPopup);
-  GM_log("* this.menuPopup2: " + this.menuPopup2);
+  Scriptish_log("> GM_MenuCommander.detach");
+  Scriptish_log("* this.menuPopup: " + this.menuPopup);
+  Scriptish_log("* this.menuPopup2: " + this.menuPopup2);
 
   for (var i = 0; i < this.menuItems.length; i++) {
     this.menuPopup.removeChild(this.menuItems[i]);
@@ -99,7 +100,7 @@ GM_MenuCommander.prototype.detach = function() {
   this.setDisabled(true);
   this.attached = false;
 
-  GM_log("< GM_MenuCommander.detach");
+  Scriptish_log("< GM_MenuCommander.detach");
 };
 
 //TODO: restructure accel/access validation to be at register time.
@@ -109,7 +110,7 @@ GM_MenuCommander.prototype.detach = function() {
 
 GM_MenuCommander.prototype.createMenuItem =
 function(commandName, commandFunc, accessKey) {
-  GM_log("> GM_MenuCommander.createMenuItem");
+  Scriptish_log("> GM_MenuCommander.createMenuItem");
 
   var menuItem = this.doc.createElement("menuitem");
   menuItem._commandFunc = commandFunc;
@@ -124,27 +125,27 @@ function(commandName, commandFunc, accessKey) {
     }
   }
 
-  GM_log("< GM_MenuCommander.createMenuItem");
+  Scriptish_log("< GM_MenuCommander.createMenuItem");
   return menuItem;
 };
 
 GM_MenuCommander.prototype.createKey =
   function(commandFunc, accelKey, modifiers, menuItem) {
-    GM_log("> GM_MenuCommander.createKey");
+    Scriptish_log("> GM_MenuCommander.createKey");
 
     var key = this.doc.createElement("key");
 
     if ((typeof accelKey) == "number") {
-      GM_log("keycode: " + accelKey);
+      Scriptish_log("keycode: " + accelKey);
       key.setAttribute("keycode", accelKey);
     } else if ((typeof accelKey) == "string" && accelKey.length == 1) {
-      GM_log("key: " + accelKey);
+      Scriptish_log("key: " + accelKey);
       key.setAttribute("key", accelKey);
     } else {
       throw "accelKey must be a numerical keycode or a single character";
     }
 
-    GM_log("modifiers: " + modifiers);
+    Scriptish_log("modifiers: " + modifiers);
     key.setAttribute("modifiers", modifiers);
 
     // hack, because listen("oncommand", commandFunc) does not work!
@@ -157,7 +158,7 @@ GM_MenuCommander.prototype.createKey =
     key.setAttribute("id", id);
     menuItem.setAttribute("key", id);
 
-    GM_log("< GM_MenuCommander.createKey");
+    Scriptish_log("< GM_MenuCommander.createKey");
     return key;
   };
 

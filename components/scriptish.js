@@ -223,10 +223,11 @@ ScriptishService.prototype = {
   evalInSandbox: function(code, codebase, sandbox, script) {
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
+    Cu.import("resource://scriptish/logging.js", tools);
 
     if (!(Cu && Cu.Sandbox)) {
       var e = new Error("Could not create sandbox.");
-      tools.GM_logError(e, 0, e.fileName, e.lineNumber);
+      tools.Scriptish_logError(e, 0, e.fileName, e.lineNumber);
       return true;
     }
     try {
@@ -254,14 +255,14 @@ ScriptishService.prototype = {
 
         if (line) {
           var err = this.findError(script, line - lineFinder.lineNumber - 1);
-          tools.GM_logError(
+          tools.Scriptish_logError(
             e, // error obj
             0, // 0 = error (1 = warning)
             err.uri,
             err.lineNumber
           );
         } else {
-          tools.GM_logError(
+          tools.Scriptish_logError(
             e, // error obj
             0, // 0 = error (1 = warning)
             script.fileURL,
@@ -365,9 +366,10 @@ ScriptishService.prototype = {
   updateVersion: function() {
     var tools = {};
     Cu.import("resource://scriptish/utils.js", tools);
+    Cu.import("resource://scriptish/logging.js", tools);
     Cu.import("resource://scriptish/prefmanager.js", tools);
 
-    tools.GM_log("> GM_updateVersion");
+    tools.Scriptish_log("> GM_updateVersion");
 
     var GUID = "scriptish@erikvold.com";
 
@@ -406,7 +408,7 @@ ScriptishService.prototype = {
 
     this.updateVersion = function() {};
 
-    tools.GM_log("< GM_updateVersion");
+    tools.Scriptish_log("< GM_updateVersion");
   }
 };
 

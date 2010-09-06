@@ -5,6 +5,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
@@ -145,7 +146,7 @@ Config.prototype = {
   },
 
   install: function(script) {
-    GM_log("> Config.install");
+    Scriptish_log("> Config.install");
 
     var existingIndex = this._find(script);
     if (existingIndex > -1) {
@@ -163,7 +164,7 @@ Config.prototype = {
     AddonManagerPrivate.callInstallListeners(
         "onExternalInstall", null, script, null, false);
 
-    GM_log("< Config.install");
+    Scriptish_log("< Config.install");
   },
 
   uninstall: function(script) {

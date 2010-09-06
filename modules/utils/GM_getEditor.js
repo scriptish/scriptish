@@ -6,6 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
@@ -13,7 +14,7 @@ const GM_getEditor = function(parentWindow, change) {
   var editorPath = Scriptish_prefRoot.getValue("editor");
 
   if (!change && editorPath) {
-    GM_log("Found saved editor preference: " + editorPath);
+    Scriptish_log("Found saved editor preference: " + editorPath);
 
     var editor = Cc["@mozilla.org/file/local;1"]
                  .createInstance(Ci.nsILocalFile);
@@ -24,7 +25,7 @@ const GM_getEditor = function(parentWindow, change) {
     if (editor.exists() && editor.isExecutable()) {
       return editor;
     } else {
-      GM_log("Editor preference either does not exist or is not executable");
+      Scriptish_log("Editor preference either does not exist or is not executable");
       Scriptish_prefRoot.remove("editor");
     }
   }
@@ -33,7 +34,7 @@ const GM_getEditor = function(parentWindow, change) {
   // pick a non-executable file, so we set this up in a loop so that if they do
   // that we can give them an error and try again.
   while (true) {
-    GM_log("Asking user to choose editor...");
+    Scriptish_log("Asking user to choose editor...");
     var nsIFilePicker = Ci.nsIFilePicker;
     var filePicker = Cc["@mozilla.org/filepicker;1"]
                          .createInstance(nsIFilePicker);
@@ -46,11 +47,11 @@ const GM_getEditor = function(parentWindow, change) {
 
     if (filePicker.show() != nsIFilePicker.returnOK) {
       // The user canceled, return null.
-      GM_log("User canceled file picker dialog");
+      Scriptish_log("User canceled file picker dialog");
       return null;
     }
 
-    GM_log("User selected: " + filePicker.file.path);
+    Scriptish_log("User selected: " + filePicker.file.path);
 
     if (filePicker.file.exists() && filePicker.file.isExecutable()) {
       Scriptish_prefRoot.setValue("editor", filePicker.file.path);

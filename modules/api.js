@@ -19,7 +19,7 @@ function GM_apiLeakCheck(apiName) {
         stack.filename != moduleFilename &&
         stack.filename != gmService.filename &&
         stack.filename.substr(0, 6) != "chrome") {
-      GM_logError(new Error(
+      Scriptish_logError(new Error(
           "Scriptish access violation: unsafeWindow cannot call " +
           apiName + "."));
       return false;

@@ -4,6 +4,7 @@ var EXPORTED_SYMBOLS = ["Script"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
 Cu.import("resource://scriptish/script/scripticon.js");
@@ -218,7 +219,7 @@ Script.prototype = {
     file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
     this._filename = file.leafName;
 
-    GM_log("Moving script file from " + tempFile.path + " to " + file.path);
+    Scriptish_log("Moving script file from " + tempFile.path + " to " + file.path);
 
     file.remove(true);
     tempFile.moveTo(file.parent, file.leafName);
