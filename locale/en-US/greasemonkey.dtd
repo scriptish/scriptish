@@ -8,7 +8,6 @@
 <!ENTITY menu.commands.accesskey "C">
 <!ENTITY menu.new "New User Script...">
 <!ENTITY menu.new.accesskey "N">
-<!ENTITY menu.managePage "Manage Page's User Scripts...">
 <!ENTITY menu.manage "Manage User Scripts...">
 <!ENTITY menu.manage.accesskey "M">
 <!ENTITY menu.options "Options...">
