@@ -13,6 +13,6 @@ function Scriptish_setUninstallPrefs(checkbox) {
 
 function Scriptish_getEditor() {
   var tools = {};
-  Components.utils.import("resource://scriptish/utils/GM_getEditor.js", tools);
-  tools.GM_getEditor(window, true);
+  Components.utils.import("resource://scriptish/utils/Scriptish_getEditor.js", tools);
+  tools.Scriptish_getEditor(window, true);
 }

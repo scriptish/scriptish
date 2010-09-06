@@ -1,6 +1,6 @@
 
 // JSM exported symbols
-var EXPORTED_SYMBOLS = ["GM_getEditor"];
+var EXPORTED_SYMBOLS = ["Scriptish_getEditor"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -9,7 +9,7 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-const GM_getEditor = function(parentWindow, change) {
+const Scriptish_getEditor = function(parentWindow, change) {
   var editorPath = Scriptish_prefRoot.getValue("editor");
 
   if (!change && editorPath) {
