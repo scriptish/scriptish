@@ -2,6 +2,7 @@
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 
 var bundle = null;
 window.addEventListener("load", function() {
@@ -37,7 +38,7 @@ function doInstall() {
   foStream.write(script, script.length);
   foStream.close();
 
-  var config = GM_getConfig();
+  var config = Scriptish_getConfig();
 
   // create a script object with parsed metadata,
   script = config.parse(script);

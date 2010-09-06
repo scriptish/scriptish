@@ -5,6 +5,7 @@ var EXPORTED_SYMBOLS = ["GM_ScriptDownloader"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
@@ -78,7 +79,7 @@ GM_ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     var source = this.req_.responseText;
 
-    this.script = GM_getConfig().parse(source, this.uri_);
+    this.script = Scriptish_getConfig().parse(source, this.uri_);
 
     var file = Cc["@mozilla.org/file/directory_service;1"]
                    .getService(Ci.nsIProperties)

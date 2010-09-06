@@ -7,6 +7,7 @@ var Scriptish_BrowserUI = new Object();
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_newUserScript.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
@@ -239,7 +240,7 @@ Scriptish_BrowserUI.installCurrentScript = function() {
 };
 
 Scriptish_BrowserUI.installScript = function(script){
-  GM_getConfig().install(script);
+  Scriptish_getConfig().install(script);
   this.showHorrayMessage(script.name);
 };
 
@@ -416,7 +417,7 @@ function GM_showPopup(aEvent) {
       return urls.some(testMatchURL);
     }
 
-    return GM_getConfig().getMatchingScripts(testMatchURLs);
+    return Scriptish_getConfig().getMatchingScripts(testMatchURLs);
   }
 
   function appendScriptToPopup(script) {
