@@ -6,7 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils/Scriptish_getEditor.js");
-Cu.import("resource://scriptish/utils/GM_launchApplicationWithDoc.js");
+Cu.import("resource://scriptish/utils/Scriptish_launchApplicationWithDoc.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
@@ -19,7 +19,7 @@ const Scriptish_openInEditor = function(script, parentWindow) {
   }
 
   try {
-    GM_launchApplicationWithDoc(editor, file);
+    Scriptish_launchApplicationWithDoc(editor, file);
   } catch (e) {
     // Something may be wrong with the editor the user selected. Remove so that
     // next time they can pick a different one.
