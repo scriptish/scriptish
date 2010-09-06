@@ -1,4 +1,3 @@
-Scriptish_setEnabled
 
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_setEnabled"];

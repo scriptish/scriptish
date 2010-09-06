@@ -4,6 +4,7 @@ var EXPORTED_SYMBOLS = ["ScriptRequire"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 
 function ScriptRequire(script) {
   this._script = script;
@@ -23,7 +24,7 @@ ScriptRequire.prototype = {
   },
 
   get fileURL() { return GM_getUriFromFile(this._file).spec; },
-  get textContent() { return GM_getContents(this._file); },
+  get textContent() { return Scriptish_getContents(this._file); },
 
   _initFile: function() {
     var name = this._downloadURL.substr(this._downloadURL.lastIndexOf("/") + 1);

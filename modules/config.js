@@ -5,6 +5,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/GM_getWriteStream.js");
 Cu.import("resource://scriptish/script/script.js");
@@ -86,7 +87,7 @@ Config.prototype = {
     var domParser = Cc["@mozilla.org/xmlextras/domparser;1"]
         .createInstance(Ci.nsIDOMParser);
 
-    var configContents = GM_getContents(this._configFile);
+    var configContents = Scriptish_getContents(this._configFile);
     var doc = domParser.parseFromString(configContents, "text/xml");
     var nodes = doc.evaluate("/UserScriptConfig/Script", doc, null, 0, null);
     var fileModified = false;
@@ -296,7 +297,7 @@ Config.prototype = {
 
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
-          GM_getContents(script._file), {spec: script._downloadURL}, true);
+          Scriptish_getContents(script._file), {spec: script._downloadURL}, true);
       script.updateFromNewScript(parsedScript);
       this._changed(script, "modified", null, true);
     }

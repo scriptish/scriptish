@@ -4,6 +4,7 @@ var EXPORTED_SYMBOLS = ["Script"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/GM_convert2RegExp.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
@@ -175,7 +176,7 @@ Script.prototype = {
   },
 
   get fileURL() { return GM_getUriFromFile(this._file).spec; },
-  get textContent() { return GM_getContents(this._file); },
+  get textContent() { return Scriptish_getContents(this._file); },
 
   get size() {
     var size = this._file.fileSize;
@@ -569,7 +570,8 @@ Script.load = function load(aConfig, aNode) {
 
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
-        aConfig, GM_getContents(script._file), {spec: script._downloadURL}, true);
+        aConfig, Scriptish_getContents(script._file), 
+        {spec: script._downloadURL}, true);
     script._dependhash = tools.GM_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;

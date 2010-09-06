@@ -4,7 +4,6 @@ var EXPORTED_SYMBOLS = [
   "GM_getConfig",
   "GM_logError",
   "GM_log",
-  "GM_getContents",
   "GM_getUriFromFile"
 ];
 
@@ -40,37 +39,6 @@ function GM_log(message, force) {
   if (force || Scriptish_prefRoot.getValue("logChrome", false)) {
     // make sure message is a string, and remove NULL bytes which truncate it
     consoleService.logStringMessage((message + '').replace("\0","","g"));
-  }
-}
-
-function GM_getContents(file, charset) {
-  if( !charset ) {
-    charset = "UTF-8"
-  }
-  var scriptableStream = Cc["@mozilla.org/scriptableinputstream;1"]
-    .getService(Ci.nsIScriptableInputStream);
-  // http://lxr.mozilla.org/mozilla/source/intl/uconv/idl/nsIScriptableUConv.idl
-  var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-    .createInstance(Ci.nsIScriptableUnicodeConverter);
-  unicodeConverter.charset = charset;
-
-  var channel = ioService.newChannelFromURI(GM_getUriFromFile(file));
-  try {
-    var input=channel.open();
-  } catch (e) {
-    GM_logError(new Error("Could not open file: " + file.path));
-    return "";
-  }
-
-  scriptableStream.init(input);
-  var str=scriptableStream.read(input.available());
-  scriptableStream.close();
-  input.close();
-
-  try {
-    return unicodeConverter.ConvertToUnicode(str);
-  } catch( e ) {
-    return str;
   }
 }
 

@@ -4,6 +4,7 @@ var EXPORTED_SYMBOLS = ["ScriptResource"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils.js");
+Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 
 function ScriptResource(script) {
@@ -30,7 +31,7 @@ ScriptResource.prototype = {
   },
 
   get fileURL() { return GM_getUriFromFile(this._file).spec; },
-  get textContent() { return GM_getContents(this._file); },
+  get textContent() { return Scriptish_getContents(this._file); },
 
   get dataContent() {
     var tools = {};
