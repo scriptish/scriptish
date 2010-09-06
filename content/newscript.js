@@ -10,7 +10,7 @@ window.addEventListener("load", function() {
 
   // load default namespace from pref
   document.getElementById("namespace").value =
-      GM_prefRoot.getValue("newscript_namespace", "");
+      Scriptish_prefRoot.getValue("newscript_namespace", "");
 
   // default the includes with the current page's url
   var content = window.opener.document.getElementById("content");
@@ -58,7 +58,7 @@ function doInstall() {
   tools.GM_openInEditor(script, window);
 
   // persist namespace value
-  GM_prefRoot.setValue("newscript_namespace", script.namespace);
+  Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
 
   return true;
 }

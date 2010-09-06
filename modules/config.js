@@ -178,9 +178,9 @@ Config.prototype = {
       script._file.remove(false);
     }
 
-    if (GM_prefRoot.getValue("uninstallPreferences")) {
+    if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
       // Remove saved preferences
-      GM_prefRoot.remove(script.prefroot);
+      Scriptish_prefRoot.remove(script.prefroot);
     }
   },
 

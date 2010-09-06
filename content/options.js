@@ -4,11 +4,11 @@ Components.utils.import("resource://scriptish/utils.js");
 
 function Scriptish_onloadOptions() {
   document.getElementById("check-uninstall")
-      .checked = GM_prefRoot.getValue("uninstallPreferences");
+      .checked = Scriptish_prefRoot.getValue("uninstallPreferences");
 }
 
 function Scriptish_setUninstallPrefs(checkbox) {
-  GM_prefRoot.setValue("uninstallPreferences",
+  Scriptish_prefRoot.setValue("uninstallPreferences",
       !!document.getElementById("check-uninstall").checked);
 }
 

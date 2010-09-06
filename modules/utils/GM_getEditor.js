@@ -8,7 +8,7 @@ Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils.js");
 
 const GM_getEditor = function(parentWindow, change) {
-  var editorPath = GM_prefRoot.getValue("editor");
+  var editorPath = Scriptish_prefRoot.getValue("editor");
 
   if (!change && editorPath) {
     GM_log("Found saved editor preference: " + editorPath);
@@ -23,7 +23,7 @@ const GM_getEditor = function(parentWindow, change) {
       return editor;
     } else {
       GM_log("Editor preference either does not exist or is not executable");
-      GM_prefRoot.remove("editor");
+      Scriptish_prefRoot.remove("editor");
     }
   }
 
@@ -51,7 +51,7 @@ const GM_getEditor = function(parentWindow, change) {
     GM_log("User selected: " + filePicker.file.path);
 
     if (filePicker.file.exists() && filePicker.file.isExecutable()) {
-      GM_prefRoot.setValue("editor", filePicker.file.path);
+      Scriptish_prefRoot.setValue("editor", filePicker.file.path);
       return filePicker.file;
     } else {
       GM_alert(GM_stringBundle().GetStringFromName("editor.please_pick_executable"));

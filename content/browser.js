@@ -51,7 +51,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
   // update visual status when enabled state changes
   this.enabledWatcher = GM_hitch(this, "refreshStatus");
-  GM_prefRoot.watch("enabled", this.enabledWatcher);
+  Scriptish_prefRoot.watch("enabled", this.enabledWatcher);
 
   // hook various events
   document.getElementById("appcontent").addEventListener(
@@ -296,7 +296,7 @@ Scriptish_BrowserUI.contentUnload = function(e) {
  * leak it's memory.
  */
 Scriptish_BrowserUI.chromeUnload = function() {
-  GM_prefRoot.unwatch("enabled", this.enabledWatcher);
+  Scriptish_prefRoot.unwatch("enabled", this.enabledWatcher);
   this.tabBrowser.removeProgressListener(this);
   delete this.menuCommanders;
 };

@@ -136,7 +136,7 @@ ScriptishService.prototype = {
     this.config.wrappedContentWin = wrappedContentWin;
     this.config.chromeWin = chromeWin;
 
-    if (tools.GM_prefRoot.getValue('enableScriptRefreshing')) {
+    if (tools.Scriptish_prefRoot.getValue('enableScriptRefreshing')) {
       this.config.updateModifiedScripts();
     }
 
@@ -371,7 +371,7 @@ ScriptishService.prototype = {
     var GUID = "scriptish@erikvold.com";
 
     // this is the last version which has been run at least once
-    var initialized = tools.GM_prefRoot.getValue("version", "0.0");
+    var initialized = tools.Scriptish_prefRoot.getValue("version", "0.0");
 
     // check if this is the first launch
     if ("0.0" == initialized) {
@@ -384,7 +384,7 @@ ScriptishService.prototype = {
       if (chromeWin.gBrowser) {
         // set version to fake version number gt 0.0 so that it is not possible
         // for the welcome tab to be opened more than once.
-        tools.GM_prefRoot.setValue("version", "0.0.1");
+        tools.Scriptish_prefRoot.setValue("version", "0.0.1");
 
         // the setTimeout makes sure we do not execute too early -- sometimes
         // the window isn't quite ready to add a tab yet
@@ -400,7 +400,7 @@ ScriptishService.prototype = {
     Cu.import("resource://gre/modules/AddonManager.jsm", tools);
 
     tools.AddonManager.getAddonByID(GUID, function(addon) {
-      tools.GM_prefRoot.setValue("version", addon.version);
+      tools.Scriptish_prefRoot.setValue("version", addon.version);
     });
 
     this.updateVersion = function() {};

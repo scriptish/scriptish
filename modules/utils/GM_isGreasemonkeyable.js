@@ -24,11 +24,11 @@ const GM_isGreasemonkeyable = function(url) {
       // Always allow "about:blank".
       if (/^about:blank/.test(url)) return true;
       // Conditionally allow the rest of "about:".
-      return GM_prefRoot.getValue('aboutIsGreaseable');
+      return Scriptish_prefRoot.getValue('aboutIsGreaseable');
     case "file":
-      return GM_prefRoot.getValue('fileIsGreaseable');
+      return Scriptish_prefRoot.getValue('fileIsGreaseable');
     case "unmht":
-      return GM_prefRoot.getValue('unmhtIsGreaseable');
+      return Scriptish_prefRoot.getValue('unmhtIsGreaseable');
   }
 
   return false;
