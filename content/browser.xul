@@ -47,7 +47,7 @@
       <menuitem id="userscript-tools-new"
         accesskey="&menu.new.accesskey;"
         label="&menu.new;"
-        oncommand="GM_newUserScript();" />
+        oncommand="Scriptish_newUserScript();" />
       <menu id="userscript-commands-sb2"
         accesskey="&menu.commands.accesskey;"
         label="&menu.commands;"
@@ -97,7 +97,7 @@
         <menuseparator />
         <menuitem accesskey="&menu.new.accesskey;"
           label="&menu.new;"
-          oncommand="GM_newUserScript(window);" />
+          oncommand="Scriptish_newUserScript(window);" />
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
           oncommand="Scriptish_BrowserUI.showUserscriptList();" />
