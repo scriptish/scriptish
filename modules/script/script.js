@@ -200,7 +200,7 @@ Script.prototype = {
     ext = ext.replace(/\s+/g, "_").replace(/[^-_A-Z0-9]+/gi, "");
 
     // If no Latin characters found - use default
-    if (!name) name = "gm_script";
+    if (!name) name = "user_script";
 
     if (ext) name += "." + ext;
 

@@ -3,12 +3,12 @@ Cu.import("resource://scriptish/addonprovider.js");
 
 (function() {
 
-function GM_ExtendedStringBundle(aBase) {
+function Scriptish_ExtendedStringBundle(aBase) {
   this.basebundle = aBase;
   this.strings = {};
 }
 
-GM_ExtendedStringBundle.prototype = {
+Scriptish_ExtendedStringBundle.prototype = {
   strings: null,
   basebundle: null,
 
@@ -23,9 +23,9 @@ GM_ExtendedStringBundle.prototype = {
   }
 };
 
-var GM_bundle = new GM_ExtendedStringBundle(window.gStrings.ext);
-GM_bundle.strings["header-userscript"] = "User Scripts";
-window.gStrings.ext = GM_bundle;
+var Scriptish_bundle = new Scriptish_ExtendedStringBundle(window.gStrings.ext);
+Scriptish_bundle.strings["header-userscript"] = "User Scripts";
+window.gStrings.ext = Scriptish_bundle;
 
 })();
 

@@ -10,7 +10,7 @@
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns:html="http://www.w3.org/1999/xhtml"
 
-  id="greasemonkey"
+  id="scriptish"
   title="&install.title;"
   style="width: 32em; height:32em;"
   onload="Scriptish_Install.init();"

@@ -25,7 +25,7 @@ function Scriptish_MenuCommander(aDocument) {
 
 Scriptish_MenuCommander.prototype.registerMenuCommand =
   function(commandName, commandFunc, accelKey, accelModifiers, accessKey) {
-    Scriptish_log("> Scriptish_MenuCommander.registerMenuCommand");
+    //Scriptish_log("> Scriptish_MenuCommander.registerMenuCommand");
 
     // Protection against item duplication
     for (var i = 0; i < this.menuItems.length; i++) {
@@ -34,9 +34,9 @@ Scriptish_MenuCommander.prototype.registerMenuCommand =
       }
     }
 
-    Scriptish_log("accelKey: " + accelKey);
-    Scriptish_log("modifiers: " + accelModifiers);
-    Scriptish_log("accessKey: " + accessKey);
+    //Scriptish_log("accelKey: " + accelKey);
+    //Scriptish_log("modifiers: " + accelModifiers);
+    //Scriptish_log("accessKey: " + accessKey);
 
     var menuItem = this.createMenuItem(commandName, commandFunc, accessKey);
     var menuItem2 = this.createMenuItem(commandName, commandFunc, accessKey);
@@ -61,7 +61,7 @@ Scriptish_MenuCommander.prototype.registerMenuCommand =
       this.setDisabled(false);
     }
 
-    Scriptish_log("< GM_MenuCommmander.registerMenuCommand")
+    //Scriptish_log("< Scriptish_MenuCommmander.registerMenuCommand")
   };
 
 Scriptish_MenuCommander.prototype.attach = function() {

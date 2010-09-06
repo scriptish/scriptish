@@ -379,13 +379,13 @@ Scriptish_BrowserUI.getCommander = function(unsafeWin) {
   return commander;
 };
 
-function GM_showGeneralPopup(aEvent) {
+function Scriptish_showGeneralPopup(aEvent) {
   // set the enabled/disabled state
   Scriptish_BrowserUI.generalMenuEnabledItem.setAttribute(
       "checked", Scriptish_getEnabled());
 }
 
-function GM_showPopup(aEvent) {
+function Scriptish_showPopup(aEvent) {
   function urlsOfAllFrames(contentWindow) {
     function collect(contentWindow) {
       urls = urls.concat(urlsOfAllFrames(contentWindow));
@@ -479,7 +479,7 @@ function GM_showPopup(aEvent) {
  * Handle clicking one of the items in the popup. Left-click toggles the enabled
  * state, rihgt-click opens in an editor.
  */
-function GM_popupClicked(aEvent) {
+function Scriptish_popupClicked(aEvent) {
   var tools = {};
 
   if (aEvent.button == 0 || aEvent.button == 2) {
@@ -498,7 +498,7 @@ function GM_popupClicked(aEvent) {
 }
 
 /**
- * Greasemonkey's enabled state has changed, either as a result of clicking
+ * Scriptish's enabled state has changed, either as a result of clicking
  * the icon in this window, clicking it in another window, or even changing
  * the mozilla preference that backs it directly.
  */

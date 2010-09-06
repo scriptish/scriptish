@@ -40,7 +40,7 @@ ScriptishService.prototype = {
   _config: null,
   get config() {
     if (!this._config) {
-      // check if GM was updated/installed
+      // check if Scriptish was updated/installed
       this.updateVersion();
 
       var tools = {};
@@ -75,7 +75,7 @@ ScriptishService.prototype = {
       return Ci.nsIContentPolicy.REJECT_SERVER;
     }
 
-    // don't intercept anything when GM is not enabled
+    // don't intercept anything when Scriptish is not enabled
     if (!tools.Scriptish_getEnabled()) {
       return ret;
     }
@@ -362,10 +362,8 @@ ScriptishService.prototype = {
    */
   updateVersion: function() {
     var tools = {};
-    Cu.import("resource://scriptish/logging.js", tools);
+    //Cu.import("resource://scriptish/logging.js", tools);
     Cu.import("resource://scriptish/prefmanager.js", tools);
-
-    tools.Scriptish_log("> GM_updateVersion");
 
     var GUID = "scriptish@erikvold.com";
 
@@ -403,8 +401,6 @@ ScriptishService.prototype = {
     });
 
     this.updateVersion = function() {};
-
-    tools.Scriptish_log("< GM_updateVersion");
   }
 };
 

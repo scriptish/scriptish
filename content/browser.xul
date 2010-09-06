@@ -2,7 +2,7 @@
 
 <!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 
-<overlay id="greasemonkey-browser-overlay"
+<overlay id="scriptish-browser-overlay"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <script type="application/x-javascript" src="chrome://scriptish/content/browser.js" />
@@ -18,16 +18,16 @@
   </popup>
 
   <menupopup id="menu_ToolsPopup">
-    <menu id="gm_general_menu"
+    <menu id="scriptish_general_menu"
       insertbefore="javascriptConsole" />
   </menupopup>
 
-  <menu id="gm_general_menu" class="menu-iconic"
+  <menu id="scriptish_general_menu" class="menu-iconic"
     accesskey="&menu.title.accesskey;"
     label="&menu.title;"
   >
     <menupopup
-      onpopupshowing="GM_showGeneralPopup(event); event.stopPropagation();"
+      onpopupshowing="Scriptish_showGeneralPopup(event); event.stopPropagation();"
     >
       <menuitem id="gm-general-menu-enabled-item"
         accesskey="&statusbar.enabled.accesskey;"
@@ -79,8 +79,8 @@
         context="gm-status-popup" />
       <menupopup id="gm-status-popup"
         position="before_end"
-        onpopupshowing="GM_showPopup(event); event.stopPropagation();"
-        onclick="GM_popupClicked(event); event.stopPropagation();"
+        onpopupshowing="Scriptish_showPopup(event); event.stopPropagation();"
+        onclick="Scriptish_popupClicked(event); event.stopPropagation();"
       >
         <menuitem id="gm-status-no-scripts"
           label="&statusbar.noscripts;"

@@ -171,7 +171,7 @@ Config.prototype = {
     this._scripts.splice(idx, 1);
     this._changed(script, "uninstall", null);
 
-    // watch out for cases like basedir="." and basedir="../gm_scripts"
+    // watch out for cases like basedir="." and basedir="../scriptish_scripts"
     if (!script._basedirFile.equals(this._scriptDir)) {
       // if script has its own dir, remove the dir + contents
       script._basedirFile.remove(true);

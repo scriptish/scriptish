@@ -3,7 +3,7 @@
 
 <!DOCTYPE dialog SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 
-<dialog id="greasemonkey"
+<dialog id="scriptish"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   buttons="accept,cancel"
   ondialogaccept="return doInstall();"
