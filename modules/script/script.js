@@ -576,11 +576,12 @@ Script.load = function load(aConfig, aNode) {
       || !aNode.getAttribute("version")) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
 
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
         aConfig, Scriptish_getContents(script._file), 
-        {spec: script._downloadURL}, true);
+        tools.Scriptish_uriFromUrl(script._downloadURL), true);
     script._dependhash = tools.Scriptish_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;

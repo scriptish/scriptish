@@ -290,6 +290,9 @@ Config.prototype = {
   },
 
   updateModifiedScripts: function() {
+    var tools = {};
+    Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
+
     // Find any updated scripts
     var scripts = this.getMatchingScripts(
         function (script) { return script.isModified(); });
@@ -297,7 +300,8 @@ Config.prototype = {
 
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
-          Scriptish_getContents(script._file), {spec: script._downloadURL}, true);
+          Scriptish_getContents(script._file),
+          tools.Scriptish_uriFromUrl(script._downloadURL), true);
       script.updateFromNewScript(parsedScript);
       this._changed(script, "modified", null, true);
     }
