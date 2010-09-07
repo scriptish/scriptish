@@ -10,6 +10,7 @@ Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
+Cu.import("resource://scriptish/third-party/MatchPattern.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?: +(?:[^\r\f\n]+))?)/g;
@@ -43,6 +44,7 @@ function Script(config) {
   this.needsUninstall = false;
   this._includes = [];
   this._excludes = [];
+  this._matches = [];
   this._includeRegExps = [];
   this._excludeRegExps = [];
   this._requires = [];
@@ -109,12 +111,12 @@ Script.prototype = {
     AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
   },
 
-  matchesURL: function(url) {
-    function test(regExp) {
-      return regExp.test(url);
-    }
+  matchesURL: function(aUrl) {
+    function testI(regExp) { return regExp.test(aUrl); }
+    function testII(aMatchPattern) { return aMatchPattern.doMatch(aUrl); }
 
-    return this._includeRegExps.some(test) && !this._excludeRegExps.some(test);
+    return (this._includeRegExps.some(testI) || this._matches.some(testII)) &&
+        !this._excludeRegExps.some(testI);
   },
 
   _changed: function(event, data) { this._config._changed(this, event, data); },
@@ -148,6 +150,7 @@ Script.prototype = {
 
   get includes() { return this._includes.concat(); },
   get excludes() { return this._excludes.concat(); },
+  get matches() { return this._excludes.concat(); },
   addInclude: function(aPattern) {
     this._includes.push(aPattern);
     this._includeRegExps.push(Scriptish_convert2RegExp(aPattern));
@@ -251,6 +254,7 @@ Script.prototype = {
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
     this._excludeRegExps = newScript._excludeRegExps;
+    this._matches = newScript._matches;
     this._homepageURL = newScript._homepageURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
@@ -312,6 +316,13 @@ Script.prototype = {
       excludeNode.appendChild(doc.createTextNode(this._excludes[j]));
       scriptNode.appendChild(doc.createTextNode("\n\t\t"));
       scriptNode.appendChild(excludeNode);
+    }
+
+    for (var j = 0; j < this._matches.length; j++) {
+      var matchNode = doc.createElement("Match");
+      matchNode.appendChild(doc.createTextNode(this._matches[j].pattern));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(matchNode);
     }
 
     for (var j = 0; j < this._requires.length; j++) {
@@ -468,13 +479,16 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
       case "exclude":
         script.addExclude(value);
         continue;
+      case "match":
+        script._matches.push(new MatchPattern(value));
+        continue;
       case "icon":
       case "iconurl":
         script._rawMeta += header + '\0' + value + '\0';
         // aceept data uri schemes for image MIME types
         if (/^data:image\//i.test(value)){
           script.icon._dataURI = value;
-          break;
+          continue;
        }
        try {
           var iconUri = tools.Scriptish_uriFromUrl(value, aURI);
@@ -552,7 +566,9 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
   if (!script._namespace && aURI) script._namespace = aURI.host;
   if (!script._description) script._description = "";
   if (!script._version) script._version = "";
-  if (script._includes.length == 0) script.addInclude("*");
+  if (script._includes.length == 0 && script._matches.length == 0) {
+    script.addInclude("*");
+  }
 
   return script;
 };
@@ -598,6 +614,9 @@ Script.load = function load(aConfig, aNode) {
         break;
       case "Exclude":
         script.addExclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
+        break;
+      case "Match":
+        script._matches.push(new MatchPattern(childNode.firstChild.nodeValue.replace(rightTrim, '')));
         break;
       case "Require":
         var scriptRequire = new ScriptRequire(script);
