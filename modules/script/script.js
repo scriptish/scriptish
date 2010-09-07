@@ -406,10 +406,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
 
   var script = new Script(aConfig);
 
-  if (aURI) {
-    script._downloadURL = aURI.spec;
-    script._enabled = true;
-  }
+  if (aURI) script._downloadURL = aURI.spec;
 
   // read one line at a time looking for start meta delimiter or EOF
   var lines = aSource.match(metaRegExp);
