@@ -129,6 +129,7 @@ ScriptishService.prototype = {
   },
 
   initScripts: function(url, wrappedContentWin, chromeWin) {
+    var scripts;
     var tools = {};
     Cu.import("resource://scriptish/prefmanager.js", tools);
 
@@ -140,12 +141,21 @@ ScriptishService.prototype = {
       this.config.updateModifiedScripts();
     }
 
-    var isTopWin = wrappedContentWin === wrappedContentWin.top;
-    return this.config.getMatchingScripts(function(script) {
+    var basicCheck = function(script) {
       return !script.delayInjection && script.enabled &&
-          !script.needsUninstall && script.matchesURL(url) &&
-         (isTopWin || !script.noframes);
-    });
+          !script.needsUninstall && script.matchesURL(url);
+    };
+
+    // is the window the top most window in the iframe stack?
+    if (wrappedContentWin !== wrappedContentWin.top) {
+      scripts = this.config.getMatchingScripts(function(script) {
+        return !script.noframes && basicCheck(script);
+      });
+    } else {
+      scripts = this.config.getMatchingScripts(basicCheck);
+    }
+
+    return scripts;
   },
 
   injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {

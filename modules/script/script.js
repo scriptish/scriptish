@@ -616,7 +616,7 @@ Script.load = function load(aConfig, aNode) {
         break;
       case "Noframes":
       case "Unwrap":
-        script["_" + childNode.nodeName] = true;
+        script["_" + childNode.nodeName.toLowerCase()] = true;
         break;
     }
   }
