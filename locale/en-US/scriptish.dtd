@@ -16,6 +16,7 @@
 <!ENTITY statusbar.enabled "Enabled">
 <!ENTITY statusbar.enabled.accesskey "E">
 <!ENTITY install.title "User Script Installation">
+<!ENTITY install.matches "matches:">
 <!ENTITY install.runson "runs on:">
 <!ENTITY install.butnoton "does not run on:">
 <!ENTITY install.warning1 "Malicious scripts can violate your privacy and act on your behalf without your knowledge.">
