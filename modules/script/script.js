@@ -34,7 +34,7 @@ function Script(config) {
 
   this._id = null;
   this._name = null;
-  this._namespace = null;
+  this._namespace = "";
   this._prefroot = null;
   this._author = null;
   this._contributors = [];
@@ -180,6 +180,7 @@ Script.prototype = {
     file.append(this._filename);
     return file;
   },
+  get filename() { return this._filename; },
 
   get editFile() { return this._file; },
 
@@ -430,7 +431,7 @@ Script.prototype = {
   }
 };
 
-Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
+Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
   var tools = {};
   Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
 
@@ -519,7 +520,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
           var iconUri = tools.Scriptish_uriFromUrl(value, aURI);
           script.icon._downloadURL = iconUri.spec;
         } catch (e) {
-          if (aUpdate) {
+          if (aUpdateScript) {
             script._dependFail = true;
           } else {
             throw new Error('Failed to get @icon '+ value);
@@ -534,7 +535,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
           script._requires.push(scriptRequire);
           script._rawMeta += header + '\0' + value + '\0';
         } catch (e) {
-          if (aUpdate) {
+          if (aUpdateScript) {
             script._dependFail = true;
           } else {
             throw new Error('Failed to @require '+ value);
@@ -566,7 +567,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
           script._rawMeta +=
               header + '\0' + resName + '\0' + resUri.spec + '\0';
         } catch (e) {
-          if (aUpdate) {
+          if (aUpdateScript) {
             script._dependFail = true;
           } else {
             throw new Error(
@@ -586,7 +587,8 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
   // if no meta info, default to reasonable values
   if (!script._name && aURI) {
     Cu.import("resource://scriptish/utils/Scriptish_parseScriptName.js", tools);
-    script._name = tools.Scriptish_parseScriptName(aURI);
+    script._name = tools.Scriptish_parseScriptName(
+        (aUpdateScript && aUpdateScript.filename) || (aURI && aURI.spec));
   }
   if (!script._namespace && aURI) script._namespace = aURI.host;
   if (!script._description) script._description = "";
@@ -618,7 +620,7 @@ Script.load = function load(aConfig, aNode) {
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
         aConfig, Scriptish_getContents(script._file), 
-        tools.Scriptish_uriFromUrl(script._downloadURL), true);
+        tools.Scriptish_uriFromUrl(script._downloadURL), script);
     script._dependhash = tools.Scriptish_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;

@@ -140,8 +140,8 @@ Config.prototype = {
     configStream.close();
   },
 
-  parse: function(source, uri, updating) {
-    return Script.parse(this, source, uri, updating);
+  parse: function(source, uri, aUpdateScript) {
+    return Script.parse(this, source, uri, aUpdateScript);
   },
 
   install: function(script) {
@@ -301,7 +301,7 @@ Config.prototype = {
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           Scriptish_getContents(script._file),
-          tools.Scriptish_uriFromUrl(script._downloadURL), true);
+          tools.Scriptish_uriFromUrl(script._downloadURL), script);
       script.updateFromNewScript(parsedScript);
       this._changed(script, "modified", null, true);
     }
