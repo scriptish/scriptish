@@ -150,7 +150,7 @@ Script.prototype = {
 
   get includes() { return this._includes.concat(); },
   get excludes() { return this._excludes.concat(); },
-  get matches() { return this._excludes.concat(); },
+  get matches() { return this._matches.concat(); },
   addInclude: function(aPattern) {
     this._includes.push(aPattern);
     this._includeRegExps.push(Scriptish_convert2RegExp(aPattern));

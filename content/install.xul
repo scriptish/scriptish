@@ -41,6 +41,14 @@
         <description id="scriptDescription"
           style="margin:0" />
       </vbox>
+      <vbox id="matches"
+        style="margin-bottom:1em; display:none"
+      >
+        <label
+          value="&install.matches;" />
+        <description id="matches-desc"
+          style="font-style:italic" />
+      </vbox>
       <vbox id="includes"
         style="margin-bottom:1em; display:none"
       >

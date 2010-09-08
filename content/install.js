@@ -1,4 +1,6 @@
 
+Components.utils.import("resource://scriptish/logging.js");
+
 var Scriptish_Install = {
   init: function() {
     var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
@@ -9,8 +11,9 @@ var Scriptish_Install = {
     this.scriptDownloader_ = window.arguments[0];
     this.script_ = this.scriptDownloader_.script;
 
-    this.setupIncludes("includes", "includes-desc", this.script_.includes);
-    this.setupIncludes("excludes", "excludes-desc", this.script_.excludes);
+    this.setupIncludes("match", "matches", "matches-desc", this.script_.matches);
+    this.setupIncludes("include", "includes", "includes-desc", this.script_.includes);
+    this.setupIncludes("include", "excludes", "excludes-desc", this.script_.excludes);
 
     this.dialog_ = document.documentElement;
     this.extraButton_ = this.dialog_.getButton("extra1");
@@ -87,14 +90,21 @@ var Scriptish_Install = {
     }
   },
 
-  setupIncludes: function(box, desc, includes) {
+  setupIncludes: function(type, box, desc, includes) {
     if (includes.length > 0) {
       desc = document.getElementById(desc);
       document.getElementById(box).style.display = "";
 
-      for (var i = 0; i < includes.length; i++) {
-        desc.appendChild(document.createTextNode(includes[i]));
-        desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
+      if (type == "match") {
+        for (var i = 0; i < includes.length; i++) {
+          desc.appendChild(document.createTextNode(includes[i].pattern));
+          desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
+        }
+      } else {
+        for (var i = 0; i < includes.length; i++) {
+          desc.appendChild(document.createTextNode(includes[i]));
+          desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
+        }
       }
 
       desc.removeChild(desc.lastChild);

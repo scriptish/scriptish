@@ -40,6 +40,7 @@ var EXPORTED_SYMBOLS = ['MatchPattern'];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
+Cu.import("resource://scriptish/logging.js");
 
 const ioService = Components.classes["@mozilla.org/network/io-service;1"].
     getService(Components.interfaces.nsIIOService);
@@ -70,7 +71,7 @@ function MatchPattern(pattern){
   else {
     if (!validateHost.test(uri.host) || !validatePath.test(uri.path)
        || validScheme.indexOf(uri.scheme) < 0) {
-      throw new Error("http(s) or ftp match pattern does not conform to pattern rules");
+      throw new Error("@match pattern does not conform to pattern rules");
     }
   }
 
