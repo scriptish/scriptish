@@ -69,8 +69,8 @@ function MatchPattern(pattern){
     }
   }
   else {
-    if (!validateHost.test(uri.host) || !validatePath.test(uri.path)
-       || validScheme.indexOf(uri.scheme) < 0) {
+    if (validScheme.indexOf(uri.scheme) < 0 || !validateHost.test(uri.host) ||
+        !validatePath.test(uri.path)) {
       throw new Error("@match pattern does not conform to pattern rules");
     }
   }
