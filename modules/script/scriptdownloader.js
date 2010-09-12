@@ -12,7 +12,7 @@ Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://gre/modules/NetUtil.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 
-function ScriptDownloader(win, uri) {
+function ScriptDownloader(win, uri, contentWin) {
   var tools = {};
   Cu.import("resource://scriptish/third-party/Timer.js", tools);
 
@@ -26,6 +26,7 @@ function ScriptDownloader(win, uri) {
   this.installOnCompletion_ = false;
   this.tempFiles_ = [];
   this.updateScript = false;
+  this.contentWin = contentWin || win.content;
 }
 
 ScriptDownloader.prototype.startInstall = function() {
@@ -56,7 +57,7 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
 
       gmService.ignoreNextScript();
 
-      this.win_.content.location.href = this.uri_.spec;
+      this.contentWin.location.href = this.uri_.spec;
       return;
     }
   }

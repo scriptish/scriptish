@@ -92,7 +92,7 @@ ScriptishService.prototype = {
 
       if (!this.ignoreNextScript_ &&
           !this.isTempScript(cl) &&
-          tools.Scriptish_installUri(cl)) {
+          tools.Scriptish_installUri(cl, ctx.contentWindow)) {
         ret = Ci.nsIContentPolicy.REJECT_REQUEST;
       }
     }

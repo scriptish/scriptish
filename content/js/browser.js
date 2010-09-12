@@ -263,19 +263,20 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
 };
 
 // Called from scriptish service when we should load a user script.
-Scriptish_BrowserUI.startInstallScript = function(uri, timer) {
+Scriptish_BrowserUI.startInstallScript = function(aURI, aWin, timer) {
   if (!timer) {
     // docs for nsicontentpolicy say we're not supposed to block, so short
     // timer.
-    setTimeout(function() { Scriptish_BrowserUI.startInstallScript(uri, true) }, 0);
-
+    setTimeout(function() {
+      Scriptish_BrowserUI.startInstallScript(aURI, aWin, true)
+    }, 0);
     return;
   }
 
   var tools = {};
   Components.utils.import("resource://scriptish/script/scriptdownloader.js", tools);
 
-  this.scriptDownloader_ = new tools.ScriptDownloader(window, uri);
+  this.scriptDownloader_ = new tools.ScriptDownloader(window, aURI, aWin);
   this.scriptDownloader_.startInstall();
 };
 
