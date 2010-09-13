@@ -232,11 +232,6 @@ ScriptishService.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/logging.js", tools);
 
-    if (!(Cu && Cu.Sandbox)) {
-      var e = new Error("Could not create sandbox.");
-      tools.Scriptish_logError(e, 0, e.fileName, e.lineNumber);
-      return true;
-    }
     try {
       // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
       var lineFinder = new Error();
