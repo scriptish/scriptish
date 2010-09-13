@@ -216,19 +216,19 @@ ScriptishService.prototype = {
       script.offsets = offsets;
 
       var scriptSrc = "\n" + // error line-number calculations depend on these
-                         requires.join("\n") +
-                         "\n" +
-                         contents +
-                         "\n";
-      if (!script.unwrap)
-        scriptSrc = "(function(){"+ scriptSrc +"})()";
-      if (!this.evalInSandbox(scriptSrc, url, sandbox, script) && script.unwrap)
+          requires.join("\n") + "\n" +
+          contents + "\n";
+
+      if (!script.unwrap) scriptSrc = "(function(){"+ scriptSrc +"})()";
+
+      if (!this.evalInSandbox(scriptSrc, sandbox, script) && script.unwrap) {
         this.evalInSandbox("(function(){"+ scriptSrc +"})()",
-                           url, sandbox, script); // wrap anyway on early return
+            sandbox, script); // wrap anyway on early return
+      }
     }
   },
 
-  evalInSandbox: function(code, codebase, sandbox, script) {
+  evalInSandbox: function(code, sandbox, script) {
     var tools = {};
     Cu.import("resource://scriptish/logging.js", tools);
 
@@ -238,8 +238,9 @@ ScriptishService.prototype = {
       Cu.evalInSandbox(code, sandbox, script.jsversion);
     } catch (e) { // catches errors while running the script code
       try {
-        if (e && "return not in function" == e.message)
+        if (e && "return not in function" == e.message) {
           return false; // means this script depends on the function enclosure
+        }
 
         // try to find the line of the actual error line
         var line = e && e.lineNumber;
