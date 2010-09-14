@@ -89,6 +89,8 @@ Script.prototype = {
     return perms;
   },
 
+  get updateDate () { return new Date(parseInt(this._modified)); },
+
   findUpdates: function(aListener) {
     if ("onNoCompatibilityUpdateAvailable" in aListener)
       aListener.onNoCompatibilityUpdateAvailable(this);
