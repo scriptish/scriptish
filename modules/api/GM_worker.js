@@ -70,6 +70,12 @@ function fake_worker(aBoss, aJSContent, aJSPath, aPgURL) {
         Ci.nsIThread.DISPATCH_NORMAL);
   }, "postMessage")
 
+  this.sandbox.importFunction(function close() {
+    threadManager.mainThread.dispatch(
+        new Dispatcher(null, self, "_terminate"),
+        Ci.nsIThread.DISPATCH_SYNC);
+  }, "close")
+
   this.thread.dispatch(this, Ci.nsIThread.DISPATCH_NORMAL);
 }
 fake_worker.prototype = {
@@ -98,6 +104,10 @@ fake_worker.prototype = {
       filename: this.jsPath,
       lineno: e.lineNumber
     });
+  },
+
+  _terminate: function() {
+    this.boss.terminate();
   },
 
   onmessage: function (aEvt) { this.boss.onmessage(aEvt); },
