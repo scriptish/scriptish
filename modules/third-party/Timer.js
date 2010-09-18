@@ -52,7 +52,9 @@ const Timer = function() {
   var timers = new Timers();
 
   this.setTimeout = function(aCallback, aDelay) {
-    return timers.addTimer(aCallback, aDelay, false);
+    return timers.addTimer(
+        false, Ci.nsIThread.TYPE_ONE_SHOT, aCallback, TimeoutCallback, aDelay,
+        Array.slice(arguments, 2));
   }
 
   this.clearTimeout = function(aTimerID) {
@@ -60,7 +62,9 @@ const Timer = function() {
   }
 
   this.setInterval = function(aCallback, aDelay) {
-    return timers.addTimer(aCallback, aDelay, true);
+    return timers.addTimer(
+        true, Ci.nsIThread.TYPE_REPEATING_SLACK, aCallback, IntervalCallback,
+        aDelay, Array.slice(arguments, 2));
   }
 
   this.clearInterval = function(aTimerID) {
@@ -74,25 +78,23 @@ const Timers = function() {
   this.nextTimerID = 0;
 }
 Timers.prototype = {
-  getTimer: function getTimer(aTimerID) {
+  getTimer: function(aTimerID) {
     return this.cache[aTimerID];
   },
-  addTimer: function addTimer(aCallback, aDelay, aInterval) {
+  addTimer: function(aInterval, aType, aCallback, aCbType, aDelay, aParams) {
     var timer = timerService.createInstance(Ci.nsITimer);
     var timerID = this.nextTimerID++;
     var removeFunc = false;
-    var timerType = timer.TYPE_ONE_SHOT;
 
     this.cache[timerID] = timer;
 
-    if (aInterval) {
+    if (!aInterval) {
       var self = this;
       removeFunc = function() { self.removeTimer(timerID); }
-      timerType = timer.TYPE_REPEATING_SLACK;
     }
 
     timer.initWithCallback(
-        new TimerCallback(aCallback, removeFunc), aDelay, timerType);
+        new aCbType(aCallback, aParams, removeFunc), aDelay, aType);
 
     return timerID;
   },
@@ -105,17 +107,28 @@ Timers.prototype = {
 }
 
 
-function TimerCallback(aCallback, aRemoveFunc) {
+function TimerCallback(aCallback, aParams) {
   this._callback = aCallback;
-  this.remove = aRemoveFunc;
-
-  this.QueryInterface = XPCOMUtils.generateQI([Ci.nsITimerCallback]);
+  this._params = aParams;
+};
+TimerCallback.prototype = {
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsITimerCallback])
 };
 
-TimerCallback.prototype = {
-  notify: function notify(aTimer) {
-    this._callback.call(null);
+function TimeoutCallback(aCallback, aParams, aRemoveFunc) {
+  TimerCallback.apply(this, arguments);
+  this._remove = aRemoveFunc;
+};
+TimeoutCallback.prototype = new TimerCallback();
+TimeoutCallback.prototype.notify = function notifyOnTimeout(timer) {
+  this._remove();
+  this._callback.apply(null, this._params);
+};
 
-    if (this.remove) this.remove();
-  }
+function IntervalCallback(aCallback, aParams) {
+  TimerCallback.apply(this, arguments)
+};
+IntervalCallback.prototype = new TimerCallback();
+IntervalCallback.prototype.notify = function notifyOnInterval() {
+  this._callback.apply(null, this._params);
 };
