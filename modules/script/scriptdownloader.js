@@ -11,6 +11,10 @@ Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 
 function ScriptDownloader(win, uri, bundle) {
+  var tools = {};
+  Cu.import("resource://scriptish/third-party/Timer.js", tools);
+
+  this._timer = new tools.Timer();
   this.win_ = win;
   this.uri_ = uri;
   this.bundle_ = bundle;
@@ -100,7 +104,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script.setDownloadedFile(file);
 
-    this.win_.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
+    this._timer.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
 
     if (this.installing_) {
       this._callback = function() {
@@ -274,7 +278,7 @@ ScriptDownloader.prototype.cleanupTempFiles = function() {
 ScriptDownloader.prototype.showInstallDialog = function(timer) {
   if (!timer) {
     // otherwise, the status bar stays in the loading state.
-    this.win_.setTimeout(Scriptish_hitch(this, "showInstallDialog", true), 0);
+    this._timer.setTimeout(Scriptish_hitch(this, "showInstallDialog", true), 0);
     return;
   }
   this.win_.openDialog("chrome://scriptish/content/install.xul", "",
