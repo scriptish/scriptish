@@ -7,11 +7,11 @@ Components.utils.import("resource://scriptish/constants.js");
 const alertsServ = Cc["@mozilla.org/alerts-service;1"]
     .getService(Ci.nsIAlertsService);
 
-function Scriptish_notification(aMsg) {
+function Scriptish_notification(aMsg, aTitle, aIconURL) {
   alertsServ.showAlertNotification(
-    "chrome://scriptish/skin/icon_medium.png",
-    "Scriptish",
-    aMsg,
+    aIconURL || "chrome://scriptish/skin/icon_medium.png",
+    aTitle || "Scriptish",
+    aMsg+"",
     false,
     "",
     null);

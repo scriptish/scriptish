@@ -86,29 +86,34 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
       head.appendChild(style);
     }
     return style;
-  };
+  }
 
   this.GM_log = function GM_log(){
     return getLogger().log.apply(getLogger(), arguments)
-  };
+  }
 
+  this.GM_notification = function GM_notification(aMsg) {
+    var tools = {};
+    Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
+    tools.Scriptish_notification(aMsg, aScript.name, aScript.iconURL);
+  }
 
   this.GM_setValue = function GM_setValue() {
     if (!GM_apiLeakCheck("GM_setValue")) return;
     return getStorage().setValue.apply(getStorage(), arguments);
-  };
+  }
   this.GM_getValue = function GM_getValue() {
     if (!GM_apiLeakCheck("GM_getValue")) return undefined;
     return getStorage().getValue.apply(getStorage(), arguments);
-  };
+  }
   this.GM_deleteValue = function GM_deleteValue() {
     if (!GM_apiLeakCheck("GM_deleteValue")) return undefined;
     return getStorage().deleteValue.apply(getStorage(), arguments);
-  };
+  }
   this.GM_listValues = function GM_listValues() {
     if (!GM_apiLeakCheck("GM_listValues")) return undefined;
     return getStorage().listValues.apply(getStorage(), arguments);
-  };
+  }
 
   this.GM_getResourceURL = function GM_getResourceURL() {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return undefined;
