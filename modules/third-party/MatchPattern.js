@@ -40,7 +40,6 @@ var EXPORTED_SYMBOLS = ['MatchPattern'];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-Cu.import("resource://scriptish/logging.js");
 
 const ioService = Components.classes["@mozilla.org/network/io-service;1"].
     getService(Components.interfaces.nsIIOService);
@@ -50,8 +49,7 @@ const validScheme = ['http', 'https', 'ftp', 'file'];
 // matches *. or * or text of host
 const validateHost = /^(\*|\*\.[^/*]+|[^/*]+)$/;
 
-// matches * or text in path
-const validatePath = /^\/.*$/;
+const validatePath = /^(\*|\/.*)$/;
 
 // create and return a match pattern obj validate match pattern!
 function MatchPattern(pattern){
@@ -63,46 +61,44 @@ function MatchPattern(pattern){
     throw new Error("Pattern could not be parsed by nsURI: " + e);
   }
 
-  if (uri.scheme === 'file') {
-    if (!validatePath.test(uri.path)) {
+  var scheme = uri.scheme;
+  var host = uri.host;
+  var path = uri.path;
+
+  if (scheme === 'file') {
+    if (!validatePath.test(path)) {
       throw new Error("File scheme match pattern does not conform to pattern rules");
     }
   }
   else {
-    if (validScheme.indexOf(uri.scheme) < 0 || !validateHost.test(uri.host) ||
-        !validatePath.test(uri.path)) {
+    if (validScheme.indexOf(scheme) < 0 || !validateHost.test(host) ||
+        !validatePath.test(path)) {
       throw new Error("@match pattern does not conform to pattern rules");
     }
+
+    if (host == "*" && uri.path == "/") path = host;
   }
 
-  var regexes = {};
-  regexes.scheme = uri.scheme;
+  var regexs = {};
+  regexs.scheme = scheme;
+  regexs.host = (scheme !== 'file') ? Scriptish_convert2RegExp(host) : null;
+  regexs.path = Scriptish_convert2RegExp(path, true);
 
-  if (uri.scheme !== 'file'){
-    regexes.host = Scriptish_convert2RegExp(uri.host);
-  } else {
-    regexes.host = null;
-  }
-
-  regexes.path = Scriptish_convert2RegExp(uri.path, true);
-
-  this.regexes = regexes;
+  this.regexs = regexs;
   return this;
 }
 
 MatchPattern.prototype.doMatch = function (uriSpec) {
   var matchURI = ioService.newURI(uriSpec, null, null);
-  var results;
+  var regexs = this.regexs;
 
-  if (this.regexes.host === null){
-    results = (this.regexes.scheme === matchURI.scheme &&
-        this.regexes.path.test(matchURI.path));
+  if (regexs.host === null){
+    return (regexs.scheme === matchURI.scheme &&
+        regexs.path.test(matchURI.path));
   } else {
-    results = (this.regexes.scheme === matchURI.scheme &&
-        this.regexes.path.test(matchURI.path) &&
-        this.regexes.host.test(matchURI.host));
+    return (regexs.scheme === matchURI.scheme &&
+        regexs.path.test(matchURI.path) &&
+        regexs.host.test(matchURI.host));
 
   }
-
-  return results;
 };
