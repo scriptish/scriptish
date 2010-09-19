@@ -13,7 +13,7 @@ Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://scriptish/third-party/MatchPattern.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
-const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?: +(?:[^\r\f\n]+))?)/g;
+const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 var getMaxJSVersion = function(){ return JSVersions[2]; };
