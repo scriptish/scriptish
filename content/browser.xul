@@ -66,10 +66,6 @@
     <statusbarpanel id="gm-status"
       insertafter="livemark-button"
     >
-      <label id="gm-status-label"
-        collapsed="true"
-        crop="end"
-        style="width:0px; margin:0" />
       <image id="gm-status-image"
         width="16"
         height="16"

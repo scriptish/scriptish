@@ -2,11 +2,11 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_alert"];
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/constants.js");
+
+const promptServ = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+    .getService(Ci.nsIPromptService);
 
 function Scriptish_alert(msg) {
-  Cc["@mozilla.org/embedcomp/prompt-service;1"]
-      .getService(Ci.nsIPromptService)
-      .alert(null, "Scriptish alert", msg);
+  promptServ.alert(null, "Scriptish", msg);
 }
