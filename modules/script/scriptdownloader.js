@@ -55,13 +55,10 @@ ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
       return;
     }
 
-    // display "Fetching user script" msg in status bar
-    this.win_.Scriptish_BrowserUI.statusImage.src =
-      "chrome://scriptish/content/third-party/throbber.gif";
-    this.win_.Scriptish_BrowserUI.statusImage.style.opacity = "0.5";
-    this.win_.Scriptish_BrowserUI.statusImage.tooltipText =
-        this.bundle_.getString("tooltip.loading");
-    this.win_.Scriptish_BrowserUI.showStatus("Fetching user script", false);
+    // display "Fetching user script" msg
+    var tools = {};
+    Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
+    tools.Scriptish_notification("Fetching user script");
   }
 };
 
@@ -112,14 +109,9 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
       };
     } else {
       this.showScriptView();
-      this._callback = function() {
-        this.hideFetchMsg();
-        this._callback = undefined;
-      };
     }
 
   } catch (e) {
-    this.hideFetchMsg();
     // NOTE: unlocalized string
     Scriptish_alert("Script could not be installed " + e);
     throw e;
@@ -285,15 +277,9 @@ ScriptDownloader.prototype.showInstallDialog = function(timer) {
     this.win_.setTimeout(Scriptish_hitch(this, "showInstallDialog", true), 0);
     return;
   }
-  this.hideFetchMsg();
   this.win_.openDialog("chrome://scriptish/content/install.xul", "",
                        "chrome,centerscreen,modal,dialog,titlebar,resizable",
                        this);
-};
-
-ScriptDownloader.prototype.hideFetchMsg = function() {
-  this.win_.Scriptish_BrowserUI.refreshStatus();
-  this.win_.Scriptish_BrowserUI.hideStatusImmediately();
 };
 
 ScriptDownloader.prototype.showScriptView = function() {

@@ -9,9 +9,7 @@ Cu.import("resource://scriptish/prefmanager.js");
 const consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);
 
-/**
- * Utility to create an error message in the log without throwing an error.
- */
+// Utility to create an error message in the log without throwing an error.
 function Scriptish_logError(e, opt_warn, fileName, lineNumber) {
   var consoleError = Cc["@mozilla.org/scripterror;1"]
     .createInstance(Ci.nsIScriptError);

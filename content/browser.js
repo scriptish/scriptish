@@ -532,89 +532,6 @@ Scriptish_BrowserUI.openOptionsWin = function() {
   Scriptish_BrowserUI.openChromeWindow("chrome://scriptish/content/options.xul");
 };
 
-Scriptish_BrowserUI.showStatus = function(message, autoHide) {
-  if (this.statusLabel.collapsed) {
-    this.statusLabel.collapsed = false;
-  }
-
-  message += " ";
-
-  var box = document.createElement("vbox");
-  var label = document.createElement("label");
-  box.style.position = "fixed";
-  box.style.left = "-10000px";
-  box.style.top = "-10000px";
-  box.style.border = "5px solid red";
-  box.appendChild(label);
-  document.documentElement.appendChild(box);
-  label.setAttribute("value", message);
-
-  var current = parseInt(this.statusLabel.style.width);
-  this.statusLabel.value = message;
-  var max = label.boxObject.width;
-
-  var tools = {};
-  Components.utils.import("resource://scriptish/accelimation.js", tools);
-  this.showAnimation = new tools.Accelimation(
-    window, this.statusLabel.style, "width", max, 300, 2, "px");
-  this.showAnimation.onend = Scriptish_hitch(this, "showStatusAnimationEnd", autoHide);
-  this.showAnimation.start();
-};
-
-Scriptish_BrowserUI.showStatusAnimationEnd = function(autoHide) {
-  this.showAnimation = null;
-
-  if (autoHide) {
-    this.setAutoHideTimer();
-  }
-};
-
-Scriptish_BrowserUI.setAutoHideTimer = function() {
-  if (this.autoHideTimer) {
-    window.clearTimeout(this.autoHideTimer);
-  }
-
-  this.autoHideTimer = window.setTimeout(Scriptish_hitch(this, "hideStatus"), 3000);
-};
-
-Scriptish_BrowserUI.hideStatusImmediately = function() {
-  if (this.showAnimation) {
-    this.showAnimation.stop();
-    this.showAnimation = null;
-  }
-
-  if (this.hideAnimation) {
-    this.hideAnimation.stop();
-    this.hideAnimation = null;
-  }
-
-  if (this.autoHideTimer) {
-    window.clearTimeout(this.autoHideTimer);
-    this.autoHideTimer = null;
-  }
-
-  this.statusLabel.style.width = "0";
-  this.statusLabel.collapsed = true;
-};
-
-Scriptish_BrowserUI.hideStatus = function() {
-  if (!this.hideAnimation) {
-    this.autoHideTimer = null;
-
-    var tools = {};
-    Components.utils.import("resource://scriptish/accelimation.js", tools);
-    this.hideAnimation = new tools.Accelimation(
-      window, this.statusLabel.style, "width", 0, 300, 2, "px");
-    this.hideAnimation.onend = Scriptish_hitch(this, "hideStatusAnimationEnd");
-    this.hideAnimation.start();
-  }
-};
-
-Scriptish_BrowserUI.hideStatusAnimationEnd = function() {
-  this.hideAnimation = null;
-  this.statusLabel.collapsed = true;
-};
-
 // necessary for webProgressListener implementation
 Scriptish_BrowserUI.onProgressChange = function(webProgress,b,c,d,e,f){};
 Scriptish_BrowserUI.onStateChange = function(a,b,c,d){};
@@ -623,7 +540,10 @@ Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
 Scriptish_BrowserUI.showHorrayMessage = function(scriptName) {
-  this.showStatus("'" + scriptName + "' " + this.bundle.getString("statusbar.installed"), true);
+  var tools = {};
+  Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
+  tools.Scriptish_notification(
+      "'" + scriptName + "' " + this.bundle.getString("statusbar.installed"));
 };
 
 Scriptish_BrowserUI.installMenuItemClicked = function() {
