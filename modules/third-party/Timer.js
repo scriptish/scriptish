@@ -53,7 +53,7 @@ const Timer = function() {
 
   this.setTimeout = function(aCallback, aDelay) {
     return timers.addTimer(
-        false, Ci.nsIThread.TYPE_ONE_SHOT, aCallback, TimeoutCallback, aDelay,
+        false, Ci.nsITimer.TYPE_ONE_SHOT, aCallback, TimeoutCallback, aDelay,
         Array.slice(arguments, 2));
   }
 
@@ -63,7 +63,7 @@ const Timer = function() {
 
   this.setInterval = function(aCallback, aDelay) {
     return timers.addTimer(
-        true, Ci.nsIThread.TYPE_REPEATING_SLACK, aCallback, IntervalCallback,
+        true, Ci.nsITimer.TYPE_REPEATING_SLACK, aCallback, IntervalCallback,
         aDelay, Array.slice(arguments, 2));
   }
 
