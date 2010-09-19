@@ -166,48 +166,9 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   this.GM_worker = function GM_worker(resourceName) {
     if (!GM_apiLeakCheck("GM_worker")) return undefined;
 
-    // Worker was introduced in FF 3.5
-    // https://developer.mozilla.org/En/DOM/Worker
-    if (!aChromeWin.Worker) return undefined;
+    var tools = {};
+    Cu.import("resource://scriptish/api/GM_worker.js", tools);
 
-    var worker = new aChromeWin.Worker(getResources().getFileURL(resourceName));
-    var fakeWorker = {
-      onmessage: function() {},
-      onerror: function() {},
-      terminate: function() {
-        worker.terminate();
-      },
-      postMessage: function(msg) {
-        worker.postMessage(msg);
-      }
-    };
-
-    function doLater(func) {
-      // Pop back onto browser thread and call event handler.
-      new XPCNativeWrapper(aUnsafeContentWin, "setTimeout()")
-        .setTimeout(func, 0);
-    }
-
-    worker.onmessage = function(evt) {
-      doLater(function() {
-        fakeWorker.onmessage({
-          data: evt.data+''
-        });
-      });
-    };
-    worker.onerror = function(evt) {
-      doLater(function() {
-        fakeWorker.onerror({
-          message: evt.message+'',
-          filename: evt.filename+'',
-          lineno: evt.lineno,
-          preventDefault: function() {
-            evt.preventDefault();
-          }
-        });
-      });
-    };
-
-    return fakeWorker;
+    return new tools.GM_worker(getResources().getDep(resourceName), aURL);
   };
 }
