@@ -47,7 +47,7 @@
       <menuitem id="userscript-tools-new"
         accesskey="&menu.new.accesskey;"
         label="&menu.new;"
-        oncommand="Scriptish_newUserScript();" />
+        oncommand="Scriptish_BrowserUIM.newUserScript()" />
       <menu id="userscript-commands-sb2"
         accesskey="&menu.commands.accesskey;"
         label="&menu.commands;"
@@ -92,14 +92,14 @@
         <menuseparator />
         <menuitem accesskey="&menu.new.accesskey;"
           label="&menu.new;"
-          oncommand="Scriptish_newUserScript(window);" />
+          oncommand="Scriptish_BrowserUIM.newUserScript()" />
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
           oncommand="Scriptish_BrowserUI.showUserscriptList();" />
         <menuseparator />
         <menuitem accesskey="&menu.options.accesskey;"
           label="&menu.options;"
-          oncommand="Scriptish_BrowserUI.openOptionsWin();" />
+          oncommand="Scriptish_BrowserUIM.openOptionsWin()" />
         <menuitem id="gm-status-enabled-item"
           accesskey="&statusbar.enabled.accesskey;"
           label="&statusbar.enabled;"

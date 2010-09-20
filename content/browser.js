@@ -7,7 +7,6 @@ Components.utils.import("resource://scriptish/content/browser.js");
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_newUserScript.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
 
 Scriptish_BrowserUI = new Object();
@@ -506,24 +505,6 @@ Scriptish_BrowserUI.refreshStatus = function() {
   }
 
   this.statusImage.style.opacity = "1.0";
-};
-
-Scriptish_BrowserUI.openChromeWindow = function(url) {
-  var windowWatcher = Components
-    .classes["@mozilla.org/embedcomp/window-watcher;1"]
-    .getService(Components.interfaces.nsIWindowWatcher);
-  windowWatcher.openWindow(
-    window, url, null,
-    "chrome,dependent,centerscreen,resizable,dialog", null
-  );
-}
-
-Scriptish_BrowserUI.newUserScript = function() {
-  Scriptish_BrowserUI.openChromeWindow("chrome://scriptish/content/newscript.xul");
-};
-
-Scriptish_BrowserUI.openOptionsWin = function() {
-  Scriptish_BrowserUI.openChromeWindow("chrome://scriptish/content/options.xul");
 };
 
 // necessary for webProgressListener implementation
