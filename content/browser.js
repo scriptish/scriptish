@@ -41,26 +41,29 @@ Scriptish_BrowserUI.init = function() {
  * listeners and wrapper objects.
  */
 Scriptish_BrowserUI.chromeLoad = function(e) {
+  var d = document;
+  var $ = function(aID) { return d.getElementById(aID); };
+
   // get all required DOM elements
-  this.tabBrowser = document.getElementById("content");
-  this.statusImage = document.getElementById("gm-status-image");
-  this.statusPopup = document.getElementById("gm-status-popup");
-  this.statusEnabledItem = document.getElementById("gm-status-enabled-item");
-  this.generalMenuEnabledItem = document.getElementById("gm-general-menu-enabled-item");
-  this.bundle = document.getElementById("gm-browser-bundle");
+  this.tabBrowser = $("content");
+  this.statusImage = $("gm-status-image");
+  this.statusPopup = $("gm-status-popup");
+  this.statusEnabledItem = $("gm-status-enabled-item");
+  this.generalMenuEnabledItem = $("gm-general-menu-enabled-item");
+  this.bundle = $("gm-browser-bundle");
 
   // update visual status when enabled state changes
   this.enabledWatcher = Scriptish_hitch(this, "refreshStatus");
   Scriptish_prefRoot.watch("enabled", this.enabledWatcher);
 
   // hook various events
-  document.getElementById("appcontent").addEventListener(
+  $("appcontent").addEventListener(
     "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
-  document.getElementById("sidebar").addEventListener(
+  $("sidebar").addEventListener(
     "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
-  document.getElementById("contentAreaContextMenu").addEventListener(
+  $("contentAreaContextMenu").addEventListener(
     "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
-  document.getElementById("menu_ToolsPopup").addEventListener(
+  $("menu_ToolsPopup").addEventListener(
     "popupshowing", Scriptish_hitch(this, "toolsMenuShowing"), false);
 
   // listen for clicks on the install bar
@@ -86,7 +89,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
   // check if GM was updated/installed
   setTimeout(function() {gmSvc.updateVersion()}, 100);
-};
+}
 
 Scriptish_BrowserUI.showUserscriptList = function() {
   var tools = {};
