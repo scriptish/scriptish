@@ -2,12 +2,17 @@
 var EXPORTED_SYMBOLS = ["Scriptish_BrowserUIM"];
 
 const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_setEnabled.js");
 Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-var winWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"]
-    .getService(Ci.nsIWindowWatcher);
+XPCOMUtils.defineLazyServiceGetter(
+    this, "winWatcher", "@mozilla.org/embedcomp/window-watcher;1",
+    "nsIWindowWatcher");
+
+XPCOMUtils.defineLazyServiceGetter(
+    this, "winMediator", "'@mozilla.org/appshell/window-mediator;1",
+    "nsIWindowMediator");
 
 function Scriptish_BrowserUIM(aWin) {
   this._win = aWin;
@@ -31,5 +36,9 @@ Scriptish_BrowserUIM.prototype = {
   },
   openOptionsWin: function() {
     this.openChromeWindow("chrome://scriptish/content/options.xul");
+  },
+  showUserscriptList: function() {
+    Cu.import("resource://scriptish/addonprovider.js");
+    this._win.setTimeout("BrowserOpenAddonsMgr('addons://list/userscripts')", 0);
   }
 }

@@ -1,6 +1,4 @@
 
-Cu.import("resource://scriptish/addonprovider.js");
-
 (function() {
 
 function Scriptish_ExtendedStringBundle(aBase) {

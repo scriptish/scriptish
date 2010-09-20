@@ -43,7 +43,7 @@
       <menuitem
         accesskey="&menu.manage.accesskey;"
         label="&menu.manage;"
-        oncommand="Scriptish_BrowserUI.showUserscriptList();" />
+        oncommand="Scriptish_BrowserUIM.showUserscriptList();" />
       <menuitem id="userscript-tools-new"
         accesskey="&menu.new.accesskey;"
         label="&menu.new;"
@@ -95,7 +95,7 @@
           oncommand="Scriptish_BrowserUIM.newUserScript()" />
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
-          oncommand="Scriptish_BrowserUI.showUserscriptList();" />
+          oncommand="Scriptish_BrowserUIM.showUserscriptList();" />
         <menuseparator />
         <menuitem accesskey="&menu.options.accesskey;"
           label="&menu.options;"

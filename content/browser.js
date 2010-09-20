@@ -91,13 +91,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   setTimeout(function() {gmSvc.updateVersion()}, 100);
 }
 
-Scriptish_BrowserUI.showUserscriptList = function() {
-  var tools = {};
-  Components.utils.import(
-    "resource://scriptish/utils/Scriptish_showUserscriptList.js", tools);
-  tools.Scriptish_showUserscriptList();
-}
-
 // registerMenuCommand
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   var commander = this.getCommander(menuCommand.window);
