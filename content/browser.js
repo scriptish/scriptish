@@ -45,7 +45,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   // get all required DOM elements
   this.tabBrowser = document.getElementById("content");
   this.statusImage = document.getElementById("gm-status-image");
-  this.statusLabel = document.getElementById("gm-status-label");
   this.statusPopup = document.getElementById("gm-status-popup");
   this.statusEnabledItem = document.getElementById("gm-status-enabled-item");
   this.generalMenuEnabledItem = document.getElementById("gm-general-menu-enabled-item");
