@@ -252,7 +252,10 @@ ScriptishService.prototype = {
         }
 
         if (line) {
-          var err = this.findError(script, line - lineFinder.lineNumber - 1);
+          Cu.import("resource://scriptish/utils/Scriptish_findError.js", tools);
+          var err = tools.Scriptish_findError(
+              script, line - lineFinder.lineNumber - 1);
+
           tools.Scriptish_logError(
             e, // error obj
             0, // 0 = error (1 = warning)
@@ -272,27 +275,6 @@ ScriptishService.prototype = {
       }
     }
     return true; // did not need a (function() {...})() enclosure.
-  },
-
-  findError: function(script, lineNumber){
-    var start = 0;
-    var end = 1;
-
-    for (var i = 0; i < script.offsets.length; i++) {
-      end = script.offsets[i];
-      if (lineNumber < end) {
-        return {
-          uri: script.requires[i].fileURL,
-          lineNumber: (lineNumber - start)
-        };
-      }
-      start = end;
-    }
-
-    return {
-      uri: script.fileURL,
-      lineNumber: (lineNumber - end)
-    };
   },
 
   getFirebugConsole: function(unsafeContentWin, chromeWin) {
