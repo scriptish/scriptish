@@ -3,18 +3,17 @@
 // all the main injection logic, though that should probably be a proper XPCOM
 // service and wouldn't need to be initialized in that case.
 
-var Scriptish_BrowserUI = new Object();
-
+Components.utils.import("resource://scriptish/content/browser.js");
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_newUserScript.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_setEnabled.js");
 
-/**
- * nsISupports.QueryInterface
- */
+Scriptish_BrowserUI = new Object();
+Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window);
+
+// nsISupports.QueryInterface
 Scriptish_BrowserUI.QueryInterface = function(aIID) {
   if (!aIID.equals(Components.interfaces.nsISupports) &&
       !aIID.equals(Components.interfaces.nsISupportsWeakReference) &&
@@ -98,9 +97,7 @@ Scriptish_BrowserUI.showUserscriptList = function() {
   tools.Scriptish_showUserscriptList();
 }
 
-/**
- * registerMenuCommand
- */
+// registerMenuCommand
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   var commander = this.getCommander(menuCommand.window);
 
@@ -184,9 +181,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
   );
 };
 
-/**
- * Called from scriptish service when we should load a user script.
- */
+// Called from scriptish service when we should load a user script.
 Scriptish_BrowserUI.startInstallScript = function(uri, timer) {
   if (!timer) {
     // docs for nsicontentpolicy say we're not supposed to block, so short

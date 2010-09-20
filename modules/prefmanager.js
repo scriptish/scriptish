@@ -1,4 +1,4 @@
-// JSM exported symbols
+
 var EXPORTED_SYMBOLS = ["Scriptish_prefRoot", "Scriptish_PrefManager"];
 
 const Cu = Components.utils;

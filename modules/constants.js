@@ -1,4 +1,4 @@
-// JSM exported symbols
+
 var EXPORTED_SYMBOLS = [
     "Cc",
     "Ci",
