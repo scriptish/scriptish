@@ -77,15 +77,11 @@ ScriptishService.prototype = {
     }
 
     // don't intercept anything when Scriptish is not enabled
-    if (!tools.Scriptish_getEnabled()) {
-      return ret;
-    }
+    if (!tools.Scriptish_getEnabled()) return ret;
 
     // don't interrupt the view-source: scheme
     // (triggered if the link in the error console is clicked)
-    if ("view-source" == cl.scheme) {
-      return ret;
-    }
+    if ("view-source" == cl.scheme) return ret;
 
     if (ct == Ci.nsIContentPolicy.TYPE_DOCUMENT &&
         cl.spec.match(/\.user\.js$/)) {
@@ -114,17 +110,15 @@ ScriptishService.prototype = {
   },
 
   isTempScript: function(uri) {
-    if (uri.scheme != "file") {
-      return false;
-    }
+    if (uri.scheme != "file") return false;
 
     var fph = Cc["@mozilla.org/network/protocol;1?name=file"]
-    .getService(Ci.nsIFileProtocolHandler);
+        .getService(Ci.nsIFileProtocolHandler);
 
     var file = fph.getFileFromURLSpec(uri.spec);
     var tmpDir = Cc["@mozilla.org/file/directory_service;1"]
-    .getService(Ci.nsIProperties)
-    .get("TmpD", Ci.nsILocalFile);
+        .getService(Ci.nsIProperties)
+        .get("TmpD", Ci.nsILocalFile);
 
     return file.parent.equals(tmpDir) && file.leafName != "newscript.user.js";
   },
