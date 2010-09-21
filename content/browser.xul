@@ -31,10 +31,9 @@
         label="&menu.install;"
         hidden="true"
         oncommand="Scriptish_BrowserUI.installMenuItemClicked(event);" />
-      <menuitem
+      <menuitem id="scriptish-tools-show-us"
         accesskey="&menu.manage.accesskey;"
-        label="&menu.manage;"
-        oncommand="Scriptish_BrowserUIM.showUserscriptList();" />
+        label="&menu.manage;"/>
       <menuitem id="scriptish-tools-new"
         accesskey="&menu.new.accesskey;"
         label="&menu.new;"/>
@@ -79,17 +78,17 @@
         >
           <menupopup/>
         </menu>
-        <menuseparator />
+        <menuseparator/>
         <menuitem id="scriptish-sb-new-us"
           accesskey="&menu.new.accesskey;"
           label="&menu.new;"/>
-        <menuitem accesskey="&menu.manage.accesskey;"
-          label="&menu.manage;"
-          oncommand="Scriptish_BrowserUIM.showUserscriptList();" />
-        <menuseparator />
-        <menuitem accesskey="&menu.options.accesskey;"
-          label="&menu.options;"
-          oncommand="Scriptish_BrowserUIM.openOptionsWin()" />
+        <menuitem id="scriptish-sb-show-us"
+          accesskey="&menu.manage.accesskey;"
+          label="&menu.manage;"/>
+        <menuseparator/>
+        <menuitem id="scriptish-sb-options"
+          accesskey="&menu.options.accesskey;"
+          label="&menu.options;"/>
         <menuitem id="scriptish-status-enabled-item"
           accesskey="&statusbar.enabled.accesskey;"
           label="&statusbar.enabled;"

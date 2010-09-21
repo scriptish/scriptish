@@ -60,8 +60,15 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   $("scriptish-commands-sb2").addEventListener("popupshowing", stopEvt, false);
 
   var newUserScript = function(){ Scriptish_BrowserUIM.newUserScript() };
-  $('scriptish-tools-new').addEventListener("command", newUserScript, false);
-  $('scriptish-sb-new-us').addEventListener("command", newUserScript, false);
+  $("scriptish-tools-new").addEventListener("command", newUserScript, false);
+  $("scriptish-sb-new-us").addEventListener("command", newUserScript, false);
+
+  var showUserScripts = function(){ Scriptish_BrowserUIM.showUserscriptList() };
+  $("scriptish-tools-show-us").addEventListener("command", showUserScripts, false);
+  $("scriptish-sb-show-us").addEventListener("command", showUserScripts, false);
+
+  var showOptions = function(){ Scriptish_BrowserUIM.openOptionsWin() };
+  $("scriptish-sb-options").addEventListener("command", showOptions, false);
 
   this.contextItem.addEventListener("command", function(aEvt) {
     Scriptish_BrowserUI.viewContextItemClicked(aEvt);
