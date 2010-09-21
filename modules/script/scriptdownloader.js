@@ -35,18 +35,18 @@ ScriptDownloader.prototype.startInstall = function() {
 ScriptDownloader.prototype.startViewScript = function(uri) {
   this.installing_ = false;
   this.startDownload();
-};
+}
 
 ScriptDownloader.prototype.startDownload = function() {
   this.req_ = new this.win_.XMLHttpRequest();
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
-  this.req_.onreadystatechange = Scriptish_hitch(this, "checkContentTypeBeforeDownload");
+  this.req_.onreadystatechange = Scriptish_hitch(this, "chkContentTypeB4DL");
   this.req_.onload = Scriptish_hitch(this, "handleScriptDownloadComplete");
   this.req_.send(null);
-};
+}
 
-ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
+ScriptDownloader.prototype.chkContentTypeB4DL = function() {
   if (this.req_.readyState == 2) {
     // If there is a 'Content-Type' header and it contains 'text/html',
     // then do not install the file, and display it instead.
@@ -58,13 +58,8 @@ ScriptDownloader.prototype.checkContentTypeBeforeDownload = function () {
       this.win_.content.location.href = this.uri_.spec;
       return;
     }
-
-    // display "Fetching user script" msg
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
-    tools.Scriptish_notification("Fetching user script");
   }
-};
+}
 
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   try {

@@ -381,7 +381,6 @@ Scriptish_BrowserUI.toolsMenuShowing = function() {
   }
 };
 
-
 /**
  * Helper method which gets the menuCommander corresponding to a given
  * document
