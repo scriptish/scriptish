@@ -1,4 +1,4 @@
-// JSM exported symbols
+
 var EXPORTED_SYMBOLS = ["Script"];
 
 const Cu = Components.utils;
@@ -135,8 +135,12 @@ Script.prototype = {
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
   },
-  get creator() { return this.author; },
+  get creator() { return this._creator; },
   get author() { return this._author; },
+  set author(aVal) {
+    this._author = aVal;
+    this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
+  },
   get contributors() { return this._contributors },
   addContributor: function(aContributor) {
     this._contributors.push(aContributor);
@@ -258,7 +262,7 @@ Script.prototype = {
     this._homepageURL = newScript._homepageURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
-    this._author = newScript._author;
+    this.author = newScript.author;
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
@@ -450,9 +454,11 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
       case "id":
         if (value) script.id = value;
         continue;
+      case "author":
+        script.author = value;
+        continue;
       case "name":
       case "namespace":
-      case "author":
       case "description":
       case "version":
         script["_" + header] = value;
@@ -641,7 +647,7 @@ Script.load = function load(aConfig, aNode) {
   script._id = aNode.getAttribute("id") || null;
   script._name = aNode.getAttribute("name");
   script._namespace = aNode.getAttribute("namespace");
-  script._author = aNode.getAttribute("author");
+  script.author = aNode.getAttribute("author");
   script._description = aNode.getAttribute("description");
   script.icon.fileURL = aNode.getAttribute("icon");
   script._enabled = aNode.getAttribute("enabled") == true.toString();
