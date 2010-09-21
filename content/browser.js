@@ -56,6 +56,13 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
     Scriptish_BrowserUIM.onIconClick(aEvt);
   }, false);
 
+  $("scriptish-tools-menupop").addEventListener("popupshowing", function(aEvt) {
+    // set the enabled/disabled state
+    Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
+        "checked", Scriptish_getEnabled());
+    aEvt.stopPropagation();
+  }, false);
+
   this.toolsInstall.addEventListener("command", function(aEvt) {
     Scriptish_BrowserUI.installMenuItemClicked(aEvt);
   }, false);
@@ -401,12 +408,6 @@ Scriptish_BrowserUI.getCommander = function(unsafeWin) {
 
   return commander;
 };
-
-function Scriptish_showGeneralPopup(aEvent) {
-  // set the enabled/disabled state
-  Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
-      "checked", Scriptish_getEnabled());
-}
 
 function Scriptish_showPopup(aEvent) {
   function urlsOfAllFrames(contentWindow) {

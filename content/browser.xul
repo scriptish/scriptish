@@ -17,9 +17,7 @@
     accesskey="&menu.title.accesskey;"
     label="&menu.title;"
   >
-    <menupopup
-      onpopupshowing="Scriptish_showGeneralPopup(event); event.stopPropagation();"
-    >
+    <menupopup id="scriptish-tools-menupop">
       <menuitem id="scriptish-tools-enabled-item"
         accesskey="&statusbar.enabled.accesskey;"
         label="&statusbar.enabled;"
