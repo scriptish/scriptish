@@ -14,8 +14,9 @@ XPCOMUtils.defineLazyServiceGetter(
     this, "winMediator", "'@mozilla.org/appshell/window-mediator;1",
     "nsIWindowMediator");
 
-function Scriptish_BrowserUIM(aWin) {
+function Scriptish_BrowserUIM(aWin, aBrowserUI) {
   this._win = aWin;
+  this._browserUI = aBrowserUI;
 }
 Scriptish_BrowserUIM.prototype = {
   onIconClick: function(aEvt) {
@@ -26,6 +27,16 @@ Scriptish_BrowserUIM.prototype = {
   },
   onToggleStatus: function() {
     Scriptish_setEnabled(!Scriptish_getEnabled());
+  },
+  refreshStatus: function() {
+    var img = this._win.document.getElementById("gm-status-image");
+    if (Scriptish_getEnabled()) {
+      img.setAttribute("src", "chrome://scriptish/skin/icon_small.png");
+      img.tooltipText = this._browserUI.bundle.getString("tooltip.enabled");
+    } else {
+      img.setAttribute("src", "chrome://scriptish/skin/icon_small_disabled.png");
+      img.tooltipText = this._browserUI.bundle.getString("tooltip.disabled");
+    }
   },
   openChromeWindow: function(aURL) {
     winWatcher.openWindow(

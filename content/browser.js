@@ -10,7 +10,7 @@ Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
 
 Scriptish_BrowserUI = new Object();
-Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window);
+Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
 
 // nsISupports.QueryInterface
 Scriptish_BrowserUI.QueryInterface = function(aIID) {
@@ -46,15 +46,27 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
   // get all required DOM elements
   this.tabBrowser = $("content");
-  this.statusImage = $("gm-status-image");
-  this.statusPopup = $("gm-status-popup");
   this.statusEnabledItem = $("gm-status-enabled-item");
   this.generalMenuEnabledItem = $("gm-general-menu-enabled-item");
   this.bundle = $("gm-browser-bundle");
 
+  $("scriptish-status").addEventListener("click", function(aEvt) {
+    Scriptish_BrowserUIM.onIconClick(aEvt);
+  }, false);
+
+  var sbPopUp = $("scriptish-status-popup");
+  sbPopUp.addEventListener("click", function(aEvt) {
+    Scriptish_popupClicked(aEvt);
+    aEvt.stopPropagation();
+  }, false);
+  sbPopUp.addEventListener("popupshowing", function(aEvt) {
+    Scriptish_showPopup(aEvt);
+    aEvt.stopPropagation();
+  }, false);
+
   // update visual status when enabled state changes
-  this.enabledWatcher = Scriptish_hitch(this, "refreshStatus");
-  Scriptish_prefRoot.watch("enabled", this.enabledWatcher);
+  this.statusWatcher = Scriptish_hitch(Scriptish_BrowserUIM, "refreshStatus");
+  Scriptish_prefRoot.watch("enabled", this.statusWatcher);
 
   // hook various events
   $("appcontent").addEventListener(
@@ -80,7 +92,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
     Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
 
   // update enabled icon
-  this.refreshStatus();
+  Scriptish_BrowserUIM.refreshStatus();
 
   // register for notifications from scriptish-service about ui type things
   var gmSvc = Components.classes["@scriptish.erikvold.com/scriptish-service;1"]
@@ -288,7 +300,7 @@ Scriptish_BrowserUI.contentUnload = function(e) {
  * leak it's memory.
  */
 Scriptish_BrowserUI.chromeUnload = function() {
-  Scriptish_prefRoot.unwatch("enabled", this.enabledWatcher);
+  Scriptish_prefRoot.unwatch("enabled", this.statusWatcher);
   this.tabBrowser.removeProgressListener(this);
   delete this.menuCommanders;
 };
@@ -486,23 +498,6 @@ function Scriptish_popupClicked(aEvent) {
   }
 }
 
-/**
- * Scriptish's enabled state has changed, either as a result of clicking
- * the icon in this window, clicking it in another window, or even changing
- * the mozilla preference that backs it directly.
- */
-Scriptish_BrowserUI.refreshStatus = function() {
-  if (Scriptish_getEnabled()) {
-    this.statusImage.src = "chrome://scriptish/skin/icon_small.png";
-    this.statusImage.tooltipText = this.bundle.getString("tooltip.enabled");
-  } else {
-    this.statusImage.src = "chrome://scriptish/skin/icon_small_disabled.png";
-    this.statusImage.tooltipText = this.bundle.getString("tooltip.disabled");
-  }
-
-  this.statusImage.style.opacity = "1.0";
-};
-
 // necessary for webProgressListener implementation
 Scriptish_BrowserUI.onProgressChange = function(webProgress,b,c,d,e,f){};
 Scriptish_BrowserUI.onStateChange = function(a,b,c,d){};
@@ -523,7 +518,7 @@ Scriptish_BrowserUI.installMenuItemClicked = function() {
 
 Scriptish_BrowserUI.viewContextItemClicked = function() {
   var tools = {};
-  Components.utils.import("resource://scriptish/scriptdownloader.js", tools);
+  Components.utils.import("resource://scriptish/script/scriptdownloader.js", tools);
 
   var uri = Scriptish_BrowserUI.getUserScriptLinkUnderPointer();
 
