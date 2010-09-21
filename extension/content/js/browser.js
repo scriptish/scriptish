@@ -35,7 +35,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.tabBrowser = $("content");
   this.statusEnabledItem = $("scriptish-sb-enabled-item");
   this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
-  this.toolsInstall = $("scriptish-tools-install")
   this.contextItem = $("scriptish-context-menu-viewsource");
 
   var tmEle = $('scriptish_general_menu');
@@ -46,9 +45,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   tmStatusEle.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
   tmStatusEle.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.accesskey"));
 
-  this.toolsInstall.setAttribute("label", Scriptish_stringBundle("menu.install"));
-  this.toolsInstall.setAttribute("accesskey", Scriptish_stringBundle("menu.install.accesskey"));
-
   $("scriptish-status").addEventListener("click", function(aEvt) {
     Scriptish_BrowserUIM.onIconClick(aEvt);
   }, false);
@@ -58,10 +54,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
     Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
         "checked", Scriptish_getEnabled());
     aEvt.stopPropagation();
-  }, false);
-
-  this.toolsInstall.addEventListener("command", function(aEvt) {
-    Scriptish_configDownloader.startInstall(gBrowser.currentURI);
   }, false);
 
   var toggleFunc = function() { Scriptish_BrowserUIM.onToggleStatus() };
@@ -141,8 +133,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
       "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
   $("contentAreaContextMenu").addEventListener(
       "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
-  ($("menu_ToolsPopup") || $("taskPopup")).addEventListener(
-      "popupshowing", Scriptish_hitch(this, "toolsMenuShowing"), false);
 
   // this gives us onLocationChange
   this.tabBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
@@ -331,15 +321,6 @@ Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
   if (!culprit || !culprit.href || !culprit.href.match(/\.user\.js(\?|$)/i))
     return null;
   return tools.NetUtil.newURI(culprit.href);
-}
-
-Scriptish_BrowserUI.toolsMenuShowing = function() {
-  if (window.content && window.content.location &&
-      window.content.location.href.match(/\.user(?:-\d+)\.js(?:\?|$)/i)) {
-    // Better to use hidden than collapsed because collapsed still allows you to
-    // select the item using keyboard navigation, but hidden doesn't.
-    this.toolsInstall.setAttribute("hidden", "false");
-  }
 }
 
 /**

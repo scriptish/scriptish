@@ -16,8 +16,7 @@
       image="chrome://scriptish/skin/icon_small.png">
     <menupopup id="scriptish-tools-menupop">
       <menuitem id="scriptish-tools-enabled-item" type="checkbox"/>
-      <menuseparator />
-      <menuitem id="scriptish-tools-install" hidden="true"/>
+      <menuseparator/>
       <menuitem id="scriptish-tools-show-us"/>
       <menuitem id="scriptish-tools-new"/>
       <menu id="scriptish-commands-sb2" disabled="false"><menupopup/></menu>
