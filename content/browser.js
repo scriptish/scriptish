@@ -55,6 +55,14 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
     Scriptish_BrowserUIM.onIconClick(aEvt);
   }, false);
 
+  var stopEvt = function(aEvt) { aEvt.stopPropagation() };
+  $("scriptish-commands-sb").addEventListener("popupshowing", stopEvt, false);
+  $("scriptish-commands-sb2").addEventListener("popupshowing", stopEvt, false);
+
+  var newUserScript = function(){ Scriptish_BrowserUIM.newUserScript() };
+  $('scriptish-tools-new').addEventListener("command", newUserScript, false);
+  $('scriptish-sb-new-us').addEventListener("command", newUserScript, false);
+
   this.contextItem.addEventListener("command", function(aEvt) {
     Scriptish_BrowserUI.viewContextItemClicked(aEvt);
   }, false)

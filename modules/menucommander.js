@@ -8,7 +8,7 @@ function Scriptish_MenuCommander(aDocument) {
 
   this.doc = aDocument;
 
-  this.menu = this.doc.getElementById("userscript-commands-sb");
+  this.menu = this.doc.getElementById("scriptish-commands-sb");
   this.keyset = this.doc.getElementById("mainKeyset");
   this.menuPopup = this.menu.firstChild;
 
@@ -16,7 +16,7 @@ function Scriptish_MenuCommander(aDocument) {
   this.keys = [];
   this.attached = false;
 
-  this.menu2 = this.doc.getElementById("userscript-commands-sb2");
+  this.menu2 = this.doc.getElementById("scriptish-commands-sb2");
   this.menuPopup2 = this.menu2.firstChild;
   this.menuItems2 = [];
 

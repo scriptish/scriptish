@@ -35,15 +35,13 @@
         accesskey="&menu.manage.accesskey;"
         label="&menu.manage;"
         oncommand="Scriptish_BrowserUIM.showUserscriptList();" />
-      <menuitem id="userscript-tools-new"
+      <menuitem id="scriptish-tools-new"
         accesskey="&menu.new.accesskey;"
-        label="&menu.new;"
-        oncommand="Scriptish_BrowserUIM.newUserScript()" />
-      <menu id="userscript-commands-sb2"
+        label="&menu.new;"/>
+      <menu id="scriptish-commands-sb2"
         accesskey="&menu.commands.accesskey;"
         label="&menu.commands;"
         disabled="false"
-        onpopupshowing="event.stopPropagation();"
       >
         <menupopup />
       </menu>
@@ -74,18 +72,17 @@
       <menupopup id="scriptish-status-popup">
         <menuitem id="scriptish-status-no-scripts" label="&statusbar.noscripts;"/>
         <menuseparator id="scriptish-status-no-scripts-sep"/>
-        <menu id="userscript-commands-sb"
+        <menu id="scriptish-commands-sb"
           accesskey="&menu.commands.accesskey;"
           label="&menu.commands;"
           disabled="false"
-          onpopupshowing="event.stopPropagation();"
         >
           <menupopup/>
         </menu>
         <menuseparator />
-        <menuitem accesskey="&menu.new.accesskey;"
-          label="&menu.new;"
-          oncommand="Scriptish_BrowserUIM.newUserScript()" />
+        <menuitem id="scriptish-sb-new-us"
+          accesskey="&menu.new.accesskey;"
+          label="&menu.new;"/>
         <menuitem accesskey="&menu.manage.accesskey;"
           label="&menu.manage;"
           oncommand="Scriptish_BrowserUIM.showUserscriptList();" />
