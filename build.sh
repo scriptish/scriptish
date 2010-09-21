@@ -3,7 +3,7 @@
 # Set up variables
 if [ "official" = "$1" ]; then
   # For official builds, use the version in install.rdf.
-  VER=`sed -ne '/em:version/{ s/.*>\(.*\)<.*/\1/; p}' install.rdf`
+  VER=`grep -Go 'em:version\>\(.*\)\<' install.rdf | grep -Go '>\(.*\)<' | sed -e 's/[><]*//g'`
 else
   # For beta builds, generate a version number.
   VER=`date +"%Y.%m.%d.beta"`
