@@ -46,14 +46,18 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
   // get all required DOM elements
   this.tabBrowser = $("content");
-  this.statusEnabledItem = $("scriptish-status-enabled-item");
-  this.generalMenuEnabledItem = $("scriptish-general-menu-enabled-item");
+  this.statusEnabledItem = $("scriptish-sb-enabled-item");
+  this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
   this.contextItem = $("scriptish-context-menu-viewsource");
   this.bundle = $("scriptish-browser-bundle");
 
   $("scriptish-status").addEventListener("click", function(aEvt) {
     Scriptish_BrowserUIM.onIconClick(aEvt);
   }, false);
+
+  var toggle = function() { Scriptish_BrowserUIM.onToggleStatus() };
+  this.statusEnabledItem.addEventListener("command", toggle, false);
+  this.toolsMenuEnabledItem.addEventListener("command", toggle, false);
 
   var stopEvt = function(aEvt) { aEvt.stopPropagation() };
   $("scriptish-commands-sb").addEventListener("popupshowing", stopEvt, false);
@@ -401,7 +405,7 @@ Scriptish_BrowserUI.getCommander = function(unsafeWin) {
 
 function Scriptish_showGeneralPopup(aEvent) {
   // set the enabled/disabled state
-  Scriptish_BrowserUI.generalMenuEnabledItem.setAttribute(
+  Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
       "checked", Scriptish_getEnabled());
 }
 

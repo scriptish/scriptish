@@ -20,11 +20,10 @@
     <menupopup
       onpopupshowing="Scriptish_showGeneralPopup(event); event.stopPropagation();"
     >
-      <menuitem id="scriptish-general-menu-enabled-item"
+      <menuitem id="scriptish-tools-enabled-item"
         accesskey="&statusbar.enabled.accesskey;"
         label="&statusbar.enabled;"
-        type="checkbox"
-        oncommand="Scriptish_BrowserUIM.onToggleStatus()" />
+        type="checkbox"/>
       <menuseparator />
       <menuitem id="userscript-tools-install"
         accesskey="&menu.install.accesskey;"
@@ -89,11 +88,10 @@
         <menuitem id="scriptish-sb-options"
           accesskey="&menu.options.accesskey;"
           label="&menu.options;"/>
-        <menuitem id="scriptish-status-enabled-item"
+        <menuitem id="scriptish-sb-enabled-item"
           accesskey="&statusbar.enabled.accesskey;"
           label="&statusbar.enabled;"
-          type="checkbox"
-          oncommand="Scriptish_BrowserUIM.onToggleStatus()" />
+          type="checkbox"/>
       </menupopup>
     </statusbarpanel>
   </statusbar>
