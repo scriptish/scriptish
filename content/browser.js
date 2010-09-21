@@ -48,11 +48,16 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.tabBrowser = $("content");
   this.statusEnabledItem = $("scriptish-status-enabled-item");
   this.generalMenuEnabledItem = $("scriptish-general-menu-enabled-item");
+  this.contextItem = $("scriptish-context-menu-viewsource");
   this.bundle = $("scriptish-browser-bundle");
 
   $("scriptish-status").addEventListener("click", function(aEvt) {
     Scriptish_BrowserUIM.onIconClick(aEvt);
   }, false);
+
+  this.contextItem.addEventListener("command", function(aEvt) {
+    Scriptish_BrowserUI.viewContextItemClicked(aEvt);
+  }, false)
 
   var sbPopUp = $("scriptish-status-popup");
   sbPopUp.addEventListener("click", function(aEvt) {
@@ -310,8 +315,8 @@ Scriptish_BrowserUI.chromeUnload = function() {
  * to show our context items.
  */
 Scriptish_BrowserUI.contextMenuShowing = function() {
-  var contextItem = document.getElementById("view-userscript");
-  var contextSep = document.getElementById("install-userscript-sep");
+  var contextItem = this.contextItem;
+  var contextSep = document.getElementById("scriptish-context-menu-viewsource-sep");
 
   var culprit = document.popupNode;
 
@@ -319,9 +324,8 @@ Scriptish_BrowserUI.contextMenuShowing = function() {
      culprit = culprit.parentNode;
   }
 
-  contextItem.hidden =
-    contextSep.hidden =
-    !this.getUserScriptLinkUnderPointer();
+  contextItem.hidden = contextSep.hidden =
+      !this.getUserScriptLinkUnderPointer();
 };
 
 

@@ -4,24 +4,13 @@
 
 <overlay id="scriptish-browser-overlay"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-
   <script type="application/x-javascript" src="chrome://scriptish/content/browser.js" />
 
-  <popup id="contentAreaContextMenu">
-    <menuitem id="view-userscript"
-      accesskey="&menu.show.accesskey;"
-      label="&menu.show;"
-      insertbefore="context-openlink"
-      oncommand="Scriptish_BrowserUI.viewContextItemClicked(event);" />
-    <menuseparator id="install-userscript-sep"
-      insertbefore="context-openlink" />
-  </popup>
 
+  <!-- TOOLS MENU -->
   <menupopup id="menu_ToolsPopup">
-    <menu id="scriptish_general_menu"
-      insertbefore="javascriptConsole" />
+    <menu id="scriptish_general_menu" insertbefore="javascriptConsole" />
   </menupopup>
-
   <menu id="scriptish_general_menu"
     class="menu-iconic"
     image="chrome://scriptish/skin/icon_small.png"
@@ -61,6 +50,20 @@
     </menupopup>
   </menu>
 
+
+  <!-- CONTEXT MENU -->
+  <popup id="contentAreaContextMenu">
+    <menuitem id="scriptish-context-menu-viewsource"
+      accesskey="&menu.show.accesskey;"
+      label="&menu.show;"
+      class="menuitem-iconic"
+      image="chrome://scriptish/skin/icon_small.png"
+      insertbefore="context-openlink"/>
+    <menuseparator id="scriptish-context-menu-viewsource-sep" insertbefore="context-openlink"/>
+  </popup>
+
+
+  <!-- STATUS BAR -->
   <statusbar id="status-bar">
     <!-- NOTE: Local to statusbar tag scope -->
     <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
@@ -98,5 +101,4 @@
       </menupopup>
     </statusbarpanel>
   </statusbar>
-
 </overlay>
