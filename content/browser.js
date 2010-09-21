@@ -518,9 +518,7 @@ Scriptish_BrowserUI.showHorrayMessage = function(scriptName) {
 };
 
 Scriptish_BrowserUI.installMenuItemClicked = function() {
-  Scriptish_BrowserUI.startInstallScript(
-    gBrowser.currentURI
-  );
+  Scriptish_BrowserUI.startInstallScript(gBrowser.currentURI);
 };
 
 Scriptish_BrowserUI.viewContextItemClicked = function() {
