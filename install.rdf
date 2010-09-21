@@ -6,7 +6,7 @@
     <em:id>scriptish@erikvold.com</em:id>
     <em:version>0.1b1</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
-    <em:homepageURL>http://www.greasespot.net/</em:homepageURL>
+    <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://scriptish/skin/icon_medium.png</em:iconURL>
 
