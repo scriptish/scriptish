@@ -22,14 +22,16 @@
       insertbefore="javascriptConsole" />
   </menupopup>
 
-  <menu id="scriptish_general_menu" class="menu-iconic"
+  <menu id="scriptish_general_menu"
+    class="menu-iconic"
+    image="chrome://scriptish/skin/icon_small.png"
     accesskey="&menu.title.accesskey;"
     label="&menu.title;"
   >
     <menupopup
       onpopupshowing="Scriptish_showGeneralPopup(event); event.stopPropagation();"
     >
-      <menuitem id="gm-general-menu-enabled-item"
+      <menuitem id="scriptish-general-menu-enabled-item"
         accesskey="&statusbar.enabled.accesskey;"
         label="&statusbar.enabled;"
         type="checkbox"
@@ -61,13 +63,14 @@
 
   <statusbar id="status-bar">
     <!-- NOTE: Local to statusbar tag scope -->
-    <stringbundle id="gm-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
+    <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
 
     <statusbarpanel id="scriptish-status" context="_child">
-      <image id="gm-status-image"/>
+      <image id="scriptish-status-image"/>
+
       <menupopup id="scriptish-status-popup">
-        <menuitem id="gm-status-no-scripts" label="&statusbar.noscripts;"/>
-        <menuseparator id="gm-status-no-scripts-sep"/>
+        <menuitem id="scriptish-status-no-scripts" label="&statusbar.noscripts;"/>
+        <menuseparator id="scriptish-status-no-scripts-sep"/>
         <menu id="userscript-commands-sb"
           accesskey="&menu.commands.accesskey;"
           label="&menu.commands;"
@@ -87,7 +90,7 @@
         <menuitem accesskey="&menu.options.accesskey;"
           label="&menu.options;"
           oncommand="Scriptish_BrowserUIM.openOptionsWin()" />
-        <menuitem id="gm-status-enabled-item"
+        <menuitem id="scriptish-status-enabled-item"
           accesskey="&statusbar.enabled.accesskey;"
           label="&statusbar.enabled;"
           type="checkbox"

@@ -29,12 +29,16 @@ Scriptish_BrowserUIM.prototype = {
     Scriptish_setEnabled(!Scriptish_getEnabled());
   },
   refreshStatus: function() {
-    var img = this._win.document.getElementById("gm-status-image");
+    var img = this._win.document.getElementById("scriptish-status-image");
+    var menu = this._win.document.getElementById("scriptish_general_menu");
+
     if (Scriptish_getEnabled()) {
       img.setAttribute("src", "chrome://scriptish/skin/icon_small.png");
+      menu.setAttribute("image", "chrome://scriptish/skin/icon_small.png");
       img.tooltipText = this._browserUI.bundle.getString("tooltip.enabled");
     } else {
       img.setAttribute("src", "chrome://scriptish/skin/icon_small_disabled.png");
+      menu.setAttribute("src", "chrome://scriptish/skin/icon_small_disabled.png");
       img.tooltipText = this._browserUI.bundle.getString("tooltip.disabled");
     }
   },

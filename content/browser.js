@@ -46,9 +46,9 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
   // get all required DOM elements
   this.tabBrowser = $("content");
-  this.statusEnabledItem = $("gm-status-enabled-item");
-  this.generalMenuEnabledItem = $("gm-general-menu-enabled-item");
-  this.bundle = $("gm-browser-bundle");
+  this.statusEnabledItem = $("scriptish-status-enabled-item");
+  this.generalMenuEnabledItem = $("scriptish-general-menu-enabled-item");
+  this.bundle = $("scriptish-browser-bundle");
 
   $("scriptish-status").addEventListener("click", function(aEvt) {
     Scriptish_BrowserUIM.onIconClick(aEvt);
@@ -431,7 +431,7 @@ function Scriptish_showPopup(aEvent) {
   }
 
   var popup = aEvent.target;
-  var tail = document.getElementById("gm-status-no-scripts-sep");
+  var tail = document.getElementById("scriptish-status-no-scripts-sep");
 
   // set the enabled/disabled state
   Scriptish_BrowserUI.statusEnabledItem.setAttribute(
@@ -473,7 +473,7 @@ function Scriptish_showPopup(aEvent) {
   runsOnTop.forEach(appendScriptToPopup);
 
   var foundInjectedScript = !!(runsFramed.length + runsOnTop.length);
-  document.getElementById("gm-status-no-scripts").collapsed = foundInjectedScript;
+  document.getElementById("scriptish-status-no-scripts").collapsed = foundInjectedScript;
 }
 
 /**

@@ -6,7 +6,7 @@ Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 var bundle = null;
 window.addEventListener("load", function() {
   // init the global string bundle
-  bundle = document.getElementById("gm-browser-bundle");
+  bundle = document.getElementById("scriptish-browser-bundle");
 
   // load default namespace from pref
   document.getElementById("namespace").value =

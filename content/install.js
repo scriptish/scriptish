@@ -26,7 +26,7 @@ var Scriptish_Install = {
     this.seconds_ = 0;
     this.startTimer();
 
-    this.bundle = document.getElementById("gm-browser-bundle");
+    this.bundle = document.getElementById("scriptish-browser-bundle");
     this.greetz = new Array();
     for(var i = 0; i < 6; i++){
       this.greetz.push(this.bundle.getString("greetz." + i));
