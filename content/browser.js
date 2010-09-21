@@ -48,11 +48,16 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.tabBrowser = $("content");
   this.statusEnabledItem = $("scriptish-sb-enabled-item");
   this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
+  this.toolsInstall = $("scriptish-tools-install")
   this.contextItem = $("scriptish-context-menu-viewsource");
   this.bundle = $("scriptish-browser-bundle");
 
   $("scriptish-status").addEventListener("click", function(aEvt) {
     Scriptish_BrowserUIM.onIconClick(aEvt);
+  }, false);
+
+  this.toolsInstall.addEventListener("command", function(aEvt) {
+    Scriptish_BrowserUI.installMenuItemClicked(aEvt);
   }, false);
 
   var toggle = function() { Scriptish_BrowserUIM.onToggleStatus() };
@@ -368,17 +373,12 @@ Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
 };
 
 Scriptish_BrowserUI.toolsMenuShowing = function() {
-  var installItem = document.getElementById("userscript-tools-install");
-  var hidden = true;
-
-  if (window._content && window._content.location &&
-      window.content.location.href.match(/\.user\.js(\?|$)/i)) {
-    hidden = false;
+  if (window.content && window.content.location &&
+      window.content.location.href.match(/\.user(?:-\d+)\.js(?:\?|$)/i)) {
+    // Better to use hidden than collapsed because collapsed still allows you to
+    // select the item using keyboard navigation, but hidden doesn't.
+	  this.toolsInstall.setAttribute("hidden", "false");
   }
-
-  // Better to use hidden than collapsed because collapsed still allows you to
-  // select the item using keyboard navigation, but hidden doesn't.
-  installItem.setAttribute("hidden", hidden.toString());
 };
 
 

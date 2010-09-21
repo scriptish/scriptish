@@ -25,11 +25,10 @@
         label="&statusbar.enabled;"
         type="checkbox"/>
       <menuseparator />
-      <menuitem id="userscript-tools-install"
+      <menuitem id="scriptish-tools-install"
         accesskey="&menu.install.accesskey;"
         label="&menu.install;"
-        hidden="true"
-        oncommand="Scriptish_BrowserUI.installMenuItemClicked(event);" />
+        hidden="true"/>
       <menuitem id="scriptish-tools-show-us"
         accesskey="&menu.manage.accesskey;"
         label="&menu.manage;"/>
