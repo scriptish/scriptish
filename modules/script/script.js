@@ -49,6 +49,7 @@ function Script(config) {
   this._excludeRegExps = [];
   this._requires = [];
   this._resources = [];
+  this._screenshots = [];
   this._unwrap = false;
   this._noframes = false;
   this._dependFail = false
@@ -195,6 +196,8 @@ Script.prototype = {
     return size;
   },
 
+  get screenshots() { return this._screenshots; },
+
   _initFileName: function(name, useExt) {
     var ext = "";
     name = name.toLowerCase();
@@ -259,6 +262,7 @@ Script.prototype = {
     this._includeRegExps = newScript._includeRegExps;
     this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
+    this._screenshots = newScript._screenshots;
     this._homepageURL = newScript._homepageURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
@@ -300,6 +304,7 @@ Script.prototype = {
 
   createXMLNode: function(doc) {
     var scriptNode = doc.createElement("Script");
+    var len;
 
     for (var j = 0; j < this.contributors.length; j++) {
       var contributorNode = doc.createElement("Contributor");
@@ -329,12 +334,18 @@ Script.prototype = {
       scriptNode.appendChild(matchNode);
     }
 
+    len = this._screenshots.length;
+    for (var j = 0; j < len; j++) {
+      var screenshotNode = doc.createElement("Screenshot");
+      screenshotNode.appendChild(doc.createTextNode(this._screenshots[j]));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(screenshotNode);
+    }
+
     for (var j = 0; j < this._requires.length; j++) {
       var req = this._requires[j];
       var resourceNode = doc.createElement("Require");
-
       resourceNode.setAttribute("filename", req._filename);
-
       scriptNode.appendChild(doc.createTextNode("\n\t\t"));
       scriptNode.appendChild(resourceNode);
     }
@@ -488,6 +499,9 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
       case "match":
         script._matches.push(new MatchPattern(value));
         continue;
+      case 'screenshot':
+        script._screenshots.push(value);
+        continue;
       case "icon":
       case "iconurl":
         script._rawMeta += header + '\0' + value + '\0';
@@ -582,7 +596,6 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
 Script.load = function load(aConfig, aNode) {
   var script = new Script(aConfig);
   var fileModified = false;
-  var rightTrim = /\s*$/g;
 
   script._filename = aNode.getAttribute("filename");
   script._basedir = aNode.getAttribute("basedir") || ".";
@@ -613,16 +626,16 @@ Script.load = function load(aConfig, aNode) {
   for (var i = 0, childNode; childNode = aNode.childNodes[i]; i++) {
     switch (childNode.nodeName) {
       case "Contributor":
-        script.addContributor(childNode.firstChild.nodeValue.replace(rightTrim, ''));
+        script.addContributor(childNode.firstChild.nodeValue.trim());
         break;
       case "Include":
-        script.addInclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
+        script.addInclude(childNode.firstChild.nodeValue.trim());
         break;
       case "Exclude":
-        script.addExclude(childNode.firstChild.nodeValue.replace(rightTrim, ''));
+        script.addExclude(childNode.firstChild.nodeValue.trim());
         break;
       case "Match":
-        script._matches.push(new MatchPattern(childNode.firstChild.nodeValue.replace(rightTrim, '')));
+        script._matches.push(new MatchPattern(childNode.firstChild.nodeValue.trim()));
         break;
       case "Require":
         var scriptRequire = new ScriptRequire(script);
@@ -636,6 +649,9 @@ Script.load = function load(aConfig, aNode) {
         scriptResource._mimetype = childNode.getAttribute("mimetype");
         scriptResource._charset = childNode.getAttribute("charset");
         script._resources.push(scriptResource);
+        break;
+      case "Screenshot":
+        script._screenshots.push(childNode.firstChild.nodeValue.trim());
         break;
       case "Noframes":
       case "Unwrap":
