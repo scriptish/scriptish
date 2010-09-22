@@ -7,6 +7,7 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
+Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
@@ -67,6 +68,7 @@ Script.prototype = {
   get isActive() { return !this.appDisabled || !this.userDisabled },
   pendingOperations: 0,
   type: "userscript",
+  get sourceURI () { return Scriptish_uriFromUrl(this._downloadURL); },
   get userDisabled() { return !this._enabled; },
   set userDisabled(val) {
     if (val == this.userDisabled) return val;
