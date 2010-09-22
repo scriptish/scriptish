@@ -449,6 +449,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
   var previousResourceNames = {};
   script._rawMeta = "";
 
+  if (!lines) lines = [""];
   while (result = lines[i++]) {
     if (!foundMeta) {
       if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
