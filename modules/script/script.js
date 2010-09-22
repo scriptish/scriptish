@@ -337,7 +337,7 @@ Script.prototype = {
     len = this._screenshots.length;
     for (var j = 0; j < len; j++) {
       var screenshotNode = doc.createElement("Screenshot");
-      screenshotNode.appendChild(doc.createTextNode(this._screenshots[j]));
+      screenshotNode.appendChild(doc.createTextNode(this._screenshots[j].url));
       scriptNode.appendChild(doc.createTextNode("\n\t\t"));
       scriptNode.appendChild(screenshotNode);
     }
@@ -501,7 +501,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         script._matches.push(new MatchPattern(value));
         continue;
       case 'screenshot':
-        script._screenshots.push(value);
+        script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(value));
         continue;
       case "icon":
       case "iconurl":
@@ -652,7 +652,7 @@ Script.load = function load(aConfig, aNode) {
         script._resources.push(scriptResource);
         break;
       case "Screenshot":
-        script._screenshots.push(childNode.firstChild.nodeValue.trim());
+        script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(childNode.firstChild.nodeValue.trim()));
         break;
       case "Noframes":
       case "Unwrap":
