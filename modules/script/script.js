@@ -476,6 +476,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdate) {
         continue;
       case "homepageurl":
         script._homepageURL = value;
+        continue;
       case "jsversion":
         var jsVerIndx = JSVersions.indexOf(value);
         if (jsVerIndx === -1) {
