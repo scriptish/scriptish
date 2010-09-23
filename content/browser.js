@@ -277,7 +277,7 @@ Scriptish_BrowserUI.installCurrentScript = function() {
 
 Scriptish_BrowserUI.installScript = function(script){
   Scriptish_getConfig().install(script);
-  this.showHorrayMessage(script.name);
+  this.showHorrayMessage(script);
 };
 
 /**
@@ -528,11 +528,13 @@ Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
 Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
-Scriptish_BrowserUI.showHorrayMessage = function(scriptName) {
+Scriptish_BrowserUI.showHorrayMessage = function(aScript) {
   var tools = {};
   Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
-  tools.Scriptish_notification(
-      "'" + scriptName + "' " + this.bundle.getString("statusbar.installed"));
+  var msg = "'" + aScript.name;
+  if (aScript.version) msg += " " + aScript.version;
+  msg += "' " + this.bundle.getString("statusbar.installed");
+  tools.Scriptish_notification(msg);
 };
 
 Scriptish_BrowserUI.installMenuItemClicked = function() {
