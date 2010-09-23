@@ -37,6 +37,6 @@ window.addEventListener("unload", function() {
   var scripts = config.scripts;
 
   for (var i = scripts.length - 1; i >= 0; i--) {
-    if (scripts[i].needsUninstall) config.uninstall(scripts[i]);
+    if (scripts[i].needsUninstall) config.uninstall(i);
   }
 }, false);

@@ -124,7 +124,9 @@ Script.prototype = {
         !this._excludeRegExps.some(testI);
   },
 
-  _changed: function(event, data) { this._config._changed(this, event, data); },
+  _changed: function(aEvt, aData, aDontChg) {
+    this._config._changed(this, aEvt, aData, aDontChg);
+  },
 
   get id() {
     if (!this._id) this.id = this.name + "@" + this.namespace;
@@ -257,7 +259,7 @@ Script.prototype = {
     return false;
   },
 
-  updateFromNewScript: function(newScript) {
+  updateFromNewScript: function(newScript, aDL) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
@@ -279,32 +281,40 @@ Script.prototype = {
     this._noframes = newScript._noframes;
     this._version = newScript._version;
 
-    var dependhash = tools.Scriptish_sha1(newScript._rawMeta);
-    if (dependhash != this._dependhash && !newScript._dependFail) {
-      Cu.import("resource://scriptish/script/scriptdownloader.js", tools);
-
-      this._dependhash = dependhash;
+    if (aDL) {
       this._icon = newScript._icon;
       this._requires = newScript._requires;
       this._resources = newScript._resources;
+    } else {
+      var dependhash = tools.Scriptish_sha1(newScript._rawMeta);
+      if (dependhash != this._dependhash && !newScript._dependFail) {
+        Cu.import("resource://scriptish/script/scriptdownloader.js", tools);
 
-      // Get rid of old dependencies.
-      var dirFiles = this._basedirFile.directoryEntries;
-      while (dirFiles.hasMoreElements()) {
-        var nextFile = dirFiles.getNext()
-            .QueryInterface(Ci.nsIFile);
-        if (!nextFile.equals(this._file)) nextFile.remove(true);
+        this._dependhash = dependhash;
+        this._icon = newScript._icon;
+        this._requires = newScript._requires;
+        this._resources = newScript._resources;
+
+        // Get rid of old dependencies.
+        var dirFiles = this._basedirFile.directoryEntries;
+        while (dirFiles.hasMoreElements()) {
+          var nextFile = dirFiles.getNext()
+              .QueryInterface(Ci.nsIFile);
+          if (!nextFile.equals(this._file)) nextFile.remove(true);
+        }
+
+        // This flag needs to be set now so the scriptDownloader can turn it off
+        this.delayInjection = true;
+
+        // Redownload dependencies.
+        var scriptDownloader = new tools.ScriptDownloader(null, null, null);
+        scriptDownloader.script = this;
+        scriptDownloader.updateScript = true;
+        scriptDownloader.fetchDependencies();
       }
-
-      // This flag needs to be set now so the scriptDownloader can turn it off
-      this.delayInjection = true;
-
-      // Redownload dependencies.
-      var scriptDownloader = new tools.ScriptDownloader(null, null, null);
-      scriptDownloader.script = this;
-      scriptDownloader.updateScript = true;
-      scriptDownloader.fetchDependencies();
     }
+
+    this.updateProcess();
   },
 
   createXMLNode: function(doc) {
@@ -427,7 +437,17 @@ Script.prototype = {
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
     this._modified = this._file.lastModifiedTime;
-    this._metahash = tools.Scriptish_sha1(this._rawMeta);
+    this._dependhash = tools.Scriptish_sha1(this._rawMeta);
+  },
+
+  updateProcess: function() {
+    AddonManagerPrivate.callAddonListeners("onUninstalled", this);
+
+    this._changed("modified", null, true);
+
+    AddonManagerPrivate.callInstallListeners(
+            "onExternalInstall", null, this, null, false);
+    
   }
 };
 

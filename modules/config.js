@@ -148,28 +148,38 @@ Config.prototype = {
     Scriptish_log("> Config.install");
 
     var existingIndex = this._find(script);
-    if (existingIndex > -1) {
-      // save the old script's state
-      script._enabled = this._scripts[existingIndex].enabled;
+    var exists = existingIndex > -1;
+    if (exists) {
+      var oldScript = this._scripts[existingIndex];
 
-      // unintall the old script
-      this.uninstall(this._scripts[existingIndex]);
+      // uninstall the old script's files
+      this.uninstall(existingIndex, true);
+
+      script.installProcess();
+      oldScript.updateFromNewScript(script, true);
+    } else {
+      script.installProcess();
+      this.addScript(script);
+      this._changed(script, "install", null);
+      AddonManagerPrivate.callInstallListeners(
+              "onExternalInstall", null, script, null, false);
     }
-
-    script.installProcess();
-
-    this.addScript(script);
-    this._changed(script, "install", null);
-    AddonManagerPrivate.callInstallListeners(
-        "onExternalInstall", null, script, null, false);
 
     Scriptish_log("< Config.install");
   },
 
-  uninstall: function(script) {
-    var idx = this._find(script);
-    this._scripts.splice(idx, 1);
-    this._changed(script, "uninstall", null);
+  uninstall: function(aIndx, aUpdate) {
+    var script = this._scripts[aIndx];
+    if (!aUpdate) {
+      var idx = this._find(script);
+      this._scripts.splice(aIndx, 1);
+      this._changed(script, "uninstall", null);
+
+      if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
+        // Remove saved preferences
+        Scriptish_prefRoot.remove(script.prefroot);
+      }
+    }
 
     // watch out for cases like basedir="." and basedir="../scriptish_scripts"
     if (!script._basedirFile.equals(this._scriptDir)) {
@@ -178,11 +188,6 @@ Config.prototype = {
     } else {
       // if script is in the root, just remove the file
       script._file.remove(false);
-    }
-
-    if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
-      // Remove saved preferences
-      Scriptish_prefRoot.remove(script.prefroot);
     }
   },
 
@@ -303,7 +308,6 @@ Config.prototype = {
           Scriptish_getContents(script._file),
           tools.Scriptish_uriFromUrl(script._downloadURL), script);
       script.updateFromNewScript(parsedScript);
-      this._changed(script, "modified", null, true);
     }
 
     this._save();
