@@ -1,0 +1,41 @@
+
+#install {
+  margin-bottom:1em;
+}
+
+#itemBox {
+  style="padding:0;
+  overflow:auto;
+  -moz-appearance:textfield;
+  margin:2px 4px;
+}
+
+#script-desc-vbox {
+  background:InfoBackground;
+  color: InfoText;
+  border-bottom:1px black dotted;
+  padding:0.5em;
+  margin:0;
+  margin-bottom:0.5em;
+}
+
+#scriptDescription {
+  margin:0;
+}
+
+#scriptDescription strong {
+  font-size: 1.25em;
+}
+
+#includes, #matches, #excludes {
+  margin:0 0 1em 1em;
+  display:none;
+}
+
+#excludes-desc, #includes-desc, #matches-desc {
+  font-style:italic;
+}
+
+#includes.display, #match.display, #excludes.display {
+  display:inherit;
+}

@@ -93,7 +93,7 @@ var Scriptish_Install = {
   setupIncludes: function(type, box, desc, includes) {
     if (includes.length > 0) {
       desc = document.getElementById(desc);
-      document.getElementById(box).style.display = "";
+      document.getElementById(box).setAttribute("class", "display");
 
       if (type == "match") {
         for (var i = 0; i < includes.length; i++) {
