@@ -1,4 +1,4 @@
-// JSM exported symbols
+
 var EXPORTED_SYMBOLS = ["Config"];
 
 const Cu = Components.utils;
@@ -8,6 +8,7 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
+Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
@@ -20,6 +21,8 @@ function Config(aBaseDir) {
   this._configFile.append("config.xml");
 
   this._initScriptDir();
+
+  this.timer = new Timer();
 
   this._observers = [];
 
@@ -109,34 +112,33 @@ Config.prototype = {
     if (!saveNow) {
       // Reduce work in the case of many changes near to each other in time.
       if (this._saveTimer) {
-        this._saveTimer.cancel(this._saveTimer);
+        this.timer.clearTimeout(this._saveTimer);
       }
 
-      this._saveTimer = Cc["@mozilla.org/timer;1"]
-          .createInstance(Ci.nsITimer);
+      this._saveTimer =
+          this.timer.setTimeout(Scriptish_hitch(this, "_save", true), 250);
 
-      var _save = Scriptish_hitch(this, "_save"); // dereference 'this' for the closure
-      this._saveTimer.initWithCallback(
-          {'notify': function() { _save(true); }}, 250,
-          Ci.nsITimer.TYPE_ONE_SHOT);
       return;
     }
+    delete this["_saveTimer"];
 
     var doc = Cc["@mozilla.org/xmlextras/domparser;1"]
-      .createInstance(Ci.nsIDOMParser)
-      .parseFromString("<UserScriptConfig></UserScriptConfig>", "text/xml");
+        .createInstance(Ci.nsIDOMParser)
+        .parseFromString("<UserScriptConfig></UserScriptConfig>", "text/xml");
 
-    this._scripts.forEach(function(script) {
-      doc.firstChild.appendChild(doc.createTextNode("\n\t"));
-      doc.firstChild.appendChild(script.createXMLNode(doc));
-    });
-
-    doc.firstChild.appendChild(doc.createTextNode("\n"));
+    var scripts = this._scripts;
+    var len = scripts.length;
+    var firstChild = doc.firstChild;
+    for (var i = 0, script; script = scripts[i]; i++) {
+      firstChild.appendChild(doc.createTextNode("\n\t"));
+      firstChild.appendChild(script.createXMLNode(doc));
+    }
+    firstChild.appendChild(doc.createTextNode("\n"));
 
     var configStream = Scriptish_getWriteStream(this._configFile);
     Cc["@mozilla.org/xmlextras/xmlserializer;1"]
-      .createInstance(Ci.nsIDOMSerializer)
-      .serializeToStream(doc, configStream, "utf-8");
+        .createInstance(Ci.nsIDOMSerializer)
+        .serializeToStream(doc, configStream, "utf-8");
     configStream.close();
   },
 
