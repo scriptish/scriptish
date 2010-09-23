@@ -148,7 +148,14 @@ Script.prototype = {
     this._author = aVal;
     this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
   },
-  get contributors() { return this._contributors },
+  get contributors() {
+    var contributors = [];
+    for (var i = this._contributors.length-1; i >= 0; i--) {
+      contributors.unshift(
+          new AddonManagerPrivate.AddonAuthor(this._contributors[i]));
+    }
+    return this._contributors;
+  },
   addContributor: function(aContributor) {
     this._contributors.push(aContributor);
   },
