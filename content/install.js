@@ -9,11 +9,11 @@ var Scriptish_Install = {
     this.htmlNs_ = "http://www.w3.org/1999/xhtml";
 
     this.scriptDownloader_ = window.arguments[0];
-    this.script_ = this.scriptDownloader_.script;
+    var script = this.script_ = this.scriptDownloader_.script;
 
-    this.setupIncludes("match", "matches", "matches-desc", this.script_.matches);
-    this.setupIncludes("include", "includes", "includes-desc", this.script_.includes);
-    this.setupIncludes("include", "excludes", "excludes-desc", this.script_.excludes);
+    this.setupIncludes("match", "matches", "matches-desc", script.matches);
+    this.setupIncludes("include", "includes", "includes-desc", script.includes);
+    this.setupIncludes("include", "excludes", "excludes-desc", script.excludes);
 
     this.dialog_ = document.documentElement;
     this.extraButton_ = this.dialog_.getButton("extra1");
@@ -40,9 +40,9 @@ var Scriptish_Install = {
 
     var desc = document.getElementById("scriptDescription");
     desc.appendChild(document.createElementNS(this.htmlNs_, "strong"));
-    desc.firstChild.appendChild(document.createTextNode(this.script_.name));
+    desc.firstChild.appendChild(document.createTextNode(script.name + " " + script.version));
     desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
-    desc.appendChild(document.createTextNode(this.script_.description));
+    desc.appendChild(document.createTextNode(script.description));
   },
 
   onFocus: function(e) {
