@@ -146,51 +146,28 @@ Config.prototype = {
     return Script.parse(this, source, uri, aUpdateScript);
   },
 
-  install: function(script) {
-    Scriptish_log("> Config.install");
-
-    var existingIndex = this._find(script);
+  install: function(aNewScript) {
+    var existingIndex = this._find(aNewScript);
     var exists = existingIndex > -1;
     if (exists) {
       var oldScript = this._scripts[existingIndex];
-
-      // uninstall the old script's files
-      this.uninstall(existingIndex, true);
-
-      script.installProcess();
-      oldScript.updateFromNewScript(script, true);
+      oldScript.removeFiles();
+      aNewScript.installProcess();
+      oldScript.updateFromNewScript(aNewScript, true);
     } else {
-      script.installProcess();
-      this.addScript(script);
-      this._changed(script, "install", null);
+      aNewScript.installProcess();
+      this.addScript(aNewScript);
+      this._changed(aNewScript, "install", null);
       AddonManagerPrivate.callInstallListeners(
-              "onExternalInstall", null, script, null, false);
+          "onExternalInstall", null, aNewScript, null, false);
     }
-
-    Scriptish_log("< Config.install");
   },
 
-  uninstall: function(aIndx, aUpdate) {
+  uninstall: function(aIndx) {
     var script = this._scripts[aIndx];
-    if (!aUpdate) {
-      var idx = this._find(script);
-      this._scripts.splice(aIndx, 1);
-      this._changed(script, "uninstall", null);
-
-      if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
-        // Remove saved preferences
-        Scriptish_prefRoot.remove(script.prefroot);
-      }
-    }
-
-    // watch out for cases like basedir="." and basedir="../scriptish_scripts"
-    if (!script._basedirFile.equals(this._scriptDir)) {
-      // if script has its own dir, remove the dir + contents
-      script._basedirFile.remove(true);
-    } else {
-      // if script is in the root, just remove the file
-      script._file.remove(false);
-    }
+    var idx = this._find(script);
+    this._scripts.splice(aIndx, 1);
+    script.uninstallProcess();
   },
 
   /**

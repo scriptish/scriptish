@@ -3,6 +3,7 @@ var EXPORTED_SYMBOLS = ["Script"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
@@ -104,10 +105,31 @@ Script.prototype = {
 
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
-
     this.needsUninstall = true;
-
     AddonManagerPrivate.callAddonListeners("onUninstalled", this);
+  },
+  uninstallProcess: function() {
+    this.removeSettings();
+    this.removeFiles();
+    this._changed("uninstall", null);
+  },
+  removeSettings: function() {
+    if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
+        // Remove saved preferences
+        Scriptish_prefRoot.remove(this.prefroot);
+      }
+  },
+  removeFiles: function() {
+    try {
+      // watch out for cases like basedir="." and basedir="../scriptish_scripts"
+      if (!this._basedirFile.equals(this._config._scriptDir)) {
+        // if script has its own dir, remove the dir + contents
+        this._basedirFile.remove(true);
+      } else {
+        // if script is in the root, just remove the file
+        this._file.remove(false);
+      }
+    } catch (e) {}
   },
 
   cancelUninstall: function() {
@@ -259,11 +281,20 @@ Script.prototype = {
   },
 
   isModified: function() {
+    if (!this.fileExists()) return false;
     if (this._modified != this._file.lastModifiedTime) {
       this._modified = this._file.lastModifiedTime;
       return true;
     }
     return false;
+  },
+
+  fileExists: function() {
+    try {
+      return this._basedirFile.exists() || this._file.exists();
+    } catch (e) {
+      return false;
+    }
   },
 
   updateFromNewScript: function(newScript, aDL) {
@@ -638,9 +669,14 @@ Script.load = function load(aConfig, aNode) {
   script._homepageURL = aNode.getAttribute("homepageURL") || null;
   script._jsversion = aNode.getAttribute("jsversion") || null;
 
-  if (!aNode.getAttribute("modified")
-      || !aNode.getAttribute("dependhash")
-      || !aNode.getAttribute("version")) {
+  if (!script.fileExists()) {
+    script.uninstallProcess();
+    return true;
+  }
+
+  if (!aNode.hasAttribute("modified")
+      || !aNode.hasAttribute("dependhash")
+      || !aNode.hasAttribute("version")) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
     Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
