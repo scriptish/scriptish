@@ -200,14 +200,12 @@ ScriptishService.prototype = {
       var requires = [];
       var offsets = [];
       var offset = 0;
+      var reqContents;
 
-      script.requires.forEach(function(req){
-        var contents = req.textContent;
-        var lineCount = contents.split("\n").length;
-        requires.push(contents);
-        offset += lineCount;
-        offsets.push(offset);
-      });
+      for (var j = 0; j < script.requires.length; j++) {
+        requires.push(reqContents = script.requires[j].textContent);
+        offsets.push(offset += reqContents.split("\n").length)
+      }
       script.offsets = offsets;
 
       var scriptSrc = "\n" + // error line-number calculations depend on these
