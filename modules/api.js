@@ -115,14 +115,21 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
     return getStorage().listValues.apply(getStorage(), arguments);
   }
 
+  this.GM_setClipboard = function GM_setClipboard() {
+    if (!GM_apiLeakCheck("GM_setClipboard")) return undefined;
+    var tools = {};
+    Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
+    tools.GM_setClipboard.apply(null, arguments);
+  }
+
   this.GM_getResourceURL = function GM_getResourceURL() {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return undefined;
     return getResources().getResourceURL.apply(getResources(), arguments)
-  };
+  }
   this.GM_getResourceText = function GM_getResourceText() {
     if (!GM_apiLeakCheck("GM_getResourceText")) return undefined;
     return getResources().getResourceText.apply(getResources(), arguments)
-  };
+  }
 
   this.GM_openInTab = function GM_openInTab(aURL) {
     if (!GM_apiLeakCheck("GM_openInTab")) return undefined;

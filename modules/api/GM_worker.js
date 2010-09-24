@@ -1,5 +1,4 @@
 
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_worker"];
 
 const Cc = Components.classes;
