@@ -59,7 +59,7 @@
   <!-- STATUS BAR -->
   <statusbar id="status-bar">
     <!-- NOTE: Local to statusbar tag scope -->
-    <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
+    <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish.properties" />
 
     <statusbarpanel id="scriptish-status" context="_child">
       <image id="scriptish-status-image"/>
