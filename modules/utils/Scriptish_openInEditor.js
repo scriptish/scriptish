@@ -23,7 +23,7 @@ const Scriptish_openInEditor = function(script, parentWindow) {
   } catch (e) {
     // Something may be wrong with the editor the user selected. Remove so that
     // next time they can pick a different one.
-    Scriptish_alert(Scriptish_stringBundle.GetStringFromName("editor.could_not_launch") + "\n" + e);
+    Scriptish_alert(Scriptish_stringBundle("editor.could_not_launch") + "\n" + e);
     Scriptish_prefRoot.remove("editor");
     throw e;
   }

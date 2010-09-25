@@ -8,6 +8,7 @@ Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 Scriptish_BrowserUI = new Object();
 Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
@@ -51,6 +52,9 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.toolsInstall = $("scriptish-tools-install")
   this.contextItem = $("scriptish-context-menu-viewsource");
   this.bundle = $("scriptish-browser-bundle");
+
+  this.statusEnabledItem.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
+  this.statusEnabledItem.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.accesskey"));
 
   $("scriptish-status").addEventListener("click", function(aEvt) {
     Scriptish_BrowserUIM.onIconClick(aEvt);

@@ -85,10 +85,7 @@
         <menuitem id="scriptish-sb-options"
           accesskey="&menu.options.accesskey;"
           label="&menu.options;"/>
-        <menuitem id="scriptish-sb-enabled-item"
-          accesskey="&statusbar.enabled.accesskey;"
-          label="&statusbar.enabled;"
-          type="checkbox"/>
+        <menuitem id="scriptish-sb-enabled-item" type="checkbox"/>
       </menupopup>
     </statusbarpanel>
   </statusbar>

@@ -38,9 +38,10 @@ const Scriptish_getEditor = function(parentWindow, change) {
     var filePicker = Cc["@mozilla.org/filepicker;1"]
                          .createInstance(nsIFilePicker);
 
-    filePicker.init(parentWindow,
-                    Scriptish_stringBundle.GetStringFromName("editor.prompt"),
-                    nsIFilePicker.modeOpen);
+    filePicker.init(
+        parentWindow,
+        Scriptish_stringBundle("editor.prompt"),
+        nsIFilePicker.modeOpen);
     filePicker.appendFilters(nsIFilePicker.filterApplication);
     filePicker.appendFilters(nsIFilePicker.filterAll);
 
@@ -56,7 +57,7 @@ const Scriptish_getEditor = function(parentWindow, change) {
       Scriptish_prefRoot.setValue("editor", filePicker.file.path);
       return filePicker.file;
     } else {
-      Scriptish_alert(Scriptish_stringBundle.GetStringFromName("editor.please_pick_executable"));
+      Scriptish_alert(Scriptish_stringBundle("editor.please_pick_executable"));
     }
   }
 }
