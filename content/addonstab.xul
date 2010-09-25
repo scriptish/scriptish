@@ -4,7 +4,7 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<script type="application/x-javascript" src="chrome://scriptish/content/addonstab.js" />
+<script type="application/x-javascript" src="chrome://scriptish/content/js/addonstab.js" />
 
 <richlistbox id="categories">
   <richlistitem id="category-userscripts" class="category" name="&userscripts;"

@@ -12,7 +12,7 @@
 
   <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
 
-  <script type="application/x-javascript" src="chrome://scriptish/content/newscript.js" />
+  <script type="application/x-javascript" src="chrome://scriptish/content/js/newscript.js" />
 
   <vbox>
     <label value="&newscript.name;" control="name" />

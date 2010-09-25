@@ -24,7 +24,7 @@
 
   <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
 
-  <script type="application/x-javascript" src="chrome://scriptish/content/install.js" />
+  <script type="application/x-javascript" src="chrome://scriptish/content/js/install.js" />
 
   <vbox id="dialogContentBox" flex="1">
     <description id="heading"/>

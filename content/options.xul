@@ -17,7 +17,7 @@
   persist="screenX screenY"
   onload="Scriptish_onloadOptions()"
 >
-<script type="application/x-javascript" src="chrome://scriptish/content/options.js" />
+<script type="application/x-javascript" src="chrome://scriptish/content/js/options.js" />
 
 <dialogheader title="Scriptish" description="&prefWindow.titleWin;"/>
 
