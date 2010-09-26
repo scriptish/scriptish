@@ -5,7 +5,7 @@ Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 window.addEventListener("load", function() {
   var d = document;
   var $ = function(aID) d.getElementById(aID);
-  var tmpEle;
+  var tmp;
 
   tmp = Scriptish_stringBundle("prefWindow.titleWin");
   $("scriptish-options-dialog").setAttribute("title", "Scriptish - " + tmp);
@@ -18,10 +18,10 @@ window.addEventListener("load", function() {
       .setAttribute("value", Scriptish_stringBundle("options.changeEditor"));
   $("caption-uninstall")
       .setAttribute("label", Scriptish_stringBundle("Uninstall"));
-  tmpEle = $("check-uninstall")
-  tmpEle.setAttribute("label", Scriptish_stringBundle("AlsoUninstallPrefs"));
-  tmpEle.addEventListener("command", Scriptish_setUninstallPrefs, false);
-  tmpEle.checked = Scriptish_prefRoot.getValue("uninstallPreferences");
+  tmp = $("check-uninstall")
+  tmp.setAttribute("label", Scriptish_stringBundle("AlsoUninstallPrefs"));
+  tmp.addEventListener("command", Scriptish_setUninstallPrefs, false);
+  tmp.checked = Scriptish_prefRoot.getValue("uninstallPreferences");
 }, false);
 
 function Scriptish_setUninstallPrefs(checkbox) {
