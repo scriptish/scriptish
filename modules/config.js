@@ -11,6 +11,7 @@ Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 function Config(aBaseDir) {
   this._saveTimer = null;
@@ -274,9 +275,6 @@ Config.prototype = {
   },
 
   updateModifiedScripts: function() {
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
-
     // Find any updated scripts
     var scripts = this.getMatchingScripts(
         function (script) { return script.isModified(); });
@@ -285,7 +283,7 @@ Config.prototype = {
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           Scriptish_getContents(script._file),
-          tools.Scriptish_uriFromUrl(script._downloadURL), script);
+          NetUtil.newURI(script._downloadURL), script);
       script.updateFromNewScript(parsedScript);
     }
 
