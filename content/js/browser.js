@@ -43,7 +43,7 @@ Scriptish_BrowserUI.init = function() {
  */
 Scriptish_BrowserUI.chromeLoad = function(e) {
   var d = document;
-  var $ = function(aID) { return d.getElementById(aID); };
+  var $ = function(aID) d.getElementById(aID);
 
   // get all required DOM elements
   this.tabBrowser = $("content");
