@@ -10,14 +10,13 @@ Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 
-function ScriptDownloader(win, uri, bundle) {
+function ScriptDownloader(win, uri) {
   var tools = {};
   Cu.import("resource://scriptish/third-party/Timer.js", tools);
 
   this._timer = new tools.Timer();
   this.win_ = win;
   this.uri_ = uri;
-  this.bundle_ = bundle;
   this.req_ = null;
   this.script = null;
   this.depQueue_ = [];

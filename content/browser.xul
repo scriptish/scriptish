@@ -1,90 +1,46 @@
 <?xml version="1.0"?>
-<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 <?xml-stylesheet href="chrome://scriptish/skin/browser.css" type="text/css"?>
 
 <overlay id="scriptish-browser-overlay"
-  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="chrome://scriptish/content/js/browser.js" />
 
-
-  <!-- TOOLS MENU -->
   <menupopup id="menu_ToolsPopup">
     <menu id="scriptish_general_menu" insertbefore="javascriptConsole" />
   </menupopup>
   <menu id="scriptish_general_menu"
-    class="menu-iconic"
-    image="chrome://scriptish/skin/icon_small.png"
-    accesskey="&menu.title.accesskey;"
-    label="&menu.title;"
-  >
+      class="menu-iconic"
+      image="chrome://scriptish/skin/icon_small.png">
     <menupopup id="scriptish-tools-menupop">
-      <menuitem id="scriptish-tools-enabled-item"
-        accesskey="&statusbar.enabled.accesskey;"
-        label="&statusbar.enabled;"
-        type="checkbox"/>
+      <menuitem id="scriptish-tools-enabled-item" type="checkbox"/>
       <menuseparator />
-      <menuitem id="scriptish-tools-install"
-        accesskey="&menu.install.accesskey;"
-        label="&menu.install;"
-        hidden="true"/>
-      <menuitem id="scriptish-tools-show-us"
-        accesskey="&menu.manage.accesskey;"
-        label="&menu.manage;"/>
-      <menuitem id="scriptish-tools-new"
-        accesskey="&menu.new.accesskey;"
-        label="&menu.new;"/>
-      <menu id="scriptish-commands-sb2"
-        accesskey="&menu.commands.accesskey;"
-        label="&menu.commands;"
-        disabled="false"
-      >
-        <menupopup />
-      </menu>
+      <menuitem id="scriptish-tools-install" hidden="true"/>
+      <menuitem id="scriptish-tools-show-us"/>
+      <menuitem id="scriptish-tools-new"/>
+      <menu id="scriptish-commands-sb2" disabled="false"><menupopup/></menu>
     </menupopup>
   </menu>
 
-
-  <!-- CONTEXT MENU -->
   <popup id="contentAreaContextMenu">
     <menuitem id="scriptish-context-menu-viewsource"
-      accesskey="&menu.show.accesskey;"
-      label="&menu.show;"
-      class="menuitem-iconic"
-      image="chrome://scriptish/skin/icon_small.png"
-      insertbefore="context-openlink"/>
+        class="menuitem-iconic"
+        image="chrome://scriptish/skin/icon_small.png"
+        insertbefore="context-openlink"/>
     <menuseparator id="scriptish-context-menu-viewsource-sep" insertbefore="context-openlink"/>
   </popup>
 
-
-  <!-- STATUS BAR -->
   <statusbar id="status-bar">
-    <!-- NOTE: Local to statusbar tag scope -->
-    <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish.properties" />
-
     <statusbarpanel id="scriptish-status" context="_child">
       <image id="scriptish-status-image"/>
-
       <menupopup id="scriptish-status-popup">
-        <menuitem id="scriptish-status-no-scripts" label="&statusbar.noscripts;"/>
+        <menuitem id="scriptish-status-no-scripts"/>
         <menuseparator id="scriptish-status-no-scripts-sep"/>
-        <menu id="scriptish-commands-sb"
-          accesskey="&menu.commands.accesskey;"
-          label="&menu.commands;"
-          disabled="false"
-        >
-          <menupopup/>
-        </menu>
+        <menu id="scriptish-commands-sb" disabled="false"><menupopup/></menu>
         <menuseparator/>
-        <menuitem id="scriptish-sb-new-us"
-          accesskey="&menu.new.accesskey;"
-          label="&menu.new;"/>
-        <menuitem id="scriptish-sb-show-us"
-          accesskey="&menu.manage.accesskey;"
-          label="&menu.manage;"/>
+        <menuitem id="scriptish-sb-new-us"/>
+        <menuitem id="scriptish-sb-show-us"/>
         <menuseparator/>
-        <menuitem id="scriptish-sb-options"
-          accesskey="&menu.options.accesskey;"
-          label="&menu.options;"/>
+        <menuitem id="scriptish-sb-options"/>
         <menuitem id="scriptish-sb-enabled-item" type="checkbox"/>
       </menupopup>
     </statusbarpanel>
