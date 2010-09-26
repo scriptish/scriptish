@@ -1,5 +1,3 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 
 const Cu = Components.utils;
@@ -7,6 +5,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/api.js");
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
   this.unsafeContentWin = unsafeContentWin;
@@ -25,12 +24,9 @@ function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
 GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
   Scriptish_log("> GM_xmlhttpRequest.contentStartRequest");
 
-  var tools = {};
-  Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
-
   try {
     // Validate and parse the (possibly relative) given URL.
-    var uri = tools.Scriptish_uriFromUrl(details.url, this.originUrl);
+    var uri = NetUtil.newURI(details.url, null, NetUtil.newURI(this.originUrl));
     var url = uri.spec;
   } catch (e) {
     // A malformed URL won't be parsed properly.

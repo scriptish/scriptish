@@ -8,12 +8,12 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://scriptish/third-party/MatchPattern.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
@@ -69,7 +69,7 @@ Script.prototype = {
   get isActive() { return !this.appDisabled || !this.userDisabled },
   pendingOperations: 0,
   type: "userscript",
-  get sourceURI () { return Scriptish_uriFromUrl(this._downloadURL); },
+  get sourceURI () { return NetUtil.newURI(this._downloadURL); },
   get userDisabled() { return !this._enabled; },
   set userDisabled(val) {
     if (val == this.userDisabled) return val;
@@ -491,8 +491,6 @@ Script.prototype = {
 
 Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
   var tools = {};
-  Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
-
   var script = new Script(aConfig);
 
   if (aURI) script._downloadURL = aURI.spec;
@@ -576,7 +574,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
           continue;
        }
        try {
-          var iconUri = tools.Scriptish_uriFromUrl(value, aURI);
+          var iconUri = NetUtil.newURI(value, null, aURI);
           script.icon._downloadURL = iconUri.spec;
         } catch (e) {
           if (aUpdateScript) {
@@ -588,7 +586,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
         continue;
       case "require":
         try {
-          var reqUri = tools.Scriptish_uriFromUrl(value, aURI);
+          var reqUri = NetUtil.newURI(value, null, aURI);
           var scriptRequire = new ScriptRequire(script);
           scriptRequire._downloadURL = reqUri.spec;
           script._requires.push(scriptRequire);
@@ -618,7 +616,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
           previousResourceNames[resName] = true;
         }
         try {
-          var resUri = tools.Scriptish_uriFromUrl(res[2], aURI);
+          var resUri = NetUtil.newURI(res[2], null, aURI);
           var scriptResource = new ScriptResource(script);
           scriptResource._name = resName;
           scriptResource._downloadURL = resUri.spec;
@@ -679,12 +677,11 @@ Script.load = function load(aConfig, aNode) {
       || !aNode.hasAttribute("version")) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
-    Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
 
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
         aConfig, Scriptish_getContents(script._file), 
-        tools.Scriptish_uriFromUrl(script._downloadURL), script);
+        NetUtil.newURI(script._downloadURL), script);
     script._dependhash = tools.Scriptish_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;

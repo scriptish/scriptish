@@ -9,6 +9,7 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 function ScriptDownloader(win, uri) {
   var tools = {};
@@ -149,10 +150,9 @@ ScriptDownloader.prototype.downloadNextDependency = function(){
         persist.PERSIST_FLAGS_BYPASS_CACHE |
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
 
-      Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
       Cu.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
 
-      var sourceUri = tools.Scriptish_uriFromUrl(dep.urlToDownload);
+      var sourceUri = NetUtil.newURI(dep.urlToDownload);
       var sourceChannel = ioService.newChannelFromURI(sourceUri);
       sourceChannel.notificationCallbacks = new NotificationCallbacks();
 
