@@ -1,33 +1,11 @@
 
 Components.utils.import("resource://scriptish/addonprovider.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-(function() {
-
-function Scriptish_ExtendedStringBundle(aBase) {
-  this.basebundle = aBase;
-  this.strings = {};
-}
-
-Scriptish_ExtendedStringBundle.prototype = {
-  strings: null,
-  basebundle: null,
-
-  GetStringFromName: function(aName) {
-    if (aName in this.strings)
-      return this.strings[aName];
-    return this.basebundle.GetStringFromName(aName);
-  },
-
-  formatStringFromName: function(aName, aArgs, aLength) {
-    return this.basebundle.formatStringFromName(aName, aArgs, aLength);
-  }
-};
-
-var Scriptish_bundle = new Scriptish_ExtendedStringBundle(window.gStrings.ext);
-Scriptish_bundle.strings["header-userscript"] = "User Scripts";
-window.gStrings.ext = Scriptish_bundle;
-
-})();
+window.addEventListener("load", function() {
+  document.getElementById("category-userscripts")
+      .setAttribute("name", Scriptish_stringBundle("userscripts"));
+}, false);
 
 window.addEventListener("unload", function() {
   var tools = {};

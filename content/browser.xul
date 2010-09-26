@@ -26,7 +26,8 @@
         class="menuitem-iconic"
         image="chrome://scriptish/skin/icon_small.png"
         insertbefore="context-openlink"/>
-    <menuseparator id="scriptish-context-menu-viewsource-sep" insertbefore="context-openlink"/>
+    <menuseparator id="scriptish-context-menu-viewsource-sep"
+        insertbefore="context-openlink"/>
   </popup>
 
   <statusbar id="status-bar">
