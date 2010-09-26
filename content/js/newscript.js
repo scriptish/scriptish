@@ -105,6 +105,7 @@ function createScriptSource() {
   script.push("// ==/UserScript==");
 
   var ending = "\n";
+  // TODO: improve
   if (window.navigator.platform.match(/^Win/)) ending = "\r\n";
   script = script.join(ending);
 
