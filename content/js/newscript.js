@@ -1,26 +1,27 @@
-/////////////////////////////// global variables ///////////////////////////////
 
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-var bundle = null;
+var $ = function(aID) document.getElementById(aID);
+
 window.addEventListener("load", function() {
-  // init the global string bundle
-  bundle = document.getElementById("scriptish-browser-bundle");
+  $("scriptish").setAttribute("title", Scriptish_stringBundle("menu.new"));
+  $("label-name").setAttribute("value", Scriptish_stringBundle("newscript.name"));
+  $("label-namespace").setAttribute("value", Scriptish_stringBundle("newscript.namespace"));
+  $("label-description").setAttribute("value", Scriptish_stringBundle("newscript.description"));
+  $("label-includes").setAttribute("value", Scriptish_stringBundle("newscript.includes"));
+  $("label-excludes").setAttribute("value", Scriptish_stringBundle("newscript.excludes"));
+  $("label-includes").setAttribute("value", Scriptish_stringBundle("newscript.includes"));
 
   // load default namespace from pref
-  document.getElementById("namespace").value =
-      Scriptish_prefRoot.getValue("newscript_namespace", "");
+  $("namespace").value = Scriptish_prefRoot.getValue("newscript_namespace", "");
 
   // default the includes with the current page's url
   var content = window.opener.document.getElementById("content");
-  if (content) {
-    document.getElementById("includes").value =
-      content.selectedBrowser.contentWindow.location.href;
-  }
+  if (content)
+    $("includes").value = content.selectedBrowser.contentWindow.location.href;
 }, false);
-
-////////////////////////////////// functions ///////////////////////////////////
 
 function doInstall() {
   var tools = {};
@@ -44,7 +45,7 @@ function doInstall() {
 
   // make sure entered details will not ruin an existing file
   if (config.installIsUpdate(script)) {
-    var overwrite = confirm(bundle.getString("newscript.exists"));
+    var overwrite = confirm(Scriptish_stringBundle("newscript.exists"));
     if (!overwrite) return false;
   }
 
@@ -67,39 +68,37 @@ function doInstall() {
 function createScriptSource() {
   var script = ["// ==UserScript=="];
 
-  var name = document.getElementById("name").value;
-  if ("" == name) {
-    alert(bundle.getString("newscript.noname"));
+  var tmp = $("name").value;
+  if ("" == tmp) {
+    alert(Scriptish_stringBundle("newscript.noname"));
     return false;
   } else {
-    script.push("// @name           " + name);
+    script.push("// @name           " + tmp);
   }
 
-  var namespace = document.getElementById("namespace").value;
-  if ("" == namespace) {
-    alert(bundle.getString("newscript.nonamespace"));
+  tmp = $("namespace").value;
+  if ("" == tmp) {
+    alert(Scriptish_stringBundle("newscript.nonamespace"));
     return false;
   } else {
-    script.push("// @namespace      " + namespace);
+    script.push("// @namespace      " + tmp);
   }
 
-  var descr = document.getElementById("descr").value;
-  if ("" != descr) {
-    script.push("// @description    " + descr);
+  tmp = $("descr").value;
+  if ("" != tmp) {
+    script.push("// @description    " + tmp);
   }
 
-  var includes = document.getElementById("includes").value;
-  if ("" != includes) {
-    includes = includes.match(/.+/g);
-    includes = "// @include        " + includes.join("\n// @include        ");
-    script.push(includes);
+  tmp = $("includes").value;
+  if ("" != tmp) {
+    tmp = "// @include        " + tmp.match(/.+/g).join("\n// @include        ");
+    script.push(tmp);
   }
 
-  var excludes = document.getElementById("excludes").value;
-  if ("" != excludes) {
-    excludes = excludes.match(/.+/g);
-    excludes = "// @exclude        " + excludes.join("\n// @exclude        ");
-    script.push(excludes);
+  tmp = $("excludes").value;
+  if ("" != tmp) {
+    tmp = "// @exclude        " + tmp.match(/.+/g).join("\n// @exclude        ");
+    script.push(tmp);
   }
 
   script.push("// ==/UserScript==");
@@ -107,7 +106,5 @@ function createScriptSource() {
   var ending = "\n";
   // TODO: improve
   if (window.navigator.platform.match(/^Win/)) ending = "\r\n";
-  script = script.join(ending);
-
-  return script;
+  return script.join(ending);
 }
