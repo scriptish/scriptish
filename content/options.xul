@@ -1,40 +1,24 @@
 <?xml version="1.0"?>
-
-<!DOCTYPE prefwindow [
-<!ENTITY % scriptishDTD SYSTEM "chrome://scriptish/locale/scriptish.dtd">
-<!ENTITY % preferencesDTD SYSTEM "chrome://browser/locale/preferences/preferences.dtd">
-%scriptishDTD;
-%preferencesDTD;
-]>
-
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
-<dialog
-  title="Scriptish - &prefWindow.titleWin;"
-  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  buttons="accept"
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    buttons="accept"
+    id="scriptish-options-dialog"
+    persist="screenX screenY">
+  <script type="application/x-javascript" src="chrome://scriptish/content/js/options.js"/>
 
-  id="scriptish-options-dialog"
-  persist="screenX screenY"
-  onload="Scriptish_onloadOptions()"
->
-<script type="application/x-javascript" src="chrome://scriptish/content/js/options.js" />
+  <dialogheader id="scriptish-header" title="Scriptish"/>
 
-<dialogheader title="Scriptish" description="&prefWindow.titleWin;"/>
+  <vbox>
+    <groupbox>
+      <caption id="caption-editor"/>
+      <button id="btn-editor">
+        <label id="label-editor"/>
+      </button>
+    </groupbox>
 
-<vbox>
-  <groupbox>
-    <caption label="&options.editor;" />
-    <button oncommand="Scriptish_getEditor()">
-      <label>&options.changeEditor;</label>
-    </button>
-  </groupbox>
-
-  <groupbox>
-    <caption label="&Uninstall;" />
-    <checkbox id="check-uninstall"
-      label="&AlsoUninstallPrefs;" 
-      oncommand="Scriptish_setUninstallPrefs(this)" />
-  </groupbox>
-</vbox>
-
+    <groupbox>
+      <caption id="caption-uninstall"/>
+      <checkbox id="check-uninstall"/>
+    </groupbox>
+  </vbox>
 </dialog>

@@ -6,23 +6,20 @@
 
 <!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 
-<dialog
-  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  xmlns:html="http://www.w3.org/1999/xhtml"
-
-  id="scriptish"
-  title="&install.title;"
-  style="width: 32em; height:32em;"
-  onload="Scriptish_Install.init();"
-  ondialogaccept="return Scriptish_Install.onOK();"
-  ondialogcancel="return Scriptish_Install.onCancel();"
-  ondialogextra1="return Scriptish_Install.onShowSource();"
-  buttons="accept,cancel,extra1"
-  buttonlabelaccept="&install.installbutton;"
-  buttonlabelextra1="&install.showscriptsource;"
-  defaultButton="accept">
-
-  <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish-browser.properties" />
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    id="scriptish"
+    title="&install.title;"
+    style="width: 32em; height:32em;"
+    onload="Scriptish_Install.init();"
+    ondialogaccept="return Scriptish_Install.onOK();"
+    ondialogcancel="return Scriptish_Install.onCancel();"
+    ondialogextra1="return Scriptish_Install.onShowSource();"
+    buttons="accept,cancel,extra1"
+    buttonlabelaccept="&install.installbutton;"
+    buttonlabelextra1="&install.showscriptsource;"
+    defaultButton="accept">
+  <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish.properties" />
 
   <script type="application/x-javascript" src="chrome://scriptish/content/js/install.js" />
 
@@ -51,5 +48,4 @@
     <description style="margin-bottom:1em" class="warning"
     >&install.warning2;</description>
   </vbox>
-
 </dialog>

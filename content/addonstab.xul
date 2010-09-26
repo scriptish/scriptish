@@ -1,15 +1,13 @@
 <?xml version="1.0"?>
-<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/scriptish.dtd">
 <?xml-stylesheet href="chrome://scriptish/skin/addonstab.css" type="text/css"?>
-
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/x-javascript" src="chrome://scriptish/content/js/addonstab.js" />
 
-<script type="application/x-javascript" src="chrome://scriptish/content/js/addonstab.js" />
-
-<richlistbox id="categories">
-  <richlistitem id="category-userscripts" class="category" name="&userscripts;"
-    insertafter="category-plugins" value="addons://list/userscript">
-  </richlistitem>
-</richlistbox>
-
+  <richlistbox id="categories">
+    <richlistitem id="category-userscripts"
+        class="category"
+        insertafter="category-plugins"
+        value="addons://list/userscript">
+    </richlistitem>
+  </richlistbox>
 </overlay>

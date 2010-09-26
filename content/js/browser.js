@@ -8,6 +8,7 @@ Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 Scriptish_BrowserUI = new Object();
 Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
@@ -42,7 +43,7 @@ Scriptish_BrowserUI.init = function() {
  */
 Scriptish_BrowserUI.chromeLoad = function(e) {
   var d = document;
-  var $ = function(aID) { return d.getElementById(aID); };
+  var $ = function(aID) d.getElementById(aID);
 
   // get all required DOM elements
   this.tabBrowser = $("content");
@@ -50,7 +51,17 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
   this.toolsInstall = $("scriptish-tools-install")
   this.contextItem = $("scriptish-context-menu-viewsource");
-  this.bundle = $("scriptish-browser-bundle");
+
+  var tmEle = $('scriptish_general_menu');
+  tmEle.setAttribute("label", Scriptish_stringBundle("menu.title"));
+  tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.title.accesskey"));
+
+  var tmStatusEle = $('scriptish-tools-enabled-item');
+  tmStatusEle.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
+  tmStatusEle.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.accesskey"));
+
+  this.toolsInstall.setAttribute("label", Scriptish_stringBundle("menu.install"));
+  this.toolsInstall.setAttribute("accesskey", Scriptish_stringBundle("menu.install.accesskey"));
 
   $("scriptish-status").addEventListener("click", function(aEvt) {
     Scriptish_BrowserUIM.onIconClick(aEvt);
@@ -67,25 +78,57 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
     Scriptish_BrowserUI.installMenuItemClicked(aEvt);
   }, false);
 
-  var toggle = function() { Scriptish_BrowserUIM.onToggleStatus() };
-  this.statusEnabledItem.addEventListener("command", toggle, false);
-  this.toolsMenuEnabledItem.addEventListener("command", toggle, false);
+  var toggleFunc = function() { Scriptish_BrowserUIM.onToggleStatus() };
+
+  this.statusEnabledItem.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
+  this.statusEnabledItem.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.accesskey"));
+  this.statusEnabledItem.addEventListener("command", toggleFunc, false);
+
+  this.toolsMenuEnabledItem.addEventListener("command", toggleFunc, false);
+
+  $('scriptish-status-no-scripts').setAttribute(
+      "label", Scriptish_stringBundle("statusbar.noscripts"));
 
   var stopEvt = function(aEvt) { aEvt.stopPropagation() };
-  $("scriptish-commands-sb").addEventListener("popupshowing", stopEvt, false);
-  $("scriptish-commands-sb2").addEventListener("popupshowing", stopEvt, false);
+  var sbCmdsEle = $("scriptish-commands-sb");
+  sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
+  sbCmdsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.commands.accesskey"));
+  sbCmdsEle.addEventListener("popupshowing", stopEvt, false);
+  var tmCmdsEle = $("scriptish-commands-sb2");
+  tmCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
+  tmCmdsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.commands.accesskey"));
+  tmCmdsEle.addEventListener("popupshowing", stopEvt, false);
 
-  var newUserScript = function(){ Scriptish_BrowserUIM.newUserScript() };
-  $("scriptish-tools-new").addEventListener("command", newUserScript, false);
-  $("scriptish-sb-new-us").addEventListener("command", newUserScript, false);
+  var newUSFunc = function(){ Scriptish_BrowserUIM.newUserScript() };
+  var tmNewUSEle = $("scriptish-tools-new");
+  tmNewUSEle.setAttribute("label", Scriptish_stringBundle("menu.new"));
+  tmNewUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.new.accesskey"));
+  tmNewUSEle.addEventListener("command", newUSFunc, false);
 
-  var showUserScripts = function(){ Scriptish_BrowserUIM.showUserscriptList() };
-  $("scriptish-tools-show-us").addEventListener("command", showUserScripts, false);
-  $("scriptish-sb-show-us").addEventListener("command", showUserScripts, false);
+  var sbNewUSEle = $("scriptish-sb-new-us");
+  sbNewUSEle.setAttribute("label", Scriptish_stringBundle("menu.new"));
+  sbNewUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.new.accesskey"));
+  sbNewUSEle.addEventListener("command", newUSFunc, false);
 
-  var showOptions = function(){ Scriptish_BrowserUIM.openOptionsWin() };
-  $("scriptish-sb-options").addEventListener("command", showOptions, false);
+  var showUserScriptsFunc = function(){ Scriptish_BrowserUIM.showUserscriptList() };
+  var tmShowUSEle = $("scriptish-tools-show-us");
+  tmShowUSEle.setAttribute("label", Scriptish_stringBundle("menu.manage"));
+  tmShowUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.manage.accesskey"));
+  tmShowUSEle.addEventListener("command", showUserScriptsFunc, false);
 
+  var sbShowUSEle = $("scriptish-sb-show-us");
+  sbShowUSEle.setAttribute("label", Scriptish_stringBundle("menu.manage"));
+  sbShowUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.manage.accesskey"));
+  sbShowUSEle.addEventListener("command", showUserScriptsFunc, false);
+
+  var showOptionsEle = $("scriptish-sb-options");
+  var showOptionsFunc = function(){ Scriptish_BrowserUIM.openOptionsWin() };
+  showOptionsEle.setAttribute("label", Scriptish_stringBundle("menu.options"));
+  showOptionsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.options.accesskey"));
+  showOptionsEle.addEventListener("command", showOptionsFunc, false);
+
+  this.contextItem.setAttribute("label", Scriptish_stringBundle("menu.show"));
+  this.contextItem.setAttribute("accesskey", Scriptish_stringBundle("menu.show.accesskey"));
   this.contextItem.addEventListener("command", function(aEvt) {
     Scriptish_BrowserUI.viewContextItemClicked(aEvt);
   }, false)
@@ -196,7 +239,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
  * a user selects "show script source" in the install dialog.
  */
 Scriptish_BrowserUI.showInstallBanner = function(browser) {
-  var greeting = this.bundle.getString("greeting.msg");
+  var greeting = Scriptish_stringBundle("greeting.msg");
 
   var notificationBox = this.tabBrowser.getNotificationBox(browser);
 
@@ -215,8 +258,8 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
     "chrome://scriptish/skin/icon_small.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
     [{
-      label: this.bundle.getString("greeting.btn"),
-      accessKey: this.bundle.getString("greeting.btnAccess"),
+      label: Scriptish_stringBundle("greeting.btn"),
+      accessKey: Scriptish_stringBundle("greeting.btnAccess"),
       popup: null,
       callback: Scriptish_hitch(this, "installCurrentScript")
     }]
@@ -236,7 +279,7 @@ Scriptish_BrowserUI.startInstallScript = function(uri, timer) {
   var tools = {};
   Components.utils.import("resource://scriptish/script/scriptdownloader.js", tools);
 
-  this.scriptDownloader_ = new tools.ScriptDownloader(window, uri, this.bundle);
+  this.scriptDownloader_ = new tools.ScriptDownloader(window, uri);
   this.scriptDownloader_.startInstall();
 };
 
@@ -533,7 +576,7 @@ Scriptish_BrowserUI.showHorrayMessage = function(aScript) {
   Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
   var msg = "'" + aScript.name;
   if (aScript.version) msg += " " + aScript.version;
-  msg += "' " + this.bundle.getString("statusbar.installed");
+  msg += "' " + Scriptish_stringBundle("statusbar.installed");
   tools.Scriptish_notification(msg);
 };
 
@@ -547,7 +590,7 @@ Scriptish_BrowserUI.viewContextItemClicked = function() {
 
   var uri = Scriptish_BrowserUI.getUserScriptLinkUnderPointer();
 
-  this.scriptDownloader_ = new tools.ScriptDownloader(window, uri, this.bundle);
+  this.scriptDownloader_ = new tools.ScriptDownloader(window, uri);
   this.scriptDownloader_.startViewScript();
 };
 
