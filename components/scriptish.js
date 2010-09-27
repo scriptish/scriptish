@@ -8,6 +8,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 XPCOMUtils.defineLazyServiceGetter(
     this, "appSvc", "@mozilla.org/appshell/appShellService;1",
@@ -116,9 +117,7 @@ ScriptishService.prototype = {
         .getService(Ci.nsIFileProtocolHandler);
 
     var file = fph.getFileFromURLSpec(uri.spec);
-    var tmpDir = Cc["@mozilla.org/file/directory_service;1"]
-        .getService(Ci.nsIProperties)
-        .get("TmpD", Ci.nsILocalFile);
+    var tmpDir = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
 
     return file.parent.equals(tmpDir) && file.leafName != "newscript.user.js";
   },
@@ -306,8 +305,7 @@ ScriptishService.prototype = {
 
       if (1.2 == fbVersion) {
         var tools = {};
-        Cc["@mozilla.org/moz/jssubscript-loader;1"]
-            .getService(Ci.mozIJSSubScriptLoader)
+        Services.scriptloader
             .loadSubScript("chrome://global/content/XPCNativeWrapper.js", tools);
         var safeWin = new tools.XPCNativeWrapper(unsafeContentWin);
 
@@ -354,9 +352,7 @@ ScriptishService.prototype = {
     // check if this is the first launch
     if ("0.0" == initialized) {
       // find an open window.
-      var chromeWin = Cc['@mozilla.org/appshell/window-mediator;1']
-          .getService(Ci.nsIWindowMediator)
-          .getMostRecentWindow("navigator:browser");
+      var chromeWin = Services.wm.getMostRecentWindow("navigator:browser");
 
       // if we found it, use it to open a welcome tab
       if (chromeWin.gBrowser) {
