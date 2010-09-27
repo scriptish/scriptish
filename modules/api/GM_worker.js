@@ -1,15 +1,11 @@
-
 var EXPORTED_SYMBOLS = ["GM_worker"];
 
-const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
-const threadManager = Cc["@mozilla.org/thread-manager;1"]
-    .getService(Ci.nsIThreadManager);
+Cu.import("resource://gre/modules/Services.jsm");
 
 const gTimer = new Timer();
 
@@ -56,7 +52,7 @@ function fake_worker(aBoss, aJSContent, aJSPath, aPgURL) {
   this.jsPath = aJSPath;
   this.sandbox = Cu.Sandbox(aPgURL);
   this.timer = new Timer();
-  this.thread = threadManager.newThread(0);
+  this.thread = Services.tm.newThread(0);
 
   for (let [k, v] in Iterator(this._functions)) {
     this.sandbox.importFunction(v, k);
@@ -64,13 +60,13 @@ function fake_worker(aBoss, aJSContent, aJSPath, aPgURL) {
 
   this.sandbox.importFunction(function postMessage(aMsg) {
     var msg = (typeof aMsg != "object") ? (aMsg + "") : JSON.stringify(aMsg);
-    threadManager.mainThread.dispatch(
+    Services.tm.mainThread.dispatch(
         new Dispatcher(msg, self, "_onmessage"),
         Ci.nsIThread.DISPATCH_NORMAL);
   }, "postMessage")
 
   this.sandbox.importFunction(function close() {
-    threadManager.mainThread.dispatch(
+    Services.tm.mainThread.dispatch(
         new Dispatcher(null, self, "_terminate"),
         Ci.nsIThread.DISPATCH_SYNC);
   }, "close")
@@ -91,7 +87,7 @@ fake_worker.prototype = {
     try {
       aFunc();
     } catch (e) {
-      threadManager.mainThread.dispatch(
+      Services.tm.mainThread.dispatch(
           new Dispatcher(e, this, "_onerror"),
           Ci.nsIThread.DISPATCH_NORMAL);
     }
@@ -166,7 +162,7 @@ function trapErrors(aFunc) {
     try {
       aFunc.apply(this, arguments);
     } catch (e) {
-      threadManager.mainThread.dispatch(
+      Services.tm.mainThread.dispatch(
           new Dispatcher(e, this, "_onerror"),
           Ci.nsIThread.DISPATCH_NORMAL);
     }

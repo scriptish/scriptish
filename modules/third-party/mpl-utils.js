@@ -31,12 +31,11 @@ Contributor(s):
   Mike Medley <medleymind@gmail.com>
   Erik Vold <erikvvold@gmail.com>
 ***** END LICENSE BLOCK ****/
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_openFolder"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
                             .getService(Ci.nsIExternalProtocolService);
@@ -54,7 +53,7 @@ function Scriptish_openFolder(aFile) {
       if (fParent.exists()) fParent.launch();
     } catch (e) {
       // If launch also fails let the OS handler try to open the parent.
-      var uri = ioService.newFileURI(fParent);
+      var uri = Services.io.newFileURI(fParent);
 
       protocolService.loadUrl(uri);
     }

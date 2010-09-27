@@ -11,7 +11,6 @@ Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 Scriptish_BrowserUI = new Object();
-Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
 
 // nsISupports.QueryInterface
 Scriptish_BrowserUI.QueryInterface = function(aIID) {
@@ -44,6 +43,8 @@ Scriptish_BrowserUI.init = function() {
 Scriptish_BrowserUI.chromeLoad = function(e) {
   var d = document;
   var $ = function(aID) d.getElementById(aID);
+
+  Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
 
   // get all required DOM elements
   this.tabBrowser = $("content");
@@ -149,18 +150,13 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
   // hook various events
   $("appcontent").addEventListener(
-    "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
+      "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
   $("sidebar").addEventListener(
-    "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
+      "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
   $("contentAreaContextMenu").addEventListener(
-    "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
+      "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
   $("menu_ToolsPopup").addEventListener(
-    "popupshowing", Scriptish_hitch(this, "toolsMenuShowing"), false);
-
-  // listen for clicks on the install bar
-  Components.classes["@mozilla.org/observer-service;1"]
-            .getService(Components.interfaces.nsIObserverService)
-            .addObserver(this, "install-userscript", true);
+      "popupshowing", Scriptish_hitch(this, "toolsMenuShowing"), false);
 
   // we use this to determine if we are the active window sometimes
   this.winWat = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]

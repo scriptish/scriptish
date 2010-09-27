@@ -14,6 +14,7 @@ Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://scriptish/third-party/MatchPattern.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/NetUtil.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
@@ -277,7 +278,7 @@ Script.prototype = {
   setDownloadedFile: function(file) { this._tempFile = file; },
 
   get previewURL() {
-    return ioService.newFileURI(this._tempFile).spec;
+    return Services.io.newFileURI(this._tempFile).spec;
   },
 
   isModified: function() {
