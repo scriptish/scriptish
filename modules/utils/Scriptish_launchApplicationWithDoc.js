@@ -1,16 +1,14 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_launchApplicationWithDoc"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_os.js");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const Scriptish_launchApplicationWithDoc = function(appFile, docFile) {
   var args = [docFile.path];
 
   // For the mac, wrap with a call to "open".
-  if ("Darwin" == Scriptish_os) {
+  if ("Darwin" == Services.appinfo.OS) {
     args = ["-a", appFile.path, docFile.path];
 
     appFile = Cc["@mozilla.org/file/local;1"]
