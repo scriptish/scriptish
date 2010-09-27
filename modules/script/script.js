@@ -1,4 +1,3 @@
-
 var EXPORTED_SYMBOLS = ["Script"];
 
 const Cu = Components.utils;
@@ -537,6 +536,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
       case "version":
         script["_" + header] = value;
         continue;
+      case "homepage":
       case "homepageurl":
         script._homepageURL = value;
         continue;
