@@ -1,16 +1,14 @@
 
-#install {
-  margin-bottom:1em;
-}
+#install{margin-bottom:1em;}
 
-#itemBox {
+#itemBox{
   style="padding:0;
   overflow:auto;
   -moz-appearance:textfield;
   margin:2px 4px;
 }
 
-#script-desc-vbox {
+#script-desc-vbox{
   background:InfoBackground;
   color: InfoText;
   border-bottom:1px black dotted;
@@ -19,23 +17,15 @@
   margin-bottom:0.5em;
 }
 
-#scriptDescription {
-  margin:0;
-}
+#scriptDescription{margin:0;}
 
-#scriptDescription strong {
-  font-size: 1.25em;
-}
+#scriptDescription strong{font-size: 1.25em;}
 
-#includes, #matches, #excludes {
+#itemBox vbox:not(#script-desc-vbox){
   margin:0 0 1em 1em;
   display:none;
 }
 
-#excludes-desc, #includes-desc, #matches-desc {
-  font-style:italic;
-}
+#excludes-desc, #includes-desc, #matches-desc{font-style:italic;}
 
-#includes.display, #match.display, #excludes.display {
-  display:inherit;
-}
+#itemBox vbox.display:not(#script-desc-vbox){display:inherit;}

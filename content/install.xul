@@ -3,49 +3,35 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://mozapps/skin/xpinstall/xpinstallConfirm.css" type="text/css"?>
 <?xml-stylesheet href="chrome://scriptish/skin/install.css" type="text/css"?>
-
-<!DOCTYPE overlay SYSTEM "chrome://scriptish/locale/scriptish.dtd">
-
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     xmlns:html="http://www.w3.org/1999/xhtml"
     id="scriptish"
-    title="&install.title;"
     style="width: 32em; height:32em;"
-    onload="Scriptish_Install.init();"
-    ondialogaccept="return Scriptish_Install.onOK();"
-    ondialogcancel="return Scriptish_Install.onCancel();"
-    ondialogextra1="return Scriptish_Install.onShowSource();"
     buttons="accept,cancel,extra1"
-    buttonlabelaccept="&install.installbutton;"
-    buttonlabelextra1="&install.showscriptsource;"
-    defaultButton="accept">
-  <stringbundle id="scriptish-browser-bundle" src="chrome://scriptish/locale/scriptish.properties" />
-
+    defaultButton="cancel">
   <script type="application/x-javascript" src="chrome://scriptish/content/js/install.js" />
 
   <vbox id="dialogContentBox" flex="1">
-    <description id="heading"/>
     <vbox id="itemBox" flex="1">
       <vbox id="script-desc-vbox">
         <description id="scriptDescription"/>
       </vbox>
       <vbox id="matches">
-        <label value="&install.matches;" />
+        <label id="matches-label"/>
         <description id="matches-desc"/>
       </vbox>
       <vbox id="includes">
-        <label value="&install.runson;" />
+        <label id="includes-label"/>
         <description id="includes-desc"/>
       </vbox>
       <vbox id="excludes">
-        <label value="&install.butnoton;" />
+        <label id="excludes-label"/>
         <description id="excludes-desc"/>
       </vbox>
-      <spacer flex="1" />
+      <spacer flex="1"/>
     </vbox>
 
-    <description style="margin-top:1em">&install.warning1;</description>
-    <description style="margin-bottom:1em" class="warning"
-    >&install.warning2;</description>
+    <description id="warning1" style="margin-top:1em"/>
+    <description id="warning2" style="margin-bottom:1em" class="warning"/>
   </vbox>
 </dialog>
