@@ -10,6 +10,7 @@ Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://gre/modules/NetUtil.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 function ScriptDownloader(win, uri) {
   var tools = {};
@@ -153,7 +154,7 @@ ScriptDownloader.prototype.downloadNextDependency = function(){
       Cu.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
 
       var sourceUri = NetUtil.newURI(dep.urlToDownload);
-      var sourceChannel = ioService.newChannelFromURI(sourceUri);
+      var sourceChannel = Services.io.newChannelFromURI(sourceUri);
       sourceChannel.notificationCallbacks = new NotificationCallbacks();
 
       var file = tools.Scriptish_getTempFile();
@@ -214,7 +215,7 @@ function(dep, file, channel) {
 };
 
 ScriptDownloader.prototype.checkDependencyURL = function(url) {
-  var scheme = ioService.extractScheme(url);
+  var scheme = Services.io.extractScheme(url);
 
   switch (scheme) {
     case "http":
@@ -222,7 +223,7 @@ ScriptDownloader.prototype.checkDependencyURL = function(url) {
     case "ftp":
         return true;
     case "file":
-        var scriptScheme = ioService.extractScheme(this.uri_.spec);
+        var scriptScheme = Services.io.extractScheme(this.uri_.spec);
         return (scriptScheme == "file")
     default:
       return false;
