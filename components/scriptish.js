@@ -177,8 +177,6 @@ ScriptishService.prototype = {
           chromeWin,
           gmBrowser);
 
-      sandbox.window = wrappedContentWin;
-      sandbox.document = sandbox.window.document;
       sandbox.unsafeWindow = unsafeContentWin;
 
       // hack XPathResult since that is so commonly used
