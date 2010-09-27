@@ -1,8 +1,11 @@
-
 Components.utils.import("resource://scriptish/logging.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 var Scriptish_Install = {
   init: function() {
+    this.doc = document;
+    var $ = function(aID) document.getElementById(aID);
+
     var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
                               .getService(Components.interfaces.nsIIOService);
 
@@ -16,78 +19,35 @@ var Scriptish_Install = {
     this.setupIncludes("include", "excludes", "excludes-desc", script.excludes);
 
     this.dialog_ = document.documentElement;
+    this.dialog_.setAttribute("title", Scriptish_stringBundle("install.title"));
+
     this.extraButton_ = this.dialog_.getButton("extra1");
     this.extraButton_.setAttribute("type", "checkbox");
+    this.extraButton_.setAttribute("label",
+        Scriptish_stringBundle("install.showscriptsource"));
+    this.extraButton_.addEventListener(
+            "command", function() { Scriptish_Install.onShowSource() }, false);
 
     this.acceptButton_ = this.dialog_.getButton("accept");
-    this.acceptButton_.baseLabel = this.acceptButton_.label;
+    this.acceptButton_.setAttribute("label",
+        Scriptish_stringBundle("install.installbutton"));
+    this.acceptButton_.addEventListener(
+        "command", function() { Scriptish_Install.onOK() }, false);
 
-    this.timer_ = null;
-    this.seconds_ = 0;
-    this.startTimer();
+    this.dialog_.getButton("cancel").addEventListener(
+        "command", function() { Scriptish_Install.onCancel() }, false);
 
-    this.bundle = document.getElementById("scriptish-browser-bundle");
-    this.greetz = new Array();
-    for(var i = 0; i < 6; i++){
-      this.greetz.push(this.bundle.getString("greetz." + i));
-    }
+    $("matches-label").setAttribute("value", Scriptish_stringBundle("install.matches"));
+    $("includes-label").setAttribute("value", Scriptish_stringBundle("install.runson"));
+    $("excludes-label").setAttribute("value", Scriptish_stringBundle("install.butnoton"));
+    $("warning1").setAttribute("value", Scriptish_stringBundle("install.warning1"));
+    $("warning2").setAttribute("value", Scriptish_stringBundle("install.warning2"));
 
-    var pick = Math.round(Math.random() * (this.greetz.length - 1));
-    var heading = document.getElementById("heading");
-    heading.appendChild(document.createElementNS(this.htmlNs_, "strong"));
-    heading.firstChild.appendChild(document.createTextNode(this.greetz[pick]));
-    heading.appendChild(document.createTextNode(" " + this.bundle.getString("greeting.msg")));
-
-    var desc = document.getElementById("scriptDescription");
-    desc.appendChild(document.createElementNS(this.htmlNs_, "strong"));
-    desc.firstChild.appendChild(document.createTextNode(script.name + " " + script.version));
-    desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
-    desc.appendChild(document.createTextNode(script.description));
-  },
-
-  onFocus: function(e) {
-    this.startTimer();
-  },
-
-  onBlur: function(e) {
-    this.stopTimer();
-  },
-
-  startTimer: function() {
-    this.seconds_ = 4;
-    this.updateLabel();
-
-    if (this.timer_) {
-      window.clearInterval(this.timer_);
-    }
-
-    this.timer_ = window.setInterval(function() { Scriptish_Install.onInterval() }, 500);
-  },
-
-  onInterval: function() {
-    this.seconds_--;
-    this.updateLabel();
-
-    if (this.seconds_ == 0) {
-      this.timer_ = window.clearInterval(this.timer_);
-    }
-  },
-
-  stopTimer: function() {
-    this.seconds_ = 5;
-    this.timer_ = window.clearInterval(this.timer_);
-    this.updateLabel();
-  },
-
-  updateLabel: function() {
-    if (this.seconds_ > 0) {
-      this.acceptButton_.focus();
-      this.acceptButton_.disabled = true;
-      this.acceptButton_.label = this.acceptButton_.baseLabel + " (" + this.seconds_ + ")";
-    } else {
-      this.acceptButton_.disabled = false;
-      this.acceptButton_.label = this.acceptButton_.baseLabel;
-    }
+    var desc = $("scriptDescription");
+    desc.appendChild(this.doc.createElementNS(this.htmlNs_, "strong"));
+    desc.firstChild.appendChild(this.doc.createTextNode(script.name + " " + script.version));
+    desc.appendChild(this.doc.createElementNS(this.htmlNs_, "br"));
+    desc.appendChild(this.doc.createTextNode(script.description));
   },
 
   setupIncludes: function(type, box, desc, includes) {
@@ -112,20 +72,18 @@ var Scriptish_Install = {
   },
 
   onOK: function() {
+    window.removeEventListener("unload", Scriptish_Install.cleanup, false);
     this.scriptDownloader_.installScript();
-    window.setTimeout("window.close()", 0);
+    Scriptish_Install.close();
   },
-
-  onCancel: function(){
-    this.scriptDownloader_.cleanupTempFiles();
-    window.close();
-  },
-
+  onCancel: function() Scriptish_Install.close(),
   onShowSource: function() {
     this.scriptDownloader_.showScriptView();
-    window.setTimeout("window.close()", 0);
-  }
+    Scriptish_Install.close();
+  },
+  cleanup: function() Scriptish_Install.scriptDownloader_.cleanupTempFiles(),
+  close: function() window.setTimeout(function() { window.close() }, 0)
 };
 
-// See: closewindow.xul
-function Scriptish_onClose() { Scriptish.onCancel(); }
+window.addEventListener("unload", Scriptish_Install.cleanup, false);
+window.addEventListener("load", function() { Scriptish_Install.init() }, false);
