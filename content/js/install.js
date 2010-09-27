@@ -1,4 +1,3 @@
-
 Components.utils.import("resource://scriptish/logging.js");
 
 var Scriptish_Install = {
@@ -112,20 +111,19 @@ var Scriptish_Install = {
   },
 
   onOK: function() {
+    window.removeEventListener("unload", Scriptish_Install.cleanup, false);
     this.scriptDownloader_.installScript();
-    window.setTimeout("window.close()", 0);
+    Scriptish_Install.close();
   },
 
-  onCancel: function(){
-    this.scriptDownloader_.cleanupTempFiles();
-    window.close();
-  },
+  onCancel: function() Scriptish_Install.close(),
 
   onShowSource: function() {
     this.scriptDownloader_.showScriptView();
-    window.setTimeout("window.close()", 0);
-  }
+    Scriptish_Install.close();
+  },
+  cleanup: function() Scriptish_Install.scriptDownloader_.cleanupTempFiles(),
+  close: function() window.setTimeout(function() { window.close() }, 0)
 };
 
-// See: closewindow.xul
-function Scriptish_onClose() { Scriptish.onCancel(); }
+window.addEventListener("unload", Scriptish_Install.cleanup, false);
