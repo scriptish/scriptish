@@ -1,5 +1,3 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 
 const Cu = Components.utils;
