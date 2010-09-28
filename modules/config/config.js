@@ -1,4 +1,3 @@
-
 var EXPORTED_SYMBOLS = ["Config"];
 
 const Cu = Components.utils;

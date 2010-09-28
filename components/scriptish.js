@@ -46,7 +46,7 @@ ScriptishService.prototype = {
       this.updateVersion();
 
       var tools = {};
-      Cu.import("resource://scriptish/config.js", tools);
+      Cu.import("resource://scriptish/config/config.js", tools);
 
       this._config = new tools.Config(this._scriptFoldername);
     }
