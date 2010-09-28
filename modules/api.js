@@ -1,4 +1,3 @@
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 
 const Cu = Components.utils;

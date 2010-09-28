@@ -186,7 +186,7 @@ ScriptishService.prototype = {
 
       // add our own APIs
       for (var funcName in GM_API) {
-        sandbox[funcName] = GM_API[funcName]
+        sandbox[funcName] = GM_API[funcName];
       }
 
       console = firebugConsole ? firebugConsole : new tools.GM_console(script);
