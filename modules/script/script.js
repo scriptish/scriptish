@@ -11,6 +11,7 @@ Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://scriptish/third-party/MatchPattern.js");
+Cu.import("resource://scriptish/config/configdownloader.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/NetUtil.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
@@ -326,8 +327,6 @@ Script.prototype = {
     } else {
       var dependhash = tools.Scriptish_sha1(newScript._rawMeta);
       if (dependhash != this._dependhash && !newScript._dependFail) {
-        Cu.import("resource://scriptish/script/scriptdownloader.js", tools);
-
         this._dependhash = dependhash;
         this._icon = newScript._icon;
         this._requires = newScript._requires;
@@ -345,10 +344,7 @@ Script.prototype = {
         this.delayInjection = true;
 
         // Redownload dependencies.
-        var scriptDownloader = new tools.ScriptDownloader(null, null);
-        scriptDownloader.script = this;
-        scriptDownloader.updateScript = true;
-        scriptDownloader.fetchDependencies();
+        Config_downloader.refetchDependencies(this);
       }
     }
 
@@ -457,7 +453,6 @@ Script.prototype = {
   installProcess: function() {
     this._initFile(this._tempFile);
     this._tempFile = null;
-
     // if icon had a file to download, then move the file
     if (this.icon.hasDownloadURL()) {
       this.icon._initFile();

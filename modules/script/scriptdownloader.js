@@ -11,14 +11,12 @@ Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://gre/modules/NetUtil.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://scriptish/third-party/Timer.js");
 
 
 function ScriptDownloader(uri, contentWin) {
-  var tools = {};
-  Cu.import("resource://scriptish/third-party/Timer.js", tools);
-
-  this._timer = new tools.Timer();
-  this.uri_ = uri;
+  this._timer = new Timer();
+  this.uri_ = uri || null;
   this.req_ = null;
   this.script = null;
   this.depQueue_ = [];
@@ -26,7 +24,7 @@ function ScriptDownloader(uri, contentWin) {
   this.installOnCompletion_ = false;
   this.tempFiles_ = [];
   this.updateScript = false;
-  this.contentWin = contentWin || win.content;
+  this.contentWin = contentWin || null;
 }
 ScriptDownloader.prototype.startInstall = function() {
   this.installing_ = true;
@@ -54,7 +52,7 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
 
       gmService.ignoreNextScript();
 
-      this.contentWin.location.href = this.uri_.spec;
+      if (this.contentWin) this.contentWin.location.href = this.uri_.spec;
       return;
     }
   }
@@ -80,10 +78,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
     file.append(base + ".user.js");
-    file.createUnique(
-      Ci.nsILocalFile.NORMAL_FILE_TYPE,
-      0640
-    );
+    file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
     this.tempFiles_.push(file);
 
     var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
@@ -247,7 +242,7 @@ ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg) {
 ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
     Scriptish_alert(this.dependencyError);
-  } else if(this.dependenciesLoaded_) {
+  } else if (this.dependenciesLoaded_) {
     Scriptish_getConfig().install(this.script);
 
     // notification that install is complete
@@ -277,7 +272,7 @@ ScriptDownloader.prototype.showInstallDialog = function(timer) {
 };
 ScriptDownloader.prototype.showScriptView = function() {
   Services.wm.getMostRecentWindow("navigator:browser")
-      .Scriptish_BrowserUI.showScriptView(this);
+      .Scriptish_BrowserUI.showScriptView(this, this.script.previewURL);
 };
 
 

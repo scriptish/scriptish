@@ -12,6 +12,7 @@ Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/NetUtil.jsm");
 
+
 function Config(aBaseDir) {
   this._saveTimer = null;
   this._scripts = null;
@@ -23,12 +24,10 @@ function Config(aBaseDir) {
   this._initScriptDir();
 
   this.timer = new Timer();
-
   this._observers = [];
 
   this._load();
 }
-
 Config.prototype = {
   addObserver: function(observer, script) {
     var observers = script ? script._observers : this._observers;
