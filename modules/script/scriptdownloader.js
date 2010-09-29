@@ -4,19 +4,19 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_notification.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://gre/modules/NetUtil.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://scriptish/third-party/Timer.js");
 
-function ScriptDownloader(win, uri, contentWin) {
-  var tools = {};
-  Cu.import("resource://scriptish/third-party/Timer.js", tools);
 
-  this._timer = new tools.Timer();
-  this.win_ = win;
-  this.uri_ = uri;
+function ScriptDownloader(uri, contentWin) {
+  this._timer = new Timer();
+  this.uri_ = uri || null;
   this.req_ = null;
   this.script = null;
   this.depQueue_ = [];
@@ -24,28 +24,25 @@ function ScriptDownloader(win, uri, contentWin) {
   this.installOnCompletion_ = false;
   this.tempFiles_ = [];
   this.updateScript = false;
-  this.contentWin = contentWin || win.content;
+  this.contentWin = contentWin || null;
 }
-
 ScriptDownloader.prototype.startInstall = function() {
   this.installing_ = true;
   this.startDownload();
 };
-
 ScriptDownloader.prototype.startViewScript = function(uri) {
   this.installing_ = false;
   this.startDownload();
 }
-
 ScriptDownloader.prototype.startDownload = function() {
-  this.req_ = new this.win_.XMLHttpRequest();
+  this.req_ = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+      .createInstance(Ci.nsIXMLHttpRequest);
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
   this.req_.onreadystatechange = Scriptish_hitch(this, "chkContentTypeB4DL");
   this.req_.onload = Scriptish_hitch(this, "handleScriptDownloadComplete");
   this.req_.send(null);
 }
-
 ScriptDownloader.prototype.chkContentTypeB4DL = function() {
   if (this.req_.readyState == 2) {
     // If there is a 'Content-Type' header and it contains 'text/html',
@@ -55,12 +52,11 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
 
       gmService.ignoreNextScript();
 
-      this.contentWin.location.href = this.uri_.spec;
+      if (this.contentWin) this.contentWin.location.href = this.uri_.spec;
       return;
     }
   }
 }
-
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   try {
     // If loading from file, status might be zero on success
@@ -82,10 +78,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
     file.append(base + ".user.js");
-    file.createUnique(
-      Ci.nsILocalFile.NORMAL_FILE_TYPE,
-      0640
-    );
+    file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
     this.tempFiles_.push(file);
 
     var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
@@ -116,7 +109,6 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     throw e;
   }
 };
-
 ScriptDownloader.prototype.fetchDependencies = function(){
   Scriptish_log("Fetching Dependencies");
 
@@ -138,7 +130,6 @@ ScriptDownloader.prototype.fetchDependencies = function(){
   }
   this.downloadNextDependency();
 };
-
 ScriptDownloader.prototype.downloadNextDependency = function(){
   var tools = {};
   if (this.depQueue_.length > 0) {
@@ -175,7 +166,6 @@ ScriptDownloader.prototype.downloadNextDependency = function(){
     this.finishInstall();
   }
 };
-
 ScriptDownloader.prototype.handleDependencyDownloadComplete =
 function(dep, file, channel) {
   Scriptish_log("Dependency Download complete " + dep.urlToDownload);
@@ -212,7 +202,6 @@ function(dep, file, channel) {
     this.downloadNextDependency();
   }
 };
-
 ScriptDownloader.prototype.checkDependencyURL = function(url) {
   var scheme = Services.io.extractScheme(url);
 
@@ -228,7 +217,6 @@ ScriptDownloader.prototype.checkDependencyURL = function(url) {
       return false;
   }
 };
-
 ScriptDownloader.prototype.finishInstall = function(){
   if (this.updateScript) {
     // Inject the script now that we have the new dependencies
@@ -241,7 +229,6 @@ ScriptDownloader.prototype.finishInstall = function(){
     this.installScript();
   }
 };
-
 ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg) {
   this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
   Scriptish_log(this.dependencyError)
@@ -252,54 +239,53 @@ ScriptDownloader.prototype.errorInstallDependency = function(script, dep, msg) {
     this._callback();
   }
 };
-
 ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
     Scriptish_alert(this.dependencyError);
-  } else if(this.dependenciesLoaded_) {
-    this.win_.Scriptish_BrowserUI.installScript(this.script)
+  } else if (this.dependenciesLoaded_) {
+    Scriptish_getConfig().install(this.script);
+
+    // notification that install is complete
+    var msg = "'" + this.script.name;
+    if (this.script.version) msg += " " + this.script.version;
+    msg += "' " + Scriptish_stringBundle("statusbar.installed");
+    Scriptish_notification(msg);
   } else {
     this.installOnCompletion_ = true;
   }
 };
-
 ScriptDownloader.prototype.cleanupTempFiles = function() {
   for (var i = 0, file = null; file = this.tempFiles_[i]; i++) {
     file.remove(false);
   }
 };
-
 ScriptDownloader.prototype.showInstallDialog = function(timer) {
   if (!timer) {
     // otherwise, the status bar stays in the loading state.
     this._timer.setTimeout(Scriptish_hitch(this, "showInstallDialog", true), 0);
     return;
   }
-  this.win_.openDialog("chrome://scriptish/content/install.xul", "",
-                       "chrome,centerscreen,modal,dialog,titlebar,resizable",
-                       this);
+  Services.wm.getMostRecentWindow("navigator:browser").openDialog(
+      "chrome://scriptish/content/install.xul", "",
+      "chrome,centerscreen,modal,dialog,titlebar,resizable",
+      this);
 };
-
 ScriptDownloader.prototype.showScriptView = function() {
-  this.win_.Scriptish_BrowserUI.showScriptView(this);
+  Services.wm.getMostRecentWindow("navigator:browser")
+      .Scriptish_BrowserUI.showScriptView(this, this.script.previewURL);
 };
 
 
 function NotificationCallbacks() {}
-
 NotificationCallbacks.prototype.QueryInterface = function(aIID) {
   if (aIID.equals(Ci.nsIInterfaceRequestor)) {
     return this;
   }
   throw Components.results.NS_NOINTERFACE;
 };
-
 NotificationCallbacks.prototype.getInterface = function(aIID) {
-  if (aIID.equals(Ci.nsIAuthPrompt )) {
-     var winWat = Cc["@mozilla.org/embedcomp/window-watcher;1"]
-                      .getService(Ci.nsIWindowWatcher);
-     return winWat.getNewAuthPrompter(winWat.activeWindow);
-  }
+  if (aIID.equals(Ci.nsIAuthPrompt ))
+    return Services.ww.getNewAuthPrompter(winWat.activeWindow);
   return undefined;
 };
 

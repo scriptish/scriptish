@@ -9,6 +9,7 @@ Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Components.utils.import("resource://scriptish/config/configdownloader.js");
 
 Scriptish_BrowserUI = new Object();
 
@@ -76,7 +77,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   }, false);
 
   this.toolsInstall.addEventListener("command", function(aEvt) {
-    Scriptish_BrowserUI.installMenuItemClicked(aEvt);
+    Config_downloader.startInstall(gBrowser.currentURI);
   }, false);
 
   var toggleFunc = function() { Scriptish_BrowserUIM.onToggleStatus() };
@@ -262,37 +263,14 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
   );
 };
 
-// Called from scriptish service when we should load a user script.
-Scriptish_BrowserUI.startInstallScript = function(aURI, aWin, timer) {
-  if (!timer) {
-    // docs for nsicontentpolicy say we're not supposed to block, so short
-    // timer.
-    setTimeout(function() {
-      Scriptish_BrowserUI.startInstallScript(aURI, aWin, true)
-    }, 0);
-    return;
-  }
-
-  var tools = {};
-  Components.utils.import("resource://scriptish/script/scriptdownloader.js", tools);
-
-  this.scriptDownloader_ = new tools.ScriptDownloader(window, aURI, aWin);
-  this.scriptDownloader_.startInstall();
-};
-
-
 /**
  * Open the tab to show the contents of a script and display the banner to let
  * the user install it.
  */
-Scriptish_BrowserUI.showScriptView = function(scriptDownloader) {
-  this.scriptDownloader_ = scriptDownloader;
-
-  var tab = this.tabBrowser.addTab(scriptDownloader.script.previewURL);
-  var browser = this.tabBrowser.getBrowserForTab(tab);
-
-  this.tabBrowser.selectedTab = tab;
-};
+Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
+  this.scriptDownloader_ = aSD;
+  this.tabBrowser.selectedTab = this.tabBrowser.addTab(aURL);
+}
 
 /**
  * Implements nsIObserve.observe. Right now we're only observing our own
@@ -313,11 +291,6 @@ Scriptish_BrowserUI.observe = function(subject, topic, data) {
  */
 Scriptish_BrowserUI.installCurrentScript = function() {
   this.scriptDownloader_.installScript();
-};
-
-Scriptish_BrowserUI.installScript = function(script){
-  Scriptish_getConfig().install(script);
-  this.showHorrayMessage(script);
 };
 
 /**
@@ -568,27 +541,9 @@ Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
 Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
-Scriptish_BrowserUI.showHorrayMessage = function(aScript) {
-  var tools = {};
-  Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
-  var msg = "'" + aScript.name;
-  if (aScript.version) msg += " " + aScript.version;
-  msg += "' " + Scriptish_stringBundle("statusbar.installed");
-  tools.Scriptish_notification(msg);
-};
-
-Scriptish_BrowserUI.installMenuItemClicked = function() {
-  Scriptish_BrowserUI.startInstallScript(gBrowser.currentURI);
-};
-
 Scriptish_BrowserUI.viewContextItemClicked = function() {
-  var tools = {};
-  Components.utils.import("resource://scriptish/script/scriptdownloader.js", tools);
-
-  var uri = Scriptish_BrowserUI.getUserScriptLinkUnderPointer();
-
-  this.scriptDownloader_ = new tools.ScriptDownloader(window, uri);
-  this.scriptDownloader_.startViewScript();
+  Config_downloader.startViewScript(
+      Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
 };
 
 Scriptish_BrowserUI.init();

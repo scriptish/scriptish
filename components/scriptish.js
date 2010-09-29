@@ -46,7 +46,7 @@ ScriptishService.prototype = {
       this.updateVersion();
 
       var tools = {};
-      Cu.import("resource://scriptish/config.js", tools);
+      Cu.import("resource://scriptish/config/config.js", tools);
 
       this._config = new tools.Config(this._scriptFoldername);
     }
@@ -91,8 +91,8 @@ ScriptishService.prototype = {
       dump("ignorescript: " + this.ignoreNextScript_ + "\n");
 
       if (!this.ignoreNextScript_ &&
-          !this.isTempScript(cl) &&
-          tools.Scriptish_installUri(cl, ctx.contentWindow)) {
+          !this.isTempScript(cl)) {
+        tools.Scriptish_installUri(cl, ctx.contentWindow);
         ret = Ci.nsIContentPolicy.REJECT_REQUEST;
       }
     }

@@ -78,6 +78,7 @@ var Scriptish_Install = {
   },
   onCancel: function() Scriptish_Install.close(),
   onShowSource: function() {
+    window.removeEventListener("unload", Scriptish_Install.cleanup, false);
     this.scriptDownloader_.showScriptView();
     Scriptish_Install.close();
   },

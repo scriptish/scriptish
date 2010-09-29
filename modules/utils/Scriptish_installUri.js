@@ -1,16 +1,12 @@
 var EXPORTED_SYMBOLS = ["Scriptish_installUri"];
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/third-party/Timer.js");
+Components.utils.import("resource://scriptish/config/configdownloader.js");
 
+var timer = new Timer();
 function Scriptish_installUri(aURI, aWin) {
-  var win = Cc['@mozilla.org/appshell/window-mediator;1']
-      .getService(Ci.nsIWindowMediator)
-      .getMostRecentWindow("navigator:browser");
-
-  if (win && win.Scriptish_BrowserUI) {
-    win.Scriptish_BrowserUI.startInstallScript(aURI, aWin);
-    return true;
-  }
-  return false;
+  // docs for nsicontentpolicy say we're not supposed to block, so short timer.
+  timer.setTimeout(function() {
+    Config_downloader.startInstall(aURI, aWin);
+  }, 0);
 }
