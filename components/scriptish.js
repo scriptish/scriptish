@@ -91,8 +91,8 @@ ScriptishService.prototype = {
       dump("ignorescript: " + this.ignoreNextScript_ + "\n");
 
       if (!this.ignoreNextScript_ &&
-          !this.isTempScript(cl) &&
-          tools.Scriptish_installUri(cl, ctx.contentWindow)) {
+          !this.isTempScript(cl)) {
+        tools.Scriptish_installUri(cl, ctx.contentWindow);
         ret = Ci.nsIContentPolicy.REJECT_REQUEST;
       }
     }
