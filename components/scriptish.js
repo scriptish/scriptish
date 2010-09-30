@@ -155,7 +155,6 @@ ScriptishService.prototype = {
   injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {
     var sandbox;
     var script;
-    var console;
     var unsafeContentWin = wrappedContentWin.wrappedJSObject;
 
     var tools = {};
@@ -183,12 +182,9 @@ ScriptishService.prototype = {
       sandbox.XPathResult = Ci.nsIDOMXPathResult;
 
       // add our own APIs
-      for (var funcName in GM_API) {
-        sandbox[funcName] = GM_API[funcName];
-      }
-
-      console = firebugConsole ? firebugConsole : new tools.GM_console(script);
-      sandbox.console = console;
+      for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
+      sandbox.console =
+          firebugConsole ? firebugConsole : new tools.GM_console(script);
 
       sandbox.__proto__ = wrappedContentWin;
 
@@ -210,10 +206,10 @@ ScriptishService.prototype = {
           contents + "\n";
 
       if (!script.unwrap) scriptSrc = "(function(){"+ scriptSrc +"})()";
-
       if (!this.evalInSandbox(scriptSrc, sandbox, script) && script.unwrap) {
-        this.evalInSandbox("(function(){"+ scriptSrc +"})()",
-            sandbox, script); // wrap anyway on early return
+        // wrap anyway on early return
+        this.evalInSandbox(
+            "(function(){"+ scriptSrc +"})()", sandbox, script);
       }
     }
   },
@@ -339,16 +335,10 @@ ScriptishService.prototype = {
    */
   updateVersion: function() {
     var tools = {};
-    //Cu.import("resource://scriptish/logging.js", tools);
     Cu.import("resource://scriptish/prefmanager.js", tools);
 
-    var GUID = "scriptish@erikvold.com";
-
-    // this is the last version which has been run at least once
-    var initialized = tools.Scriptish_prefRoot.getValue("version", "0.0");
-
     // check if this is the first launch
-    if ("0.0" == initialized) {
+    if ("0.0" == tools.Scriptish_prefRoot.getValue("version", "0.0")) {
       // find an open window.
       var chromeWin = Services.wm.getMostRecentWindow("navigator:browser");
 
@@ -357,25 +347,15 @@ ScriptishService.prototype = {
         // set version to fake version number gt 0.0 so that it is not possible
         // for the welcome tab to be opened more than once.
         tools.Scriptish_prefRoot.setValue("version", "0.0.1");
-
-        // the setTimeout makes sure we do not execute too early -- sometimes
-        // the window isn't quite ready to add a tab yet
-/*
-        chromeWin.setTimeout(
-            "gBrowser.selectedTab = gBrowser.addTab(" +
-            "'http://wiki.greasespot.net/Welcome')", 500);
-*/
       }
     }
 
     // update the currently initialized version so we don't do this work again.
     Cu.import("resource://gre/modules/AddonManager.jsm", tools);
 
-    tools.AddonManager.getAddonByID(GUID, function(addon) {
-      tools.Scriptish_prefRoot.setValue("version", addon.version);
+    tools.AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
+      tools.Scriptish_prefRoot.setValue("version", aAddon.version);
     });
-
-    this.updateVersion = function() {};
   }
 };
 
