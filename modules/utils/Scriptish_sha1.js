@@ -1,13 +1,10 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_sha1"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_memoize.js");
 
 // UTF-8 encodes input, SHA-1 hashes it and returns the 40-char hex version.
-const Scriptish_sha1 = Scriptish_memoize(function(aUnicode) {
+const Scriptish_sha1 = function(aUnicode) {
   var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
       .createInstance(Ci.nsIScriptableUnicodeConverter);
   unicodeConverter.charset = "UTF-8";
@@ -24,4 +21,4 @@ const Scriptish_sha1 = Scriptish_memoize(function(aUnicode) {
     hex.push( ("0" + hash.charCodeAt(i).toString(16)).slice(-2) );
   }
   return hex.join('');
-});
+}

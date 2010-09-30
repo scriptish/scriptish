@@ -1,9 +1,4 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_convert2RegExp"];
-
-const Cu = Components.utils;
-Cu.import("resource://scriptish/utils/Scriptish_memoize.js");
 
 const tldRegExp = new RegExp("^(\\^(?:[^/]*)(?://)?(?:[^/]*))(\\\\\\.tld)((?:/.*)?)$");
 
@@ -12,7 +7,7 @@ const tldStr = "\\.(?:demon\\.co\\.uk|esc\\.edu\\.ar|(?:c[oi]\\.)?[^\\.]\\.(?:vt
 
 // Converts a pattern in this programs simple notation to a regular expression.
 // thanks AdBlock! http://www.mozdev.org/source/browse/adblock/adblock/
-const Scriptish_convert2RegExp = Scriptish_memoize(function(aPattern, aNoTLD) {
+const Scriptish_convert2RegExp = function(aPattern, aNoTLD) {
   var s = new String(aPattern);
   var res = new String("^");
 
@@ -63,4 +58,4 @@ const Scriptish_convert2RegExp = Scriptish_memoize(function(aPattern, aNoTLD) {
   }
 
   return new RegExp(res + "$", "i");
-});
+}

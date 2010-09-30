@@ -1,4 +1,3 @@
-
 var EXPORTED_SYMBOLS = ["Scriptish_hitch"];
 
 const Scriptish_hitch = function (aObj, aMeth) {
