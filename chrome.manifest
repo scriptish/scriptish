@@ -14,3 +14,4 @@ overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/clo
 overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/closewindow.xul
 
 locale     scriptish  en-US  locale/en-US/
+locale     scriptish  ja-JP  locale/ja-JP/
