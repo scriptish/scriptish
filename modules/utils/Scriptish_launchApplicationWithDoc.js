@@ -20,5 +20,5 @@ const Scriptish_launchApplicationWithDoc = function(appFile, docFile) {
   var process = Cc["@mozilla.org/process/util;1"]
       .createInstance(Ci.nsIProcess);
   process.init(appFile);
-  process.run(false, args, args.length);
+  process.runwAsync(args, args.length);
 }
