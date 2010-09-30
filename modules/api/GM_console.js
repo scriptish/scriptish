@@ -3,26 +3,18 @@ var EXPORTED_SYMBOLS = ["GM_console"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/api/GM_ScriptLogger.js");
 
-// \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ //
-
-function GM_console(script) {
-  // based on http://www.getfirebug.com/firebug/firebugx.js
-  var names = [
+// based on http://www.getfirebug.com/firebug/firebugx.js
+const keys = [
     "debug", "warn", "error", "info", "assert", "dir", "dirxml",
     "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile",
-    "profileEnd"
-  ];
+    "profileEnd"];
 
-  for (var i=0, name; name=names[i]; i++) {
-    this[name] = function() {};
-  }
+function GM_console(script) {
+  for (var i = keys.length - 1, key; key = keys[i--];)
+    this[key] = function() {};
 
   // Important to use this private variable so that user scripts can't make
   // this call something else by redefining <this> or <logger>.
   var logger = new GM_ScriptLogger(script);
-  this.log = function() {
-    logger.log(Array.slice(arguments).join("\n"));
-  };
+  this.log = function() { logger.log(Array.slice(arguments).join("\n")); };
 }
-
-GM_console.prototype.log = function() {};
