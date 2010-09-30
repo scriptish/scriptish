@@ -1,14 +1,12 @@
 <?xml version="1.0"?>
 <overlay id="scriptish-close-window-overlay"
-  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <commandset>
+    <command id="cmd_close" oncommand="window.close();" />
+  </commandset>
 
-<commandset>
-  <command id="cmd_close" oncommand="Scriptish_onClose &amp;&amp; Scriptish_onClose(); window.close();" />
-</commandset>
-
-<keyset>
-  <key command="cmd_close" key="w" modifiers="accel" />
-  <key command="cmd_close" keycode="VK_ESCAPE" />
-</keyset>
-
+  <keyset>
+    <key command="cmd_close" key="w" modifiers="accel" />
+    <key command="cmd_close" keycode="VK_ESCAPE" />
+  </keyset>
 </overlay>

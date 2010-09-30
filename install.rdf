@@ -4,9 +4,9 @@
    xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>scriptish@erikvold.com</em:id>
-    <em:version>0.1b1</em:version>
+    <em:version>0.1b2</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
-    <em:homepageURL>http://www.greasespot.net/</em:homepageURL>
+    <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://scriptish/skin/icon_medium.png</em:iconURL>
 
@@ -40,7 +40,7 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>4.0b1pre</em:minVersion>
+        <em:minVersion>4.0b5pre</em:minVersion>
         <em:maxVersion>4.0b7pre</em:maxVersion>
       </Description>
     </em:targetApplication>

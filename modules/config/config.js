@@ -1,4 +1,3 @@
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Config"];
 
 const Cu = Components.utils;
@@ -8,8 +7,11 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
+Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu.import("resource://gre/modules/NetUtil.jsm");
+
 
 function Config(aBaseDir) {
   this._saveTimer = null;
@@ -21,11 +23,11 @@ function Config(aBaseDir) {
 
   this._initScriptDir();
 
+  this.timer = new Timer();
   this._observers = [];
 
   this._load();
 }
-
 Config.prototype = {
   addObserver: function(observer, script) {
     var observers = script ? script._observers : this._observers;
@@ -109,81 +111,62 @@ Config.prototype = {
     if (!saveNow) {
       // Reduce work in the case of many changes near to each other in time.
       if (this._saveTimer) {
-        this._saveTimer.cancel(this._saveTimer);
+        this.timer.clearTimeout(this._saveTimer);
       }
 
-      this._saveTimer = Cc["@mozilla.org/timer;1"]
-          .createInstance(Ci.nsITimer);
+      this._saveTimer =
+          this.timer.setTimeout(Scriptish_hitch(this, "_save", true), 250);
 
-      var _save = Scriptish_hitch(this, "_save"); // dereference 'this' for the closure
-      this._saveTimer.initWithCallback(
-          {'notify': function() { _save(true); }}, 250,
-          Ci.nsITimer.TYPE_ONE_SHOT);
       return;
     }
+    delete this["_saveTimer"];
 
     var doc = Cc["@mozilla.org/xmlextras/domparser;1"]
-      .createInstance(Ci.nsIDOMParser)
-      .parseFromString("<UserScriptConfig></UserScriptConfig>", "text/xml");
+        .createInstance(Ci.nsIDOMParser)
+        .parseFromString("<UserScriptConfig></UserScriptConfig>", "text/xml");
 
-    this._scripts.forEach(function(script) {
-      doc.firstChild.appendChild(doc.createTextNode("\n\t"));
-      doc.firstChild.appendChild(script.createXMLNode(doc));
-    });
-
-    doc.firstChild.appendChild(doc.createTextNode("\n"));
+    var scripts = this._scripts;
+    var len = scripts.length;
+    var firstChild = doc.firstChild;
+    for (var i = 0, script; script = scripts[i]; i++) {
+      firstChild.appendChild(doc.createTextNode("\n\t"));
+      firstChild.appendChild(script.createXMLNode(doc));
+    }
+    firstChild.appendChild(doc.createTextNode("\n"));
 
     var configStream = Scriptish_getWriteStream(this._configFile);
     Cc["@mozilla.org/xmlextras/xmlserializer;1"]
-      .createInstance(Ci.nsIDOMSerializer)
-      .serializeToStream(doc, configStream, "utf-8");
+        .createInstance(Ci.nsIDOMSerializer)
+        .serializeToStream(doc, configStream, "utf-8");
     configStream.close();
   },
 
-  parse: function(source, uri, updating) {
-    return Script.parse(this, source, uri, updating);
+  parse: function(source, uri, aUpdateScript) {
+    return Script.parse(this, source, uri, aUpdateScript);
   },
 
-  install: function(script) {
-    Scriptish_log("> Config.install");
-
-    var existingIndex = this._find(script);
-    if (existingIndex > -1) {
-      // save the old script's state
-      script._enabled = this._scripts[existingIndex].enabled;
-
-      // unintall the old script
-      this.uninstall(this._scripts[existingIndex]);
-    }
-
-    script.installProcess();
-
-    this.addScript(script);
-    this._changed(script, "install", null);
-    AddonManagerPrivate.callInstallListeners(
-        "onExternalInstall", null, script, null, false);
-
-    Scriptish_log("< Config.install");
-  },
-
-  uninstall: function(script) {
-    var idx = this._find(script);
-    this._scripts.splice(idx, 1);
-    this._changed(script, "uninstall", null);
-
-    // watch out for cases like basedir="." and basedir="../scriptish_scripts"
-    if (!script._basedirFile.equals(this._scriptDir)) {
-      // if script has its own dir, remove the dir + contents
-      script._basedirFile.remove(true);
+  install: function(aNewScript) {
+    var existingIndex = this._find(aNewScript);
+    var exists = existingIndex > -1;
+    if (exists) {
+      var oldScript = this._scripts[existingIndex];
+      oldScript.removeFiles();
+      aNewScript.installProcess();
+      oldScript.updateFromNewScript(aNewScript, true);
     } else {
-      // if script is in the root, just remove the file
-      script._file.remove(false);
+      aNewScript.installProcess();
+      this.addScript(aNewScript);
+      this._changed(aNewScript, "install", null);
+      AddonManagerPrivate.callInstallListeners(
+          "onExternalInstall", null, aNewScript, null, false);
     }
+  },
 
-    if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
-      // Remove saved preferences
-      Scriptish_prefRoot.remove(script.prefroot);
-    }
+  uninstall: function(aIndx) {
+    var script = this._scripts[aIndx];
+    var idx = this._find(script);
+    this._scripts.splice(aIndx, 1);
+    script.uninstallProcess();
   },
 
   /**
@@ -290,9 +273,6 @@ Config.prototype = {
   },
 
   updateModifiedScripts: function() {
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_uriFromUrl.js", tools);
-
     // Find any updated scripts
     var scripts = this.getMatchingScripts(
         function (script) { return script.isModified(); });
@@ -301,9 +281,8 @@ Config.prototype = {
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           Scriptish_getContents(script._file),
-          tools.Scriptish_uriFromUrl(script._downloadURL), true);
+          NetUtil.newURI(script._downloadURL), script);
       script.updateFromNewScript(parsedScript);
-      this._changed(script, "modified", null, true);
     }
 
     this._save();

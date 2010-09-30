@@ -1,18 +1,12 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_installUri"];
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/third-party/Timer.js");
+Components.utils.import("resource://scriptish/config/configdownloader.js");
 
-function Scriptish_installUri(uri) {
-  var win = Cc['@mozilla.org/appshell/window-mediator;1']
-      .getService(Ci.nsIWindowMediator)
-      .getMostRecentWindow("navigator:browser");
-
-  if (win && win.Scriptish_BrowserUI) {
-    win.Scriptish_BrowserUI.startInstallScript(uri);
-    return true;
-  }
-  return false;
+var timer = new Timer();
+function Scriptish_installUri(aURI, aWin) {
+  // docs for nsicontentpolicy say we're not supposed to block, so short timer.
+  timer.setTimeout(function() {
+    Config_downloader.startInstall(aURI, aWin);
+  }, 0);
 }

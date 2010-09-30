@@ -40,9 +40,7 @@ var EXPORTED_SYMBOLS = ['MatchPattern'];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-
-const ioService = Components.classes["@mozilla.org/network/io-service;1"].
-    getService(Components.interfaces.nsIIOService);
+Cu.import("resource://gre/modules/NetUtil.jsm");
 
 const validScheme = ['http', 'https', 'ftp', 'file'];
 
@@ -56,7 +54,7 @@ function MatchPattern(pattern){
   this.pattern = pattern;
 
   try {
-    var uri = ioService.newURI(pattern, null, null );
+    var uri = NetUtil.newURI(pattern);
   } catch (e) {
     throw new Error("Pattern could not be parsed by nsURI: " + e);
   }
@@ -89,7 +87,7 @@ function MatchPattern(pattern){
 }
 
 MatchPattern.prototype.doMatch = function (uriSpec) {
-  var matchURI = ioService.newURI(uriSpec, null, null);
+  var matchURI = NetUtil.newURI(uriSpec);
   var regexs = this.regexs;
 
   if (regexs.host === null){

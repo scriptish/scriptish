@@ -2,9 +2,9 @@
 // JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_parseScriptName"];
 
-const Scriptish_parseScriptName = function(sourceUri) {
-  var name = sourceUri.spec;
-  name = name.substring(0, name.indexOf(".user.js"));
-  name = name.substring(name.lastIndexOf("/") + 1);
-  return name;
+const Scriptish_parseScriptName = function(aURL) {
+  if (!aURL) return "";
+  var tmp = aURL.match(/\/([^\/]+)\.user(?:-\d+)?\.js([\?#][^\/]*)?$/);
+  if (tmp) return tmp[1];
+  return "";
 }
