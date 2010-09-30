@@ -174,9 +174,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   var gmSvc = Components.classes["@scriptish.erikvold.com/scriptish-service;1"]
                   .getService().wrappedJSObject;
   this.gmSvc = gmSvc;
-
-  // check if GM was updated/installed
-  setTimeout(function() {gmSvc.updateVersion()}, 100);
+  if (gmSvc.updateChk) setTimeout(function() { gmSvc.updateChk() }, 100);
 }
 
 // registerMenuCommand

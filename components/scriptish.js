@@ -18,6 +18,13 @@ const serviceFilename = Components.stack.filename;
 
 function ScriptishService() {
   this.wrappedJSObject = this;
+
+  this.updateChk = function() {
+    Cc["@mozilla.org/moz/jssubscript-loader;1"]
+        .getService(Ci.mozIJSSubScriptLoader)
+        .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
+    this.updateChk = false;
+  }
 }
 
 ScriptishService.prototype = {
@@ -42,12 +49,9 @@ ScriptishService.prototype = {
   _config: null,
   get config() {
     if (!this._config) {
-      // check if Scriptish was updated/installed
-      this.updateVersion();
-
+      if (this.updateChk) this.updateChk();
       var tools = {};
       Cu.import("resource://scriptish/config/config.js", tools);
-
       this._config = new tools.Config(this._scriptFoldername);
     }
 
@@ -327,35 +331,6 @@ ScriptishService.prototype = {
     }
 
     return null;
-  },
-
-  /**
-   * Checks whether the version has changed since the last run and performs
-   * any necessary upgrades.
-   */
-  updateVersion: function() {
-    var tools = {};
-    Cu.import("resource://scriptish/prefmanager.js", tools);
-
-    // check if this is the first launch
-    if ("0.0" == tools.Scriptish_prefRoot.getValue("version", "0.0")) {
-      // find an open window.
-      var chromeWin = Services.wm.getMostRecentWindow("navigator:browser");
-
-      // if we found it, use it to open a welcome tab
-      if (chromeWin.gBrowser) {
-        // set version to fake version number gt 0.0 so that it is not possible
-        // for the welcome tab to be opened more than once.
-        tools.Scriptish_prefRoot.setValue("version", "0.0.1");
-      }
-    }
-
-    // update the currently initialized version so we don't do this work again.
-    Cu.import("resource://gre/modules/AddonManager.jsm", tools);
-
-    tools.AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
-      tools.Scriptish_prefRoot.setValue("version", aAddon.version);
-    });
   }
 };
 
