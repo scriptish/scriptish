@@ -51,6 +51,9 @@ Scriptish_BrowserUIM.prototype = {
   },
   showUserscriptList: function() {
     Cu.import("resource://scriptish/addonprovider.js");
-    this._win.setTimeout("BrowserOpenAddonsMgr('addons://list/userscripts')", 0);
+    var win = this._win;
+    win.setTimeout(function() {
+      win.BrowserOpenAddonsMgr('addons://list/userscripts');
+    }, 0);
   }
 }
