@@ -428,7 +428,7 @@ function Scriptish_showPopup(aEvent) {
       urls = urls.concat(urlsOfAllFrames(contentWindow));
     }
     var urls = [contentWindow.location.href];
-    Array.prototype.slice.call(contentWindow.frames).forEach(collect);
+    Array.slice(contentWindow.frames).forEach(collect);
     return urls;
   }
 

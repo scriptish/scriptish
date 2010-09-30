@@ -1,5 +1,3 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["GM_console"];
 
 const Cu = Components.utils;
@@ -23,9 +21,7 @@ function GM_console(script) {
   // this call something else by redefining <this> or <logger>.
   var logger = new GM_ScriptLogger(script);
   this.log = function() {
-    logger.log(
-      Array.prototype.slice.apply(arguments).join("\n")
-    );
+    logger.log(Array.slice(arguments).join("\n"));
   };
 }
 
