@@ -125,7 +125,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
   var showOptionsEle = $("scriptish-sb-options");
   var showOptionsFunc = function(){ Scriptish_BrowserUIM.openOptionsWin() };
-  showOptionsEle.setAttribute("label", Scriptish_stringBundle("menu.options"));
+  showOptionsEle.setAttribute("label", Scriptish_stringBundle("options")+"...");
   showOptionsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.options.accesskey"));
   showOptionsEle.addEventListener("command", showOptionsFunc, false);
 

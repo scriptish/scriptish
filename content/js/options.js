@@ -1,4 +1,3 @@
-
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
@@ -7,7 +6,7 @@ window.addEventListener("load", function() {
   var $ = function(aID) d.getElementById(aID);
   var tmp;
 
-  tmp = Scriptish_stringBundle("prefWindow.titleWin");
+  tmp = Scriptish_stringBundle("options");
   $("scriptish-options-dialog").setAttribute("title", "Scriptish - " + tmp);
   $("scriptish-header").setAttribute("description", tmp);
   $("caption-editor")
