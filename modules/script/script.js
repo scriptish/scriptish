@@ -645,7 +645,8 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
     script._name = tools.Scriptish_parseScriptName(
         (aUpdateScript && aUpdateScript.filename) || (aURI && aURI.spec));
   }
-  if (!script._namespace && aURI) script._namespace = aURI.host;
+  if (!script._namespace && script._downloadURL)
+    script._namespace = aURI.host;
   if (!script._description) script._description = "";
   if (!script._version) script._version = "";
   if (script._includes.length == 0 && script._matches.length == 0) {
