@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>scriptish@erikvold.com</em:id>
+    <em:localized>
+      <Description>
+        <em:locale>ja-JP</em:locale>
+        <em:name>Scriptish</em:name>
+        <em:description>Firefox用のスクリプトマネージャ</em:description>
+      </Description>
+    </em:localized>
+    <em:name>Scriptish</em:name>
+    <em:description>A Script Extension Manager for Firefox</em:description>
     <em:version>0.1b2</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://scriptish/skin/icon_medium.png</em:iconURL>
-
-    <em:name>Scriptish</em:name>
-    <em:description>A Script Extension Manager for Firefox</em:description>
-
     <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
     <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>
     <em:contributor>Chris Feldmann; http://axlotl.net/</em:contributor>
