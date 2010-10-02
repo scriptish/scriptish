@@ -243,13 +243,17 @@ ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
     Scriptish_alert(this.dependencyError);
   } else if (this.dependenciesLoaded_) {
-    Scriptish_getConfig().install(this.script);
+    var script = this.script;
+    Scriptish_getConfig().install(script);
 
     // notification that install is complete
-    var msg = "'" + this.script.name;
-    if (this.script.version) msg += " " + this.script.version;
+    var msg = "'" + script.name;
+    if (script.version) msg += " " + script.version;
     msg += "' " + Scriptish_stringBundle("statusbar.installed");
-    Scriptish_notification(msg);
+    Scriptish_notification(msg, null, null, function() {
+      Services.wm.getMostRecentWindow("navigator:browser")
+          .BrowserOpenAddonsMgr("addons://list/userscripts");
+    });
   } else {
     this.installOnCompletion_ = true;
   }

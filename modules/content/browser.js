@@ -19,7 +19,7 @@ Scriptish_BrowserUIM.prototype = {
     if (!aEvt.button)
       this.onToggleStatus();
     else if (aEvt.button == 1)
-      this._win.BrowserOpenAddonsMgr('userscripts');
+      this._win.BrowserOpenAddonsMgr("addons://list/userscripts");
   },
   onToggleStatus: function() {
     Scriptish_setEnabled(!Scriptish_getEnabled());
