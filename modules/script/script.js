@@ -525,7 +525,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
         if (value) script.id = value;
         continue;
       case "author":
-        script.author = value;
+        if (!script.author) script.author = value;
         continue;
       case "name":
       case "namespace":
