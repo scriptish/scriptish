@@ -4,6 +4,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/utils/Scriptish_setEnabled.js");
 Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 
@@ -19,7 +20,7 @@ Scriptish_BrowserUIM.prototype = {
     if (!aEvt.button)
       this.onToggleStatus();
     else if (aEvt.button == 1)
-      this._win.BrowserOpenAddonsMgr("addons://list/userscripts");
+      Scriptish_openManager();
   },
   onToggleStatus: function() {
     Scriptish_setEnabled(!Scriptish_getEnabled());
@@ -53,7 +54,7 @@ Scriptish_BrowserUIM.prototype = {
     Cu.import("resource://scriptish/addonprovider.js");
     var win = this._win;
     win.setTimeout(function() {
-      win.BrowserOpenAddonsMgr('addons://list/userscripts');
+      Scriptish_openManager();
     }, 0);
   }
 }
