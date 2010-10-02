@@ -14,8 +14,12 @@ var Scriptish_Install = {
     this.scriptDownloader_ = window.arguments[0];
     var script = this.script_ = this.scriptDownloader_.script;
 
-    this.setupIncludes("match", "matches", "matches-desc", script.matches);
-    this.setupIncludes("include", "includes", "includes-desc", script.includes);
+    if (script.matches.length || script.includes.length) {
+      this.setupIncludes("match", "matches", "matches-desc", script.matches);
+      this.setupIncludes("include", "includes", "includes-desc", script.includes);
+    } else {
+      $('includes').setAttribute("class", "display");
+    }
     this.setupIncludes("include", "excludes", "excludes-desc", script.excludes);
 
     this.dialog_ = document.documentElement;
@@ -51,24 +55,23 @@ var Scriptish_Install = {
   },
 
   setupIncludes: function(type, box, desc, includes) {
-    if (includes.length > 0) {
-      desc = document.getElementById(desc);
-      document.getElementById(box).setAttribute("class", "display");
+    if (!includes.length) return;
+    desc = document.getElementById(desc);
+    document.getElementById(box).setAttribute("class", "display");
 
-      if (type == "match") {
-        for (var i = 0; i < includes.length; i++) {
-          desc.appendChild(document.createTextNode(includes[i].pattern));
-          desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
-        }
-      } else {
-        for (var i = 0; i < includes.length; i++) {
-          desc.appendChild(document.createTextNode(includes[i]));
-          desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
-        }
+    if (type == "match") {
+      for (var i = 0; i < includes.length; i++) {
+        desc.appendChild(document.createTextNode(includes[i].pattern));
+        desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
       }
-
-      desc.removeChild(desc.lastChild);
+    } else {
+      for (var i = 0; i < includes.length; i++) {
+        desc.appendChild(document.createTextNode(includes[i]));
+        desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
+      }
     }
+
+    desc.removeChild(desc.lastChild);
   },
 
   onOK: function() {
