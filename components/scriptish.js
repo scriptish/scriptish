@@ -191,84 +191,29 @@ ScriptishService.prototype = {
 
       sandbox.__proto__ = wrappedContentWin;
 
-      var contents = script.textContent;
-
-      var requires = [];
-      var offsets = [];
-      var offset = 0;
-      var reqContents;
-
-      for (var j = 0; j < script.requires.length; j++) {
-        requires.push(reqContents = script.requires[j].textContent);
-        offsets.push(offset += reqContents.split("\n").length)
-      }
-      script.offsets = offsets;
-
-      var scriptSrc = "\n" + // error line-number calculations depend on these
-          requires.join("\n") + "\n" +
-          contents + "\n";
-
-      if (!script.unwrap) scriptSrc = "(function(){"+ scriptSrc +"})()";
-      if (!this.evalInSandbox(scriptSrc, sandbox, script) && script.unwrap) {
-        // wrap anyway on early return
-        this.evalInSandbox(
-            "(function(){"+ scriptSrc +"})()", sandbox, script);
-      }
+      this.evalInSandbox(script, sandbox);
     }
   },
 
-  evalInSandbox: function(code, sandbox, script) {
+  evalInSandbox: function(aScript, aSandbox) {
     var tools = {};
+    var jsVer = aScript.jsversion;
     Cu.import("resource://scriptish/logging.js", tools);
 
     try {
-      // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
-      var lineFinder = new Error();
-      Cu.evalInSandbox(code, sandbox, script.jsversion);
-    } catch (e) { // catches errors while running the script code
+      for (let [, req] in Iterator(aScript.requires))
+        Cu.evalInSandbox(req.textContent, aSandbox, jsVer, req.fileURL, 1);
+
+      var src = aScript.textContent;
       try {
-        if (e && "return not in function" == e.message) {
-          return false; // means this script depends on the function enclosure
-        }
-
-        // try to find the line of the actual error line
-        var line = e && e.lineNumber;
-        if (4294967295 == line) {
-          // Line number is reported as max int in edge cases.  Sometimes
-          // the right one is in the "location", instead.  Look there.
-          if (e.location && e.location.lineNumber) {
-            line = e.location.lineNumber;
-          } else {
-            // Reporting maxint is useless, if we couldn't find it in location
-            // either, forget it.  A value of 0 isn't shown in the console.
-            line = 0;
-          }
-        }
-
-        if (line) {
-          Cu.import("resource://scriptish/utils/Scriptish_findError.js", tools);
-          var err = tools.Scriptish_findError(
-              script, line - lineFinder.lineNumber - 1);
-
-          tools.Scriptish_logError(
-            e, // error obj
-            0, // 0 = error (1 = warning)
-            err.uri,
-            err.lineNumber
-          );
-        } else {
-          tools.Scriptish_logError(
-            e, // error obj
-            0, // 0 = error (1 = warning)
-            script.fileURL,
-            0
-          );
-        }
-      } catch (e) { // catches errors we cause trying to inform the user
-        // Do nothing. More importantly: don't stop script incovation sequence.
+        Cu.evalInSandbox(src, aSandbox, jsVer, aScript.fileURL, 1);
+      } catch (e if e.message == "return not in function") {
+        Cu.evalInSandbox(
+            "(function(){"+src+"})()", aSandbox, jsVer, aScript.fileURL, 1);
       }
+    } catch (e) {
+      tools.Scriptish_logError(e, 0, e.fileName, e.lineNumber);
     }
-    return true; // did not need a (function() {...})() enclosure.
   },
 
   getFirebugConsole: function(unsafeContentWin, chromeWin) {

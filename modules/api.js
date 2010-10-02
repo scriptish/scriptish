@@ -2,6 +2,8 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils/Scriptish_config.js");
+Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
 const moduleFilename = Components.stack.filename;
 
@@ -14,6 +16,8 @@ function GM_apiLeakCheck(apiName) {
     // Valid stack frames for GM api calls are: native and js when coming from
     // chrome:// URLs and any file name listed in _apiAcceptedFiles.
     if (2 == stack.language &&
+        stack.filename.indexOf(
+            Scriptish_getUriFromFile(Scriptish_config._scriptDir).spec) != 0 &&
         stack.filename != moduleFilename &&
         stack.filename != Scriptish_Services.scriptish.filename &&
         stack.filename.substr(0, 6) != "chrome") {
