@@ -649,9 +649,6 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
     script._namespace = aURI.host;
   if (!script._description) script._description = "";
   if (!script._version) script._version = "";
-  if (script._includes.length == 0 && script._matches.length == 0) {
-    script.addInclude("*");
-  }
 
   return script;
 };
