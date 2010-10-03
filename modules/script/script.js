@@ -3,8 +3,8 @@ var EXPORTED_SYMBOLS = ["Script"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/script/scripticon.js");
@@ -312,7 +312,7 @@ Script.prototype = {
     this._homepageURL = newScript._homepageURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
-    this.author = newScript.author;
+    this.author = newScript._author;
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
@@ -321,9 +321,15 @@ Script.prototype = {
     this._version = newScript._version;
 
     if (aDL) {
+      this._file = newScript._file;
+      this._basedir = newScript._basedir;
+      this._filename = newScript._filename;
       this._icon = newScript._icon;
       this._requires = newScript._requires;
       this._resources = newScript._resources;
+      this._modified = newScript._modified;
+      this._dependhash = newScript._dependhash;
+      if (newScript._downloadURL) this._downloadURL = newScript._downloadURL;
     } else {
       var dependhash = tools.Scriptish_sha1(newScript._rawMeta);
       if (dependhash != this._dependhash && !newScript._dependFail) {
@@ -347,7 +353,6 @@ Script.prototype = {
         Config_downloader.refetchDependencies(this);
       }
     }
-
     this.updateProcess();
   },
 
@@ -454,17 +459,14 @@ Script.prototype = {
     this._initFile(this._tempFile);
     this._tempFile = null;
     // if icon had a file to download, then move the file
-    if (this.icon.hasDownloadURL()) {
+    if (this.icon.hasDownloadURL())
       this.icon._initFile();
-    }
 
-    for (var i = 0; i < this._requires.length; i++) {
+    for (var i = 0; i < this._requires.length; i++)
       this._requires[i]._initFile();
-    }
 
-    for (var i = 0; i < this._resources.length; i++) {
+    for (var i = 0; i < this._resources.length; i++)
       this._resources[i]._initFile();
-    }
 
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);

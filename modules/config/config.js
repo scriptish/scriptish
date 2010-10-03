@@ -49,10 +49,7 @@ Config.prototype = {
   },
 
   _changed: function(script, event, data, dontSave) {
-    if (!dontSave) {
-      this._save();
-    }
-
+    if (!dontSave) this._save();
     this._notifyObservers(script, event, data);
   },
 
@@ -153,6 +150,7 @@ Config.prototype = {
       oldScript.removeFiles();
       aNewScript.installProcess();
       oldScript.updateFromNewScript(aNewScript, true);
+      this._changed(oldScript, "update", null);
     } else {
       aNewScript.installProcess();
       this.addScript(aNewScript);
