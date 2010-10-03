@@ -1,7 +1,5 @@
 var EXPORTED_SYMBOLS = ["GM_console"];
-
-const Cu = Components.utils;
-Cu.import("resource://scriptish/api/GM_ScriptLogger.js");
+Components.utils.import("resource://scriptish/api/GM_ScriptLogger.js");
 
 // based on http://www.getfirebug.com/firebug/firebugx.js
 const keys = [
