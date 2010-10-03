@@ -14,17 +14,16 @@ Cu.import("resource://gre/modules/NetUtil.jsm");
 
 
 function Config(aBaseDir) {
+  this.timer = new Timer();
+  this._observers = [];
   this._saveTimer = null;
-  this._scripts = null;
+  this._scripts = [];
   this._scriptFoldername = aBaseDir;
 
   this._configFile = this._scriptDir;
   this._configFile.append("config.xml");
 
   this._initScriptDir();
-
-  this.timer = new Timer();
-  this._observers = [];
 
   this._load();
 }
@@ -70,23 +69,14 @@ Config.prototype = {
   getScriptById: function(aID) this._find(aID, "script"),
 
   _load: function() {
-    var domParser = Cc["@mozilla.org/xmlextras/domparser;1"]
-        .createInstance(Ci.nsIDOMParser);
-
     var configContents = Scriptish_getContents(this._configFile);
-    var doc = domParser.parseFromString(configContents, "text/xml");
+    var doc = Scriptish_Services.dp.parseFromString(configContents, "text/xml");
     var nodes = doc.evaluate("/UserScriptConfig/Script", doc, null, 0, null);
     var fileModified = false;
 
-    this._scripts = [];
-
-    for (var node = null; node = nodes.iterateNext(); ) {
+    for (var node = null; node = nodes.iterateNext(); )
       fileModified = Script.load(this, node) || fileModified;
-    }
-
-    if (fileModified) {
-      this._save();
-    }
+    if (fileModified) this._save();
   },
 
   _save: function(saveNow) {
@@ -94,21 +84,15 @@ Config.prototype = {
     // via a timer, to avoid locking up the UI.
     if (!saveNow) {
       // Reduce work in the case of many changes near to each other in time.
-      if (this._saveTimer) {
-        this.timer.clearTimeout(this._saveTimer);
-      }
-
+      if (this._saveTimer) this.timer.clearTimeout(this._saveTimer);
       this._saveTimer =
           this.timer.setTimeout(Scriptish_hitch(this, "_save", true), 250);
-
       return;
     }
     delete this["_saveTimer"];
 
-    var doc = Cc["@mozilla.org/xmlextras/domparser;1"]
-        .createInstance(Ci.nsIDOMParser)
-        .parseFromString("<UserScriptConfig></UserScriptConfig>", "text/xml");
-
+    var doc = Scriptish_Services.dp.parseFromString(
+        "<UserScriptConfig/>", "text/xml");
     var scripts = this._scripts;
     var len = scripts.length;
     var firstChild = doc.firstChild;
@@ -147,11 +131,13 @@ Config.prototype = {
     }
   },
 
-  uninstall: function(aIndx) {
-    var script = this._scripts[aIndx];
-    var idx = this._find(script.id);
-    this._scripts.splice(aIndx, 1);
-    script.uninstallProcess();
+  uninstallScripts: function() {
+    for (var i = 0, script; script = this._scripts[i]; i++) {
+      if (script.needsUninstall) {
+        this._scripts.splice(i, 1);
+        script.uninstallProcess();
+      }
+    }
   },
 
   get _scriptDir() {
@@ -160,22 +146,17 @@ Config.prototype = {
     return tools.Scriptish_getProfileFile(this._scriptFoldername);
   },
 
-  /**
-   * Create an empty configuration if none exist.
-   */
+  // Creates an empty configuration if none exist.
   _initScriptDir: function() {
     var dir = this._scriptDir;
-
-    // if the folder does not exist
-    if (!dir.exists()) {
-      dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
-
-      // create config.xml file
-      var configStream = Scriptish_getWriteStream(this._configFile);
-      var xml = "<UserScriptConfig/>";
-      configStream.write(xml, xml.length);
-      configStream.close();
-    }
+    if (dir.exists()) return;
+    // create script folder
+    dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
+    // create config.xml file
+    var configStream = Scriptish_getWriteStream(this._configFile);
+    var xml = "<UserScriptConfig/>";
+    configStream.write(xml, xml.length);
+    configStream.close();
   },
 
   get scripts() { return this._scripts.concat(); },
@@ -186,7 +167,8 @@ Config.prototype = {
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
     if (script.enabled && !script.needsUninstall && script.matchesURL(href)) {
-      gmService.injectScripts([script], href, unsafeWin, this.chromeWin);
+      Scriptish_Services.scriptish.injectScripts(
+          [script], href, unsafeWin, this.chromeWin);
     }
   },
 

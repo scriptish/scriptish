@@ -1,11 +1,6 @@
-// this file is the JavaScript backing for the UI wrangling which happens in
-// browser.xul. It also initializes the Scriptish singleton which contains
-// all the main injection logic, though that should probably be a proper XPCOM
-// service and wouldn't need to be initialized in that case.
-
 Components.utils.import("resource://scriptish/content/browser.js");
 Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_getConfig.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_config.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
@@ -77,7 +72,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   }, false);
 
   this.toolsInstall.addEventListener("command", function(aEvt) {
-    Config_downloader.startInstall(gBrowser.currentURI);
+    Scriptish_configDownloader.startInstall(gBrowser.currentURI);
   }, false);
 
   var toggleFunc = function() { Scriptish_BrowserUIM.onToggleStatus() };
@@ -451,7 +446,7 @@ function Scriptish_showPopup(aEvent) {
       return urls.some(testMatchURL);
     }
 
-    return Scriptish_getConfig().getMatchingScripts(testMatchURLs);
+    return Scriptish_config.getMatchingScripts(testMatchURLs);
   }
 
   function appendScriptToPopup(script) {
@@ -540,7 +535,7 @@ Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
 Scriptish_BrowserUI.viewContextItemClicked = function() {
-  Config_downloader.startViewScript(
+  Scriptish_configDownloader.startViewScript(
       Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
 };
 

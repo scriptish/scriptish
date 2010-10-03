@@ -1,20 +1,13 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = [];
+Components.utils.import("resource://scriptish/utils/Scriptish_config.js");
+Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://gre/modules/AddonManager.jsm");
-
-Scriptish_AddonProvider = {
+AddonManagerPrivate.registerProvider({
   getAddonByID: function(aId, aCallback) {
-    aCallback(gmService.config.getScriptById(aId));
+    aCallback(Scriptish_config.getScriptById(aId));
   },
-
   getAddonsByTypes: function(aTypes, aCallback) {
     if (aTypes && aTypes.indexOf("userscript") < 0) aCallback([]);
-    else aCallback(gmService.config.scripts);
+    else aCallback(Scriptish_config.scripts);
   }
-}
-
-AddonManagerPrivate.registerProvider(Scriptish_AddonProvider);
+});

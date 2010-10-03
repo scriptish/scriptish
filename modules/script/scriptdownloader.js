@@ -2,7 +2,7 @@ var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_getConfig.js");
+Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
@@ -51,7 +51,7 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
     if (/text\/html/i.test(this.req_.getResponseHeader("Content-Type"))) {
       this.req_.abort();
 
-      gmService.ignoreNextScript();
+      Scriptish_Services.scriptish.ignoreNextScript();
 
       if (this.contentWin) this.contentWin.location.href = this.uri_.spec;
       return;
@@ -71,7 +71,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     var source = this.req_.responseText;
 
-    this.script = Scriptish_getConfig().parse(source, this.uri_);
+    this.script = Scriptish_config.parse(source, this.uri_);
 
     var file = Cc["@mozilla.org/file/directory_service;1"]
                    .getService(Ci.nsIProperties)
@@ -245,7 +245,7 @@ ScriptDownloader.prototype.installScript = function() {
     Scriptish_alert(this.dependencyError);
   } else if (this.dependenciesLoaded_) {
     var script = this.script;
-    Scriptish_getConfig().install(script);
+    Scriptish_config.install(script);
 
     // notification that install is complete
     var msg = "'" + script.name;

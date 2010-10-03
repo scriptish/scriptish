@@ -350,7 +350,7 @@ Script.prototype = {
         this.delayInjection = true;
 
         // Redownload dependencies.
-        Config_downloader.refetchDependencies(this);
+        Scriptish_configDownloader.refetchDependencies(this);
       }
     }
     this.updateProcess();
@@ -471,7 +471,7 @@ Script.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
-    if (pbs.privateBrowsingEnabled) this._downloadURL = null;
+    if (Scriptish_Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
 
     this._modified = this._file.lastModifiedTime;
     this._dependhash = tools.Scriptish_sha1(this._rawMeta);
@@ -492,7 +492,8 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
   var tools = {};
   var script = new Script(aConfig);
 
-  if (aURI && !pbs.privateBrowsingEnabled) script._downloadURL = aURI.spec;
+  if (aURI && !Scriptish_Services.pbs.privateBrowsingEnabled)
+    script._downloadURL = aURI.spec;
 
   // read one line at a time looking for start meta delimiter or EOF
   var lines = aSource.match(metaRegExp);

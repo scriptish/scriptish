@@ -1,11 +1,15 @@
-Components.utils.import("resource://scriptish/addonprovider.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js");
-Components.utils.import("resource://scriptish/third-party/Scriptish_openFolder.js");
+
+(function($){
+var Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/addonprovider.js");
+Cu.import("resource://scriptish/utils/Scriptish_config.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js");
+Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js");
 
 window.addEventListener("load", function() {
-  var $ = function(aID) document.getElementById(aID);
-
   function addonIsInstalledScript(aAddon) {
     if (!aAddon || "userscript" != aAddon.type || aAddon.needsUninstall)
       return false;
@@ -40,14 +44,7 @@ window.addEventListener("load", function() {
       "name", Scriptish_stringBundle("userscripts"));
 }, false);
 
-window.addEventListener("unload", function() {
-  var tools = {};
-  Cu.import("resource://scriptish/constants.js", tools);
+window.addEventListener(
+    "unload", Scriptish_hitch(Scriptish_config, "uninstallScripts"), false);
 
-  var config = tools.gmService.config;
-  var scripts = config.scripts;
-
-  for (var i = scripts.length - 1; i >= 0; i--) {
-    if (scripts[i].needsUninstall) config.uninstall(i);
-  }
-}, false);
+})(function(aID) document.getElementById(aID));

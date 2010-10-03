@@ -1,9 +1,7 @@
-var EXPORTED_SYMBOLS = ["Config_downloader"];
+var EXPORTED_SYMBOLS = ["Scriptish_configDownloader"];
+Components.utils.import("resource://scriptish/script/scriptdownloader.js");
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/script/scriptdownloader.js");
-
-var Config_downloader = {
+var Scriptish_configDownloader = {
   startInstall: function(aURI, aWin) {
     new ScriptDownloader(aURI, aWin).startInstall();
   },
