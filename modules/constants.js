@@ -17,3 +17,11 @@ XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
 XPCOMUtils.defineLazyServiceGetter(
     Scriptish_Services, "pbs", "@mozilla.org/privatebrowsing;1",
     "nsIPrivateBrowsingService");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
+    "nsIClipboardHelper");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "as", "@mozilla.org/alerts-service;1",
+    "nsIAlertsService");
