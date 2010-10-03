@@ -26,3 +26,11 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
     Scriptish_Services, "as", "@mozilla.org/alerts-service;1",
     "nsIAlertsService");
+
+XPCOMUtils.defineLazyServiceGetter(
+  Scriptish_Services, "ass", "@mozilla.org/appshell/appShellService;1",
+    "nsIAppShellService");
+
+XPCOMUtils.defineLazyServiceGetter(
+  Scriptish_Services, "mssl", "@mozilla.org/moz/jssubscript-loader;1",
+    "mozIJSSubScriptLoader");
