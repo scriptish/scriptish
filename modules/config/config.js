@@ -54,33 +54,20 @@ Config.prototype = {
   },
 
   installIsUpdate: function(script) {
-    return this._find(script) > -1;
+    return this._find(script.id) > -1;
   },
 
   addScript: function(aScript) {
     this._scripts.push(aScript);
   },
 
-  _find: function(aScript) {
-    var id = aScript.id;
+  _find: function(aID, aType) {
     var scripts = this._scripts;
-
-    for (var i = 0, script; script = scripts[i]; i++) {
-      if (script.id == id) return i;
-    }
-
-    return -1;
+    for (var i = 0, script; script = scripts[i]; i++)
+      if (script.id == aID) return ("script" == aType) ? script : i;
+    return ("script" == aType) ? null : -1;
   },
-
-  getScriptById: function(aId) {
-    for (var i = 0, script; script = this._scripts[i]; i++) {
-      if (script.id === aId) {
-        return script;
-      }
-    }
-
-    return null;
-  },
+  getScriptById: function(aID) this._find(aID, "script"),
 
   _load: function() {
     var domParser = Cc["@mozilla.org/xmlextras/domparser;1"]
@@ -143,7 +130,7 @@ Config.prototype = {
   },
 
   install: function(aNewScript) {
-    var existingIndex = this._find(aNewScript);
+    var existingIndex = this._find(aNewScript.id);
     var exists = existingIndex > -1;
     if (exists) {
       var oldScript = this._scripts[existingIndex];
@@ -162,7 +149,7 @@ Config.prototype = {
 
   uninstall: function(aIndx) {
     var script = this._scripts[aIndx];
-    var idx = this._find(script);
+    var idx = this._find(script.id);
     this._scripts.splice(aIndx, 1);
     script.uninstallProcess();
   },
