@@ -6,7 +6,8 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var Scriptish_Services = {
   get dp() Cc["@mozilla.org/xmlextras/domparser;1"]
-      .createInstance(Ci.nsIDOMParser)
+      .createInstance(Ci.nsIDOMParser),
+  get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError)
 };
 
 XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
