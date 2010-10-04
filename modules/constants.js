@@ -1,8 +1,9 @@
-var EXPORTED_SYMBOLS = [ "Cc", "Ci", "Scriptish_Services"];
+var EXPORTED_SYMBOLS = [ "Cc", "Ci", "XPCOMUtils", "Services", "Scriptish_Services"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Scriptish_Services = {
   get dp() Cc["@mozilla.org/xmlextras/domparser;1"]

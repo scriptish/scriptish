@@ -3,7 +3,6 @@ var EXPORTED_SYMBOLS = ["Scriptish_logError", "Scriptish_log"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://gre/modules/Services.jsm");
 
 // Utility to create an error message in the log without throwing an error.
 function Scriptish_logError(e, opt_warn, fileName, lineNumber) {

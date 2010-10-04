@@ -1,12 +1,11 @@
 var EXPORTED_SYMBOLS = ["Scriptish_BrowserUIM"];
 
 const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_setEnabled.js");
 Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
 
 function Scriptish_BrowserUIM(aWin, aBrowserUI) {
   this._win = aWin;

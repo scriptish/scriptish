@@ -3,7 +3,6 @@ var EXPORTED_SYMBOLS = ["Scriptish_getBinaryContents"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-Cu.import("resource://gre/modules/Services.jsm");
 
 const Scriptish_getBinaryContents = function(aFile) {
     var channel = Services.io.newChannelFromURI(Scriptish_getUriFromFile(aFile));

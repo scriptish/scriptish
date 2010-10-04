@@ -4,8 +4,6 @@ const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
 
 const serviceFilename = Components.stack.filename;
 

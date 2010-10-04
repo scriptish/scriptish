@@ -1,8 +1,5 @@
-
 var EXPORTED_SYMBOLS = ["Scriptish_prefRoot", "Scriptish_PrefManager"];
-
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/constants.js");
 
 const MIN_INT_32 = -0x80000000;
 const MAX_INT_32 = 0x7FFFFFFF;
