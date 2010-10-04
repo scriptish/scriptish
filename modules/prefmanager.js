@@ -12,58 +12,43 @@ var Scriptish_prefRoot = new Scriptish_PrefManager();
  * "extensions.scriptish." prefix is assumed.
  */
 function Scriptish_PrefManager(startPoint) {
-  if (!startPoint) {
-    startPoint = "";
-  }
-
+  if (!startPoint) startPoint = "";
   startPoint = "extensions.scriptish." + startPoint;
 
-  var pref = Cc["@mozilla.org/preferences-service;1"]
-                 .getService(Ci.nsIPrefService)
-                 .getBranch(startPoint);
+  var pref = Services.prefs.getBranch(startPoint);
 
   var observers = {};
-  const nsISupportsString = Ci.nsISupportsString;
 
-  /**
-   * whether a preference exists
-   */
+  // whether a preference exists
   this.exists = function(prefName) {
     return pref.getPrefType(prefName) != 0;
-  };
-
-  /**
-   * enumerate preferences
-   */
-  this.listValues = function() {
-    return pref.getChildList("", {});
   }
 
-  /**
-   * returns the named preference, or defaultValue if it does not exist
-   */
+  // enumerate preferences
+  this.listValues = function() pref.getChildList("", {});
+
+  // returns the named preference, or defaultValue if it does not exist
   this.getValue = function(prefName, defaultValue) {
     var prefType = pref.getPrefType(prefName);
 
     // underlying preferences object throws an exception if pref doesn't exist
-    if (prefType == pref.PREF_INVALID) {
+    if (prefType == pref.PREF_INVALID)
       return defaultValue;
-    }
 
     try {
       switch (prefType) {
         case pref.PREF_STRING:
-          return pref.getComplexValue(prefName, nsISupportsString).data;
+          return pref.getComplexValue(prefName, Ci.nsISupportsString).data;
         case pref.PREF_BOOL:
           return pref.getBoolPref(prefName);
         case pref.PREF_INT:
           return pref.getIntPref(prefName);
       }
-    } catch(ex) {
+    } catch(e) {
       return defaultValue != undefined ? defaultValue : null;
     }
     return null;
-  };
+  }
 
   /**
    * sets the named preference to the specified value. values must be strings,
@@ -95,17 +80,15 @@ function Scriptish_PrefManager(startPoint) {
     // underlying preferences object throws an exception if new pref has a
     // different type than old one. i think we should not do this, so delete
     // old pref first if this is the case.
-    if (this.exists(prefName) && prefType != typeof(this.getValue(prefName))) {
+    if (this.exists(prefName) && prefType != typeof(this.getValue(prefName)))
       this.remove(prefName);
-    }
 
     // set new value using correct method
     switch (prefType) {
       case "string":
-        var str = Cc["@mozilla.org/supports-string;1"]
-                      .createInstance(nsISupportsString);
+        var str = Scriptish_Services.ss;
         str.data = value;
-        pref.setComplexValue(prefName, nsISupportsString, str);
+        pref.setComplexValue(prefName, Ci.nsISupportsString, str);
         break;
       case "boolean":
         pref.setBoolPref(prefName, value);
@@ -114,40 +97,32 @@ function Scriptish_PrefManager(startPoint) {
         pref.setIntPref(prefName, Math.floor(value));
         break;
     }
-  };
+  }
 
-  /**
-   * deletes the named preference or subtree
-   */
-  this.remove = function(prefName) {
-    pref.deleteBranch(prefName);
-  };
+  // deletes the named preference or subtree
+  this.remove = function(prefName) { pref.deleteBranch(prefName); }
 
-  /**
-   * call a function whenever the named preference subtree changes
-   */
+  // call a function whenever the named preference subtree changes
   this.watch = function(prefName, watcher) {
     // construct an observer
     var observer = {
       observe:function(subject, topic, prefName) {
         watcher(prefName);
       }
-    };
+    }
 
     // store the observer in case we need to remove it later
     observers[watcher] = observer;
 
     pref.QueryInterface(Ci.nsIPrefBranchInternal).
       addObserver(prefName, observer, false);
-  };
+  }
 
-  /**
-   * stop watching
-   */
+  // stop watching
   this.unwatch = function(prefName, watcher) {
     if (observers[watcher]) {
-      pref.QueryInterface(Ci.nsIPrefBranchInternal).
-        removeObserver(prefName, observers[watcher]);
+      pref.QueryInterface(Ci.nsIPrefBranchInternal)
+          .removeObserver(prefName, observers[watcher]);
     }
-  };
+  }
 }

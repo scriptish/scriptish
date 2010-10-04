@@ -8,7 +8,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 var Scriptish_Services = {
   get dp() Cc["@mozilla.org/xmlextras/domparser;1"]
       .createInstance(Ci.nsIDOMParser),
-  get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError)
+  get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
+  get ss() Cc["@mozilla.org/supports-string;1"]
+      .createInstance(Ci.nsISupportsString)
 };
 
 XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
@@ -31,7 +33,3 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
   Scriptish_Services, "ass", "@mozilla.org/appshell/appShellService;1",
     "nsIAppShellService");
-
-XPCOMUtils.defineLazyServiceGetter(
-  Scriptish_Services, "mssl", "@mozilla.org/moz/jssubscript-loader;1",
-    "mozIJSSubScriptLoader");

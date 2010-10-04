@@ -11,7 +11,7 @@ function ScriptishService() {
   this.wrappedJSObject = this;
 
   this.updateChk = function() {
-    Scriptish_Services.mssl
+    Services.scriptloader
         .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
     this.updateChk = false;
   }
