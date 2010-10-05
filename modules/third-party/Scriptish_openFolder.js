@@ -32,10 +32,7 @@ Contributor(s):
   Erik Vold <erikvvold@gmail.com>
 ***** END LICENSE BLOCK ****/
 var EXPORTED_SYMBOLS = ["Scriptish_openFolder"];
-
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://scriptish/constants.js");
 
 const protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
                             .getService(Ci.nsIExternalProtocolService);

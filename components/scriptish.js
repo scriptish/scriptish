@@ -4,16 +4,8 @@ const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
 
 const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
 const Cu = Components.utils;
-
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-
-XPCOMUtils.defineLazyServiceGetter(
-    this, "appSvc", "@mozilla.org/appshell/appShellService;1",
-    "nsIAppShellService");
+Cu.import("resource://scriptish/constants.js");
 
 const serviceFilename = Components.stack.filename;
 
@@ -21,8 +13,7 @@ function ScriptishService() {
   this.wrappedJSObject = this;
 
   this.updateChk = function() {
-    Cc["@mozilla.org/moz/jssubscript-loader;1"]
-        .getService(Ci.mozIJSSubScriptLoader)
+    Services.scriptloader
         .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
     this.updateChk = false;
   }
@@ -177,7 +168,7 @@ ScriptishService.prototype = {
           url,
           wrappedContentWin.document,
           unsafeContentWin,
-          appSvc.hiddenDOMWindow,
+          Scriptish_Services.ass.hiddenDOMWindow,
           chromeWin,
           gmBrowser);
 

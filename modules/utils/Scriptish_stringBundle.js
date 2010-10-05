@@ -1,9 +1,9 @@
 var EXPORTED_SYMBOLS = ["Scriptish_stringBundle"];
 
 const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://gre/modules/NetUtil.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
 
 const defaultBundle = Services.strings.createBundle("chrome://scriptish/locale/scriptish.properties");
 const engBundle = Services.strings.createBundle((function(){

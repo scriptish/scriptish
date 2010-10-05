@@ -1,11 +1,9 @@
 var EXPORTED_SYMBOLS = ["GM_worker"];
 
 const Ci = Components.interfaces;
-const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
 
 const gTimer = new Timer();
 

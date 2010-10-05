@@ -4,7 +4,6 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-Cu.import("resource://gre/modules/Services.jsm");
 
 function Scriptish_getContents(file, charset) {
   if (!charset) charset = "UTF-8";

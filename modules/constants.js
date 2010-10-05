@@ -1,12 +1,16 @@
-var EXPORTED_SYMBOLS = [ "Cc", "Ci", "Scriptish_Services"];
+var EXPORTED_SYMBOLS = [ "Cc", "Ci", "XPCOMUtils", "Services", "Scriptish_Services"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Scriptish_Services = {
   get dp() Cc["@mozilla.org/xmlextras/domparser;1"]
-      .createInstance(Ci.nsIDOMParser)
+      .createInstance(Ci.nsIDOMParser),
+  get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
+  get ss() Cc["@mozilla.org/supports-string;1"]
+      .createInstance(Ci.nsISupportsString)
 };
 
 XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
@@ -25,3 +29,7 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
     Scriptish_Services, "as", "@mozilla.org/alerts-service;1",
     "nsIAlertsService");
+
+XPCOMUtils.defineLazyServiceGetter(
+  Scriptish_Services, "ass", "@mozilla.org/appshell/appShellService;1",
+    "nsIAppShellService");
