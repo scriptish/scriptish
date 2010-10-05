@@ -200,21 +200,29 @@ ScriptishService.prototype = {
   evalInSandbox: function(aScript, aSandbox) {
     var tools = {};
     var jsVer = aScript.jsversion;
+    var fileURL;
     Cu.import("resource://scriptish/logging.js", tools);
 
     try {
-      for (let [, req] in Iterator(aScript.requires))
-        Cu.evalInSandbox(req.textContent, aSandbox, jsVer, fileURLPrefix+req.fileURL, 1);
-
-      var src = aScript.textContent;
-      try {
-        Cu.evalInSandbox(src, aSandbox, jsVer, fileURLPrefix+aScript.fileURL, 1);
-      } catch (e if e.message == "return not in function") {
-        Cu.evalInSandbox(
-            "(function(){"+src+"})()", aSandbox, jsVer, fileURLPrefix+aScript.fileURL, 1);
+      for (let [, req] in Iterator(aScript.requires)) {
+        fileURL = req.fileURL;
+        Cu.evalInSandbox(req.textContent, aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       }
     } catch (e) {
-      tools.Scriptish_logError(e, 0, e.fileName, e.lineNumber);
+      return tools.Scriptish_logError(e, 0, fileURL, e.lineNumber);
+    }
+
+    var src = aScript.textContent;
+    fileURL = aScript.fileURL;
+    try {
+      try {
+        Cu.evalInSandbox(src, aSandbox, jsVer, fileURLPrefix+fileURL, 1);
+      } catch (e if e.message == "return not in function") {
+        Cu.evalInSandbox(
+            "(function(){"+src+"})()", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
+      }
+    } catch (e) {
+      tools.Scriptish_logError(e, 0, fileURL, e.lineNumber);
     }
   },
 
