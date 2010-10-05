@@ -6,6 +6,7 @@ const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/logging.js");
 
 const serviceFilename = Components.stack.filename;
 
@@ -189,10 +190,8 @@ ScriptishService.prototype = {
   },
 
   evalInSandbox: function(aScript, aSandbox) {
-    var tools = {};
     var jsVer = aScript.jsversion;
     var fileURL;
-    Cu.import("resource://scriptish/logging.js", tools);
 
     try {
       for (let [, req] in Iterator(aScript.requires)) {
@@ -200,7 +199,7 @@ ScriptishService.prototype = {
         Cu.evalInSandbox(req.textContent, aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       }
     } catch (e) {
-      return tools.Scriptish_logError(e, 0, fileURL, e.lineNumber);
+      return Scriptish_logError(e, 0, fileURL, e.lineNumber);
     }
 
     var src = aScript.textContent;
@@ -213,7 +212,7 @@ ScriptishService.prototype = {
             "(function(){"+src+"})()", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       }
     } catch (e) {
-      tools.Scriptish_logError(e, 0, fileURL, e.lineNumber);
+      Scriptish_logError(e, 0, fileURL, e.lineNumber);
     }
   },
 
