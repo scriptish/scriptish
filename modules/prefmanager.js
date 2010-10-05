@@ -4,7 +4,9 @@ Components.utils.import("resource://scriptish/constants.js");
 const MIN_INT_32 = -0x80000000;
 const MAX_INT_32 = 0x7FFFFFFF;
 
-var Scriptish_prefRoot = new Scriptish_PrefManager();
+XPCOMUtils.defineLazyGetter(this, "Scriptish_prefRoot", function() {
+  return new Scriptish_PrefManager();
+});
 
 /**
  * Simple API on top of preferences for extensions.scriptish.
