@@ -2,6 +2,8 @@ const DESCRIPTION = "ScriptishService";
 const CONTRACTID = "@scriptish.erikvold.com/scriptish-service;1";
 const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
 
+const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -202,14 +204,14 @@ ScriptishService.prototype = {
 
     try {
       for (let [, req] in Iterator(aScript.requires))
-        Cu.evalInSandbox(req.textContent, aSandbox, jsVer, req.fileURL, 1);
+        Cu.evalInSandbox(req.textContent, aSandbox, jsVer, fileURLPrefix+req.fileURL, 1);
 
       var src = aScript.textContent;
       try {
-        Cu.evalInSandbox(src, aSandbox, jsVer, aScript.fileURL, 1);
+        Cu.evalInSandbox(src, aSandbox, jsVer, fileURLPrefix+aScript.fileURL, 1);
       } catch (e if e.message == "return not in function") {
         Cu.evalInSandbox(
-            "(function(){"+src+"})()", aSandbox, jsVer, aScript.fileURL, 1);
+            "(function(){"+src+"})()", aSandbox, jsVer, fileURLPrefix+aScript.fileURL, 1);
       }
     } catch (e) {
       tools.Scriptish_logError(e, 0, e.fileName, e.lineNumber);
