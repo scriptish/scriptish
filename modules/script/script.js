@@ -52,7 +52,6 @@ function Script(config) {
   this._requires = [];
   this._resources = [];
   this._screenshots = [];
-  this._unwrap = false;
   this._noframes = false;
   this._dependFail = false
   this.delayInjection = false;
@@ -202,7 +201,6 @@ Script.prototype = {
 
   get requires() { return this._requires.concat(); },
   get resources() { return this._resources.concat(); },
-  get unwrap() { return this._unwrap; },
   get noframes() { return this._noframes; },
   get jsversion() { return this._jsversion || getMaxJSVersion() },
 
@@ -315,7 +313,6 @@ Script.prototype = {
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
-    this._unwrap = newScript._unwrap;
     this._noframes = newScript._noframes;
     this._version = newScript._version;
 
@@ -418,10 +415,6 @@ Script.prototype = {
       scriptNode.appendChild(resourceNode);
     }
 
-    if (this._unwrap) {
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(doc.createElement("Unwrap"));
-    }
     if (this._noframes) {
       scriptNode.appendChild(doc.createTextNode("\n\t\t"));
       scriptNode.appendChild(doc.createElement("Noframes"));
@@ -632,7 +625,6 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
           }
         }
         continue;
-      case "unwrap":
       case "noframes":
         if (!value) script["_" + header] = true;
         continue;
@@ -720,7 +712,6 @@ Script.load = function load(aConfig, aNode) {
         script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(childNode.firstChild.nodeValue.trim()));
         break;
       case "Noframes":
-      case "Unwrap":
         script["_" + childNode.nodeName.toLowerCase()] = true;
         break;
     }
