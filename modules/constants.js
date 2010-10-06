@@ -6,11 +6,15 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Scriptish_Services = {
+  get ch() Cc["@mozilla.org/security/hash;1"]
+      .createInstance(Ci.nsICryptoHash),
   get dp() Cc["@mozilla.org/xmlextras/domparser;1"]
       .createInstance(Ci.nsIDOMParser),
   get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
   get ss() Cc["@mozilla.org/supports-string;1"]
-      .createInstance(Ci.nsISupportsString)
+      .createInstance(Ci.nsISupportsString),
+  get suc() Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+      .createInstance(Ci.nsIScriptableUnicodeConverter)
 };
 
 XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
