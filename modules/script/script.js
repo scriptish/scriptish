@@ -1,5 +1,7 @@
 var EXPORTED_SYMBOLS = ["Script"];
 
+const valueSplitter = /(\S+)\s+([^\r\f\n]+)/;
+
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
@@ -387,7 +389,10 @@ Script.prototype = {
     len = this._screenshots.length;
     for (var j = 0; j < len; j++) {
       var screenshotNode = doc.createElement("Screenshot");
-      screenshotNode.appendChild(doc.createTextNode(this._screenshots[j].url));
+      var screenshot = this._screenshots[j];
+      screenshotNode.appendChild(doc.createTextNode(screenshot.url));
+      if (screenshot.thumbnailURL)
+        screenshotNode.setAttribute("thumb", screenshot.thumbnailURL);
       scriptNode.appendChild(doc.createTextNode("\n\t\t"));
       scriptNode.appendChild(screenshotNode);
     }
@@ -436,13 +441,11 @@ Script.prototype = {
     scriptNode.setAttribute("dependhash", this._dependhash);
     if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
 
-    if (this.homepageURL) {
+    if (this.homepageURL)
       scriptNode.setAttribute("homepageURL", this.homepageURL);
-    }
 
-    if (this._downloadURL) {
+    if (this._downloadURL)
       scriptNode.setAttribute("installurl", this._downloadURL);
-    }
 
     return scriptNode;
   },
@@ -556,7 +559,15 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
         script._matches.push(new MatchPattern(value));
         continue;
       case 'screenshot':
-        script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(value));
+        if (!value) continue;
+        var splitValue = value.match(valueSplitter);
+        if (splitValue) {
+          script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+              splitValue[1], splitValue[2]));
+        } else {
+          script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+              value));
+        }
         continue;
       case "icon":
       case "iconurl":
@@ -593,14 +604,14 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
         }
         continue;
       case "resource":
-        var res = value.match(/(\S+)\s+(.*)/);
+        var res = value.match(valueSplitter);
         if (res === null) {
           // NOTE: Unlocalized strings
           throw new Error("Invalid syntax for @resource declaration '" +
                           value + "'. Resources are declared like: " +
                           "@resource <name> <url>.");
         }
-         var resName = res[1];
+        var resName = res[1];
         if (previousResourceNames[resName]) {
           throw new Error("Duplicate resource name '" + resName + "' " +
                           "detected. Each resource must have a unique " +
@@ -709,7 +720,11 @@ Script.load = function load(aConfig, aNode) {
         script._resources.push(scriptResource);
         break;
       case "Screenshot":
-        script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(childNode.firstChild.nodeValue.trim()));
+        var thumb = "";
+        if (childNode.hasAttribute("thumb"))
+          thumb = childNode.getAttribute("thumb");
+        script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+            childNode.firstChild.nodeValue.trim(), thumb));
         break;
       case "Noframes":
         script["_" + childNode.nodeName.toLowerCase()] = true;
