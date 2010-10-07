@@ -1,5 +1,3 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_openInEditor"];
 
 const Cu = Components.utils;
@@ -10,13 +8,11 @@ Cu.import("resource://scriptish/utils/Scriptish_launchApplicationWithDoc.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-const Scriptish_openInEditor = function(script, parentWindow) {
+function Scriptish_openInEditor(script, parentWindow) {
   var file = script.editFile;
   var editor = Scriptish_getEditor(parentWindow);
-  if (!editor) {
-    // The user did not choose an editor.
-    return;
-  }
+  // The user did not choose an editor.
+  if (!editor) return;
 
   try {
     Scriptish_launchApplicationWithDoc(editor, file);

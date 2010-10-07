@@ -1,5 +1,3 @@
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_getEditor"];
 
 const Cu = Components.utils;
