@@ -3,7 +3,7 @@
 # Set up variables
 if [ "official" = "$1" ]; then
   # For official builds, use the version in install.rdf.
-  VER=`grep -Go 'em:version\>\(.*\)\<' install.rdf | grep -Go '>\(.*\)<' | sed -e 's/[><]*//g'`
+  VER=`grep -Go 'em:version\>\(.*\)\<' extension/install.rdf | grep -Go '>\(.*\)<' | sed -e 's/[><]*//g'`
 else
   # For beta builds, generate a version number.
   VER=`date +"%Y.%m.%d.beta"`
@@ -12,11 +12,12 @@ XPI="scriptish-$VER.xpi"
 
 # Copy base structure to a temporary build directory and change to it
 echo "Creating working directory ..."
+cd extension
 rm -rf build
 mkdir build
 cp -r \
   chrome.manifest components content defaults install.rdf license LICENSE.txt \
-       locale modules skin \
+      locale modules skin \
   build/
 cd build
 
@@ -25,8 +26,9 @@ find . -depth -name '*~' -exec rm -rf "{}" \;
 find . -depth -name '#*' -exec rm -rf "{}" \;
 
 echo "Creating $XPI ..."
-zip -qr9XD "../$XPI" *
+zip -qr9XD "../../$XPI" *
 
 echo "Cleaning up temporary files ..."
 cd ..
 rm -rf build
+cd ..
