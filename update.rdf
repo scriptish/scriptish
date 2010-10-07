@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <RDF:Description about="urn:mozilla:extension:scriptish@erikvold.com">
+    <em:updates>
+      <RDF:Seq>
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.1b1</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0b1pre</em:minVersion>
+                <em:maxVersion>4.0b7pre</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b1.xpi</em:updateLink>
+                <em:updateHash>sha1:f55866f8af54e25cc31645ce019404e0e9c9a9f7</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.1b2</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0b5pre</em:minVersion>
+                <em:maxVersion>4.0b7pre</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b2.xpi</em:updateLink>
+                <em:updateHash>sha1:3807af3b00ab2cb7718f3531167f1dd5d1598ad7</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+      </RDF:Seq>
+    </em:updates>
+  </RDF:Description>
+</RDF:RDF>
