@@ -13,7 +13,9 @@ Links
 ----------
 
 * Addons.Mozilla.Org (AMO): https://addons.mozilla.org/en-US/firefox/addon/231203
-* Source Code:              http://github.com/erikvold/scriptish
-* Issues:                   http://github.com/erikvold/scriptish/issues
-* Wiki:                     http://github.com/erikvold/scriptish/wiki
 * Userscripts:              http://userscripts.org
+* Wiki:                     http://github.com/erikvold/scriptish/wiki
+* Issues:                   http://github.com/erikvold/scriptish/issues
+* Google Group:             http://groups.google.com/group/scriptish
+* Source Code:              http://github.com/erikvold/scriptish
+* 
