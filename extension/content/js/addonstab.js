@@ -18,7 +18,7 @@ window.addEventListener("load", function() {
 
   gViewController.commands.cmd_scriptish_userscript_edit = {
     isEnabled: addonIsInstalledScript,
-    doCommand: Scriptish_openInEditor
+    doCommand: function(aAddon) { Scriptish_openInEditor(aAddon, window); }
   };
   gViewController.commands.cmd_scriptish_userscript_show = {
     isEnabled: addonIsInstalledScript,
