@@ -1,4 +1,3 @@
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["ScriptResource"];
 
 const Cu = Components.utils;
@@ -37,10 +36,7 @@ ScriptResource.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_getBinaryContents.js", tools);
 
-    var appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
-                     .getService(Ci.nsIAppShellService);
-
-    var window = appSvc.hiddenDOMWindow;
+    var window = Scriptish_Services.ass.hiddenDOMWindow;
     var binaryContents = tools.Scriptish_getBinaryContents(this._file);
 
     var mimetype = this._mimetype;

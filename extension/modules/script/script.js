@@ -347,8 +347,9 @@ Script.prototype = {
         // This flag needs to be set now so the scriptDownloader can turn it off
         this.delayInjection = true;
 
+        Cu.import("resource://scriptish/config/configdownloader.js", tools);
         // Redownload dependencies.
-        Scriptish_configDownloader.refetchDependencies(this);
+        tools.Scriptish_configDownloader.refetchDependencies(this);
       }
     }
     this.updateProcess();
