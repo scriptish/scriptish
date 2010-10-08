@@ -7,6 +7,7 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
+Cu.import("resource://scriptish/utils/Scriptish_getProfileFile.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
@@ -140,11 +141,7 @@ Config.prototype = {
     }
   },
 
-  get _scriptDir() {
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_getProfileFile.js", tools);
-    return tools.Scriptish_getProfileFile(this._scriptFoldername);
-  },
+  get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),
 
   // Creates an empty configuration if none exist.
   _initScriptDir: function() {
