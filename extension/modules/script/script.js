@@ -9,6 +9,7 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
+Cu.import("resource://scriptish/utils/Scriptish_parseScriptName.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
@@ -22,13 +23,19 @@ const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 var getMaxJSVersion = function(){ return JSVersions[2]; };
 
+function noUpdateFound(aListener) {
+  if ("onNoUpdateAvailable" in aListener) aListener.onNoUpdateAvailable(this);
+  if ("onUpdateFinished" in aListener) aListener.onUpdateFinished(this);
+}
+
 // Implements Addon https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
 function Script(config) {
   this._config = config;
   this._observers = [];
 
-  this._homepageURL = null; // Only for scripts not installed
-  this._downloadURL = null; // Only for scripts not installed
+  this._homepageURL = null;
+  this._downloadURL = null;
+  this._updateURL = null;
   this._tempFile = null; // Only for scripts not installed
   this._basedir = null;
   this._filename = null;
@@ -63,7 +70,6 @@ function Script(config) {
 
 Script.prototype = {
   isCompatible: true,
-  providesUpdatesSecurely: true,
   blocklistState: 0,
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
@@ -95,13 +101,19 @@ Script.prototype = {
 
   get updateDate () { return new Date(parseInt(this._modified)); },
 
-  findUpdates: function(aListener) {
+  findUpdates: function(aListener, aReason) {
     if ("onNoCompatibilityUpdateAvailable" in aListener)
       aListener.onNoCompatibilityUpdateAvailable(this);
-    if ("onNoUpdateAvailable" in aListener)
-      aListener.onNoUpdateAvailable(this);
-    if ("onUpdateFinished" in aListener)
-      aListener.onUpdateFinished(this);
+
+    switch (aReason) {
+      case AddonManager.UPDATE_WHEN_NEW_APP_DETECTED:
+      case AddonManager.UPDATE_WHEN_NEW_APP_INSTALLED:
+      case AddonManager.UPDATE_WHEN_ADDON_INSTALLED:
+        return noUpdateFound();
+    }
+
+    // TODO: check for update
+    noUpdateFound();
   },
 
   uninstall: function() {
@@ -158,7 +170,6 @@ Script.prototype = {
   set id(aId) {
     this._id = aId.replace(nonIdChars, ''); // remove unacceptable chars
   },
-  get homepageURL() { return this._homepageURL; },
   get name() { return this._name; },
   get namespace() { return this._namespace; },
   get prefroot() { 
@@ -180,6 +191,7 @@ Script.prototype = {
     return this._contributors;
   },
   addContributor: function(aContributor) {
+    if (!aContributor) return;
     this._contributors.push(aContributor);
   },
   get description() { return this._description; },
@@ -193,10 +205,12 @@ Script.prototype = {
   get excludes() { return this._excludes.concat(); },
   get matches() { return this._matches.concat(); },
   addInclude: function(aPattern) {
+    if (!aPattern) return;
     this._includes.push(aPattern);
     this._includeRegExps.push(Scriptish_convert2RegExp(aPattern));
   },
   addExclude: function(aPattern) {
+    if (!aPattern) return;
     this._excludes.push(aPattern);
     this._excludeRegExps.push(Scriptish_convert2RegExp(aPattern));
   },
@@ -205,6 +219,22 @@ Script.prototype = {
   get resources() { return this._resources.concat(); },
   get noframes() { return this._noframes; },
   get jsversion() { return this._jsversion || getMaxJSVersion() },
+
+  get homepageURL() this._homepageURL,
+  get updateURL() {
+    var url = this._updateURL || this._downloadURL;
+    // make sure that the updateURL is http or https
+    if (!url || !url.match(/^https?:\/\//)) return null;
+    var usoURL = url.match(/^http:\/\/userscripts.org\/[^?]*\.user\.js/);
+    if (usoURL)
+      return usoURL[0].replace(/^http/, "https").replace(/\.user\.js$/,".meta.js");
+    return url;
+  },
+  get providesUpdatesSecurely() {
+    var url = this.updateURL();
+    if (!url || !url.match(/^https:\/\//)) return false;
+    return true;
+  },
 
   get _file() {
     var file = this._basedirFile;
@@ -444,9 +474,10 @@ Script.prototype = {
 
     if (this.homepageURL)
       scriptNode.setAttribute("homepageURL", this.homepageURL);
-
     if (this._downloadURL)
-      scriptNode.setAttribute("installurl", this._downloadURL);
+      scriptNode.setAttribute("downloadURL", this._downloadURL);
+    if (this._updateURL)
+        scriptNode.setAttribute("updateURL", this._updateURL);
 
     return scriptNode;
   },
@@ -454,7 +485,7 @@ Script.prototype = {
   installProcess: function() {
     this._initFile(this._tempFile);
     this._tempFile = null;
-    // if icon had a file to download, then move the file
+
     if (this.icon.hasDownloadURL())
       this.icon._initFile();
 
@@ -485,7 +516,6 @@ Script.prototype = {
 };
 
 Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
-  var tools = {};
   var script = new Script(aConfig);
 
   if (aURI && !Scriptish_Services.pbs.privateBrowsingEnabled)
@@ -517,24 +547,27 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
     if (match === null) continue;
 
     var header = match[1].toLowerCase();
-    var value = match[2];
+    var value = (match[2]+"").trimRight();
 
     switch (header) {
       case "id":
-        if (value) script.id = value;
+        value && (script.id = value);
         continue;
       case "author":
-        if (!script.author) script.author = value;
+        script.author && value && (script.author = value);
         continue;
       case "name":
       case "namespace":
       case "description":
       case "version":
-        script["_" + header] = value;
+        value && (script["_" + header] = value);
         continue;
+      case "updateurl":
+          if (!value.match(/^https?:\/\//)) script._updateURL = value;
+          continue;
       case "homepage":
       case "homepageurl":
-        script._homepageURL = value;
+        value && (script._homepageURL = value);
         continue;
       case "jsversion":
         var jsVerIndx = JSVersions.indexOf(value);
@@ -557,7 +590,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
         script.addExclude(value);
         continue;
       case "match":
-        script._matches.push(new MatchPattern(value));
+        value && script._matches.push(new MatchPattern(value));
         continue;
       case 'screenshot':
         if (!value) continue;
@@ -572,6 +605,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
         continue;
       case "icon":
       case "iconurl":
+        if (!value) continue;
         script._rawMeta += header + '\0' + value + '\0';
         // aceept data uri schemes for image MIME types
         if (/^data:image\//i.test(value)){
@@ -590,6 +624,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
         }
         continue;
       case "require":
+        if (!value) continue;
         try {
           var reqUri = NetUtil.newURI(value, null, aURI);
           var scriptRequire = new ScriptRequire(script);
@@ -605,6 +640,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
         }
         continue;
       case "resource":
+        if (!value) continue;
         var res = value.match(valueSplitter);
         if (res === null) {
           // NOTE: Unlocalized strings
@@ -647,8 +683,7 @@ Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
 
   // if no meta info, default to reasonable values
   if (!script._name && aURI) {
-    Cu.import("resource://scriptish/utils/Scriptish_parseScriptName.js", tools);
-    script._name = tools.Scriptish_parseScriptName(
+    script._name = Scriptish_parseScriptName(
         (aUpdateScript && aUpdateScript.filename) || (aURI && aURI.spec));
   }
   if (!script._namespace && script._downloadURL)
@@ -665,8 +700,11 @@ Script.load = function load(aConfig, aNode) {
 
   script._filename = aNode.getAttribute("filename");
   script._basedir = aNode.getAttribute("basedir") || ".";
-  script._downloadURL = aNode.getAttribute("installurl") || null;
-  script._homepageURL = aNode.getAttribute("homepageURL") || null;
+  script._downloadURL = aNode.getAttribute("downloadURL")
+      || aNode.getAttribute("installurl") || null;
+  script._updateURL = aNode.getAttribute("updateURL") || null;
+  script._homepageURL = aNode.getAttribute("homepageURL")
+      || aNode.getAttribute("homepage") || null;
   script._jsversion = aNode.getAttribute("jsversion") || null;
 
   if (!script.fileExists()) {
