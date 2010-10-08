@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Set up variables
-if [ "official" = "$1" ]; then
+if [ "amo" = "$1" ] || [ "staging" = "$1" ]; then
   # For official builds, use the version in install.rdf.
   VER=`grep -Go 'em:version\>\(.*\)\<' extension/install.rdf | grep -Go '>\(.*\)<' | sed -e 's/[><]*//g'`
 else
@@ -20,6 +20,14 @@ cp -r \
       locale modules skin \
   build/
 cd build
+
+if [ "amo" = "$1" ]; then
+  (sed -e 's/<em\:update.*//g' install.rdf > install.rdf.$$ &&
+   mv install.rdf.$$ install.rdf)
+fi
+
+(sed -e 's/<!--.*//g' install.rdf > install.rdf.$$ &&
+ mv install.rdf.$$ install.rdf)
 
 echo "Cleaning up unwanted files ..."
 find . -depth -name '*~' -exec rm -rf "{}" \;
