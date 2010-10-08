@@ -70,7 +70,7 @@ Script.prototype = {
   get isActive() { return !this.appDisabled || !this.userDisabled },
   pendingOperations: 0,
   type: "userscript",
-  get sourceURI () { return NetUtil.newURI(this._downloadURL); },
+  get sourceURI () { return this._downloadURL && NetUtil.newURI(this._downloadURL); },
   get userDisabled() { return !this._enabled; },
   set userDisabled(val) {
     if (val == this.userDisabled) return val;
@@ -682,7 +682,8 @@ Script.load = function load(aConfig, aNode) {
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
         aConfig, Scriptish_getContents(script._file), 
-        NetUtil.newURI(script._downloadURL), script);
+        script._downloadURL && NetUtil.newURI(script._downloadURL),
+        script);
     script._dependhash = tools.Scriptish_sha1(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;

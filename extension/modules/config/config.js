@@ -181,7 +181,8 @@ Config.prototype = {
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           Scriptish_getContents(script._file),
-          NetUtil.newURI(script._downloadURL), script);
+          script._downloadURL && NetUtil.newURI(script._downloadURL),
+          script);
       script.updateFromNewScript(parsedScript);
     }
 
