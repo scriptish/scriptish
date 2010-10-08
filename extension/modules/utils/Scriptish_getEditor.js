@@ -33,9 +33,7 @@ const Scriptish_getEditor = function(parentWindow, change) {
   while (true) {
     Scriptish_log("Asking user to choose editor...");
     var nsIFilePicker = Ci.nsIFilePicker;
-    var filePicker = Cc["@mozilla.org/filepicker;1"]
-                         .createInstance(nsIFilePicker);
-
+    var filePicker = Scriptish_Services.fp;
     filePicker.init(
         parentWindow,
         Scriptish_stringBundle("editor.prompt"),
