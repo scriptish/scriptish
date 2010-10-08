@@ -10,6 +10,7 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_parseScriptName.js");
+Cu.import("resource://scriptish/script/scriptinstaller.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
@@ -73,6 +74,7 @@ Script.prototype = {
   blocklistState: 0,
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
+  applyBackgroundUpdates: false,
   get isActive() { return !this.appDisabled || !this.userDisabled },
   pendingOperations: 0,
   type: "userscript",
@@ -339,6 +341,7 @@ Script.prototype = {
     this._matches = newScript._matches;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript._homepageURL;
+    this._updateURL = newScript._updateURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this.author = newScript._author;
