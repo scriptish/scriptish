@@ -12,6 +12,8 @@ var Scriptish_Services = {
       .createInstance(Ci.nsIDOMParser),
   get ds() Cc["@mozilla.org/xmlextras/xmlserializer;1"]
       .createInstance(Ci.nsIDOMSerializer),
+  get fos() Cc["@mozilla.org/network/file-output-stream;1"]
+      .createInstance(Ci.nsIFileOutputStream),
   get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
   get ss() Cc["@mozilla.org/supports-string;1"]
       .createInstance(Ci.nsISupportsString),
