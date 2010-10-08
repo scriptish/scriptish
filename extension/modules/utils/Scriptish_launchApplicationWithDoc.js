@@ -8,8 +8,7 @@ const Scriptish_launchApplicationWithDoc = function(appFile, docFile) {
   if ("Darwin" == Services.appinfo.OS) {
     args = ["-a", appFile.path, docFile.path];
 
-    appFile = Cc["@mozilla.org/file/local;1"]
-        .createInstance(Ci.nsILocalFile);
+    appFile = Scriptish_Services.lf;
     appFile.followLinks = true;
     appFile.initWithPath("/usr/bin/open");
   }
