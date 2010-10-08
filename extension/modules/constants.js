@@ -10,6 +10,8 @@ var Scriptish_Services = {
       .createInstance(Ci.nsICryptoHash),
   get dp() Cc["@mozilla.org/xmlextras/domparser;1"]
       .createInstance(Ci.nsIDOMParser),
+  get ds() Cc["@mozilla.org/xmlextras/xmlserializer;1"]
+      .createInstance(Ci.nsIDOMSerializer),
   get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
   get ss() Cc["@mozilla.org/supports-string;1"]
       .createInstance(Ci.nsISupportsString),

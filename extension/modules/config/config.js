@@ -104,9 +104,7 @@ Config.prototype = {
     firstChild.appendChild(doc.createTextNode("\n"));
 
     var configStream = Scriptish_getWriteStream(this._configFile);
-    Cc["@mozilla.org/xmlextras/xmlserializer;1"]
-        .createInstance(Ci.nsIDOMSerializer)
-        .serializeToStream(doc, configStream, "utf-8");
+    Scriptish_Services.ds.serializeToStream(doc, configStream, "utf-8");
     configStream.close();
   },
 
