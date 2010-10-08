@@ -27,17 +27,22 @@ XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
 });
 
 XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "pbs", "@mozilla.org/privatebrowsing;1",
-    "nsIPrivateBrowsingService");
-
-XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
-    "nsIClipboardHelper");
-
-XPCOMUtils.defineLazyServiceGetter(
     Scriptish_Services, "as", "@mozilla.org/alerts-service;1",
     "nsIAlertsService");
 
 XPCOMUtils.defineLazyServiceGetter(
   Scriptish_Services, "ass", "@mozilla.org/appshell/appShellService;1",
     "nsIAppShellService");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
+    "nsIClipboardHelper");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "eps",
+    "@mozilla.org/uriloader/external-protocol-service;1",
+    "nsIExternalProtocolService");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "pbs", "@mozilla.org/privatebrowsing;1",
+    "nsIPrivateBrowsingService");

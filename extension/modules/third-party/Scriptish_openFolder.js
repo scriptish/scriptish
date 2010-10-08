@@ -34,9 +34,6 @@ Contributor(s):
 var EXPORTED_SYMBOLS = ["Scriptish_openFolder"];
 Components.utils.import("resource://scriptish/constants.js");
 
-const protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
-                            .getService(Ci.nsIExternalProtocolService);
-
 function Scriptish_openFolder(aFile) {
   try {
     // Show the directory containing the file and select the file.
@@ -50,9 +47,7 @@ function Scriptish_openFolder(aFile) {
       if (fParent.exists()) fParent.launch();
     } catch (e) {
       // If launch also fails let the OS handler try to open the parent.
-      var uri = Services.io.newFileURI(fParent);
-
-      protocolService.loadUrl(uri);
+      Scriptish_Services.eps.loadUrl(Services.io.newFileURI(fParent));
     }
   }
 }
