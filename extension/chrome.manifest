@@ -1,0 +1,17 @@
+component {ca39e060-88ab-11df-a4ee-0800200c9a66} components/scriptish.js
+contract  @scriptish.erikvold.com/scriptish-service;1 {ca39e060-88ab-11df-a4ee-0800200c9a66}
+category  content-policy @scriptish.erikvold.com/scriptish-service;1 @scriptish.erikvold.com/scriptish-service;1
+
+content    scriptish    content/
+resource   scriptish    modules/
+skin       scriptish    classic/1.0 skin/
+
+overlay    chrome://browser/content/browser.xul    chrome://scriptish/content/browser.xul
+overlay    about:addons chrome://scriptish/content/addonstab.xul
+
+overlay    chrome://scriptish/content/install.xul chrome://scriptish/content/closewindow.xul
+overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/closewindow.xul
+overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/closewindow.xul
+
+locale     scriptish  en-US  locale/en-US/
+locale     scriptish  ja-JP  locale/ja-JP/

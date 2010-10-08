@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>scriptish@erikvold.com</em:id>
+    <em:localized>
+      <Description>
+        <em:locale>ja-JP</em:locale>
+        <em:description>Firefox用のスクリプトマネージャ</em:description>
+      </Description>
+    </em:localized>
+    <em:name>Scriptish</em:name>
+    <em:description>A Script Extension Manager for Firefox</em:description>
+
+    <em:version>0.1b3</em:version>
+    <em:creator>Erik Vold; http://erikvold.com/</em:creator>
+    <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
+    <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
+    <em:iconURL>chrome://scriptish/skin/icon_medium.png</em:iconURL>
+
+    <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
+    <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>
+    <em:contributor>Chris Feldmann; http://axlotl.net/</em:contributor>
+    <em:contributor>David Schontzler; http://stilleye.com/</em:contributor>
+    <em:contributor>Gareth Andrew; http://freegarethandrew.org/</em:contributor>
+    <em:contributor>Hisateru Tanaka</em:contributor>
+    <em:contributor>Jeremy Dunck; http://dunck.us/anabasis/</em:contributor>
+    <em:contributor>Jesper Kristensen; &lt;mail&#64;jesperkristensen.dk&gt;</em:contributor>
+    <em:contributor>Johan Sundström; http://ecmanaut.blogspot.com/</em:contributor>
+    <em:contributor>JP Sugarbroad</em:contributor>
+    <em:contributor>Juan Pablo Guereca Alonso</em:contributor>
+    <em:contributor>Manpreet Singh</em:contributor>
+    <em:contributor>Mark Pilgrim; http://diveintomark.org/</em:contributor>
+    <em:contributor>Marti Martz</em:contributor>
+    <em:contributor>Matthias Bauer; http://moeffju.net/</em:contributor>
+    <em:contributor>Matthew Gray; http://mkgray.com:8000/</em:contributor>
+    <em:contributor>Mike Medley; http://sizzlemctwizzle.com/</em:contributor>
+    <em:contributor>Nikolas Coukouma; http://atrus.org/</em:contributor>
+    <em:contributor>Ori Avtallon</em:contributor>
+    <em:contributor>Pak Kei (logo); http://arkidect.com/</em:contributor>
+    <em:contributor>Sergio Abreu; http://sitedosergio.sitesbr.net/</em:contributor>
+    <em:contributor>Tommi Rautava/</em:contributor>
+
+    <em:translator>nishikawasasaki(kohsei yamamoto)</em:translator>
+
+    <em:updateURL>http://github.com/downloads/erikvold/scriptish/update.rdf</em:updateURL>
+    <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDjEA/hqcsMgPctoWvqJFfjtNcQbfBi1uP3zoWR3PPMRSXnpBJv/5Kb5lJD9HJ+963CFQ3oFvkgO9+oEWisiKBjxhx94Bynl0Ym2sZ1DdEzTsH9kV4HGFLjeYTix5WkQqdoswyM32ebtDSYrFbSqxpBrgHwVLELfFYM1qZsnWpJKwIDAQAB</em:updateKey>
+
+    <!-- Firefox -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>4.0b5pre</em:minVersion>
+        <em:maxVersion>4.0b8pre</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+  </Description>
+</RDF>

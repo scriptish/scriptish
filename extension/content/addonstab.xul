@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://scriptish/skin/addonstab.css" type="text/css"?>
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/x-javascript" src="chrome://scriptish/content/js/addonstab.js" />
+
+  <commandset id="viewCommandSet">
+    <command id="cmd_scriptish_userscript_edit"/>
+    <command id="cmd_scriptish_userscript_show"/>
+  </commandset>
+  <menupopup id="addonitem-popup">
+    <menuitem id="menuitem_scriptish_userscript_edit"
+        command="cmd_scriptish_userscript_edit" type="userscript"/>
+    <menuitem id="menuitem_scriptish_userscript_show"
+        command="cmd_scriptish_userscript_show" type="userscript"/>
+  </menupopup>
+
+  <richlistbox id="categories">
+    <richlistitem id="category-userscripts"
+        class="category"
+        insertafter="category-plugins"
+        value="addons://list/userscript">
+    </richlistitem>
+  </richlistbox>
+</overlay>
