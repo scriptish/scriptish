@@ -6,6 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
@@ -25,8 +26,15 @@ const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 var getMaxJSVersion = function(){ return JSVersions[2]; };
 
 function noUpdateFound(aListener) {
-  if ("onNoUpdateAvailable" in aListener) aListener.onNoUpdateAvailable(this);
-  if ("onUpdateFinished" in aListener) aListener.onUpdateFinished(this);
+  aListener.onNoUpdateAvailable(this);
+  if (aListener.onUpdateFinished) aListener.onUpdateFinished(this);
+}
+function updateFound(aListener) {
+  var AddonInstall = new ScriptInstall(this);
+  this.updateAvailable = true;
+  AddonManagerPrivate.callAddonListeners("onNewInstall", AddonInstall);
+  aListener.onUpdateAvailable(this, AddonInstall);
+  if (aListener.onUpdateFinished) aListener.onUpdateFinished(this);
 }
 
 // Implements Addon https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
@@ -98,37 +106,43 @@ Script.prototype = {
   get permissions() {
     var perms = AddonManager.PERM_CAN_UNINSTALL;
     perms |= this.userDisabled ? AddonManager.PERM_CAN_ENABLE : AddonManager.PERM_CAN_DISABLE;
+    if (this.updateURL) perms |= AddonManager.PERM_CAN_UPGRADE
     return perms;
   },
 
   get updateDate () { return new Date(parseInt(this._modified)); },
 
   findUpdates: function(aListener, aReason) {
-    if ("onNoCompatibilityUpdateAvailable" in aListener)
+    if (aListener.onNoCompatibilityUpdateAvailable)
       aListener.onNoCompatibilityUpdateAvailable(this);
-
     switch (aReason) {
       case AddonManager.UPDATE_WHEN_NEW_APP_DETECTED:
       case AddonManager.UPDATE_WHEN_NEW_APP_INSTALLED:
       case AddonManager.UPDATE_WHEN_ADDON_INSTALLED:
-        return noUpdateFound();
+        return noUpdateFound.call(this, aListener);
     }
-
-    // TODO: check for update
-    noUpdateFound();
+    if (this.updateAvailable) return updateFound.call(this, aListener);
+    this.checkForRemoteUpdate(function(aUpdate) {
+      if (!aUpdate) return noUpdateFound.call(this, aListener);
+      updateFound.call(this, aListener);
+    });
   },
   checkForRemoteUpdate: function(aCallback) {
-    if (!this.updateURL) return;
+    var updateURL = this.updateURL;
+    if (!updateURL) return aCallback.call(this, false);
     var req = Scriptish_Services.xhr;
-    req.open("GET", this.updateURL, true);
-    req.onload = GM_hitch(this, "checkRemoteVersion", req, aCallback);
+    req.open("GET", updateURL, true);
+    req.onload = Scriptish_hitch(this, "checkRemoteVersion", req, aCallback);
+    req.onerror = Scriptish_hitch(this, "checkRemoteVersionErr", aCallback);
     req.send(null);	
   },
   checkRemoteVersion: function(req, aCallback) {
-    if (req.status != 200 && req.status != 0) return;
+    if (4 > req.readyState) return;
+    if (req.status != 200 && req.status != 0) return aCallback(this, false);
     var remoteVersion = Script.parseVersion(req.responseText);
-    aCallback(!!(remoteVersion && Services.vc.compare(this.version, remoteVersion) < 0));
+    aCallback.call(this, !!(remoteVersion && Services.vc.compare(this.version, remoteVersion) < 0));
   },
+  checkRemoteVersionErr: function(aCallback) aCallback(this, false),
 
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
@@ -161,7 +175,6 @@ Script.prototype = {
 
   cancelUninstall: function() {
     this.needsUninstall = false;
-
     AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
   },
 
@@ -236,14 +249,20 @@ Script.prototype = {
 
   get homepageURL() this._homepageURL,
   get updateURL() {
-    var url = this._updateURL || this._downloadURL;
-    // make sure that the updateURL is http or https
-    if (!url || !url.match(/^https?:\/\//)) return null;
-    var usoURL = url.match(/^http:\/\/userscripts.org\/[^?]*\.user\.js/);
-    if (usoURL)
-      return usoURL[0].replace(/^http/, "https").replace(/\.user\.js$/,".meta.js");
+    if (!this.version) return null;
+    var url =
+        (this._updateURL || this._downloadURL || "").replace(/[\?#].*$/, "");
+    // valid updateURL?
+    if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i))
+      return null;
+    // userscripts.org url?
+    if (url.match(/^https?:\/\/userscripts.org\/.*\.user\.js$/i))
+      return url.replace(/^http:/, "https:").replace(/\.user\.js$/i,".meta.js");
+    // is url https?
+    if (!url.match(/^https:\/\//)) return null;
     return url;
   },
+  get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
     var url = this.updateURL();
     if (!url || !url.match(/^https:\/\//)) return false;
@@ -341,11 +360,16 @@ Script.prototype = {
     }
   },
 
+  replaceScriptWith: function(aNewScript) {
+    this.removeFiles();
+    this.updateFromNewScript(aNewScript.installProcess(), true);
+  },
   updateFromNewScript: function(newScript, aDL) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
     // Copy new values.
+    this.updateAvailable = false;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
@@ -517,6 +541,7 @@ Script.prototype = {
 
     this._modified = this._file.lastModifiedTime;
     this._dependhash = tools.Scriptish_sha1(this._rawMeta);
+    return this;
   },
 
   updateProcess: function() {
@@ -531,7 +556,7 @@ Script.prototype = {
 };
 
 Script.parseVersion = function Script_parseVersion(aSrc) {
-  var lines = source.match(/\s*\/\/ [=@].*/g);
+  var lines = aSrc.match(/\s*\/\/ [=@].*/g);
   var lnIdx = 0;
   var result = {};
   var foundMeta = false;
@@ -592,7 +617,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         value && (script.id = value);
         continue;
       case "author":
-        script.author && value && (script.author = value);
+        !script.author && value && (script.author = value);
         continue;
       case "name":
       case "namespace":
@@ -601,7 +626,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         value && (script["_" + header] = value);
         continue;
       case "updateurl":
-          if (!value.match(/^https?:\/\//)) script._updateURL = value;
+          if (value.match(/^https?:\/\//)) script._updateURL = value;
           continue;
       case "homepage":
       case "homepageurl":

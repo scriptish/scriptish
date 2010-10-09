@@ -117,9 +117,7 @@ Config.prototype = {
     var exists = existingIndex > -1;
     if (exists) {
       var oldScript = this._scripts[existingIndex];
-      oldScript.removeFiles();
-      aNewScript.installProcess();
-      oldScript.updateFromNewScript(aNewScript, true);
+      oldScript.replaceScriptWith(aNewScript);
       this._changed(oldScript, "update", null);
     } else {
       aNewScript.installProcess();
