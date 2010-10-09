@@ -35,8 +35,7 @@ ScriptDownloader.prototype.startViewScript = function(uri) {
   this.startDownload();
 }
 ScriptDownloader.prototype.startDownload = function() {
-  this.req_ = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
-      .createInstance(Ci.nsIXMLHttpRequest);
+  this.req_ = Scriptish_Services.xhr;
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
   this.req_.onreadystatechange = Scriptish_hitch(this, "chkContentTypeB4DL");

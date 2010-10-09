@@ -117,6 +117,18 @@ Script.prototype = {
     // TODO: check for update
     noUpdateFound();
   },
+  checkForRemoteUpdate: function(aCallback) {
+    if (!this.updateURL) return;
+    var req = Scriptish_Services.xhr;
+    req.open("GET", this.updateURL, true);
+    req.onload = GM_hitch(this, "checkRemoteVersion", req, aCallback);
+    req.send(null);	
+  },
+  checkRemoteVersion: function(req, aCallback) {
+    if (req.status != 200 && req.status != 0) return;
+    var remoteVersion = Script.parseVersion(req.responseText);
+    aCallback(!!(remoteVersion && Services.vc.compare(this.version, remoteVersion) < 0));
+  },
 
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
@@ -518,7 +530,30 @@ Script.prototype = {
   }
 };
 
-Script.parse = function parse(aConfig, aSource, aURI, aUpdateScript) {
+Script.parseVersion = function Script_parseVersion(aSrc) {
+  var lines = source.match(/\s*\/\/ [=@].*/g);
+  var lnIdx = 0;
+  var result = {};
+  var foundMeta = false;
+  var start = "// ==UserScript==";
+  var end = "// ==/UserScript==";
+  var version = /\/\/ \@version\s+([^\s]+)/;
+
+  while ((result = lines[lnIdx++])) {
+    if (result.indexOf(start) != 0) continue;
+    foundMeta = true;
+    break;
+  }
+  if (!foundMeta) return;
+  while ((result = lines[lnIdx++])) {
+    if (result.indexOf(end) == 0) break;
+    var match = result.match(version);
+    if (match !== null) return match[1];
+  }
+  return null;
+}
+
+Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   var script = new Script(aConfig);
 
   if (aURI && !Scriptish_Services.pbs.privateBrowsingEnabled)
