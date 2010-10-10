@@ -9,6 +9,12 @@
         <em:description>Firefox用のスクリプトマネージャ</em:description>
       </Description>
     </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>ru-RU</em:locale>
+        <em:description>Управление пользовательских скриптов для Firefox</em:description>
+      </Description>
+    </em:localized>
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
 
