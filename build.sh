@@ -32,6 +32,7 @@ fi
 echo "Cleaning up unwanted files ..."
 find . -depth -name '*~' -exec rm -rf "{}" \;
 find . -depth -name '#*' -exec rm -rf "{}" \;
+find . -depth -name '.DS_Store' -exec rm "{}" \;
 
 echo "Creating $XPI ..."
 zip -qr9XD "../../$XPI" *
