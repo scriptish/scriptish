@@ -1,53 +1,23 @@
 var EXPORTED_SYMBOLS = ["ScriptIcon"];
+Components.utils.import("resource://scriptish/script/scriptdependency.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-Cu.import("resource://scriptish/script/scriptrequire.js");
-
-function ScriptIcon(script) {
-  this._script = script;
-
-  this._downloadURL = null;
-  this._tempFile = null;
-  this._filename = null;
+function ScriptIcon() {
+  ScriptDependency.apply(this, [].concat(["icon"], Array.slice(arguments)));
   this._dataURI = null;
-  this._mimetype = null;
-  this.type = "icon";
-  this.updateScript = false;
 }
-
-ScriptIcon.prototype = {
-  get _file() {
-    var file = this._script._basedirFile;
-    file.append(this._filename);
-    return file;
-  },
-
-  hasDownloadURL: function() !!this._downloadURL,
-  get filename() (this._filename || this._dataURI),
-
-  get fileURL() {
-    if (this._dataURI) return this._dataURI;
-    if (this._filename) return Scriptish_getUriFromFile(this._file).spec;
-    return null;
-  },
-  set fileURL(aURL) {
-    if (/^data:/i.test(aURL)) {
-      // icon is a data scheme
-      this._dataURI = aURL;
-    } else if (aURL) {
-      // icon is a file
-      this._filename = aURL;
-    }
-  },
-
-  _initFile: ScriptRequire.prototype._initFile,
-
-  get urlToDownload() { return this._downloadURL; },
-  setDownloadedFile: function(tempFile, mimetype) {
-    this._tempFile = tempFile;
-    this._mimetype = mimetype;
-    if (this.updateScript) this._initFile();
-  }
-};
+ScriptIcon.prototype = new ScriptDependency();
+ScriptIcon.prototype.constructor = ScriptIcon;
+ScriptIcon.prototype.hasDownloadURL = function() !!this._downloadURL;
+ScriptIcon.prototype.__defineGetter__("filename", function() (
+    this._filename || this._dataURI));
+ScriptIcon.prototype.__defineGetter__("fileURL", function() {
+  if (this._dataURI) return this._dataURI;
+  if (this._filename) return Scriptish_getUriFromFile(this._file).spec;
+  return null;
+});
+ScriptIcon.prototype.__defineSetter__("fileURL", function(aURL) {
+  // is icon url a data: url?
+  if (/^data:/i.test(aURL)) return this._dataURI = aURL;
+  return this._filename = aURL;
+});

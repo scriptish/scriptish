@@ -341,9 +341,7 @@ Script.prototype = {
 
     // If no Latin characters found - use default
     if (!name) name = "user_script";
-
     if (ext) name += "." + ext;
-
     return name;
   },
 
