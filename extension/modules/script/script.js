@@ -11,6 +11,9 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_parseScriptName.js");
+Cu.import("resource://scriptish/utils/Scriptish_notification.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
@@ -363,6 +366,14 @@ Script.prototype = {
   replaceScriptWith: function(aNewScript) {
     this.removeFiles();
     this.updateFromNewScript(aNewScript.installProcess(), true);
+
+    // notification that update is complete
+    var msg = "'" + this.name;
+    if (this.version) msg += " " + this.version;
+    msg += "' " + Scriptish_stringBundle("statusbar.updated");
+    Scriptish_notification(msg, null, null, function() Scriptish_openManager());
+    this.updateHelper();
+    this._changed("update");
   },
   updateFromNewScript: function(newScript, aDL) {
     var tools = {};
@@ -420,8 +431,8 @@ Script.prototype = {
         // Redownload dependencies.
         tools.Scriptish_configDownloader.refetchDependencies(this);
       }
+      this.modificationProcess();
     }
-    this.updateProcess();
   },
 
   createXMLNode: function(doc) {
@@ -544,13 +555,20 @@ Script.prototype = {
     return this;
   },
 
-  updateProcess: function() {
+  updateHelper: function () {
     AddonManagerPrivate.callAddonListeners("onUninstalled", this);
-
-    this._changed("modified", null, true);
-
     AddonManagerPrivate.callInstallListeners(
             "onExternalInstall", null, this, null, false);
+  },
+  modificationProcess: function() {
+    // notification that modification is complete
+    var msg = "'" + this.name;
+    if (this.version) msg += " " + this.version;
+    msg += "' " + Scriptish_stringBundle("statusbar.modified");
+    Scriptish_notification(msg, null, null, function() Scriptish_openManager());
+
+    this.updateHelper();
+    this._changed("modified", null, true);
     
   }
 };

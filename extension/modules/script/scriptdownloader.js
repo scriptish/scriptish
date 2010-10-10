@@ -4,9 +4,6 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
-Cu.import("resource://scriptish/utils/Scriptish_notification.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
@@ -256,14 +253,6 @@ ScriptDownloader.prototype.installScript = function() {
   } else if (this.dependenciesLoaded_) {
     var script = this.script;
     Scriptish_config.install(script);
-
-    // notification that install is complete
-    var msg = "'" + script.name;
-    if (script.version) msg += " " + script.version;
-    msg += "' " + Scriptish_stringBundle("statusbar.installed");
-    Scriptish_notification(msg, null, null, function() {
-      Scriptish_openManager()
-    });
   } else {
     this.installOnCompletion_ = true;
   }
