@@ -250,7 +250,19 @@ Script.prototype = {
   get noframes() { return this._noframes; },
   get jsversion() { return this._jsversion || getMaxJSVersion() },
 
-  get homepageURL() this._homepageURL,
+  get homepageURL() {
+    var url = this._homepageURL;
+    if (url) return url;
+    // is the download URL a userscript.org url?
+    if (!url && this._downloadURL.match(/https?:\/\/userscripts\.org\/[^\?#]*\.user\.js(?:[\?#].*)?$/i)) {
+      url = this._downloadURL.replace(/[\?#].*$/, "")
+          .replace(/https?:\/\/userscripts\.org\/scripts\/source\/(\d+)\.user\.js$/, "http://userscripts.org/scripts/show/$1")
+          .replace(/https?:\/\/userscripts\.org\/scripts\/version\/(\d+)\/\d+\.user\.js$/, "http://userscripts.org/scripts/show/$1");
+      if (url.match(/https?:\/\/userscripts\.org\/scripts\/show\/\d+$/))
+        return url;
+    }
+    return null;
+  },
   get updateURL() {
     if (!this.version) return null;
     if (Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL"))
@@ -262,7 +274,7 @@ Script.prototype = {
     if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i))
       return null;
     // userscripts.org url?
-    if (url.match(/^https?:\/\/userscripts.org\/.*\.user\.js$/i))
+    if (url.match(/^https?:\/\/userscripts\.org\/.*\.user\.js$/i))
       return url.replace(/^http:/, "https:").replace(/\.user\.js$/i,".meta.js");
     // is url https?
     if (!url.match(/^https:\/\//)) return null;
