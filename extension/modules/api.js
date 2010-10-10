@@ -179,4 +179,6 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
 
     return new tools.GM_worker(getResources().getDep(resourceName), aURL);
   };
+
+  this.GM_updatingEnabled = true;
 }

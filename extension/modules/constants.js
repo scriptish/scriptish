@@ -10,11 +10,21 @@ var Scriptish_Services = {
       .createInstance(Ci.nsICryptoHash),
   get dp() Cc["@mozilla.org/xmlextras/domparser;1"]
       .createInstance(Ci.nsIDOMParser),
+  get ds() Cc["@mozilla.org/xmlextras/xmlserializer;1"]
+      .createInstance(Ci.nsIDOMSerializer),
+  get fos() Cc["@mozilla.org/network/file-output-stream;1"]
+      .createInstance(Ci.nsIFileOutputStream),
+  get fp() Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker),
+  get lf() Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile),
   get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
   get ss() Cc["@mozilla.org/supports-string;1"]
       .createInstance(Ci.nsISupportsString),
   get suc() Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-      .createInstance(Ci.nsIScriptableUnicodeConverter)
+      .createInstance(Ci.nsIScriptableUnicodeConverter),
+  get wbp() Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+      .createInstance(Ci.nsIWebBrowserPersist),
+  get xhr() Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+      .createInstance(Ci.nsIXMLHttpRequest)
 };
 
 XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
@@ -23,17 +33,22 @@ XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
 });
 
 XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "pbs", "@mozilla.org/privatebrowsing;1",
-    "nsIPrivateBrowsingService");
-
-XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
-    "nsIClipboardHelper");
-
-XPCOMUtils.defineLazyServiceGetter(
     Scriptish_Services, "as", "@mozilla.org/alerts-service;1",
     "nsIAlertsService");
 
 XPCOMUtils.defineLazyServiceGetter(
   Scriptish_Services, "ass", "@mozilla.org/appshell/appShellService;1",
     "nsIAppShellService");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
+    "nsIClipboardHelper");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "eps",
+    "@mozilla.org/uriloader/external-protocol-service;1",
+    "nsIExternalProtocolService");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "pbs", "@mozilla.org/privatebrowsing;1",
+    "nsIPrivateBrowsingService");

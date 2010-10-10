@@ -46,9 +46,23 @@
             </em:targetApplication>
           </RDF:Description>
         </RDF:li>
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.1b4</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0b5pre</em:minVersion>
+                <em:maxVersion>4.0.*</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b4.xpi</em:updateLink>
+                <em:updateHash>sha1:df200fe64284b5aebd3d0f6a836294a5a03c8faa</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
       </RDF:Seq>
     </em:updates>
 
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAA0DbmAjq6PVbmTej9mKmYiNfQ1pNc7KO78dKZd7kQ+Q3UrzOlCHeOrMB76zVuVHX8bA7pZrxUy2voMQz9IOwKeR2ts6b6Gy2NkyCpQpQwz+I3R1xV1Wn8qPFIPgZYtTXbwNLX9Peajd9jFBgfnqdN1Fee/pxASJgwZiS96BCU9T</em:signature>
+    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBACkB/PkEEkgZzHk1MMGr8FnJ6JoHH+aN3g10Hh48PI59afxsOfbWKGCH9/O2w2kKnutPnuVwTuvUm7PyguLks821QXfQF4FIlnZ/rFwn94z9D4WoPwNZvF8lLSKuK+CRnA4FnzuoSCP2+L/eF6i/rxNHvjZbL1SA3+KsLQK1RSBe</em:signature>
   </RDF:Description>
 </RDF:RDF>
