@@ -73,7 +73,8 @@ ScriptInstall.prototype = {
   cancel: function() {
     switch (this.state) {
       case "DownloadStarted":
-        this.changed("DownloadCancelled");
+        // TODO: Implement ability to cancel
+        //this.changed("DownloadCancelled");
       default:
         return;
     }
