@@ -253,8 +253,11 @@ Script.prototype = {
   get homepageURL() this._homepageURL,
   get updateURL() {
     if (!this.version) return null;
-    var url =
-        (this._updateURL || this._downloadURL || "").replace(/[\?#].*$/, "");
+    if (Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL"))
+      var url = (this._updateURL || this._downloadURL || "");
+    else
+      var url = (this._updateURL || "");
+    url = url.replace(/[\?#].*$/, "");
     // valid updateURL?
     if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i))
       return null;

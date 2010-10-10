@@ -20,5 +20,9 @@
       <caption id="caption-uninstall"/>
       <checkbox id="check-uninstall"/>
     </groupbox>
+    <groupbox>
+      <caption id="caption-downloadURL"/>
+      <checkbox id="check-downloadURL"/>
+    </groupbox>
   </vbox>
 </dialog>
