@@ -20,7 +20,11 @@ var Scriptish_Services = {
   get ss() Cc["@mozilla.org/supports-string;1"]
       .createInstance(Ci.nsISupportsString),
   get suc() Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-      .createInstance(Ci.nsIScriptableUnicodeConverter)
+      .createInstance(Ci.nsIScriptableUnicodeConverter),
+  get wbp() Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+      .createInstance(Ci.nsIWebBrowserPersist),
+  get xhr() Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+      .createInstance(Ci.nsIXMLHttpRequest)
 };
 
 XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {

@@ -8,6 +8,9 @@ Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_getProfileFile.js");
+Cu.import("resource://scriptish/utils/Scriptish_notification.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://gre/modules/AddonManager.jsm");
@@ -116,17 +119,19 @@ Config.prototype = {
     var existingIndex = this._find(aNewScript.id);
     var exists = existingIndex > -1;
     if (exists) {
-      var oldScript = this._scripts[existingIndex];
-      oldScript.removeFiles();
-      aNewScript.installProcess();
-      oldScript.updateFromNewScript(aNewScript, true);
-      this._changed(oldScript, "update", null);
+      this._scripts[existingIndex].replaceScriptWith(aNewScript);
     } else {
       aNewScript.installProcess();
       this.addScript(aNewScript);
       this._changed(aNewScript, "install", null);
       AddonManagerPrivate.callInstallListeners(
           "onExternalInstall", null, aNewScript, null, false);
+
+      // notification that install is complete
+      var msg = "'" + aNewScript.name;
+      if (aNewScript.version) msg += " " + aNewScript.version;
+      msg += "' " + Scriptish_stringBundle("statusbar.installed");
+      Scriptish_notification(msg, null, null, function() Scriptish_openManager());
     }
   },
 
