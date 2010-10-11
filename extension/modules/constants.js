@@ -52,3 +52,7 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
     Scriptish_Services, "pbs", "@mozilla.org/privatebrowsing;1",
     "nsIPrivateBrowsingService");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Scriptish_Services, "sis", "@mozilla.org/scriptableinputstream;1",
+    "nsIScriptableInputStream");

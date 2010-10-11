@@ -81,8 +81,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
     this.tempFiles_.push(file);
 
-    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-        .createInstance(Ci.nsIScriptableUnicodeConverter);
+    var converter = Scriptish_Services.suc;
     converter.charset = "UTF-8";
     source = converter.ConvertFromUnicode(source);
 
