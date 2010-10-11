@@ -4,6 +4,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
+Cu.import("resource://scriptish/utils/Scriptish_getBinaryContents.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
 
 function ScriptResource(script) {
@@ -33,19 +34,15 @@ ScriptResource.prototype = {
   get textContent() { return Scriptish_getContents(this._file); },
 
   get dataContent() {
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_getBinaryContents.js", tools);
-
-    var window = Scriptish_Services.ass.hiddenDOMWindow;
-    var binaryContents = tools.Scriptish_getBinaryContents(this._file);
-
+    var win = Scriptish_Services.ass.hiddenDOMWindow;
+    var binaryContents = Scriptish_getBinaryContents(this._file);
     var mimetype = this._mimetype;
-    if (this._charset && this._charset.length > 0) {
+
+    if (this._charset && this._charset.length > 0)
       mimetype += ";charset=" + this._charset;
-    }
 
     return "data:" + mimetype + ";base64," +
-      window.encodeURIComponent(window.btoa(binaryContents));
+        win.encodeURIComponent(win.btoa(binaryContents));
   },
 
   _initFile: ScriptRequire.prototype._initFile,

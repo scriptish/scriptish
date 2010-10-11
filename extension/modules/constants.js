@@ -6,6 +6,8 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 
 var Scriptish_Services = {
+  get bis() Cc["@mozilla.org/binaryinputstream;1"]
+      .createInstance(Ci.nsIBinaryInputStream),
   get ch() Cc["@mozilla.org/security/hash;1"]
       .createInstance(Ci.nsICryptoHash),
   get dp() Cc["@mozilla.org/xmlextras/domparser;1"]
