@@ -13,8 +13,7 @@ const Scriptish_launchApplicationWithDoc = function(appFile, docFile) {
     appFile.initWithPath("/usr/bin/open");
   }
 
-  var process = Cc["@mozilla.org/process/util;1"]
-      .createInstance(Ci.nsIProcess);
+  var process = Scriptish_Services.process;
   process.init(appFile);
   process.runwAsync(args, args.length);
 }

@@ -16,6 +16,7 @@ var Scriptish_Services = {
       .createInstance(Ci.nsIFileOutputStream),
   get fp() Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker),
   get lf() Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile),
+  get process() Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess),
   get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
   get ss() Cc["@mozilla.org/supports-string;1"]
       .createInstance(Ci.nsISupportsString),
