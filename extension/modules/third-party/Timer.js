@@ -35,18 +35,11 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
-
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Timer"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
 const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
-const timerService = Cc["@mozilla.org/timer;1"];
-
 
 const Timer = function() {
   var timers = new Timers();
@@ -82,11 +75,9 @@ Timers.prototype = {
     return this.cache[aTimerID];
   },
   addTimer: function(aInterval, aType, aCallback, aCbType, aDelay, aParams) {
-    var timer = timerService.createInstance(Ci.nsITimer);
     var timerID = this.nextTimerID++;
+    var timer = this.cache[timerID] = Scriptish_Services.timer;
     var removeFunc = false;
-
-    this.cache[timerID] = timer;
 
     if (!aInterval) {
       var self = this;
@@ -95,7 +86,6 @@ Timers.prototype = {
 
     timer.initWithCallback(
         new aCbType(aCallback, aParams, removeFunc), aDelay, aType);
-
     return timerID;
   },
   removeTimer: function(aTimerID) {
