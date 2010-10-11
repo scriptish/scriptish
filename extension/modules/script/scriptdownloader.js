@@ -9,10 +9,9 @@ Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://gre/modules/NetUtil.jsm");
 Cu.import("resource://scriptish/third-party/Timer.js");
-
+const gTimer = new Timer();
 
 function ScriptDownloader(uri, contentWin) {
-  this._timer = new Timer();
   this.uri_ = uri || null;
   this.req_ = null;
   this.script = null;
@@ -91,13 +90,13 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script.setDownloadedFile(file);
 
-    this._timer.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
+    gTimer.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
 
     switch (this.type) {
       case "install":
         this._callback = function() {
           this.showInstallDialog();
-          this._callback = undefined;
+          delete this._callback;
         }
         break;
       case "view":
@@ -125,7 +124,7 @@ ScriptDownloader.prototype.fetchDependencies = function() {
     if (this.checkDependencyURL(dep.urlToDownload)) {
       this.depQueue_.push(dep);
     } else {
-      this.errorInstallDependency(this.script, dep,
+      this.errorInstallDependency(dep,
         "SecurityException: Request to local and chrome url's is forbidden");
       return;
     }
@@ -135,7 +134,7 @@ ScriptDownloader.prototype.fetchDependencies = function() {
 ScriptDownloader.prototype.downloadNextDependency = function() {
   if (!this.depQueue_.length) {
     this.dependenciesLoaded_ = true;
-    if (this._callback) this._callback();
+    this._callback && this._callback();
     this.finishInstall();
     return;
   }
@@ -163,7 +162,7 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
     persist.saveChannel(sourceChannel, file);
   } catch (e) {
     Scriptish_log("Download exception " + e);
-    this.errorInstallDependency(this.script, dep, e);
+    this.errorInstallDependency(dep, e);
   }
 }
 ScriptDownloader.prototype.handleDependencyDownloadComplete =
@@ -186,15 +185,14 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       // if the dependency type is icon, then check it's mime type
       if (dep.type == "icon" &&
           !/^image\//i.test(channel.contentType)) {
-        this.errorInstallDependency(this.script, dep,
-          "Error! @icon is not a image MIME type");
+        this.errorInstallDependency(dep, "Error! @icon is not a image MIME type");
       }
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
-      this.errorInstallDependency(this.script, dep,
-        "Error! Server Returned : " + httpChannel.responseStatus + ": " +
+      this.errorInstallDependency(
+        dep, "Error! Server Returned : " + httpChannel.responseStatus + ": " +
         httpChannel.responseStatusText);
     }
   } else {
@@ -234,14 +232,14 @@ ScriptDownloader.prototype.finishInstall = function() {
 ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
   this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
   Scriptish_log(this.dependencyError);
-  if (this.scriptInstaller)
-    return this.scriptInstaller.changed("DownloadFailed");
-  if (this.installOnCompletion_) alert(this.dependencyError);
-  if (this._callback) this._callback();
+  if (this.scriptInstaller) return this.scriptInstaller.changed("DownloadFailed");
+  if (this.installOnCompletion_) Scriptish_alert(this.dependencyError);
+  this._callback && this._callback();
 }
 ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
-    Scriptish_alert(this.dependencyError);
+    Scriptish_alert(this.dependencyError, 0);
+    return false;
   } else if (this.scriptInstaller && this.dependenciesLoaded_) {
     this.scriptInstaller._script.replaceScriptWith(this.script);
     this.scriptInstaller.changed("InstallEnded");
@@ -251,21 +249,18 @@ ScriptDownloader.prototype.installScript = function() {
   } else {
     this.installOnCompletion_ = true;
   }
+  return true;
 }
 ScriptDownloader.prototype.cleanupTempFiles = function() {
-  for (var i = 0, file = null; file = this.tempFiles_[i]; i++)
-    file.remove(false);
+  for (var i = 0, file; file = this.tempFiles_[i++];) file.remove(false);
 }
-ScriptDownloader.prototype.showInstallDialog = function(timer) {
-  if (!timer) {
-    // otherwise, the status bar stays in the loading state.
-    this._timer.setTimeout(Scriptish_hitch(this, "showInstallDialog", true), 0);
-    return;
-  }
+ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
+  if (!aTimer)
+    return gTimer.setTimeout(Scriptish_hitch(this, "showInstallDialog", 1), 0);
+
   Services.wm.getMostRecentWindow("navigator:browser").openDialog(
       "chrome://scriptish/content/install.xul", "",
-      "chrome,centerscreen,modal,dialog,titlebar,resizable",
-      this);
+      "chrome,centerscreen,modal,dialog,titlebar,resizable", this);
 }
 ScriptDownloader.prototype.showScriptView = function() {
   Services.wm.getMostRecentWindow("navigator:browser")
