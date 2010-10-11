@@ -86,8 +86,8 @@ Script.prototype = {
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
   applyBackgroundUpdates: false,
-  get isActive() { return !this.appDisabled || !this.userDisabled },
-  pendingOperations: 0,
+  get isActive() !this.appDisabled || !this.userDisabled,
+  pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
   get sourceURI () { return this._downloadURL && NetUtil.newURI(this._downloadURL); },
   get userDisabled() { return !this._enabled; },
@@ -150,6 +150,7 @@ Script.prototype = {
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
     this.needsUninstall = true;
+    this.pendingOperations = AddonManager.PENDING_UNINSTALL;
     AddonManagerPrivate.callAddonListeners("onUninstalled", this);
   },
   uninstallProcess: function() {
@@ -178,6 +179,7 @@ Script.prototype = {
 
   cancelUninstall: function() {
     this.needsUninstall = false;
+    delete this.pendingOperations;
     AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
   },
 
