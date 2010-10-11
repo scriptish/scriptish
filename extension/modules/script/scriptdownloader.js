@@ -73,13 +73,9 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     }
 
     var source = this.req_.responseText;
-
     this.script = Scriptish_config.parse(source, this.uri_);
 
-    var file = Cc["@mozilla.org/file/directory_service;1"]
-                   .getService(Ci.nsIProperties)
-                   .get("TmpD", Ci.nsILocalFile);
-
+    var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
     file.append(base + ".user.js");
     file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
