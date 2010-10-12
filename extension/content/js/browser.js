@@ -1,12 +1,16 @@
-Components.utils.import("resource://scriptish/content/browser.js");
-Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_config.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Components.utils.import("resource://scriptish/config/configdownloader.js");
+(function(import, tools){
+import("resource://scriptish/content/browser.js");
+import("resource://scriptish/prefmanager.js");
+import("resource://scriptish/utils/Scriptish_config.js");
+import("resource://scriptish/utils/Scriptish_hitch.js");
+import("resource://scriptish/utils/Scriptish_getEnabled.js");
+import("resource://scriptish/utils/Scriptish_stringBundle.js");
+import("resource://scriptish/utils/Scriptish_openInEditor.js");
+import("resource://scriptish/utils/Scriptish_isGreasemonkeyable.js");
+import("resource://scriptish/config/configdownloader.js");
+import("resource://scriptish/menucommander.js");
 
-Scriptish_BrowserUI = new Object();
+Scriptish_BrowserUI = {};
 
 // nsISupports.QueryInterface
 Scriptish_BrowserUI.QueryInterface = function(aIID) {
@@ -14,7 +18,6 @@ Scriptish_BrowserUI.QueryInterface = function(aIID) {
       !aIID.equals(Components.interfaces.nsISupportsWeakReference) &&
       !aIID.equals(Components.interfaces.nsIWebProgressListener))
     throw Components.results.NS_ERROR_NO_INTERFACE;
-
   return this;
 };
 
@@ -37,9 +40,7 @@ Scriptish_BrowserUI.init = function() {
  * listeners and wrapper objects.
  */
 Scriptish_BrowserUI.chromeLoad = function(e) {
-  var d = document;
-  var $ = function(aID) d.getElementById(aID);
-
+  var $ = function(aID) document.getElementById(aID);
   Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
 
   // get all required DOM elements
@@ -189,17 +190,12 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
  * it's menu items and activate them.
  */
 Scriptish_BrowserUI.contentLoad = function(e) {
-  var tools = {};
-  Components.utils.import(
-      "resource://scriptish/utils/Scriptish_isGreasemonkeyable.js", tools);
-
   if (!Scriptish_getEnabled()) return;
-
   var safeWin = e.target.defaultView;
   var unsafeWin = safeWin.wrappedJSObject;
   var href = safeWin.location.href;
 
-  if (tools.Scriptish_isGreasemonkeyable(href)) {
+  if (Scriptish_isGreasemonkeyable(href)) {
     // if this content load is in the focused tab, attach the menuCommaander
     if (unsafeWin == this.tabBrowser.selectedBrowser.contentWindow) {
       var commander = this.getCommander(safeWin);
@@ -400,18 +396,13 @@ Scriptish_BrowserUI.toolsMenuShowing = function() {
  */
 Scriptish_BrowserUI.getCommander = function(unsafeWin) {
   for (var i = 0; i < this.menuCommanders.length; i++) {
-    if (this.menuCommanders[i].win == unsafeWin) {
+    if (this.menuCommanders[i].win == unsafeWin)
       return this.menuCommanders[i].commander;
-    }
   }
 
-  var tools = {};
-  Components.utils.import("resource://scriptish/menucommander.js", tools);
-
   // no commander found. create one and add it.
-  var commander = new tools.Scriptish_MenuCommander(document);
-  this.menuCommanders.push({win:unsafeWin, commander:commander});
-
+  var commander = new Scriptish_MenuCommander(document);
+  this.menuCommanders.push({win: unsafeWin, commander: commander});
   return commander;
 };
 
@@ -436,13 +427,10 @@ function Scriptish_showPopup(aEvent) {
   }
 
   function scriptsMatching(urls) {
-
     function testMatchURLs(script) {
-
       function testMatchURL(url) {
         return script.matchesURL(url);
       }
-
       return urls.some(testMatchURL);
     }
 
@@ -510,18 +498,14 @@ function Scriptish_showPopup(aEvent) {
  * state, rihgt-click opens in an editor.
  */
 function Scriptish_popupClicked(aEvent) {
-  var tools = {};
-
   if (aEvent.button == 0 || aEvent.button == 2) {
     var script = aEvent.target.script;
     if (!script) return;
 
     if (aEvent.button == 0) // left-click: toggle enabled state
       script.enabled =! script.enabled;
-    else { // right-click: open in editor
-      Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
-      tools.Scriptish_openInEditor(script, window);
-    }
+    else // right-click: open in editor
+      Scriptish_openInEditor(script, window);
 
     closeMenus(aEvent.target);
   }
@@ -540,3 +524,4 @@ Scriptish_BrowserUI.viewContextItemClicked = function() {
 };
 
 Scriptish_BrowserUI.init();
+})(Components.utils.import, {})
