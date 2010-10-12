@@ -36,10 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 var EXPORTED_SYMBOLS = ["Timer"];
-
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://scriptish/constants.js");
 
 const Timer = function() {
   var timers = new Timers();
