@@ -2,22 +2,15 @@ const DESCRIPTION = "ScriptishService";
 const CONTRACTID = "@scriptish.erikvold.com/scriptish-service;1";
 const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
 
+const filename = Components.stack.filename;
 const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 
-const serviceFilename = Components.stack.filename;
-
 function ScriptishService() {
   this.wrappedJSObject = this;
-
-  this.updateChk = function() {
-    Services.scriptloader
-        .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
-    this.updateChk = false;
-  }
 }
 
 ScriptishService.prototype = {
@@ -36,13 +29,14 @@ ScriptishService.prototype = {
       Ci.nsIContentPolicy
   ]),
 
-  get filename() { return serviceFilename; },
+  get filename() filename,
   _scriptFoldername: "scriptish_scripts",
 
   _config: null,
   get config() {
     if (!this._config) {
-      if (this.updateChk) this.updateChk();
+      Services.scriptloader
+          .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
       var tools = {};
       Cu.import("resource://scriptish/config/config.js", tools);
       this._config = new tools.Config(this._scriptFoldername);
@@ -219,7 +213,7 @@ ScriptishService.prototype = {
   getFirebugConsole: function(unsafeContentWin, chromeWin) {
     // If we can't find this object, there's no chance the rest of this
     // function will work.
-    if ('undefined'==typeof chromeWin.Firebug) return null;
+    if ('undefined' == typeof chromeWin.Firebug) return null;
 
     try {
       chromeWin = chromeWin.top;
@@ -230,15 +224,12 @@ ScriptishService.prototype = {
 
       // Firebug 1.4 will give no context, when disabled for the current site.
       // We can't run that way.
-      if ('undefined'==typeof fbContext) {
-        return null;
-      }
+      if ('undefined' == typeof fbContext) return null;
 
       function findActiveContext() {
         for (var i=0; i<fbContext.activeConsoleHandlers.length; i++) {
-          if (fbContext.activeConsoleHandlers[i].window == unsafeContentWin) {
+          if (fbContext.activeConsoleHandlers[i].window == unsafeContentWin)
             return fbContext.activeConsoleHandlers[i];
-          }
         }
         return null;
       }
@@ -273,10 +264,8 @@ ScriptishService.prototype = {
     } catch (e) {
       dump('Scriptish getFirebugConsole() error:\n'+uneval(e)+'\n');
     }
-
     return null;
   }
 };
 
-// XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
