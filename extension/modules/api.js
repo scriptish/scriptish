@@ -38,11 +38,18 @@ function GM_apiSafeCallback(aWindow, aThis, aCallback, aArgs) {
       .setTimeout(function() { aCallback.apply(aThis, aArgs); }, 0);
 }
 
-function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChromeWin, aGmBrowser) {
+function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWindow, aChromeWin, aGmBrowser) {
+  var document = aSafeWin.document;
   var _xmlhttpRequester = null;
   var _storage = null;
   var _resources = null;
   var _logger = null;
+  var workers = [];
+
+  // terminate workers
+  aSafeWin.addEventListener("unload", function() {
+    for (var i = 0, worker; worker = workers[i++];) worker.terminate();
+  }, true);
 
   function getXmlhttpRequester() {
     if (!_xmlhttpRequester) {
@@ -79,9 +86,9 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   }
 
   this.GM_addStyle = function GM_addStyle(css) {
-    var head = aDocument.getElementsByTagName("head")[0];
+    var head = document.getElementsByTagName("head")[0];
     if (head) {
-      var style = aDocument.createElement("style");
+      var style = document.createElement("style");
       style.textContent = css;
       style.type = "text/css";
       head.appendChild(style);
@@ -89,9 +96,7 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
     return style;
   }
 
-  this.GM_log = function GM_log(){
-    return getLogger().log.apply(getLogger(), arguments)
-  }
+  this.GM_log = function GM_log() getLogger().log.apply(getLogger(), arguments)
 
   this.GM_notification = function GM_notification(aMsg) {
     var tools = {};
@@ -104,39 +109,38 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
     return getStorage().setValue.apply(getStorage(), arguments);
   }
   this.GM_getValue = function GM_getValue() {
-    if (!GM_apiLeakCheck("GM_getValue")) return undefined;
+    if (!GM_apiLeakCheck("GM_getValue")) return;
     return getStorage().getValue.apply(getStorage(), arguments);
   }
   this.GM_deleteValue = function GM_deleteValue() {
-    if (!GM_apiLeakCheck("GM_deleteValue")) return undefined;
+    if (!GM_apiLeakCheck("GM_deleteValue")) return;
     return getStorage().deleteValue.apply(getStorage(), arguments);
   }
   this.GM_listValues = function GM_listValues() {
-    if (!GM_apiLeakCheck("GM_listValues")) return undefined;
+    if (!GM_apiLeakCheck("GM_listValues")) return;
     return getStorage().listValues.apply(getStorage(), arguments);
   }
 
   this.GM_setClipboard = function GM_setClipboard() {
-    if (!GM_apiLeakCheck("GM_setClipboard")) return undefined;
+    if (!GM_apiLeakCheck("GM_setClipboard")) return;
     var tools = {};
     Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
     tools.GM_setClipboard.apply(null, arguments);
   }
 
   this.GM_getResourceURL = function GM_getResourceURL() {
-    if (!GM_apiLeakCheck("GM_getResourceURL")) return undefined;
+    if (!GM_apiLeakCheck("GM_getResourceURL")) return;
     return getResources().getResourceURL.apply(getResources(), arguments)
   }
   this.GM_getResourceText = function GM_getResourceText() {
-    if (!GM_apiLeakCheck("GM_getResourceText")) return undefined;
+    if (!GM_apiLeakCheck("GM_getResourceText")) return;
     return getResources().getResourceText.apply(getResources(), arguments)
   }
 
   this.GM_openInTab = function GM_openInTab(aURL) {
-    if (!GM_apiLeakCheck("GM_openInTab")) return undefined;
+    if (!GM_apiLeakCheck("GM_openInTab")) return;
 
-    var newTab = aChromeWin.openNewTabWith(
-        aURL, aDocument, null, null, null, null);
+    var newTab = aChromeWin.openNewTabWith(aURL, document);
     // Source:
     // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
     var newWindow = aChromeWin.gBrowser
@@ -149,7 +153,6 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
     if (!GM_apiLeakCheck("GM_xmlhttpRequest")) return;
-
     return getXmlhttpRequester().contentStartRequest.apply(
         getXmlhttpRequester(), arguments);
   };
@@ -172,12 +175,13 @@ function GM_API(aScript, aURL, aDocument, aUnsafeContentWin, aChromeWindow, aChr
   };
 
   this.GM_worker = function GM_worker(resourceName) {
-    if (!GM_apiLeakCheck("GM_worker")) return undefined;
+    if (!GM_apiLeakCheck("GM_worker")) return;
 
     var tools = {};
     Cu.import("resource://scriptish/api/GM_worker.js", tools);
-
-    return new tools.GM_worker(getResources().getDep(resourceName), aURL);
+    var worker = new tools.GM_worker(getResources().getDep(resourceName), aURL);
+    workers.push(worker)
+    return worker;
   };
 
   this.GM_updatingEnabled = true;

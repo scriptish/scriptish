@@ -165,7 +165,7 @@ ScriptishService.prototype = {
       var GM_API = new tools.GM_API(
           script,
           url,
-          wrappedContentWin.document,
+          wrappedContentWin,
           unsafeContentWin,
           Services.ass.hiddenDOMWindow,
           chromeWin,
