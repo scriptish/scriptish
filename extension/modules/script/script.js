@@ -568,7 +568,7 @@ Script.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
-    if (Scriptish_Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
+    if (Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
 
     this._modified = this._file.lastModifiedTime;
     this._dependhash = tools.Scriptish_sha1(this._rawMeta);
@@ -619,7 +619,7 @@ Script.parseVersion = function Script_parseVersion(aSrc) {
 Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   var script = new Script(aConfig);
 
-  if (aURI && !Scriptish_Services.pbs.privateBrowsingEnabled)
+  if (aURI && !Services.pbs.privateBrowsingEnabled)
     script._downloadURL = aURI.spec;
 
   // read one line at a time looking for start meta delimiter or EOF

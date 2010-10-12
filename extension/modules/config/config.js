@@ -166,10 +166,8 @@ Config.prototype = {
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
-    if (script.enabled && !script.needsUninstall && script.matchesURL(href)) {
-      Scriptish_Services.scriptish.injectScripts(
-          [script], href, unsafeWin, this.chromeWin);
-    }
+    if (script.enabled && !script.needsUninstall && script.matchesURL(href))
+      Services.scriptish.injectScripts([script], href, unsafeWin, this.chromeWin);
   },
 
   updateModifiedScripts: function() {

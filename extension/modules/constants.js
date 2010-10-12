@@ -2,8 +2,12 @@ var EXPORTED_SYMBOLS = [ "Cc", "Ci", "XPCOMUtils", "Services", "Scriptish_Servic
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+var Services = {};
+(function(import, tools){
+  import("resource://gre/modules/XPCOMUtils.jsm");
+  import("resource://gre/modules/Services.jsm", tools);
+  Services.__proto__ = tools.Services;
+})(Components.utils.import, {})
 
 var Scriptish_Services = {
   get bis() Cc["@mozilla.org/binaryinputstream;1"]
@@ -31,32 +35,29 @@ var Scriptish_Services = {
       .createInstance(Ci.nsIXMLHttpRequest)
 };
 
-XPCOMUtils.defineLazyGetter(Scriptish_Services, "scriptish", function() {
-  return Cc["@scriptish.erikvold.com/scriptish-service;1"]
-      .getService().wrappedJSObject;
-});
+XPCOMUtils.defineLazyGetter(Services, "scriptish", function() (
+    Cc["@scriptish.erikvold.com/scriptish-service;1"]
+        .getService().wrappedJSObject));
 
 XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "as", "@mozilla.org/alerts-service;1",
-    "nsIAlertsService");
+     Services, "as", "@mozilla.org/alerts-service;1", "nsIAlertsService");
 
 XPCOMUtils.defineLazyServiceGetter(
-  Scriptish_Services, "ass", "@mozilla.org/appshell/appShellService;1",
+    Services, "ass", "@mozilla.org/appshell/appShellService;1",
     "nsIAppShellService");
 
 XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
+    Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
     "nsIClipboardHelper");
 
 XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "eps",
-    "@mozilla.org/uriloader/external-protocol-service;1",
+    Services, "eps", "@mozilla.org/uriloader/external-protocol-service;1",
     "nsIExternalProtocolService");
 
 XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "pbs", "@mozilla.org/privatebrowsing;1",
+    Services, "pbs", "@mozilla.org/privatebrowsing;1",
     "nsIPrivateBrowsingService");
 
 XPCOMUtils.defineLazyServiceGetter(
-    Scriptish_Services, "sis", "@mozilla.org/scriptableinputstream;1",
+    Services, "sis", "@mozilla.org/scriptableinputstream;1",
     "nsIScriptableInputStream");

@@ -57,7 +57,7 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
   // If there is a 'Content-Type' header and it contains 'text/html',
   // then do not install the file, and display it instead.
   this.req_.abort();
-  Scriptish_Services.scriptish.ignoreNextScript();
+  Services.scriptish.ignoreNextScript();
   if (this.contentWin) this.contentWin.location.href = this.uri_.spec;
 }
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
