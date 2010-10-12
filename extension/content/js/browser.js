@@ -348,8 +348,7 @@ Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
 
   if (!culprit || !culprit.href || !culprit.href.match(/\.user\.js(\?|$)/i))
     return null;
-
-  return Services.io.newURI(culprit.href, null, null);
+  return tools.NetUtil.newURI(culprit.href);
 }
 
 Scriptish_BrowserUI.toolsMenuShowing = function() {

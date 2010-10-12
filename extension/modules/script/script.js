@@ -87,8 +87,8 @@ Script.prototype = {
   get isActive() !this.appDisabled || !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
-  get sourceURI () { return this._downloadURL && NetUtil.newURI(this._downloadURL); },
-  get userDisabled() { return !this._enabled; },
+  get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
+  get userDisabled() !this._enabled,
   set userDisabled(val) {
     if (val == this.userDisabled) return val;
 
@@ -102,8 +102,7 @@ Script.prototype = {
         val ? "onEnabled" : "onDisabled", this);
   },
 
-  isCompatibleWith: function() { return true; },
-
+  isCompatibleWith: function() true,
   get permissions() {
     var perms = AddonManager.PERM_CAN_UNINSTALL;
     perms |= this.userDisabled ? AddonManager.PERM_CAN_ENABLE : AddonManager.PERM_CAN_DISABLE;
@@ -111,7 +110,7 @@ Script.prototype = {
     return perms;
   },
 
-  get updateDate () { return new Date(parseInt(this._modified)); },
+  get updateDate () new Date(parseInt(this._modified)),
 
   findUpdates: function(aListener, aReason) {
     if (aListener.onNoCompatibilityUpdateAvailable)
@@ -200,14 +199,14 @@ Script.prototype = {
   set id(aId) {
     this._id = aId.replace(nonIdChars, ''); // remove unacceptable chars
   },
-  get name() { return this._name; },
-  get namespace() { return this._namespace; },
+  get name() this._name,
+  get namespace() this._namespace,
   get prefroot() { 
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
   },
-  get creator() { return this._creator; },
-  get author() { return this._author; },
+  get creator() this._creator,
+  get author() this._author,
   set author(aVal) {
     this._author = aVal;
     this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
@@ -224,16 +223,16 @@ Script.prototype = {
     if (!aContributor) return;
     this._contributors.push(aContributor);
   },
-  get description() { return this._description; },
-  get version() { return this._version; },
-  get icon() { return this._icon; },
-  get iconURL() { return this._icon.fileURL; },
-  get enabled() { return this._enabled; },
+  get description() this._description,
+  get version() this._version,
+  get icon() this._icon,
+  get iconURL() this._icon.fileURL,
+  get enabled() this._enabled,
   set enabled(enabled) { this.userDisabled = !enabled; },
 
-  get includes() { return this._includes.concat(); },
-  get excludes() { return this._excludes.concat(); },
-  get matches() { return this._matches.concat(); },
+  get includes() this._includes.concat(),
+  get excludes() this._excludes.concat(),
+  get matches() this._matches.concat(),
   addInclude: function(aPattern) {
     if (!aPattern) return;
     this._includes.push(aPattern);
@@ -245,10 +244,10 @@ Script.prototype = {
     this._excludeRegExps.push(Scriptish_convert2RegExp(aPattern));
   },
 
-  get requires() { return this._requires.concat(); },
-  get resources() { return this._resources.concat(); },
-  get noframes() { return this._noframes; },
-  get jsversion() { return this._jsversion || getMaxJSVersion() },
+  get requires() this._requires.concat(),
+  get resources() this._resources.concat(),
+  get noframes() this._noframes,
+  get jsversion() this._jsversion || getMaxJSVersion(),
 
   get homepageURL() {
     var url = this._homepageURL;
@@ -295,9 +294,8 @@ Script.prototype = {
     file.append(this._filename);
     return file;
   },
-  get filename() { return this._filename; },
-
-  get editFile() { return this._file; },
+  get filename() this._filename,
+  get editFile() this._file,
 
   get _basedirFile() {
     var file = this._config._scriptDir;
@@ -306,8 +304,8 @@ Script.prototype = {
     return file;
   },
 
-  get fileURL() { return Scriptish_getUriFromFile(this._file).spec; },
-  get textContent() { return Scriptish_getContents(this._file); },
+  get fileURL() Scriptish_getUriFromFile(this._file).spec,
+  get textContent() Scriptish_getContents(this._file),
 
   get size() {
     var size = this._file.fileSize;
@@ -316,7 +314,7 @@ Script.prototype = {
     return size;
   },
 
-  get screenshots() { return this._screenshots; },
+  get screenshots() this._screenshots,
 
   _initFileName: function(name, useExt) {
     var ext = "";

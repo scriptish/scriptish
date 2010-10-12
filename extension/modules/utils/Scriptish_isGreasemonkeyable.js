@@ -28,6 +28,5 @@ const Scriptish_isGreasemonkeyable = function(aURL) {
     case "unmht":
       return Scriptish_prefRoot.getValue('unmhtIsGreaseable');
   }
-
   return false;
 }

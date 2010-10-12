@@ -1,4 +1,3 @@
-
 var EXPORTED_SYMBOLS = ["Scriptish_findError"];
 
 function Scriptish_findError(aScript, aLineNum) {
