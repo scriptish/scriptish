@@ -10,6 +10,7 @@ import("resource://scriptish/utils/Scriptish_isGreasemonkeyable.js");
 import("resource://scriptish/config/configdownloader.js");
 import("resource://scriptish/menucommander.js");
 import("resource://scriptish/constants.js", tools);
+var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;
 
@@ -17,12 +18,12 @@ Scriptish_BrowserUI = {};
 
 // nsISupports.QueryInterface
 Scriptish_BrowserUI.QueryInterface = function(aIID) {
-  if (!aIID.equals(Components.interfaces.nsISupports) &&
-      !aIID.equals(Components.interfaces.nsISupportsWeakReference) &&
-      !aIID.equals(Components.interfaces.nsIWebProgressListener))
+  if (!aIID.equals(Ci.nsISupports) &&
+      !aIID.equals(Ci.nsISupportsWeakReference) &&
+      !aIID.equals(Ci.nsIWebProgressListener))
     throw Components.results.NS_ERROR_NO_INTERFACE;
   return this;
-};
+}
 
 
 /**
@@ -35,7 +36,7 @@ Scriptish_BrowserUI.init = function() {
   this.currentMenuCommander = null;
   window.addEventListener("load", Scriptish_hitch(this, "chromeLoad"), false);
   window.addEventListener("unload", Scriptish_hitch(this, "chromeUnload"), false);
-};
+}
 
 /**
  * The browser XUL has loaded. Find the elements we need and set up our
@@ -157,13 +158,8 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   $("menu_ToolsPopup").addEventListener(
       "popupshowing", Scriptish_hitch(this, "toolsMenuShowing"), false);
 
-  // we use this to determine if we are the active window sometimes
-  this.winWat = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-                          .getService(Components.interfaces.nsIWindowWatcher);
-
   // this gives us onLocationChange
-  this.tabBrowser.addProgressListener(this,
-    Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+  this.tabBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
@@ -175,13 +171,10 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 // registerMenuCommand
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   var commander = this.getCommander(menuCommand.window);
-
-  commander.registerMenuCommand(menuCommand.name,
-                                menuCommand.doCommand,
-                                menuCommand.accelKey,
-                                menuCommand.accelModifiers,
-                                menuCommand.accessKey);
-};
+  commander.registerMenuCommand(
+      menuCommand.name, menuCommand.doCommand, menuCommand.accelKey,
+      menuCommand.accelModifiers, menuCommand.accessKey);
+}
 
 /**
  * Gets called when a DOMContentLoaded event occurs somewhere in the browser.
@@ -209,13 +202,12 @@ Scriptish_BrowserUI.contentLoad = function(e) {
   // Show the scriptish install banner if we are navigating to a .user.js
   // file in a top-level tab.  If the file was previously cached it might have
   // been given a number after .user, like gmScript.user-12.js
-  if (safeWin == safeWin.top &&
-      href.match(/\.user(?:-\d+)?\.js$/) &&
-      !/text\/html/i.test(safeWin.document.contentType)) {
+  if (safeWin == safeWin.top && href.match(/\.user(?:-\d+)?\.js$/)
+      && !/text\/html/i.test(safeWin.document.contentType)) {
     var browser = this.tabBrowser.getBrowserForDocument(safeWin.document);
     this.showInstallBanner(browser);
   }
-};
+}
 
 
 /**
@@ -224,16 +216,14 @@ Scriptish_BrowserUI.contentLoad = function(e) {
  */
 Scriptish_BrowserUI.showInstallBanner = function(browser) {
   var greeting = Scriptish_stringBundle("greeting.msg");
-
   var notificationBox = this.tabBrowser.getNotificationBox(browser);
 
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
   // them ourselves in the case of reload, or they stack up.
   for (var i = 0, child; child = notificationBox.childNodes[i]; i++) {
-    if (child.getAttribute("value") == "install-userscript") {
+    if (child.getAttribute("value") == "install-userscript")
       notificationBox.removeNotification(child);
-    }
   }
 
   var notification = notificationBox.appendNotification(
@@ -248,7 +238,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
       callback: Scriptish_hitch(this, "installCurrentScript")
     }]
   );
-};
+}
 
 /**
  * Open the tab to show the contents of a script and display the banner to let
@@ -264,13 +254,10 @@ Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
  * install-userscript, which happens when the install bar is clicked.
  */
 Scriptish_BrowserUI.observe = function(subject, topic, data) {
-  if (topic == "install-userscript") {
-    if (window == this.winWat.activeWindow) {
-      this.installCurrentScript();
-    }
-  } else {
+  if (topic == "install-userscript")
+    if (window == Services.ww.activeWindow) this.installCurrentScript();
+  else
     throw new Error("Unexpected topic received: {" + topic + "}");
-  }
 };
 
 /**
@@ -278,7 +265,7 @@ Scriptish_BrowserUI.observe = function(subject, topic, data) {
  */
 Scriptish_BrowserUI.installCurrentScript = function() {
   this.scriptDownloader_.installScript();
-};
+}
 
 /**
  * The browser's location has changed. Usually, we don't care. But in the case
@@ -298,25 +285,22 @@ Scriptish_BrowserUI.onLocationChange = function(a,b,c) {
     this.currentMenuCommander = menuCommander;
     this.currentMenuCommander.attach();
   }
-};
+}
 
 /**
  * A content document has unloaded. We need to remove it's menuCommander to
  * avoid leaking it's memory.
  */
 Scriptish_BrowserUI.contentUnload = function(e) {
-  if (e.persisted || !this.menuCommanders || 0 == this.menuCommanders.length) {
+  if (e.persisted || !this.menuCommanders || 0 == this.menuCommanders.length)
     return;
-  }
 
   var unsafeWin = e.target.defaultView;
 
   // looping over commanders rather than using getCommander because we need
   // the index into commanders.splice.
   for (var i = 0, item; item = this.menuCommanders[i]; i++) {
-    if (item.win != unsafeWin) {
-      continue;
-    }
+    if (item.win != unsafeWin) continue;
 
     if (item.commander == this.currentMenuCommander) {
       this.currentMenuCommander.detach();
@@ -324,10 +308,9 @@ Scriptish_BrowserUI.contentUnload = function(e) {
     }
 
     this.menuCommanders.splice(i, 1);
-
     break;
   }
-};
+}
 
 /**
  * The browser XUL has unloaded. We need to let go of the pref watcher so
@@ -339,7 +322,7 @@ Scriptish_BrowserUI.chromeUnload = function() {
   Scriptish_prefRoot.unwatch("enabled", this.statusWatcher);
   this.tabBrowser.removeProgressListener(this);
   delete this.menuCommanders;
-};
+}
 
 /**
  * Called when the content area context menu is showing. We figure out whether
@@ -348,45 +331,35 @@ Scriptish_BrowserUI.chromeUnload = function() {
 Scriptish_BrowserUI.contextMenuShowing = function() {
   var contextItem = this.contextItem;
   var contextSep = document.getElementById("scriptish-context-menu-viewsource-sep");
-
   var culprit = document.popupNode;
 
-  while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a") {
+  while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a")
      culprit = culprit.parentNode;
-  }
 
-  contextItem.hidden = contextSep.hidden =
-      !this.getUserScriptLinkUnderPointer();
-};
+  contextItem.hidden = contextSep.hidden = !this.getUserScriptLinkUnderPointer();
+}
 
 
 Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
   var culprit = document.popupNode;
 
-  while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a") {
+  while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a")
      culprit = culprit.parentNode;
-  }
 
-  if (!culprit || !culprit.href ||
-      !culprit.href.match(/\.user\.js(\?|$)/i)) {
+  if (!culprit || !culprit.href || !culprit.href.match(/\.user\.js(\?|$)/i))
     return null;
-  }
 
-  var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
-                        .getService(Components.interfaces.nsIIOService);
-  var uri = ioSvc.newURI(culprit.href, null, null);
-
-  return uri;
-};
+  return Services.io.newURI(culprit.href, null, null);
+}
 
 Scriptish_BrowserUI.toolsMenuShowing = function() {
   if (window.content && window.content.location &&
       window.content.location.href.match(/\.user(?:-\d+)\.js(?:\?|$)/i)) {
     // Better to use hidden than collapsed because collapsed still allows you to
     // select the item using keyboard navigation, but hidden doesn't.
-	  this.toolsInstall.setAttribute("hidden", "false");
+    this.toolsInstall.setAttribute("hidden", "false");
   }
-};
+}
 
 /**
  * Helper method which gets the menuCommander corresponding to a given
@@ -402,7 +375,7 @@ Scriptish_BrowserUI.getCommander = function(unsafeWin) {
   var commander = new Scriptish_MenuCommander(document);
   this.menuCommanders.push({win: unsafeWin, commander: commander});
   return commander;
-};
+}
 
 function Scriptish_showPopup(aEvent) {
   function urlsOfAllFrames(contentWindow) {
@@ -426,12 +399,8 @@ function Scriptish_showPopup(aEvent) {
 
   function scriptsMatching(urls) {
     function testMatchURLs(script) {
-      function testMatchURL(url) {
-        return script.matchesURL(url);
-      }
-      return urls.some(testMatchURL);
+      return urls.some(function(url) script.matchesURL(url));
     }
-
     return Scriptish_config.getMatchingScripts(testMatchURLs);
   }
 
@@ -455,9 +424,8 @@ function Scriptish_showPopup(aEvent) {
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; i >= 0; i--) {
     var node = popup.childNodes[i];
-    if (node.script || node.getAttribute("value") == "hack") {
+    if (node.script || node.getAttribute("value") == "hack")
       popup.removeChild(node);
-    }
   }
 
   var urls = uniq( urlsOfAllFrames( getBrowser().contentWindow ));
@@ -468,11 +436,8 @@ function Scriptish_showPopup(aEvent) {
   for (var i = 0; i < runsOnTop.length; i++) {
     var j = 0, item = runsOnTop[i];
     while (j < runsFramed.length) {
-      if (item === runsFramed[j]) {
-        runsFramed.splice(j, 1);
-      } else {
-        j++;
-      }
+      if (item === runsFramed[j]) runsFramed.splice(j, 1);
+      else j++;
     }
   }
 
@@ -496,17 +461,21 @@ function Scriptish_showPopup(aEvent) {
  * state, rihgt-click opens in an editor.
  */
 function Scriptish_popupClicked(aEvent) {
-  if (aEvent.button == 0 || aEvent.button == 2) {
-    var script = aEvent.target.script;
-    if (!script) return;
+  if (aEvent.button != 0 && aEvent.button != 2) return;
+  var script = aEvent.target.script;
+  if (!script) return;
 
-    if (aEvent.button == 0) // left-click: toggle enabled state
-      script.enabled =! script.enabled;
-    else // right-click: open in editor
-      Scriptish_openInEditor(script, window);
+  if (aEvent.button == 0) // left-click: toggle enabled state
+    script.enabled =! script.enabled;
+  else // right-click: open in editor
+    Scriptish_openInEditor(script, window);
 
-    closeMenus(aEvent.target);
-  }
+  closeMenus(aEvent.target);
+}
+
+Scriptish_BrowserUI.viewContextItemClicked = function() {
+  Scriptish_configDownloader.startViewScript(
+      Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
 }
 
 // necessary for webProgressListener implementation
@@ -515,11 +484,6 @@ Scriptish_BrowserUI.onStateChange = function(a,b,c,d){};
 Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
 Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
-
-Scriptish_BrowserUI.viewContextItemClicked = function() {
-  Scriptish_configDownloader.startViewScript(
-      Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
-};
 
 Scriptish_BrowserUI.init();
 })(Components.utils.import, {})
