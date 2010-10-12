@@ -76,7 +76,7 @@ Timers.prototype = {
   },
   addTimer: function(aInterval, aType, aCallback, aCbType, aDelay, aParams) {
     var timerID = this.nextTimerID++;
-    var timer = this.cache[timerID] = Scriptish_Services.timer;
+    var timer = this.cache[timerID] = Instances.timer;
     var removeFunc = false;
 
     if (!aInterval) {

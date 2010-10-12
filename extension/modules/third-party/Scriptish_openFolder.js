@@ -47,7 +47,7 @@ function Scriptish_openFolder(aFile) {
       if (fParent.exists()) fParent.launch();
     } catch (e) {
       // If launch also fails let the OS handler try to open the parent.
-      Scriptish_Services.eps.loadUrl(Services.io.newFileURI(fParent));
+      Services.eps.loadUrl(Services.io.newFileURI(fParent));
     }
   }
 }

@@ -5,7 +5,7 @@ Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js"
 const Scriptish_getBinaryContents = function(aFile) {
   var channel = Services.io.newChannelFromURI(Scriptish_getUriFromFile(aFile));
   var input = channel.open();
-  var bstream = Scriptish_Services.bis;
+  var bstream = Instances.bis;
   bstream.setInputStream(input);
   return bstream.readBytes(bstream.available());
 }

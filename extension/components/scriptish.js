@@ -163,7 +163,7 @@ ScriptishService.prototype = {
           url,
           wrappedContentWin.document,
           unsafeContentWin,
-          Scriptish_Services.ass.hiddenDOMWindow,
+          Services.ass.hiddenDOMWindow,
           chromeWin,
           gmBrowser);
 

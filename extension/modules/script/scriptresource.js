@@ -34,7 +34,7 @@ ScriptResource.prototype = {
   get textContent() { return Scriptish_getContents(this._file); },
 
   get dataContent() {
-    var win = Scriptish_Services.ass.hiddenDOMWindow;
+    var win = Services.ass.hiddenDOMWindow;
     var binaryContents = Scriptish_getBinaryContents(this._file);
     var mimetype = this._mimetype;
 

@@ -13,7 +13,7 @@ const Scriptish_getEditor = function(parentWindow, change) {
   if (!change && editorPath) {
     Scriptish_log("Found saved editor preference: " + editorPath);
 
-    var editor = Scriptish_Services.lf;
+    var editor = Instances.lf;
     editor.followLinks = true;
     editor.initWithPath(editorPath);
 
@@ -32,7 +32,7 @@ const Scriptish_getEditor = function(parentWindow, change) {
   while (true) {
     Scriptish_log("Asking user to choose editor...");
     var nsIFilePicker = Ci.nsIFilePicker;
-    var filePicker = Scriptish_Services.fp;
+    var filePicker = Instances.fp;
     filePicker.init(
         parentWindow,
         Scriptish_stringBundle("editor.prompt"),

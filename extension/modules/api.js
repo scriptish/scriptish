@@ -18,7 +18,7 @@ function GM_apiLeakCheck(apiName) {
     // chrome:// URLs and any file name listed in _apiAcceptedFiles.
     if (2 == stack.language &&
         stack.filename != moduleFilename &&
-        stack.filename != Scriptish_Services.scriptish.filename &&
+        stack.filename != Services.scriptish.filename &&
         stack.filename.substr(0, 6) != "chrome") {
       Scriptish_logError(new Error(
           "Scriptish access violation: unsafeWindow cannot call " +

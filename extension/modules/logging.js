@@ -6,7 +6,7 @@ Cu.import("resource://scriptish/prefmanager.js");
 
 // Utility to create an error message in the log without throwing an error.
 function Scriptish_logError(e, opt_warn, fileName, lineNumber) {
-  var err = Scriptish_Services.se;
+  var err = Instances.se;
 
   // third parameter "sourceLine" is supposed to be the line, of the source,
   // on which the error happened.  we don't know it. (directly...)

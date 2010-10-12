@@ -7,7 +7,7 @@ function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
   gTimer.setTimeout(function() {
     if (aCallback) var callback = new Observer(aCallback);
 
-    Scriptish_Services.as.showAlertNotification(
+    Services.as.showAlertNotification(
       aIconURL || "chrome://scriptish/skin/icon_medium.png",
       aTitle || "Scriptish", aMsg+"", !!callback, "", callback || null);
   }, 0);
