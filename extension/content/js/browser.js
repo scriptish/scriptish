@@ -9,6 +9,9 @@ import("resource://scriptish/utils/Scriptish_openInEditor.js");
 import("resource://scriptish/utils/Scriptish_isGreasemonkeyable.js");
 import("resource://scriptish/config/configdownloader.js");
 import("resource://scriptish/menucommander.js");
+import("resource://scriptish/constants.js", tools);
+var Services = tools.Services;
+var gmSvc = Services.scriptish;
 
 Scriptish_BrowserUI = {};
 
@@ -30,7 +33,6 @@ Scriptish_BrowserUI.QueryInterface = function(aIID) {
 Scriptish_BrowserUI.init = function() {
   this.menuCommanders = [];
   this.currentMenuCommander = null;
-
   window.addEventListener("load", Scriptish_hitch(this, "chromeLoad"), false);
   window.addEventListener("unload", Scriptish_hitch(this, "chromeUnload"), false);
 };
@@ -167,10 +169,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   Scriptish_BrowserUIM.refreshStatus();
 
   // register for notifications from scriptish-service about ui type things
-  var gmSvc = Components.classes["@scriptish.erikvold.com/scriptish-service;1"]
-                  .getService().wrappedJSObject;
-  this.gmSvc = gmSvc;
-  if (gmSvc.updateChk) setTimeout(function() { gmSvc.updateChk() }, 100);
+  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 100);
 }
 
 // registerMenuCommand
@@ -203,8 +202,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
       this.currentMenuCommander.attach();
     }
 
-    this.gmSvc.domContentLoaded(safeWin, window, this);
-
+    gmSvc.domContentLoaded(safeWin, window, this);
     safeWin.addEventListener("pagehide", Scriptish_hitch(this, "contentUnload"), false);
   }
 

@@ -11,6 +11,11 @@ Cu.import("resource://scriptish/logging.js");
 
 function ScriptishService() {
   this.wrappedJSObject = this;
+  this.updateChk = function() {
+    Services.scriptloader
+        .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
+    delete this.updateChk;
+  }
 }
 
 ScriptishService.prototype = {
@@ -35,8 +40,7 @@ ScriptishService.prototype = {
   _config: null,
   get config() {
     if (!this._config) {
-      Services.scriptloader
-          .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
+      this.updateChk && this.updateChk();
       var tools = {};
       Cu.import("resource://scriptish/config/config.js", tools);
       this._config = new tools.Config(this._scriptFoldername);
