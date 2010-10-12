@@ -1,10 +1,10 @@
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
-
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
-Cu.import("resource://scriptish/api.js");
+(function(import){
+  import("resource://scriptish/constants.js");
+  import("resource://scriptish/logging.js");
+  import("resource://scriptish/utils/Scriptish_hitch.js");
+  import("resource://scriptish/api.js");
+})(Components.utils.import)
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
   this.unsafeContentWin = unsafeContentWin;
@@ -52,7 +52,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
       req.abort();
     }
   };
-};
+}
 
 // this function is intended to be called in chrome's security context, so
 // that it can access other domains without security warning
@@ -62,34 +62,28 @@ function(safeUrl, details, req) {
 
   this.setupRequestEvent(this.unsafeContentWin, req, "onload", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onerror", details);
-  this.setupRequestEvent(this.unsafeContentWin, req, "onreadystatechange",
-                         details);
+  this.setupRequestEvent(
+      this.unsafeContentWin, req, "onreadystatechange", details);
 
-  if (details.mozBackgroundRequest) { req.mozBackgroundRequest = true; }
+  if (details.mozBackgroundRequest) req.mozBackgroundRequest = true;
 
-  req.open(details.method, safeUrl, true,
-      details.user || "", details.password || "");
+  req.open(
+      details.method, safeUrl, true, details.user || "", details.password || "");
 
-  if (details.overrideMimeType) {
-    req.overrideMimeType(details.overrideMimeType);
-  }
+  if (details.overrideMimeType) req.overrideMimeType(details.overrideMimeType);
 
   if (details.headers) {
     var headers = details.headers;
 
     for (var prop in headers) {
-      if (Object.prototype.hasOwnProperty.call(headers, prop)) {
+      if (Object.prototype.hasOwnProperty.call(headers, prop))
         req.setRequestHeader(prop, headers[prop]);
-      }
     }
   }
 
   var body = details.data ? details.data : null;
-  if (details.binary) {
-    req.sendAsBinary(body);
-  } else {
-    req.send(body);
-  }
+  if (details.binary) req.sendAsBinary(body);
+  else req.send(body);
 
   Scriptish_log("< GM_xmlhttpRequest.chromeStartRequest");
 }
@@ -130,4 +124,4 @@ function(unsafeContentWin, req, event, details) {
   }
 
   Scriptish_log("< GM_xmlhttpRequester.setupRequestEvent");
-};
+}
