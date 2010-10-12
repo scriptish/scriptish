@@ -133,7 +133,7 @@ Script.prototype = {
   checkForRemoteUpdate: function(aCallback) {
     var updateURL = this.updateURL;
     if (!updateURL) return aCallback.call(this, false);
-    var req = Scriptish_Services.xhr;
+    var req = Instances.xhr;
     req.open("GET", updateURL, true);
     req.onload = Scriptish_hitch(this, "checkRemoteVersion", req, aCallback);
     req.onerror = Scriptish_hitch(this, "checkRemoteVersionErr", aCallback);

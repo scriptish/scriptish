@@ -88,7 +88,7 @@ function Scriptish_PrefManager(startPoint) {
     // set new value using correct method
     switch (prefType) {
       case "string":
-        var str = Scriptish_Services.ss;
+        var str = Instances.ss;
         str.data = value;
         pref.setComplexValue(prefName, Ci.nsISupportsString, str);
         break;

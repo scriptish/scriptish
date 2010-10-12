@@ -8,7 +8,7 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 function Scriptish_getContents(file, charset) {
   if (!charset) charset = "UTF-8";
   var scriptableStream = Services.sis;
-  var unicodeConverter = Scriptish_Services.suc;
+  var unicodeConverter = Instances.suc;
   unicodeConverter.charset = charset;
 
   var channel = Services.io.newChannelFromURI(Scriptish_getUriFromFile(file));

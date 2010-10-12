@@ -1,4 +1,4 @@
-var EXPORTED_SYMBOLS = [ "Cc", "Ci", "XPCOMUtils", "Services", "Scriptish_Services"];
+var EXPORTED_SYMBOLS = [ "Cc", "Ci", "XPCOMUtils", "Services", "Instances"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -9,7 +9,7 @@ var Services = {};
   Services.__proto__ = tools.Services;
 })(Components.utils.import, {})
 
-var Scriptish_Services = {
+var Instances = {
   get bis() Cc["@mozilla.org/binaryinputstream;1"]
       .createInstance(Ci.nsIBinaryInputStream),
   get ch() Cc["@mozilla.org/security/hash;1"]

@@ -74,7 +74,7 @@ Config.prototype = {
 
   _load: function() {
     var configContents = Scriptish_getContents(this._configFile);
-    var doc = Scriptish_Services.dp.parseFromString(configContents, "text/xml");
+    var doc = Instances.dp.parseFromString(configContents, "text/xml");
     var nodes = doc.evaluate("/UserScriptConfig/Script", doc, null, 0, null);
     var fileModified = false;
 
@@ -95,7 +95,7 @@ Config.prototype = {
     }
     delete this["_saveTimer"];
 
-    var doc = Scriptish_Services.dp.parseFromString(
+    var doc = Instances.dp.parseFromString(
         "<UserScriptConfig/>", "text/xml");
     var scripts = this._scripts;
     var len = scripts.length;
@@ -107,7 +107,7 @@ Config.prototype = {
     firstChild.appendChild(doc.createTextNode("\n"));
 
     var configStream = Scriptish_getWriteStream(this._configFile);
-    Scriptish_Services.ds.serializeToStream(doc, configStream, "utf-8");
+    Instances.ds.serializeToStream(doc, configStream, "utf-8");
     configStream.close();
   },
 

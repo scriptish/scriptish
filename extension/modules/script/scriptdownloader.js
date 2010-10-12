@@ -38,7 +38,7 @@ ScriptDownloader.prototype.startUpdateScript = function(aScriptInstaller) {
 }
 ScriptDownloader.prototype.startDownload = function() {
   Scriptish_log("Fetching Script");
-  this.req_ = Scriptish_Services.xhr;
+  this.req_ = Instances.xhr;
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
   this.req_.onerror = Scriptish_hitch(this, "handleErr");
@@ -80,7 +80,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
     this.tempFiles_.push(file);
 
-    var converter = Scriptish_Services.suc;
+    var converter = Instances.suc;
     converter.charset = "UTF-8";
     source = converter.ConvertFromUnicode(source);
 
@@ -143,7 +143,7 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
   var dep = this.depQueue_.pop();
   Cu.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
   try {
-    var persist = Scriptish_Services.wbp;
+    var persist = Instances.wbp;
     persist.persistFlags =
         persist.PERSIST_FLAGS_BYPASS_CACHE |
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
