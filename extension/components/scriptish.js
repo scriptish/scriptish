@@ -205,7 +205,10 @@ ScriptishService.prototype = {
     try {
       try {
         Cu.evalInSandbox(src, aSandbox, jsVer, fileURLPrefix+fileURL, 1);
-      } catch (e if e.message == "return not in function") {
+      // catch errors when return is not in a function or when a window global
+      // is being overwritten (which throws NS_ERROR_OUT_OF_MEMORY..)
+      } catch (e if (e.message == "return not in function"
+          || /\(NS_ERROR_OUT_OF_MEMORY\) \[nsIXPCComponents_Utils.evalInSandbox\]/.test(e.message))) {
         Cu.evalInSandbox(
             "(function(){"+src+"})()", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       }
