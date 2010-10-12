@@ -13,8 +13,6 @@ Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/script/script.js");
-Cu.import("resource://gre/modules/AddonManager.jsm");
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 
 function Config(aBaseDir) {

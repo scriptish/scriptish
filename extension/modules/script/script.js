@@ -20,8 +20,6 @@ Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://scriptish/third-party/MatchPattern.js");
 Cu.import("resource://scriptish/config/configdownloader.js");
-Cu.import("resource://gre/modules/AddonManager.jsm");
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid

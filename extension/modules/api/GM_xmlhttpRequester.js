@@ -5,7 +5,6 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/api.js");
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
   this.unsafeContentWin = unsafeContentWin;

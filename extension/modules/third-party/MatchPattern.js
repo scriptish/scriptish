@@ -39,8 +39,8 @@
 var EXPORTED_SYMBOLS = ['MatchPattern'];
 
 const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 const validScheme = ['http', 'https', 'ftp', 'file'];
 

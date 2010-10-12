@@ -1,7 +1,7 @@
 var EXPORTED_SYMBOLS = ["ScriptInstall"];
+Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/logging.js");
 Components.utils.import("resource://scriptish/third-party/Timer.js");
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 const gTimer = new Timer();
 

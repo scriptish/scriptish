@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = [];
 Components.utils.import("resource://scriptish/utils/Scriptish_config.js");
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
+Components.utils.import("resource://scriptish/constants.js");
 
 AddonManagerPrivate.registerProvider({
   getAddonByID: function(aId, aCallback) {

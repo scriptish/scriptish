@@ -1,7 +1,7 @@
 // Checks if Scriptish was updated/installed
 (function(import, tools) {
   import("resource://scriptish/prefmanager.js", tools);
-  import("resource://gre/modules/AddonManager.jsm", tools);
+  import("resource://scriptish/constants.js", tools);
   var pref = tools.Scriptish_prefRoot;
 
   // check if this is the first launch

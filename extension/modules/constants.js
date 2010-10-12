@@ -1,11 +1,16 @@
-var EXPORTED_SYMBOLS = [ "Cc", "Ci", "XPCOMUtils", "Services", "Instances"];
+var EXPORTED_SYMBOLS = [
+    "Cc", "Ci", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
+    "Services", "Instances"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 var Services = {};
 (function(import, tools){
   import("resource://gre/modules/XPCOMUtils.jsm");
+  import("resource://gre/modules/NetUtil.jsm");
+  import("resource://gre/modules/AddonManager.jsm");
   import("resource://gre/modules/Services.jsm", tools);
+
   Services.__proto__ = tools.Services;
 })(Components.utils.import, {})
 

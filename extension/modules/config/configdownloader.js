@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_configDownloader"];
 Components.utils.import("resource://scriptish/script/scriptdownloader.js");
-Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Components.utils.import("resource://scriptish/constants.js");
 
 var Scriptish_configDownloader = {
   startInstall: function(aURI, aWin) {
