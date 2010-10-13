@@ -8,6 +8,9 @@ const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+
+const CP = Ci.nsIContentPolicy;
 
 function ScriptishService() {
   this.wrappedJSObject = this;
@@ -26,13 +29,8 @@ ScriptishService.prototype = {
                        entry: CONTRACTID,
                        value: CONTRACTID,
                        service: true}],
-
-  // nsISupports
   QueryInterface: XPCOMUtils.generateQI([
-      Ci.nsISupports,
-      Ci.nsISupportsWeakReference,
-      Ci.nsIContentPolicy
-  ]),
+      Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIContentPolicy]),
 
   get filename() filename,
   _scriptFoldername: "scriptish_scripts",
@@ -61,44 +59,31 @@ ScriptishService.prototype = {
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_installUri.js", tools);
-    Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js", tools);
-
-    var ret = Ci.nsIContentPolicy.ACCEPT;
 
     // block content detection of scriptish by denying it chrome: & resource:
     // content, unless loaded from chrome: or about:
     if (org && !/^(?:chrome|about)$/.test(org.scheme)
         && /^(?:chrome|resource)$/.test(cl.scheme) && cl.host == "scriptish") {
-      return Ci.nsIContentPolicy.REJECT_SERVER;
+      return CP.REJECT_SERVER;
     }
 
+    var ret = CP.ACCEPT;
     // don't intercept anything when Scriptish is not enabled
-    if (!tools.Scriptish_getEnabled()) return ret;
-
+    if (!Scriptish_getEnabled()) return ret;
     // don't interrupt the view-source: scheme
-    // (triggered if the link in the error console is clicked)
     if ("view-source" == cl.scheme) return ret;
 
-    if (ct == Ci.nsIContentPolicy.TYPE_DOCUMENT &&
-        cl.spec.match(/\.user\.js$/)) {
-
-      dump("shouldload: " + cl.spec + "\n");
-      dump("ignorescript: " + this.ignoreNextScript_ + "\n");
-
-      if (!this.ignoreNextScript_ &&
-          !this.isTempScript(cl)) {
-        tools.Scriptish_installUri(cl, ctx.contentWindow);
-        ret = Ci.nsIContentPolicy.REJECT_REQUEST;
-      }
+    if (ct == CP.TYPE_DOCUMENT && cl.spec.match(/\.user\.js$/)
+        && !this.ignoreNextScript_ && !this.isTempScript(cl)) {
+      tools.Scriptish_installUri(cl, ctx.contentWindow);
+      ret = CP.REJECT_REQUEST;
     }
 
     this.ignoreNextScript_ = false;
     return ret;
   },
 
-  shouldProcess: function(ct, cl, org, ctx, mt, ext) {
-    return Ci.nsIContentPolicy.ACCEPT;
-  },
+  shouldProcess: function(ct, cl, org, ctx, mt, ext) CP.ACCEPT,
 
   ignoreNextScript: function() {
     dump("ignoring next script...\n");
