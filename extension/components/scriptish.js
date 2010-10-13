@@ -65,10 +65,10 @@ ScriptishService.prototype = {
 
     var ret = Ci.nsIContentPolicy.ACCEPT;
 
-    // block content detection of scriptish by denying it
-    // chrome content, unless loaded from chrome
-    if (org && !org.scheme.match(/^(?:chrome|about)$/) && cl.scheme == "chrome"
-        && cl.host == "scriptish") {
+    // block content detection of scriptish by denying it chrome: & resource:
+    // content, unless loaded from chrome: or about:
+    if (org && !/^(?:chrome|about)$/.test(org.scheme)
+        && /^(?:chrome|resource)$/.test(cl.scheme) && cl.host == "scriptish") {
       return Ci.nsIContentPolicy.REJECT_SERVER;
     }
 

@@ -1,4 +1,3 @@
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_MenuCommander"];
 
 Components.utils.import("resource://scriptish/logging.js");
