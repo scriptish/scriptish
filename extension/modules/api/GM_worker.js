@@ -34,7 +34,7 @@ const GM_worker = function (aResource, aPgURL) {
     alive = false;
     gTimer.setTimeout(function() {
       Services.tm.mainThread.dispatch(
-          new Dispatcher(null, thread, "shutdown"), Ci.nsIThread.NORMAL);
+          new Dispatcher(null, thread, "shutdown"), Ci.nsIThread.DISPATCH_NORMAL);
     }, 0);
     Scriptish_log("terminated GM_worker");
     fakeWorker = tempWorker;
@@ -63,14 +63,12 @@ function fake_worker(aThread, aBoss, aJSContent, aJSPath, aPgURL) {
   this.sandbox.importFunction(function postMessage(aMsg) {
     var msg = (typeof aMsg != "object") ? (aMsg + "") : JSON.stringify(aMsg);
     Services.tm.mainThread.dispatch(
-        new Dispatcher(msg, self, "_onmessage"),
-        Ci.nsIThread.DISPATCH_NORMAL);
+        new Dispatcher(msg, self, "_onmessage"), Ci.nsIThread.DISPATCH_NORMAL);
   }, "postMessage")
 
   this.sandbox.importFunction(function close() {
     Services.tm.mainThread.dispatch(
-        new Dispatcher(null, self, "_terminate"),
-        Ci.nsIThread.DISPATCH_SYNC);
+        new Dispatcher(null, self, "_terminate"), Ci.nsIThread.DISPATCH_SYNC);
   }, "close")
 
   this.thread.dispatch(this, Ci.nsIThread.DISPATCH_NORMAL);
@@ -90,8 +88,7 @@ fake_worker.prototype = {
       aFunc();
     } catch (e) {
       Services.tm.mainThread.dispatch(
-          new Dispatcher(e, this, "_onerror"),
-          Ci.nsIThread.DISPATCH_NORMAL);
+          new Dispatcher(e, this, "_onerror"), Ci.nsIThread.DISPATCH_NORMAL);
     }
   },
 
@@ -157,16 +154,4 @@ function Dispatcher(aArg, aObj, aFuncName) {
 Dispatcher.prototype = {
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIRunnable]),
   run: function () { this.obj[this.func](this.arg); }
-}
-
-function trapErrors(aFunc) {
-  return function () {
-    try {
-      aFunc.apply(this, arguments);
-    } catch (e) {
-      Services.tm.mainThread.dispatch(
-          new Dispatcher(e, this, "_onerror"),
-          Ci.nsIThread.DISPATCH_NORMAL);
-    }
-  }
 }
