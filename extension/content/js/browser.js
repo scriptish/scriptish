@@ -168,7 +168,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 100);
 }
 
-// registerMenuCommand
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   var commander = this.getCommander(menuCommand.window);
   commander.registerMenuCommand(
@@ -278,8 +277,8 @@ Scriptish_BrowserUI.onLocationChange = function(a,b,c) {
     this.currentMenuCommander = null;
   }
 
-  var menuCommander = this.getCommander(this.tabBrowser.selectedBrowser.
-                                        contentWindow);
+  var menuCommander = this.getCommander(
+      this.tabBrowser.selectedBrowser.contentWindow);
 
   if (menuCommander) {
     this.currentMenuCommander = menuCommander;
@@ -364,15 +363,14 @@ Scriptish_BrowserUI.toolsMenuShowing = function() {
  * Helper method which gets the menuCommander corresponding to a given
  * document
  */
-Scriptish_BrowserUI.getCommander = function(unsafeWin) {
-  for (var i = 0; i < this.menuCommanders.length; i++) {
-    if (this.menuCommanders[i].win == unsafeWin)
+Scriptish_BrowserUI.getCommander = function(aWin) {
+  for (var i = 0; i < this.menuCommanders.length; i++)
+    if (this.menuCommanders[i].win === aWin)
       return this.menuCommanders[i].commander;
-  }
 
   // no commander found. create one and add it.
   var commander = new Scriptish_MenuCommander(document);
-  this.menuCommanders.push({win: unsafeWin, commander: commander});
+  this.menuCommanders.push({win: aWin, commander: commander});
   return commander;
 }
 
@@ -427,9 +425,9 @@ function Scriptish_showPopup(aEvent) {
       popup.removeChild(node);
   }
 
-  var urls = uniq( urlsOfAllFrames( getBrowser().contentWindow ));
-  var runsOnTop = scriptsMatching( [urls.shift()] ); // first url = top window
-  var runsFramed = scriptsMatching( urls ); // remainder are all its subframes
+  var urls = uniq(urlsOfAllFrames(getBrowser().contentWindow));
+  var runsOnTop = scriptsMatching([urls.shift()]); // first url = top window
+  var runsFramed = scriptsMatching(urls); // remainder are all its subframes
 
   // drop all runsFramed scripts already present in runsOnTop
   for (var i = 0; i < runsOnTop.length; i++) {

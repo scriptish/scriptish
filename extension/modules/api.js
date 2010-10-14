@@ -171,7 +171,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       accelModifiers: aAccelModifiers,
       accessKey: aAccessKey,
       doCommand: aCommandFunc,
-      window: aUnsafeContentWin});
+      window: aSafeWin});
   };
 
   this.GM_worker = function GM_worker(resourceName) {
