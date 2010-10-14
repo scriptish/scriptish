@@ -38,7 +38,7 @@ function GM_apiSafeCallback(aWindow, aThis, aCallback, aArgs) {
       .setTimeout(function() { aCallback.apply(aThis, aArgs); }, 0);
 }
 
-function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWindow, aChromeWin, aGmBrowser) {
+function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var document = aSafeWin.document;
   var _xmlhttpRequester = null;
   var _storage = null;
@@ -165,7 +165,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWindow, aChro
       aAccessKey) {
     if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
 
-    aGmBrowser.registerMenuCommand({
+    aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
       name: aCommandName,
       accelKey: aAccelKey,
       accelModifiers: aAccelModifiers,

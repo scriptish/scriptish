@@ -114,9 +114,8 @@ ScriptDownloader.prototype.fetchDependencies = function() {
 
   var deps = this.script.requires.concat(this.script.resources);
   // if this.script.icon._filename exists then the icon is a data scheme
-  if (this.script.icon.hasDownloadURL()) {
+  if (this.script.icon.hasDownloadURL())
     deps.push(this.script.icon);
-  }
 
   for (var i = 0; i < deps.length; i++) {
     var dep = deps[i];

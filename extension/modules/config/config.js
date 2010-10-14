@@ -109,9 +109,8 @@ Config.prototype = {
     configStream.close();
   },
 
-  parse: function(source, uri, aUpdateScript) {
-    return Script.parse(this, source, uri, aUpdateScript);
-  },
+  parse: function(source, uri, aUpdateScript) (
+      Script.parse(this, source, uri, aUpdateScript)),
 
   install: function(aNewScript) {
     var existingIndex = this._find(aNewScript.id);
@@ -170,13 +169,12 @@ Config.prototype = {
 
   updateModifiedScripts: function() {
     // Find any updated scripts
-    var scripts = this.getMatchingScripts(
-        function (script) { return script.isModified(); });
+    var scripts = this.getMatchingScripts(function(script) script.isModified());
     if (0 == scripts.length) return;
 
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
-          Scriptish_getContents(script._file),
+          script.textContent,
           script._downloadURL && NetUtil.newURI(script._downloadURL),
           script);
       script.updateFromNewScript(parsedScript);

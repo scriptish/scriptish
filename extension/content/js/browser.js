@@ -195,7 +195,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
       this.currentMenuCommander.attach();
     }
 
-    gmSvc.domContentLoaded(safeWin, window, this);
+    gmSvc.domContentLoaded(safeWin, window);
     safeWin.addEventListener("pagehide", Scriptish_hitch(this, "contentUnload"), false);
   }
 

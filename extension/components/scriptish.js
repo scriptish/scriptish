@@ -47,13 +47,11 @@ ScriptishService.prototype = {
     return this._config;
   },
 
-  domContentLoaded: function(wrappedContentWin, chromeWin, gmBrowser) {
+  domContentLoaded: function(wrappedContentWin, chromeWin) {
     var url = wrappedContentWin.document.location.href;
     var scripts = this.initScripts(url, wrappedContentWin, chromeWin);
-
-    if (scripts.length > 0) {
-      this.injectScripts(scripts, url, wrappedContentWin, chromeWin, gmBrowser);
-    }
+    if (scripts.length > 0)
+      this.injectScripts(scripts, url, wrappedContentWin, chromeWin);
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
@@ -111,9 +109,8 @@ ScriptishService.prototype = {
     this.config.wrappedContentWin = wrappedContentWin;
     this.config.chromeWin = chromeWin;
 
-    if (tools.Scriptish_prefRoot.getValue('enableScriptRefreshing')) {
+    if (tools.Scriptish_prefRoot.getValue('enableScriptRefreshing'))
       this.config.updateModifiedScripts();
-    }
 
     var basicCheck = function(script) {
       return !script.delayInjection && script.enabled &&
@@ -132,11 +129,10 @@ ScriptishService.prototype = {
     return scripts;
   },
 
-  injectScripts: function(scripts, url, wrappedContentWin, chromeWin, gmBrowser) {
+  injectScripts: function(scripts, url, wrappedContentWin, chromeWin) {
     var sandbox;
     var script;
     var unsafeContentWin = wrappedContentWin.wrappedJSObject;
-
     var tools = {};
     Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
@@ -152,9 +148,7 @@ ScriptishService.prototype = {
           url,
           wrappedContentWin,
           unsafeContentWin,
-          Services.ass.hiddenDOMWindow,
-          chromeWin,
-          gmBrowser);
+          chromeWin);
 
       sandbox.unsafeWindow = unsafeContentWin;
 
