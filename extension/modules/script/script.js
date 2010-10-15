@@ -209,15 +209,19 @@ Script.prototype = {
   get author() this._author,
   set author(aVal) {
     this._author = aVal;
-    this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
+    if (AddonManagerPrivate.AddonAuthor)
+      this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
+    else
+      this._creator = aVal;
   },
   get contributors() {
+    if (!AddonManagerPrivate.AddonAuthor) return this._contributors;
     var contributors = [];
     for (var i = this._contributors.length-1; i >= 0; i--) {
       contributors.unshift(
           new AddonManagerPrivate.AddonAuthor(this._contributors[i]));
     }
-    return this._contributors;
+    return contributors;
   },
   addContributor: function(aContributor) {
     if (!aContributor) return;
@@ -690,7 +694,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         value && script._matches.push(new MatchPattern(value));
         continue;
       case 'screenshot':
-        if (!value) continue;
+        if (!value || !AddonManagerPrivate.AddonScreenshot) continue;
         var splitValue = value.match(valueSplitter);
         if (splitValue) {
           script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(

@@ -1,3 +1,5 @@
+var Scriptish_BrowserUI = {};
+
 (function(import, tools){
 import("resource://scriptish/content/browser.js");
 import("resource://scriptish/prefmanager.js");
@@ -13,8 +15,6 @@ import("resource://scriptish/constants.js", tools);
 var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;
-
-Scriptish_BrowserUI = {};
 
 // nsISupports.QueryInterface
 Scriptish_BrowserUI.QueryInterface = function(aIID) {
@@ -151,11 +151,12 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   // hook various events
   $("appcontent").addEventListener(
       "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
-  $("sidebar").addEventListener(
+  var sidebar = $("sidebar") || $("sidebar-box");
+  sidebar.addEventListener(
       "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
   $("contentAreaContextMenu").addEventListener(
       "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
-  $("menu_ToolsPopup").addEventListener(
+  ($("menu_ToolsPopup") || $("taskPopup")).addEventListener(
       "popupshowing", Scriptish_hitch(this, "toolsMenuShowing"), false);
 
   // this gives us onLocationChange

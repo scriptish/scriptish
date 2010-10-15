@@ -59,9 +59,13 @@ XPCOMUtils.defineLazyServiceGetter(
     Services, "eps", "@mozilla.org/uriloader/external-protocol-service;1",
     "nsIExternalProtocolService");
 
-XPCOMUtils.defineLazyServiceGetter(
-    Services, "pbs", "@mozilla.org/privatebrowsing;1",
-    "nsIPrivateBrowsingService");
+if (Cc["@mozilla.org/privatebrowsing;1"]) {
+  XPCOMUtils.defineLazyServiceGetter(
+      Services, "pbs", "@mozilla.org/privatebrowsing;1",
+      "nsIPrivateBrowsingService");
+} else {
+  Services.pbs = {privateBrowsingEnabled: false};
+}
 
 XPCOMUtils.defineLazyServiceGetter(
     Services, "sis", "@mozilla.org/scriptableinputstream;1",

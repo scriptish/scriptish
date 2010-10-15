@@ -2,12 +2,18 @@
 (function($){
 var Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/addonprovider.js");
 Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_ExtendedStringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js");
 Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js");
+
+var Scriptish_bundle = new Scriptish_ExtendedStringBundle(gStrings.ext);
+Scriptish_bundle.strings["header-userscript"] = Scriptish_stringBundle("userscripts");
+gStrings.ext = Scriptish_bundle;
 
 window.addEventListener("load", function() {
   function addonIsInstalledScript(aAddon) {
