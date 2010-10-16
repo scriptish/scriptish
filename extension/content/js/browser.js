@@ -1,4 +1,7 @@
-var Scriptish_BrowserUI = {};
+var Scriptish_BrowserUI = {
+  menuCommanders: [],
+  currentMenuCommander: null
+};
 
 (function(import, tools){
 import("resource://scriptish/content/browser.js");
@@ -16,28 +19,16 @@ import("resource://scriptish/constants.js", tools);
 var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;
+var $ = function(aID) document.getElementById(aID);
 
 Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
-
-/**
- * Called when this file is parsed, by the last line. Set up initial objects,
- * do version checking, and set up listeners for browser xul load and location
- * changes.
- */
-Scriptish_BrowserUI.init = function() {
-  this.menuCommanders = [];
-  this.currentMenuCommander = null;
-  window.addEventListener("load", Scriptish_hitch(this, "chromeLoad"), false);
-  window.addEventListener("unload", Scriptish_hitch(this, "chromeUnload"), false);
-}
 
 /**
  * The browser XUL has loaded. Find the elements we need and set up our
  * listeners and wrapper objects.
  */
 Scriptish_BrowserUI.chromeLoad = function(e) {
-  var $ = function(aID) document.getElementById(aID);
   Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
 
   // get all required DOM elements
@@ -225,8 +216,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
     "install-userscript",
     "chrome://scriptish/skin/icon_small.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
-    [{
-      label: Scriptish_stringBundle("greeting.btn"),
+    [{label: Scriptish_stringBundle("greeting.btn"),
       accessKey: Scriptish_stringBundle("greeting.btnAccess"),
       popup: null,
       callback: Scriptish_hitch(this, "installCurrentScript")
@@ -254,9 +244,7 @@ Scriptish_BrowserUI.observe = function(subject, topic, data) {
     throw new Error("Unexpected topic received: {" + topic + "}");
 };
 
-/**
- * Handles the install button getting clicked.
- */
+// Handles the install button getting clicked.
 Scriptish_BrowserUI.installCurrentScript = function() {
   this.scriptDownloader_.installScript();
 }
@@ -324,7 +312,7 @@ Scriptish_BrowserUI.chromeUnload = function() {
  */
 Scriptish_BrowserUI.contextMenuShowing = function() {
   var contextItem = this.contextItem;
-  var contextSep = document.getElementById("scriptish-context-menu-viewsource-sep");
+  var contextSep = $("scriptish-context-menu-viewsource-sep");
   var culprit = document.popupNode;
 
   while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a")
@@ -388,7 +376,7 @@ function Scriptish_showPopup(aEvent) {
   }
 
   var popup = aEvent.target;
-  var tail = document.getElementById("scriptish-status-no-scripts-sep");
+  var tail = $("scriptish-status-no-scripts-sep");
 
   // set the enabled/disabled state
   Scriptish_BrowserUI.statusEnabledItem.setAttribute(
@@ -426,7 +414,7 @@ function Scriptish_showPopup(aEvent) {
   runsOnTop.forEach(appendScriptToPopup);
 
   var foundInjectedScript = !!(runsFramed.length + runsOnTop.length);
-  document.getElementById("scriptish-status-no-scripts").collapsed = foundInjectedScript;
+  $("scriptish-status-no-scripts").collapsed = foundInjectedScript;
 }
 
 /**
@@ -458,5 +446,6 @@ Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
 Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
-Scriptish_BrowserUI.init();
+window.addEventListener("load", Scriptish_hitch(Scriptish_BrowserUI, "chromeLoad"), false);
+window.addEventListener("unload", Scriptish_hitch(Scriptish_BrowserUI, "chromeUnload"), false);
 })(Components.utils.import, {})
