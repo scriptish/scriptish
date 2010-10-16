@@ -711,22 +711,14 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
       case "icon":
       case "iconurl":
         if (!value) continue;
-        script._rawMeta += header + '\0' + value + '\0';
-        // aceept data uri schemes for image MIME types
-        if (/^data:image\//i.test(value)){
-          script.icon._dataURI = value;
-          continue;
-       }
-       try {
-          var iconUri = NetUtil.newURI(value, null, aURI);
-          script.icon._downloadURL = iconUri.spec;
+        try {
+          script.icon.setIcon(value, aURI);
         } catch (e) {
-          if (aUpdateScript) {
-            script._dependFail = true;
-          } else {
-            throw new Error('Failed to get @icon '+ value);
-          }
+          if (!aUpdateScript) throw e;
+          script._dependFail = true;
+          continue;
         }
+        script._rawMeta += header + '\0' + value + '\0';
         continue;
       case "require":
         if (!value) continue;

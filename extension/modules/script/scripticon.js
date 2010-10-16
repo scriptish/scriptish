@@ -1,4 +1,5 @@
 var EXPORTED_SYMBOLS = ["ScriptIcon"];
+Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/script/scriptdependency.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
@@ -21,3 +22,13 @@ ScriptIcon.prototype.__defineSetter__("fileURL", function(aURL) {
   if (/^data:/i.test(aURL)) return this._dataURI = aURL;
   return this._filename = aURL;
 });
+ScriptIcon.prototype.setIcon = function(aVal, aURI) {
+  // aceept data uri schemes for image MIME types
+  if (/^data:image\//i.test(aVal)) return this._dataURI = aVal;
+  if (/^data:/i.test(aVal)) throw new Error("Invalid data: URL for @icon");
+  try {
+    this._downloadURL = NetUtil.newURI(aVal, null, aURI).spec;
+  } catch (e) {
+    throw new Error("Invalid URL for @icon");
+  }
+}
