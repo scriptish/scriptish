@@ -17,15 +17,8 @@ var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;
 
-// nsISupports.QueryInterface
-Scriptish_BrowserUI.QueryInterface = function(aIID) {
-  if (!aIID.equals(Ci.nsISupports) &&
-      !aIID.equals(Ci.nsISupportsWeakReference) &&
-      !aIID.equals(Ci.nsIWebProgressListener))
-    throw Components.results.NS_ERROR_NO_INTERFACE;
-  return this;
-}
-
+Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
+    Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
 /**
  * Called when this file is parsed, by the last line. Set up initial objects,
