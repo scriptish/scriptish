@@ -255,17 +255,23 @@ Script.prototype = {
 
   get homepageURL() {
     var url = this._homepageURL;
-    if (url) return url;
+    if (typeof url == "string" && "" != url) return url;
+    url = this._downloadURL;
+    if (typeof url != "string" || "" == url) return null;
+    url = url.replace(/[\?#].*$/, "");
     // is the download URL a userscript.org url?
-    if (/^(https?:\/\/userscripts\.org\/[^\?#]*\.user\.js)(?:[\?#].*)?$/i.test(this._downloadURL)) {
+    if (/^(https?:\/\/userscripts\.org\/[^\?#]*\.user\.js)$/i.test(url)) {
       url = RegExp.$1
           .replace(/^https?:\/\/userscripts\.org\/scripts\/source\/(\d+)\.user\.js$/, "http://userscripts.org/scripts/show/$1")
           .replace(/^https?:\/\/userscripts\.org\/scripts\/version\/(\d+)\/\d+\.user\.js$/, "http://userscripts.org/scripts/show/$1");
       if (url.match(/^https?:\/\/userscripts\.org\/scripts\/show\/\d+$/))
         return url;
     // is the download URL a gist.github.com url?
-    } else if (/^https?:\/\/gist\.github\.com\/raw\/([\da-z]+)\/(?:[\da-z]{40}\/)?[^\/\?#\s]*\.user\.js(?:[\?#].*)?$/i.test(this._downloadURL)) {
+    } else if (/^https?:\/\/gist\.github\.com\/raw\/([\da-z]+)\/(?:[\da-z]{40}\/)?[^\/\?#\s]*\.user\.js$/i.test(url)) {
       return "https://gist.github.com/"+RegExp.$1;
+    // is the download URL a github.com url?
+    } else if (/^https?:\/\/(?:cloud\.)?github\.com\/(?:downloads\/)?([^\/]+\/[^\/]+)\/.*\.user\.js$/.test(url)) {
+      return "https://github.com/"+RegExp.$1;
     }
     return null;
   },
