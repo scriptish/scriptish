@@ -10,8 +10,8 @@ Cu.import("resource://scriptish/script/scriptrequire.js");
 function ScriptResource(script) {
   this._script = script;
 
-  this._downloadURL = null; // Only for scripts not installed
-  this._tempFile = null; // Only for scripts not installed
+  this._downloadURL = null;
+  this._tempFile = null;
   this._filename = null;
   this._mimetype = null;
   this._charset = null;
@@ -52,7 +52,6 @@ ScriptResource.prototype = {
     this._tempFile = tempFile;
     this._mimetype = mimetype;
     this._charset = charset;
-    if (this.updateScript)
-      this._initFile();
+    if (this.updateScript) this._initFile();
   }
 };

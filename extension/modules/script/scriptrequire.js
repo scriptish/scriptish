@@ -1,4 +1,3 @@
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["ScriptRequire"];
 
 const Cu = Components.utils;
@@ -10,8 +9,8 @@ Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 function ScriptRequire(script) {
   this._script = script;
 
-  this._downloadURL = null; // Only for scripts not installed
-  this._tempFile = null; // Only for scripts not installed
+  this._downloadURL = null;
+  this._tempFile = null;
   this._filename = null;
   this.type = "require";
   this.updateScript = false;

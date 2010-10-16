@@ -1,4 +1,3 @@
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["ScriptIcon"];
 
 const Cu = Components.utils;
@@ -9,8 +8,8 @@ Cu.import("resource://scriptish/script/scriptrequire.js");
 function ScriptIcon(script) {
   this._script = script;
 
-  this._downloadURL = null; // Only for scripts not installed
-  this._tempFile = null; // Only for scripts not installed
+  this._downloadURL = null;
+  this._tempFile = null;
   this._filename = null;
   this._dataURI = null;
   this._mimetype = null;
@@ -25,30 +24,21 @@ ScriptIcon.prototype = {
     return file;
   },
 
-  hasDownloadURL: function() {
-    if (this._downloadURL) return true;
-
-    return false;
-  },
-
-  get filename() {
-    return (this._filename || this._dataURI);
-  },
+  hasDownloadURL: function() !!this._downloadURL,
+  get filename() (this._filename || this._dataURI),
 
   get fileURL() {
     if (this._dataURI) return this._dataURI;
-
     if (this._filename) return Scriptish_getUriFromFile(this._file).spec;
-
     return null;
   },
-  set fileURL(icon) {
-    if (/^data:/i.test(icon)) {
+  set fileURL(aURL) {
+    if (/^data:/i.test(aURL)) {
       // icon is a data scheme
-      this._dataURI = icon;
-    } else if (icon) {
+      this._dataURI = aURL;
+    } else if (aURL) {
       // icon is a file
-      this._filename = icon;
+      this._filename = aURL;
     }
   },
 
@@ -58,7 +48,6 @@ ScriptIcon.prototype = {
   setDownloadedFile: function(tempFile, mimetype) {
     this._tempFile = tempFile;
     this._mimetype = mimetype;
-    if (this.updateScript)
-      this._initFile();
+    if (this.updateScript) this._initFile();
   }
 };
