@@ -32,3 +32,4 @@ ScriptIcon.prototype.setIcon = function(aVal, aURI) {
     throw new Error("Invalid URL for @icon");
   }
 }
+ScriptIcon.prototype.isImage = function(aMIMEType) /^image\//i.test(aMIMEType);

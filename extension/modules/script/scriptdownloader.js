@@ -180,11 +180,8 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
         dep.updateScript = true;
       }
 
-      // if the dependency type is icon, then check it's mime type
-      if (dep.type == "icon" &&
-          !/^image\//i.test(channel.contentType)) {
+      if (dep.type == "icon" && !dep.isImage(channel.contentType))
         this.errorInstallDependency(dep, "Error! @icon is not a image MIME type");
-      }
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
