@@ -9,6 +9,7 @@ import("resource://scriptish/utils/Scriptish_getEnabled.js");
 import("resource://scriptish/utils/Scriptish_stringBundle.js");
 import("resource://scriptish/utils/Scriptish_openInEditor.js");
 import("resource://scriptish/utils/Scriptish_isGreasemonkeyable.js");
+import("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
 import("resource://scriptish/config/configdownloader.js");
 import("resource://scriptish/menucommander.js");
 import("resource://scriptish/constants.js", tools);
@@ -376,25 +377,6 @@ Scriptish_BrowserUI.getCommander = function(aWin) {
 }
 
 function Scriptish_showPopup(aEvent) {
-  function urlsOfAllFrames(contentWindow) {
-    function collect(contentWindow) {
-      urls = urls.concat(urlsOfAllFrames(contentWindow));
-    }
-    var urls = [contentWindow.location.href];
-    Array.slice(contentWindow.frames).forEach(collect);
-    return urls;
-  }
-
-  function uniq(a) {
-    var seen = {}, list = [], item;
-    for (var i = 0; i < a.length; i++) {
-      item = a[i];
-      if (!seen.hasOwnProperty(item))
-        seen[item] = list.push(item);
-    }
-    return list;
-  }
-
   function scriptsMatching(urls) {
     function testMatchURLs(script) {
       return urls.some(function(url) script.matchesURL(url));
@@ -426,7 +408,7 @@ function Scriptish_showPopup(aEvent) {
       popup.removeChild(node);
   }
 
-  var urls = uniq(urlsOfAllFrames(getBrowser().contentWindow));
+  var urls = Scriptish_getURLsForContentWindow(getBrowser().contentWindow);
   var runsOnTop = scriptsMatching([urls.shift()]); // first url = top window
   var runsFramed = scriptsMatching(urls); // remainder are all its subframes
 
