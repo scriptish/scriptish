@@ -6,7 +6,7 @@ import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 import("resource://scriptish/utils/Scriptish_getContents.js");
 })(Components.utils.import)
 
-function ScriptDependency(aType, aScript) {
+function ScriptDependency(aScript) {
   this._script = aScript;
 
   this._downloadURL = null;
@@ -14,7 +14,6 @@ function ScriptDependency(aType, aScript) {
   this._filename = null;
   this._mimetype = null;
   this._charset = null;
-  this.type = aType;
   this.updateScript = false;
 }
 

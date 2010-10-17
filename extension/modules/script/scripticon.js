@@ -4,7 +4,7 @@ Components.utils.import("resource://scriptish/script/scriptdependency.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
 function ScriptIcon() {
-  ScriptDependency.apply(this, [].concat(["icon"], Array.slice(arguments)));
+  ScriptDependency.apply(this, arguments);
   this._dataURI = null;
 }
 ScriptIcon.prototype = new ScriptDependency();

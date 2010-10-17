@@ -4,7 +4,7 @@ Components.utils.import("resource://scriptish/utils/Scriptish_getBinaryContents.
 Components.utils.import("resource://scriptish/script/scriptdependency.js");
 
 function ScriptResource() {
-  ScriptDependency.apply(this, [].concat(["resource"], Array.slice(arguments)));
+  ScriptDependency.apply(this, arguments);
   this._name = null;
 }
 ScriptResource.prototype = new ScriptDependency();

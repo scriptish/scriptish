@@ -2,8 +2,9 @@ var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/script/ScriptIcon.js");
+Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
@@ -180,7 +181,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
         dep.updateScript = true;
       }
 
-      if (dep.type == "icon" && !dep.isImage(channel.contentType))
+      if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType))
         this.errorInstallDependency(dep, "Error! @icon is not a image MIME type");
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
