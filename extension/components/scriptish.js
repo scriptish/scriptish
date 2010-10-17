@@ -209,41 +209,18 @@ ScriptishService.prototype = {
         chromeWin.TabWatcher.getContextByWindow(unsafeContentWin);
 
       // Firebug 1.4 will give no context, when disabled for the current site.
-      // We can't run that way.
       if ('undefined' == typeof fbContext) return null;
 
       function findActiveContext() {
-        for (var i=0; i<fbContext.activeConsoleHandlers.length; i++) {
+        for (var i = 0; i < fbContext.activeConsoleHandlers.length; i++)
           if (fbContext.activeConsoleHandlers[i].window == unsafeContentWin)
             return fbContext.activeConsoleHandlers[i];
-        }
         return null;
       }
 
       if (!fbConsole.isEnabled(fbContext)) return null;
 
-      if (1.2 == fbVersion) {
-        var tools = {};
-        Services.scriptloader
-            .loadSubScript("chrome://global/content/XPCNativeWrapper.js", tools);
-        var safeWin = new tools.XPCNativeWrapper(unsafeContentWin);
-
-        if (fbContext.consoleHandler) {
-          for (var i = 0; i < fbContext.consoleHandler.length; i++) {
-            if (fbContext.consoleHandler[i].window == safeWin) {
-              return fbContext.consoleHandler[i].handler;
-            }
-          }
-        }
-
-        var dummyElm = safeWin.document.createElement("div");
-        dummyElm.setAttribute("id", "_firebugConsole");
-        safeWin.document.documentElement.appendChild(dummyElm);
-        chromeWin.Firebug.Console.injector.addConsoleListener(fbContext, safeWin);
-        dummyElm.parentNode.removeChild(dummyElm);
-
-        return fbContext.consoleHandler.pop().handler;
-      } else if (fbVersion >= 1.3) {
+      if (fbVersion >= 1.3) {
         fbConsole.injector.attachIfNeeded(fbContext, unsafeContentWin);
         return findActiveContext();
       }
