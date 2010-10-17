@@ -92,7 +92,7 @@ function(safeUrl, details, req) {
 // method by the same name which is a property of 'details' in the content
 // window's security context.
 GM_xmlhttpRequester.prototype.setupRequestEvent =
-function(unsafeContentWin, req, event, details) {
+    function(unsafeContentWin, req, event, details) {
   Scriptish_log("> GM_xmlhttpRequester.setupRequestEvent");
 
   if (details[event]) {

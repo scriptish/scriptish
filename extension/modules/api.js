@@ -5,6 +5,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
+Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 
 const moduleFilename = Components.stack.filename;
 
@@ -98,10 +99,15 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_log = function GM_log() getLogger().log.apply(getLogger(), arguments)
 
-  this.GM_notification = function GM_notification(aMsg) {
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
-    tools.Scriptish_notification(aMsg, aScript.name, aScript.iconURL);
+  this.GM_notification =
+      function GM_notification(aMsg, aTitle, aIcon, aCallback) {
+    if (!GM_apiLeakCheck("GM_notification")) return;
+    if (typeof aTitle != "string") aTitle = aScript.name;
+    if (typeof aIcon != "string") aIcon = aScript.iconURL;
+    var callback = null;
+    if (typeof aCallback == "function")
+      callback = function() GM_apiSafeCallback(aSafeWin, null, aCallback);
+    Scriptish_notification(aMsg, aTitle, aIcon, callback);
   }
 
   this.GM_setValue = function GM_setValue() {
