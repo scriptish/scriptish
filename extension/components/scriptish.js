@@ -9,6 +9,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 
 const CP = Ci.nsIContentPolicy;
 
@@ -138,28 +139,22 @@ ScriptishService.prototype = {
     Cu.import("resource://scriptish/api.js", tools);
 
     // detect and grab reference to firebug console and context, if it exists
-    var firebugConsole = this.getFirebugConsole(unsafeContentWin, chromeWin);
+    var fbConsole = Scriptish_getFirebugConsole(unsafeContentWin, chromeWin);
 
-    for (var i = 0; script = scripts[i]; i++) {
+    for (var i = 0; script = scripts[i++];) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
 
       var GM_API = new tools.GM_API(
-          script,
-          url,
-          wrappedContentWin,
-          unsafeContentWin,
-          chromeWin);
-
-      sandbox.unsafeWindow = unsafeContentWin;
+          script, url, wrappedContentWin, unsafeContentWin, chromeWin);
 
       // hack XPathResult since that is so commonly used
       sandbox.XPathResult = Ci.nsIDOMXPathResult;
 
       // add our own APIs
       for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
-      sandbox.console =
-          firebugConsole ? firebugConsole : new tools.GM_console(script);
+      sandbox.console = fbConsole || new tools.GM_console(script);
 
+      sandbox.unsafeWindow = unsafeContentWin;
       sandbox.__proto__ = wrappedContentWin;
 
       this.evalInSandbox(script, sandbox);
@@ -194,41 +189,7 @@ ScriptishService.prototype = {
     } catch (e) {
       Scriptish_logError(e, 0, fileURL, e.lineNumber);
     }
-  },
-
-  getFirebugConsole: function(unsafeContentWin, chromeWin) {
-    // If we can't find this object, there's no chance the rest of this
-    // function will work.
-    if ('undefined' == typeof chromeWin.Firebug) return null;
-
-    try {
-      chromeWin = chromeWin.top;
-      var fbVersion = parseFloat(chromeWin.Firebug.version, 10);
-      var fbConsole = chromeWin.Firebug.Console;
-      var fbContext = chromeWin.TabWatcher &&
-        chromeWin.TabWatcher.getContextByWindow(unsafeContentWin);
-
-      // Firebug 1.4 will give no context, when disabled for the current site.
-      if ('undefined' == typeof fbContext) return null;
-
-      function findActiveContext() {
-        for (var i = 0; i < fbContext.activeConsoleHandlers.length; i++)
-          if (fbContext.activeConsoleHandlers[i].window == unsafeContentWin)
-            return fbContext.activeConsoleHandlers[i];
-        return null;
-      }
-
-      if (!fbConsole.isEnabled(fbContext)) return null;
-
-      if (fbVersion >= 1.3) {
-        fbConsole.injector.attachIfNeeded(fbContext, unsafeContentWin);
-        return findActiveContext();
-      }
-    } catch (e) {
-      dump('Scriptish getFirebugConsole() error:\n'+uneval(e)+'\n');
-    }
-    return null;
   }
-};
+}
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
