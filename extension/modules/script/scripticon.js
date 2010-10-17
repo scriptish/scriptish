@@ -15,7 +15,7 @@ ScriptIcon.prototype.__defineGetter__("filename", function() (
 ScriptIcon.prototype.__defineGetter__("fileURL", function() {
   if (this._dataURI) return this._dataURI;
   if (this._filename) return Scriptish_getUriFromFile(this._file).spec;
-  return "chrome://scriptish/skin/uso_medium.png";
+  return "chrome://scriptish/skin/third-party/uso_medium.png";
 });
 ScriptIcon.prototype.__defineSetter__("fileURL", function(aURL) {
   // is icon url a data: url?
