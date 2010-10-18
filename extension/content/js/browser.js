@@ -2,12 +2,13 @@ var Scriptish_BrowserUI = {
   menuCommanders: [],
   currentMenuCommander: null
 };
+var Scriptish_BrowserUIM;
 
 (function(import, tools){
 import("resource://scriptish/content/browser.js");
 import("resource://scriptish/prefmanager.js");
 import("resource://scriptish/utils/Scriptish_config.js");
-import("resource://scriptish/utils/Scriptish_hitch.js");
+import("resource://scriptish/utils/Scriptish_hitch.js", tools);
 import("resource://scriptish/utils/Scriptish_getEnabled.js");
 import("resource://scriptish/utils/Scriptish_stringBundle.js");
 import("resource://scriptish/utils/Scriptish_openInEditor.js");
@@ -20,6 +21,7 @@ var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;
 var $ = function(aID) document.getElementById(aID);
+function hitch() tools.Scriptish_hitch.apply(null, arguments);
 
 Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
@@ -29,7 +31,7 @@ Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
  * listeners and wrapper objects.
  */
 Scriptish_BrowserUI.chromeLoad = function(e) {
-  Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
+  Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, this);
 
   // get all required DOM elements
   this.statusEnabledItem = $("scriptish-sb-enabled-item");
@@ -44,9 +46,8 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   tmStatusEle.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
   tmStatusEle.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.accesskey"));
 
-  $("scriptish-status").addEventListener("click", function(aEvt) {
-    Scriptish_BrowserUIM.onIconClick(aEvt);
-  }, false);
+  $("scriptish-status").addEventListener(
+      "click", hitch(Scriptish_BrowserUIM, "onIconClick"), false);
 
   $("scriptish-tools-menupop").addEventListener("popupshowing", function(aEvt) {
     // set the enabled/disabled state
@@ -121,17 +122,17 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   }, false);
 
   // update visual status when enabled state changes
-  this.statusWatcher = Scriptish_hitch(Scriptish_BrowserUIM, "refreshStatus");
+  this.statusWatcher = hitch(Scriptish_BrowserUIM, "refreshStatus");
   Scriptish_prefRoot.watch("enabled", this.statusWatcher);
 
   // hook various events
   $("appcontent").addEventListener(
-      "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
+      "DOMContentLoaded", hitch(this, "contentLoad"), true);
   var sidebar = $("sidebar") || $("sidebar-box");
   sidebar.addEventListener(
-      "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
+      "DOMContentLoaded", hitch(this, "contentLoad"), true);
   $("contentAreaContextMenu").addEventListener(
-      "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
+      "popupshowing", hitch(this, "contextMenuShowing"), false);
 
   // this gives us onLocationChange
   gBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
@@ -170,7 +171,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
     }
 
     gmSvc.domContentLoaded(safeWin, window);
-    safeWin.addEventListener("pagehide", Scriptish_hitch(this, "contentUnload"), false);
+    safeWin.addEventListener("pagehide", hitch(this, "contentUnload"), false);
   }
 
   // Show the scriptish install banner if we are navigating to a .user.js
@@ -208,7 +209,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
     [{label: Scriptish_stringBundle("greeting.btn"),
       accessKey: Scriptish_stringBundle("greeting.btnAccess"),
       popup: null,
-      callback: Scriptish_hitch(this, "installCurrentScript")
+      callback: hitch(this, "installCurrentScript")
     }]
   );
 }
@@ -429,6 +430,6 @@ Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
 Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
-window.addEventListener("load", Scriptish_hitch(Scriptish_BrowserUI, "chromeLoad"), false);
-window.addEventListener("unload", Scriptish_hitch(Scriptish_BrowserUI, "chromeUnload"), false);
+window.addEventListener("load", hitch(Scriptish_BrowserUI, "chromeLoad"), false);
+window.addEventListener("unload", hitch(Scriptish_BrowserUI, "chromeUnload"), false);
 })(Components.utils.import, {})
