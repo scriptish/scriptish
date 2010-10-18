@@ -32,7 +32,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
 
   // get all required DOM elements
-  this.tabBrowser = $("content");
   this.statusEnabledItem = $("scriptish-sb-enabled-item");
   this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
   this.contextItem = $("scriptish-context-menu-viewsource");
@@ -135,7 +134,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
       "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
 
   // this gives us onLocationChange
-  this.tabBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
+  gBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
@@ -164,7 +163,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
 
   if (Scriptish_isGreasemonkeyable(href)) {
     // if this content load is in the focused tab, attach the menuCommaander
-    if (unsafeWin == this.tabBrowser.selectedBrowser.contentWindow) {
+    if (unsafeWin == gBrowser.selectedBrowser.contentWindow) {
       var commander = this.getCommander(safeWin);
       this.currentMenuCommander = commander;
       this.currentMenuCommander.attach();
@@ -179,7 +178,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
   // been given a number after .user, like gmScript.user-12.js
   if (safeWin == safeWin.top && href.match(/\.user(?:-\d+)?\.js$/)
       && !/text\/html/i.test(safeWin.document.contentType)) {
-    var browser = this.tabBrowser.getBrowserForDocument(safeWin.document);
+    var browser = gBrowser.getBrowserForDocument(safeWin.document);
     this.showInstallBanner(browser);
   }
 }
@@ -191,7 +190,7 @@ Scriptish_BrowserUI.contentLoad = function(e) {
  */
 Scriptish_BrowserUI.showInstallBanner = function(browser) {
   var greeting = Scriptish_stringBundle("greeting.msg");
-  var notificationBox = this.tabBrowser.getNotificationBox(browser);
+  var notificationBox = gBrowser.getNotificationBox(browser);
 
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
@@ -220,7 +219,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
  */
 Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
   this.scriptDownloader_ = aSD;
-  this.tabBrowser.selectedTab = this.tabBrowser.addTab(aURL);
+  gBrowser.selectedTab = gBrowser.addTab(aURL);
 }
 
 /**
@@ -251,7 +250,7 @@ Scriptish_BrowserUI.onLocationChange = function(a,b,c) {
   }
 
   var menuCommander = this.getCommander(
-      this.tabBrowser.selectedBrowser.contentWindow);
+      gBrowser.selectedBrowser.contentWindow);
 
   if (menuCommander) {
     this.currentMenuCommander = menuCommander;
@@ -292,7 +291,7 @@ Scriptish_BrowserUI.contentUnload = function(e) {
  */
 Scriptish_BrowserUI.chromeUnload = function() {
   Scriptish_prefRoot.unwatch("enabled", this.statusWatcher);
-  this.tabBrowser.removeProgressListener(this);
+  gBrowser.removeProgressListener(this);
   delete this.menuCommanders;
 }
 
