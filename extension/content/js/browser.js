@@ -305,7 +305,7 @@ Scriptish_BrowserUI.contextMenuShowing = function() {
   var culprit = document.popupNode;
 
   while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a")
-     culprit = culprit.parentNode;
+    culprit = culprit.parentNode;
 
   contextItem.hidden = contextSep.hidden = !this.getUserScriptLinkUnderPointer();
 }
@@ -315,7 +315,7 @@ Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
   var culprit = document.popupNode;
 
   while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a")
-     culprit = culprit.parentNode;
+    culprit = culprit.parentNode;
 
   if (!culprit || !culprit.href || !culprit.href.match(/\.user\.js(\?|$)/i))
     return null;
@@ -403,14 +403,18 @@ function Scriptish_showPopup(aEvent) {
  * state, rihgt-click opens in an editor.
  */
 function Scriptish_popupClicked(aEvt) {
-  if (aEvt.button != 0 && aEvt.button != 2) return;
   var script = aEvt.target.script;
   if (!script) return;
-
-  if (aEvt.button == 0) // left-click: toggle enabled state
-    script.enabled = !script.enabled;
-  else // right-click: open in editor
-    Scriptish_openInEditor(script, window);
+  switch (aEvt.button) {
+    // left-click
+    case 0:
+      script.enabled = !script.enabled;
+      break;
+    // right-click
+    case 2:
+      Scriptish_openInEditor(script, window);
+      break;
+  }
 }
 
 Scriptish_BrowserUI.viewContextItemClicked = function() {
