@@ -24,7 +24,7 @@ Cu.import("resource://scriptish/config/configdownloader.js");
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
-var getMaxJSVersion = function(){ return JSVersions[2]; };
+const maxJSVer = JSVersions[2];
 
 function noUpdateFound(aListener) {
   aListener.onNoUpdateAvailable(this);
@@ -251,7 +251,7 @@ Script.prototype = {
   get requires() this._requires.concat(),
   get resources() this._resources.concat(),
   get noframes() this._noframes,
-  get jsversion() this._jsversion || getMaxJSVersion(),
+  get jsversion() this._jsversion || maxJSVer,
 
   get homepageURL() {
     var url = this._homepageURL;
@@ -676,7 +676,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         var jsVerIndx = JSVersions.indexOf(value);
         if (jsVerIndx === -1) {
           throw new Error("'" + value + "' is an invalid value for @jsversion.");
-        } else if (jsVerIndx > JSVersions.indexOf(getMaxJSVersion())) {
+        } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
           throw new Error("The @jsversion value '" + value + "' is not "
               + "supported by this version of Firefox.");
         } else {
