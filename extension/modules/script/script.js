@@ -264,16 +264,16 @@ Script.prototype = {
       url = RegExp.$1
           .replace(/^https?:\/\/userscripts\.org\/scripts\/source\/(\d+)\.user\.js$/, "http://userscripts.org/scripts/show/$1")
           .replace(/^https?:\/\/userscripts\.org\/scripts\/version\/(\d+)\/\d+\.user\.js$/, "http://userscripts.org/scripts/show/$1");
-      if (url.match(/^https?:\/\/userscripts\.org\/scripts\/show\/\d+$/))
-        return url;
+      if (!/^https?:\/\/userscripts\.org\/scripts\/show\/\d+$/.test(url))
+        return null;
     // is the download URL a gist.github.com url?
     } else if (/^https?:\/\/gist\.github\.com\/raw\/([\da-z]+)\/(?:[\da-z]{40}\/)?[^\/\?#\s]*\.user\.js$/i.test(url)) {
-      return "https://gist.github.com/"+RegExp.$1;
+      url = "https://gist.github.com/"+RegExp.$1;
     // is the download URL a github.com url?
     } else if (/^https?:\/\/(?:cloud\.)?github\.com\/(?:downloads\/)?([^\/]+\/[^\/]+)\/.*\.user\.js$/.test(url)) {
-      return "https://github.com/"+RegExp.$1;
+      url = "https://github.com/"+RegExp.$1;
     }
-    return null;
+    return this._homepageURL = url;
   },
   get updateURL() {
     if (!this.version) return null;
@@ -363,12 +363,10 @@ Script.prototype = {
     tempFile.moveTo(file.parent, file.leafName);
   },
 
-  get urlToDownload() { return this._downloadURL; },
+  get urlToDownload() this._downloadURL,
   setDownloadedFile: function(file) { this._tempFile = file; },
 
-  get previewURL() {
-    return Services.io.newFileURI(this._tempFile).spec;
-  },
+  get previewURL() Services.io.newFileURI(this._tempFile).spec,
 
   isModified: function() {
     if (!this.fileExists()) return false;
@@ -411,7 +409,7 @@ Script.prototype = {
     this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
     this._screenshots = newScript._screenshots;
-    this._homepageURL = newScript._homepageURL;
+    this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
