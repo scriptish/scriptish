@@ -352,6 +352,7 @@ function Scriptish_showPopup(aEvent) {
     mi.setAttribute("label", script.name);
     mi.script = script;
     mi.setAttribute("type", "checkbox");
+    mi.setAttribute("closemenu", "none");
     mi.setAttribute("checked", script.enabled.toString());
     popup.insertBefore(mi, tail);
   }
@@ -402,17 +403,15 @@ function Scriptish_showPopup(aEvent) {
  * Handle clicking one of the items in the popup. Left-click toggles the enabled
  * state, rihgt-click opens in an editor.
  */
-function Scriptish_popupClicked(aEvent) {
-  if (aEvent.button != 0 && aEvent.button != 2) return;
-  var script = aEvent.target.script;
+function Scriptish_popupClicked(aEvt) {
+  if (aEvt.button != 0 && aEvt.button != 2) return;
+  var script = aEvt.target.script;
   if (!script) return;
 
-  if (aEvent.button == 0) // left-click: toggle enabled state
-    script.enabled =! script.enabled;
+  if (aEvt.button == 0) // left-click: toggle enabled state
+    script.enabled = !script.enabled;
   else // right-click: open in editor
     Scriptish_openInEditor(script, window);
-
-  closeMenus(aEvent.target);
 }
 
 Scriptish_BrowserUI.viewContextItemClicked = function() {
