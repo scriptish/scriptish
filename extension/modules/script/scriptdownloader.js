@@ -3,7 +3,7 @@ var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/script/ScriptIcon.js");
+Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
