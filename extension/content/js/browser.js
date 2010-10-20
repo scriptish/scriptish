@@ -414,6 +414,7 @@ function Scriptish_popupClicked(aEvt) {
     // right-click
     case 2:
       Scriptish_openInEditor(script, window);
+      $("scriptish-status-popup").hidePopup();
       break;
   }
 }
