@@ -13,39 +13,45 @@
   </menupopup>
   <menu id="scriptish_general_menu"
       class="menu-iconic"
-      image="chrome://scriptish/skin/icon_small.png">
+      image="chrome://scriptish/skin/icon_16.png">
     <menupopup id="scriptish-tools-menupop">
       <menuitem id="scriptish-tools-enabled-item" type="checkbox"/>
       <menuseparator/>
       <menuitem id="scriptish-tools-show-us"/>
       <menuitem id="scriptish-tools-new"/>
-      <menu id="scriptish-commands-sb2" disabled="false"><menupopup/></menu>
+      <menu id="scriptish-tools-commands" disabled="false"><menupopup/></menu>
     </menupopup>
   </menu>
+
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbaritem id="scriptish-tb-item"
+        class="chromeclass-toolbar-additional"
+        label="Scriptish">
+      <toolbarbutton id="scriptish-button"
+          type="menu-button"
+          class="toolbarbutton-1"
+          image="chrome://scriptish/skin/icon_24.png">
+        <menupopup id="scriptish-tb-popup">
+          <menuitem id="scriptish-tb-no-scripts"/>
+          <menuseparator id="scriptish-tb-no-scripts-sep"/>
+          <menu id="scriptish-tb-cmds" disabled="false"><menupopup/></menu>
+          <menuseparator/>
+          <menuitem id="scriptish-tb-new-us"/>
+          <menuitem id="scriptish-tb-show-us"/>
+          <menuseparator/>
+          <menuitem id="scriptish-tb-options"/>
+          <menuitem id="scriptish-tb-enabled-item" type="checkbox"/>
+        </menupopup>
+      </toolbarbutton>
+    </toolbaritem>
+  </toolbarpalette>
 
   <popup id="contentAreaContextMenu">
     <menuitem id="scriptish-context-menu-viewsource"
         class="menuitem-iconic"
-        image="chrome://scriptish/skin/icon_small.png"
+        image="chrome://scriptish/skin/icon_16.png"
         insertbefore="context-openlink"/>
     <menuseparator id="scriptish-context-menu-viewsource-sep"
         insertbefore="context-openlink"/>
   </popup>
-
-  <statusbar id="status-bar">
-    <statusbarpanel id="scriptish-status" context="_child">
-      <image id="scriptish-status-image"/>
-      <menupopup id="scriptish-status-popup">
-        <menuitem id="scriptish-status-no-scripts"/>
-        <menuseparator id="scriptish-status-no-scripts-sep"/>
-        <menu id="scriptish-commands-sb" disabled="false"><menupopup/></menu>
-        <menuseparator/>
-        <menuitem id="scriptish-sb-new-us"/>
-        <menuitem id="scriptish-sb-show-us"/>
-        <menuseparator/>
-        <menuitem id="scriptish-sb-options"/>
-        <menuitem id="scriptish-sb-enabled-item" type="checkbox"/>
-      </menupopup>
-    </statusbarpanel>
-  </statusbar>
 </overlay>
