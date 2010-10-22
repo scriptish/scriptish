@@ -39,7 +39,6 @@ ScriptishService.prototype = {
   _config: null,
   get config() {
     if (!this._config) {
-      this.updateChk && this.updateChk();
       var tools = {};
       Cu.import("resource://scriptish/config/config.js", tools);
       this._config = new tools.Config(this._scriptFoldername);
