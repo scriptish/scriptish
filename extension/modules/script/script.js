@@ -648,131 +648,131 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
 
     var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
     if (match === null) continue;
-
     var header = match[1].toLowerCase();
-    var value = (match[2]+"").trimRight();
+    var value = match[2];
 
-    switch (header) {
-      case "id":
-        value && (script.id = value);
-        continue;
-      case "author":
-        !script.author && value && (script.author = value);
-        continue;
-      case "name":
-      case "namespace":
-      case "description":
-      case "version":
-        value && (script["_" + header] = value);
-        continue;
-      case "updateurl":
-          if (value.match(/^https?:\/\//)) script._updateURL = value;
+    if (!value) {
+      switch (header) {
+        case "noframes":
+          script["_" + header] = true;
           continue;
-      case "homepage":
-      case "homepageurl":
-        value && (script._homepageURL = value);
-        continue;
-      case "jsversion":
-        var jsVerIndx = JSVersions.indexOf(value);
-        if (jsVerIndx === -1) {
-          throw new Error("'" + value + "' is an invalid value for @jsversion.");
-        } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
-          throw new Error("The @jsversion value '" + value + "' is not "
-              + "supported by this version of Firefox.");
-        } else {
-          script._jsversion = JSVersions[jsVerIndx];
-        }
-        continue;
-      case "contributor":
-        script.addContributor(value);
-        continue;
-      case "include":
-        script.addInclude(value);
-        continue;
-      case "exclude":
-        script.addExclude(value);
-        continue;
-      case "match":
-        value && script._matches.push(new MatchPattern(value));
-        continue;
-      case 'screenshot':
-        if (!value || !AddonManagerPrivate.AddonScreenshot) continue;
-        var splitValue = value.match(valueSplitter);
-        if (splitValue) {
-          script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
-              splitValue[1], splitValue[2]));
-        } else {
-          script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
-              value));
-        }
-        continue;
-      case "icon":
-      case "iconurl":
-        if (!value) continue;
-        try {
-          script.icon.setIcon(value, aURI);
-        } catch (e) {
-          if (!aUpdateScript) throw e;
-          script._dependFail = true;
+      }
+    } else {
+      value = value.trimRight();
+      switch (header) {
+        case "id":
+          script.id = value;
           continue;
-        }
-        script._rawMeta += header + '\0' + value + '\0';
-        continue;
-      case "require":
-        if (!value) continue;
-        try {
-          var reqUri = NetUtil.newURI(value, null, aURI);
-          var scriptRequire = new ScriptRequire(script);
-          scriptRequire._downloadURL = reqUri.spec;
-          script._requires.push(scriptRequire);
+        case "author":
+          !script.author && (script.author = value);
+          continue;
+        case "name":
+        case "namespace":
+        case "description":
+        case "version":
+          script["_" + header] = value;
+          continue;
+        case "updateurl":
+            if (value.match(/^https?:\/\//)) script._updateURL = value;
+            continue;
+        case "homepage":
+        case "homepageurl":
+          script._homepageURL = value;
+          continue;
+        case "jsversion":
+          var jsVerIndx = JSVersions.indexOf(value);
+          if (jsVerIndx === -1) {
+            throw new Error("'" + value + "' is an invalid value for @jsversion.");
+          } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
+            throw new Error("The @jsversion value '" + value + "' is not "
+                + "supported by this version of Firefox.");
+          } else {
+            script._jsversion = JSVersions[jsVerIndx];
+          }
+          continue;
+        case "contributor":
+          script.addContributor(value);
+          continue;
+        case "include":
+          script.addInclude(value);
+          continue;
+        case "exclude":
+          script.addExclude(value);
+          continue;
+        case "match":
+          script._matches.push(new MatchPattern(value));
+          continue;
+        case 'screenshot':
+          if (!AddonManagerPrivate.AddonScreenshot) continue;
+          var splitValue = value.match(valueSplitter);
+          if (splitValue) {
+            script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+                splitValue[1], splitValue[2]));
+          } else {
+            script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+                value));
+          }
+          continue;
+        case "icon":
+        case "iconurl":
+          try {
+            script.icon.setIcon(value, aURI);
+          } catch (e) {
+            if (!aUpdateScript) throw e;
+            script._dependFail = true;
+            continue;
+          }
           script._rawMeta += header + '\0' + value + '\0';
-        } catch (e) {
-          if (aUpdateScript) {
-            script._dependFail = true;
-          } else {
-            throw new Error('Failed to @require '+ value);
+          continue;
+        case "require":
+          try {
+            var reqUri = NetUtil.newURI(value, null, aURI);
+            var scriptRequire = new ScriptRequire(script);
+            scriptRequire._downloadURL = reqUri.spec;
+            script._requires.push(scriptRequire);
+            script._rawMeta += header + '\0' + value + '\0';
+          } catch (e) {
+            if (aUpdateScript) {
+              script._dependFail = true;
+            } else {
+              throw new Error('Failed to @require '+ value);
+            }
           }
-        }
-        continue;
-      case "resource":
-        if (!value) continue;
-        var res = value.match(valueSplitter);
-        if (res === null) {
-          // NOTE: Unlocalized strings
-          throw new Error("Invalid syntax for @resource declaration '" +
-                          value + "'. Resources are declared like: " +
-                          "@resource <name> <url>.");
-        }
-        var resName = res[1];
-        if (previousResourceNames[resName]) {
-          throw new Error("Duplicate resource name '" + resName + "' " +
-                          "detected. Each resource must have a unique " +
-                          "name.");
-        } else {
-          previousResourceNames[resName] = true;
-        }
-        try {
-          var resUri = NetUtil.newURI(res[2], null, aURI);
-          var scriptResource = new ScriptResource(script);
-          scriptResource._name = resName;
-          scriptResource._downloadURL = resUri.spec;
-          script._resources.push(scriptResource);
-          script._rawMeta +=
-              header + '\0' + resName + '\0' + resUri.spec + '\0';
-        } catch (e) {
-          if (aUpdateScript) {
-            script._dependFail = true;
-          } else {
-            throw new Error(
-                'Failed to get @resource '+ resName +' from '+ res[2]);
+          continue;
+        case "resource":
+          var res = value.match(valueSplitter);
+          if (res === null) {
+            // NOTE: Unlocalized strings
+            throw new Error("Invalid syntax for @resource declaration '" +
+                            value + "'. Resources are declared like: " +
+                            "@resource <name> <url>.");
           }
-        }
-        continue;
-      case "noframes":
-        if (!value) script["_" + header] = true;
-        continue;
-      default:
-        continue;
+          var resName = res[1];
+          if (previousResourceNames[resName]) {
+            throw new Error("Duplicate resource name '" + resName + "' " +
+                            "detected. Each resource must have a unique " +
+                            "name.");
+          } else {
+            previousResourceNames[resName] = true;
+          }
+          try {
+            var resUri = NetUtil.newURI(res[2], null, aURI);
+            var scriptResource = new ScriptResource(script);
+            scriptResource._name = resName;
+            scriptResource._downloadURL = resUri.spec;
+            script._resources.push(scriptResource);
+            script._rawMeta +=
+                header + '\0' + resName + '\0' + resUri.spec + '\0';
+          } catch (e) {
+            if (aUpdateScript) {
+              script._dependFail = true;
+            } else {
+              throw new Error(
+                  'Failed to get @resource '+ resName +' from '+ res[2]);
+            }
+          }
+          continue;
+      }
     }
   }
 
