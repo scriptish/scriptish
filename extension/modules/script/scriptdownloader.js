@@ -2,17 +2,16 @@ var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/script/scripticon.js");
+Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
-Cu.import("resource://gre/modules/NetUtil.jsm");
 Cu.import("resource://scriptish/third-party/Timer.js");
-
+const gTimer = new Timer();
 
 function ScriptDownloader(uri, contentWin) {
-  this._timer = new Timer();
   this.uri_ = uri || null;
   this.req_ = null;
   this.script = null;
@@ -39,7 +38,7 @@ ScriptDownloader.prototype.startUpdateScript = function(aScriptInstaller) {
 }
 ScriptDownloader.prototype.startDownload = function() {
   Scriptish_log("Fetching Script");
-  this.req_ = Scriptish_Services.xhr;
+  this.req_ = Instances.xhr;
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
   this.req_.onerror = Scriptish_hitch(this, "handleErr");
@@ -58,7 +57,7 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
   // If there is a 'Content-Type' header and it contains 'text/html',
   // then do not install the file, and display it instead.
   this.req_.abort();
-  Scriptish_Services.scriptish.ignoreNextScript();
+  Services.scriptish.ignoreNextScript();
   if (this.contentWin) this.contentWin.location.href = this.uri_.spec;
 }
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
@@ -73,20 +72,15 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     }
 
     var source = this.req_.responseText;
-
     this.script = Scriptish_config.parse(source, this.uri_);
 
-    var file = Cc["@mozilla.org/file/directory_service;1"]
-                   .getService(Ci.nsIProperties)
-                   .get("TmpD", Ci.nsILocalFile);
-
+    var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
     file.append(base + ".user.js");
     file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
     this.tempFiles_.push(file);
 
-    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-        .createInstance(Ci.nsIScriptableUnicodeConverter);
+    var converter = Instances.suc;
     converter.charset = "UTF-8";
     source = converter.ConvertFromUnicode(source);
 
@@ -96,13 +90,13 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script.setDownloadedFile(file);
 
-    this._timer.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
+    gTimer.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
 
     switch (this.type) {
       case "install":
         this._callback = function() {
           this.showInstallDialog();
-          this._callback = undefined;
+          delete this._callback;
         }
         break;
       case "view":
@@ -121,16 +115,15 @@ ScriptDownloader.prototype.fetchDependencies = function() {
 
   var deps = this.script.requires.concat(this.script.resources);
   // if this.script.icon._filename exists then the icon is a data scheme
-  if (this.script.icon.hasDownloadURL()) {
+  if (this.script.icon.hasDownloadURL())
     deps.push(this.script.icon);
-  }
 
   for (var i = 0; i < deps.length; i++) {
     var dep = deps[i];
     if (this.checkDependencyURL(dep.urlToDownload)) {
       this.depQueue_.push(dep);
     } else {
-      this.errorInstallDependency(this.script, dep,
+      this.errorInstallDependency(dep,
         "SecurityException: Request to local and chrome url's is forbidden");
       return;
     }
@@ -140,7 +133,7 @@ ScriptDownloader.prototype.fetchDependencies = function() {
 ScriptDownloader.prototype.downloadNextDependency = function() {
   if (!this.depQueue_.length) {
     this.dependenciesLoaded_ = true;
-    if (this._callback) this._callback();
+    this._callback && this._callback();
     this.finishInstall();
     return;
   }
@@ -149,7 +142,7 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
   var dep = this.depQueue_.pop();
   Cu.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
   try {
-    var persist = Scriptish_Services.wbp;
+    var persist = Instances.wbp;
     persist.persistFlags =
         persist.PERSIST_FLAGS_BYPASS_CACHE |
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
@@ -168,7 +161,7 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
     persist.saveChannel(sourceChannel, file);
   } catch (e) {
     Scriptish_log("Download exception " + e);
-    this.errorInstallDependency(this.script, dep, e);
+    this.errorInstallDependency(dep, e);
   }
 }
 ScriptDownloader.prototype.handleDependencyDownloadComplete =
@@ -188,18 +181,14 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
         dep.updateScript = true;
       }
 
-      // if the dependency type is icon, then check it's mime type
-      if (dep.type == "icon" &&
-          !/^image\//i.test(channel.contentType)) {
-        this.errorInstallDependency(this.script, dep,
-          "Error! @icon is not a image MIME type");
-      }
+      if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType))
+        this.errorInstallDependency(dep, "Error! @icon is not a image MIME type");
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
-      this.errorInstallDependency(this.script, dep,
-        "Error! Server Returned : " + httpChannel.responseStatus + ": " +
+      this.errorInstallDependency(
+        dep, "Error! Server Returned : " + httpChannel.responseStatus + ": " +
         httpChannel.responseStatusText);
     }
   } else {
@@ -239,14 +228,14 @@ ScriptDownloader.prototype.finishInstall = function() {
 ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
   this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
   Scriptish_log(this.dependencyError);
-  if (this.scriptInstaller)
-    return this.scriptInstaller.changed("DownloadFailed");
-  if (this.installOnCompletion_) alert(this.dependencyError);
-  if (this._callback) this._callback();
+  if (this.scriptInstaller) return this.scriptInstaller.changed("DownloadFailed");
+  if (this.installOnCompletion_) Scriptish_alert(this.dependencyError);
+  this._callback && this._callback();
 }
 ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
-    Scriptish_alert(this.dependencyError);
+    Scriptish_alert(this.dependencyError, 0);
+    return false;
   } else if (this.scriptInstaller && this.dependenciesLoaded_) {
     this.scriptInstaller._script.replaceScriptWith(this.script);
     this.scriptInstaller.changed("InstallEnded");
@@ -256,21 +245,18 @@ ScriptDownloader.prototype.installScript = function() {
   } else {
     this.installOnCompletion_ = true;
   }
+  return true;
 }
 ScriptDownloader.prototype.cleanupTempFiles = function() {
-  for (var i = 0, file = null; file = this.tempFiles_[i]; i++)
-    file.remove(false);
+  for (var i = 0, file; file = this.tempFiles_[i++];) file.remove(false);
 }
-ScriptDownloader.prototype.showInstallDialog = function(timer) {
-  if (!timer) {
-    // otherwise, the status bar stays in the loading state.
-    this._timer.setTimeout(Scriptish_hitch(this, "showInstallDialog", true), 0);
-    return;
-  }
+ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
+  if (!aTimer)
+    return gTimer.setTimeout(Scriptish_hitch(this, "showInstallDialog", 1), 0);
+
   Services.wm.getMostRecentWindow("navigator:browser").openDialog(
       "chrome://scriptish/content/install.xul", "",
-      "chrome,centerscreen,modal,dialog,titlebar,resizable",
-      this);
+      "chrome,centerscreen,modal,dialog,titlebar,resizable", this);
 }
 ScriptDownloader.prototype.showScriptView = function() {
   Services.wm.getMostRecentWindow("navigator:browser")

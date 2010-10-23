@@ -7,12 +7,8 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
 function Scriptish_getContents(file, charset) {
   if (!charset) charset = "UTF-8";
-
-  var scriptableStream = Cc["@mozilla.org/scriptableinputstream;1"]
-    .getService(Ci.nsIScriptableInputStream);
-  // http://lxr.mozilla.org/mozilla/source/intl/uconv/idl/nsIScriptableUConv.idl
-  var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-    .createInstance(Ci.nsIScriptableUnicodeConverter);
+  var scriptableStream = Services.sis;
+  var unicodeConverter = Instances.suc;
   unicodeConverter.charset = charset;
 
   var channel = Services.io.newChannelFromURI(Scriptish_getUriFromFile(file));

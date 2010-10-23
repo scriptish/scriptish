@@ -20,13 +20,11 @@ Cu.import("resource://scriptish/script/scriptrequire.js");
 Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://scriptish/third-party/MatchPattern.js");
 Cu.import("resource://scriptish/config/configdownloader.js");
-Cu.import("resource://gre/modules/AddonManager.jsm");
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
-var getMaxJSVersion = function(){ return JSVersions[2]; };
+const maxJSVer = JSVersions[2];
 
 function noUpdateFound(aListener) {
   aListener.onNoUpdateAvailable(this);
@@ -86,11 +84,11 @@ Script.prototype = {
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
   applyBackgroundUpdates: false,
-  get isActive() { return !this.appDisabled || !this.userDisabled },
-  pendingOperations: 0,
+  get isActive() !this.appDisabled || !this.userDisabled,
+  pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
-  get sourceURI () { return this._downloadURL && NetUtil.newURI(this._downloadURL); },
-  get userDisabled() { return !this._enabled; },
+  get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
+  get userDisabled() !this._enabled,
   set userDisabled(val) {
     if (val == this.userDisabled) return val;
 
@@ -104,8 +102,7 @@ Script.prototype = {
         val ? "onEnabled" : "onDisabled", this);
   },
 
-  isCompatibleWith: function() { return true; },
-
+  isCompatibleWith: function() true,
   get permissions() {
     var perms = AddonManager.PERM_CAN_UNINSTALL;
     perms |= this.userDisabled ? AddonManager.PERM_CAN_ENABLE : AddonManager.PERM_CAN_DISABLE;
@@ -113,7 +110,7 @@ Script.prototype = {
     return perms;
   },
 
-  get updateDate () { return new Date(parseInt(this._modified)); },
+  get updateDate () new Date(parseInt(this._modified)),
 
   findUpdates: function(aListener, aReason) {
     if (aListener.onNoCompatibilityUpdateAvailable)
@@ -133,7 +130,7 @@ Script.prototype = {
   checkForRemoteUpdate: function(aCallback) {
     var updateURL = this.updateURL;
     if (!updateURL) return aCallback.call(this, false);
-    var req = Scriptish_Services.xhr;
+    var req = Instances.xhr;
     req.open("GET", updateURL, true);
     req.onload = Scriptish_hitch(this, "checkRemoteVersion", req, aCallback);
     req.onerror = Scriptish_hitch(this, "checkRemoteVersionErr", aCallback);
@@ -150,6 +147,7 @@ Script.prototype = {
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
     this.needsUninstall = true;
+    this.pendingOperations = AddonManager.PENDING_UNINSTALL;
     AddonManagerPrivate.callAddonListeners("onUninstalled", this);
   },
   uninstallProcess: function() {
@@ -178,6 +176,7 @@ Script.prototype = {
 
   cancelUninstall: function() {
     this.needsUninstall = false;
+    delete this.pendingOperations;
     AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
   },
 
@@ -200,40 +199,44 @@ Script.prototype = {
   set id(aId) {
     this._id = aId.replace(nonIdChars, ''); // remove unacceptable chars
   },
-  get name() { return this._name; },
-  get namespace() { return this._namespace; },
+  get name() this._name,
+  get namespace() this._namespace,
   get prefroot() { 
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
   },
-  get creator() { return this._creator; },
-  get author() { return this._author; },
+  get creator() this._creator,
+  get author() this._author,
   set author(aVal) {
     this._author = aVal;
-    this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
+    if (AddonManagerPrivate.AddonAuthor)
+      this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
+    else
+      this._creator = aVal;
   },
   get contributors() {
+    if (!AddonManagerPrivate.AddonAuthor) return this._contributors;
     var contributors = [];
     for (var i = this._contributors.length-1; i >= 0; i--) {
       contributors.unshift(
           new AddonManagerPrivate.AddonAuthor(this._contributors[i]));
     }
-    return this._contributors;
+    return contributors;
   },
   addContributor: function(aContributor) {
     if (!aContributor) return;
     this._contributors.push(aContributor);
   },
-  get description() { return this._description; },
-  get version() { return this._version; },
-  get icon() { return this._icon; },
-  get iconURL() { return this._icon.fileURL; },
-  get enabled() { return this._enabled; },
+  get description() this._description,
+  get version() this._version,
+  get icon() this._icon,
+  get iconURL() this._icon.fileURL,
+  get enabled() this._enabled,
   set enabled(enabled) { this.userDisabled = !enabled; },
 
-  get includes() { return this._includes.concat(); },
-  get excludes() { return this._excludes.concat(); },
-  get matches() { return this._matches.concat(); },
+  get includes() this._includes.concat(),
+  get excludes() this._excludes.concat(),
+  get matches() this._matches.concat(),
   addInclude: function(aPattern) {
     if (!aPattern) return;
     this._includes.push(aPattern);
@@ -245,23 +248,32 @@ Script.prototype = {
     this._excludeRegExps.push(Scriptish_convert2RegExp(aPattern));
   },
 
-  get requires() { return this._requires.concat(); },
-  get resources() { return this._resources.concat(); },
-  get noframes() { return this._noframes; },
-  get jsversion() { return this._jsversion || getMaxJSVersion() },
+  get requires() this._requires.concat(),
+  get resources() this._resources.concat(),
+  get noframes() this._noframes,
+  get jsversion() this._jsversion || maxJSVer,
 
   get homepageURL() {
     var url = this._homepageURL;
-    if (url) return url;
+    if (typeof url == "string" && "" != url) return url;
+    url = this._downloadURL;
+    if (typeof url != "string" || "" == url) return null;
+    url = url.replace(/[\?#].*$/, "");
     // is the download URL a userscript.org url?
-    if (!url && this._downloadURL.match(/https?:\/\/userscripts\.org\/[^\?#]*\.user\.js(?:[\?#].*)?$/i)) {
-      url = this._downloadURL.replace(/[\?#].*$/, "")
-          .replace(/https?:\/\/userscripts\.org\/scripts\/source\/(\d+)\.user\.js$/, "http://userscripts.org/scripts/show/$1")
-          .replace(/https?:\/\/userscripts\.org\/scripts\/version\/(\d+)\/\d+\.user\.js$/, "http://userscripts.org/scripts/show/$1");
-      if (url.match(/https?:\/\/userscripts\.org\/scripts\/show\/\d+$/))
-        return url;
+    if (/^(https?:\/\/userscripts\.org\/[^\?#]*\.user\.js)$/i.test(url)) {
+      url = RegExp.$1
+          .replace(/^https?:\/\/userscripts\.org\/scripts\/source\/(\d+)\.user\.js$/, "http://userscripts.org/scripts/show/$1")
+          .replace(/^https?:\/\/userscripts\.org\/scripts\/version\/(\d+)\/\d+\.user\.js$/, "http://userscripts.org/scripts/show/$1");
+      if (!/^https?:\/\/userscripts\.org\/scripts\/show\/\d+$/.test(url))
+        return null;
+    // is the download URL a gist.github.com url?
+    } else if (/^https?:\/\/gist\.github\.com\/raw\/([\da-z]+)\/(?:[\da-z]{40}\/)?[^\/\?#\s]*\.user\.js$/i.test(url)) {
+      url = "https://gist.github.com/"+RegExp.$1;
+    // is the download URL a github.com url?
+    } else if (/^https?:\/\/(?:cloud\.)?github\.com\/(?:downloads\/)?([^\/]+\/[^\/]+)\/.*\.user\.js$/.test(url)) {
+      url = "https://github.com/"+RegExp.$1;
     }
-    return null;
+    return this._homepageURL = url;
   },
   get updateURL() {
     if (!this.version) return null;
@@ -292,9 +304,8 @@ Script.prototype = {
     file.append(this._filename);
     return file;
   },
-  get filename() { return this._filename; },
-
-  get editFile() { return this._file; },
+  get filename() this._filename,
+  get editFile() this._file,
 
   get _basedirFile() {
     var file = this._config._scriptDir;
@@ -303,8 +314,8 @@ Script.prototype = {
     return file;
   },
 
-  get fileURL() { return Scriptish_getUriFromFile(this._file).spec; },
-  get textContent() { return Scriptish_getContents(this._file); },
+  get fileURL() Scriptish_getUriFromFile(this._file).spec,
+  get textContent() Scriptish_getContents(this._file),
 
   get size() {
     var size = this._file.fileSize;
@@ -313,7 +324,7 @@ Script.prototype = {
     return size;
   },
 
-  get screenshots() { return this._screenshots; },
+  get screenshots() this._screenshots,
 
   _initFileName: function(name, useExt) {
     var ext = "";
@@ -330,9 +341,7 @@ Script.prototype = {
 
     // If no Latin characters found - use default
     if (!name) name = "user_script";
-
     if (ext) name += "." + ext;
-
     return name;
   },
 
@@ -354,12 +363,10 @@ Script.prototype = {
     tempFile.moveTo(file.parent, file.leafName);
   },
 
-  get urlToDownload() { return this._downloadURL; },
+  get urlToDownload() this._downloadURL,
   setDownloadedFile: function(file) { this._tempFile = file; },
 
-  get previewURL() {
-    return Services.io.newFileURI(this._tempFile).spec;
-  },
+  get previewURL() Services.io.newFileURI(this._tempFile).spec,
 
   isModified: function() {
     if (!this.fileExists()) return false;
@@ -402,7 +409,7 @@ Script.prototype = {
     this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
     this._screenshots = newScript._screenshots;
-    this._homepageURL = newScript._homepageURL;
+    this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
@@ -563,7 +570,7 @@ Script.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
-    if (Scriptish_Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
+    if (Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
 
     this._modified = this._file.lastModifiedTime;
     this._dependhash = tools.Scriptish_sha1(this._rawMeta);
@@ -614,7 +621,7 @@ Script.parseVersion = function Script_parseVersion(aSrc) {
 Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   var script = new Script(aConfig);
 
-  if (aURI && !Scriptish_Services.pbs.privateBrowsingEnabled)
+  if (aURI && !Services.pbs.privateBrowsingEnabled)
     script._downloadURL = aURI.spec;
 
   // read one line at a time looking for start meta delimiter or EOF
@@ -669,7 +676,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         var jsVerIndx = JSVersions.indexOf(value);
         if (jsVerIndx === -1) {
           throw new Error("'" + value + "' is an invalid value for @jsversion.");
-        } else if (jsVerIndx > JSVersions.indexOf(getMaxJSVersion())) {
+        } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
           throw new Error("The @jsversion value '" + value + "' is not "
               + "supported by this version of Firefox.");
         } else {
@@ -689,7 +696,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         value && script._matches.push(new MatchPattern(value));
         continue;
       case 'screenshot':
-        if (!value) continue;
+        if (!value || !AddonManagerPrivate.AddonScreenshot) continue;
         var splitValue = value.match(valueSplitter);
         if (splitValue) {
           script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
@@ -702,22 +709,14 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
       case "icon":
       case "iconurl":
         if (!value) continue;
-        script._rawMeta += header + '\0' + value + '\0';
-        // aceept data uri schemes for image MIME types
-        if (/^data:image\//i.test(value)){
-          script.icon._dataURI = value;
-          continue;
-       }
-       try {
-          var iconUri = NetUtil.newURI(value, null, aURI);
-          script.icon._downloadURL = iconUri.spec;
+        try {
+          script.icon.setIcon(value, aURI);
         } catch (e) {
-          if (aUpdateScript) {
-            script._dependFail = true;
-          } else {
-            throw new Error('Failed to get @icon '+ value);
-          }
+          if (!aUpdateScript) throw e;
+          script._dependFail = true;
+          continue;
         }
+        script._rawMeta += header + '\0' + value + '\0';
         continue;
       case "require":
         if (!value) continue;

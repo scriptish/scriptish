@@ -3,18 +3,20 @@
 
 <overlay id="scriptish-browser-overlay"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="application/x-javascript" src="chrome://scriptish/content/js/browser.js" />
+  <script type="application/x-javascript" src="chrome://scriptish/content/js/browser.js"/>
 
   <menupopup id="menu_ToolsPopup">
-    <menu id="scriptish_general_menu" insertbefore="javascriptConsole" />
+    <menu id="scriptish_general_menu" insertbefore="javascriptConsole"/>
+  </menupopup>
+  <menupopup id="taskPopup">
+    <menu id="scriptish_general_menu" insertbefore="downloadMgr"/>
   </menupopup>
   <menu id="scriptish_general_menu"
       class="menu-iconic"
       image="chrome://scriptish/skin/icon_small.png">
     <menupopup id="scriptish-tools-menupop">
       <menuitem id="scriptish-tools-enabled-item" type="checkbox"/>
-      <menuseparator />
-      <menuitem id="scriptish-tools-install" hidden="true"/>
+      <menuseparator/>
       <menuitem id="scriptish-tools-show-us"/>
       <menuitem id="scriptish-tools-new"/>
       <menu id="scriptish-commands-sb2" disabled="false"><menupopup/></menu>

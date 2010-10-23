@@ -13,8 +13,6 @@ Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/script/script.js");
-Cu.import("resource://gre/modules/AddonManager.jsm");
-Cu.import("resource://gre/modules/NetUtil.jsm");
 
 
 function Config(aBaseDir) {
@@ -74,7 +72,7 @@ Config.prototype = {
 
   _load: function() {
     var configContents = Scriptish_getContents(this._configFile);
-    var doc = Scriptish_Services.dp.parseFromString(configContents, "text/xml");
+    var doc = Instances.dp.parseFromString(configContents, "text/xml");
     var nodes = doc.evaluate("/UserScriptConfig/Script", doc, null, 0, null);
     var fileModified = false;
 
@@ -95,7 +93,7 @@ Config.prototype = {
     }
     delete this["_saveTimer"];
 
-    var doc = Scriptish_Services.dp.parseFromString(
+    var doc = Instances.dp.parseFromString(
         "<UserScriptConfig/>", "text/xml");
     var scripts = this._scripts;
     var len = scripts.length;
@@ -107,13 +105,12 @@ Config.prototype = {
     firstChild.appendChild(doc.createTextNode("\n"));
 
     var configStream = Scriptish_getWriteStream(this._configFile);
-    Scriptish_Services.ds.serializeToStream(doc, configStream, "utf-8");
+    Instances.ds.serializeToStream(doc, configStream, "utf-8");
     configStream.close();
   },
 
-  parse: function(source, uri, aUpdateScript) {
-    return Script.parse(this, source, uri, aUpdateScript);
-  },
+  parse: function(source, uri, aUpdateScript) (
+      Script.parse(this, source, uri, aUpdateScript)),
 
   install: function(aNewScript) {
     var existingIndex = this._find(aNewScript.id);
@@ -166,21 +163,18 @@ Config.prototype = {
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
-    if (script.enabled && !script.needsUninstall && script.matchesURL(href)) {
-      Scriptish_Services.scriptish.injectScripts(
-          [script], href, unsafeWin, this.chromeWin);
-    }
+    if (script.enabled && !script.needsUninstall && script.matchesURL(href))
+      Services.scriptish.injectScripts([script], href, unsafeWin, this.chromeWin);
   },
 
   updateModifiedScripts: function() {
     // Find any updated scripts
-    var scripts = this.getMatchingScripts(
-        function (script) { return script.isModified(); });
+    var scripts = this.getMatchingScripts(function(script) script.isModified());
     if (0 == scripts.length) return;
 
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
-          Scriptish_getContents(script._file),
+          script.textContent,
           script._downloadURL && NetUtil.newURI(script._downloadURL),
           script);
       script.updateFromNewScript(parsedScript);

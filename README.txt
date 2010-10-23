@@ -18,4 +18,5 @@ Links
 * Issues:                   http://github.com/erikvold/scriptish/issues
 * Google Group:             http://groups.google.com/group/scriptish
 * IRC:                      irc://irc.freenode.net/scriptish
+* StatusNet                 http://identi.ca/scriptish
 * Source Code:              http://github.com/erikvold/scriptish

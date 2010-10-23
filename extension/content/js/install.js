@@ -1,16 +1,10 @@
-Components.utils.import("resource://scriptish/logging.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 var Scriptish_Install = {
   init: function() {
     this.doc = document;
     var $ = function(aID) document.getElementById(aID);
-
-    var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
-                              .getService(Components.interfaces.nsIIOService);
-
     this.htmlNs_ = "http://www.w3.org/1999/xhtml";
-
     this.scriptDownloader_ = window.arguments[0];
     var script = this.script_ = this.scriptDownloader_.script;
 
@@ -75,8 +69,8 @@ var Scriptish_Install = {
   },
 
   onOK: function() {
-    window.removeEventListener("unload", Scriptish_Install.cleanup, false);
-    this.scriptDownloader_.installScript();
+    if (this.scriptDownloader_.installScript())
+      window.removeEventListener("unload", Scriptish_Install.cleanup, false);
     Scriptish_Install.close();
   },
   onCancel: function() Scriptish_Install.close(),
@@ -86,7 +80,7 @@ var Scriptish_Install = {
     Scriptish_Install.close();
   },
   cleanup: function() Scriptish_Install.scriptDownloader_.cleanupTempFiles(),
-  close: function() window.setTimeout(function() { window.close() }, 0)
+  close: function() window.setTimeout(function() window.close(), 0)
 };
 
 window.addEventListener("unload", Scriptish_Install.cleanup, false);

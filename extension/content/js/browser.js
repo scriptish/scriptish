@@ -1,52 +1,41 @@
-Components.utils.import("resource://scriptish/content/browser.js");
-Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_config.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_hitch.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_getEnabled.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Components.utils.import("resource://scriptish/config/configdownloader.js");
-
-Scriptish_BrowserUI = new Object();
-
-// nsISupports.QueryInterface
-Scriptish_BrowserUI.QueryInterface = function(aIID) {
-  if (!aIID.equals(Components.interfaces.nsISupports) &&
-      !aIID.equals(Components.interfaces.nsISupportsWeakReference) &&
-      !aIID.equals(Components.interfaces.nsIWebProgressListener))
-    throw Components.results.NS_ERROR_NO_INTERFACE;
-
-  return this;
+var Scriptish_BrowserUI = {
+  menuCommanders: [],
+  currentMenuCommander: null
 };
+var Scriptish_BrowserUIM;
 
+(function(import, tools){
+import("resource://scriptish/content/browser.js");
+import("resource://scriptish/prefmanager.js");
+import("resource://scriptish/utils/Scriptish_config.js");
+import("resource://scriptish/utils/Scriptish_hitch.js", tools);
+import("resource://scriptish/utils/Scriptish_getEnabled.js");
+import("resource://scriptish/utils/Scriptish_stringBundle.js");
+import("resource://scriptish/utils/Scriptish_openInEditor.js");
+import("resource://scriptish/utils/Scriptish_isGreasemonkeyable.js");
+import("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
+import("resource://scriptish/config/configdownloader.js");
+import("resource://scriptish/menucommander.js");
+import("resource://scriptish/constants.js", tools);
+var Ci = tools.Ci;
+var Services = tools.Services;
+var gmSvc = Services.scriptish;
+var $ = function(aID) document.getElementById(aID);
+function hitch() tools.Scriptish_hitch.apply(null, arguments);
 
-/**
- * Called when this file is parsed, by the last line. Set up initial objects,
- * do version checking, and set up listeners for browser xul load and location
- * changes.
- */
-Scriptish_BrowserUI.init = function() {
-  this.menuCommanders = [];
-  this.currentMenuCommander = null;
-
-  window.addEventListener("load", Scriptish_hitch(this, "chromeLoad"), false);
-  window.addEventListener("unload", Scriptish_hitch(this, "chromeUnload"), false);
-};
+Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
+    Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
 /**
  * The browser XUL has loaded. Find the elements we need and set up our
  * listeners and wrapper objects.
  */
 Scriptish_BrowserUI.chromeLoad = function(e) {
-  var d = document;
-  var $ = function(aID) d.getElementById(aID);
-
-  Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, Scriptish_BrowserUI);
+  Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, this);
 
   // get all required DOM elements
-  this.tabBrowser = $("content");
   this.statusEnabledItem = $("scriptish-sb-enabled-item");
   this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
-  this.toolsInstall = $("scriptish-tools-install")
   this.contextItem = $("scriptish-context-menu-viewsource");
 
   var tmEle = $('scriptish_general_menu');
@@ -57,22 +46,14 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   tmStatusEle.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
   tmStatusEle.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.accesskey"));
 
-  this.toolsInstall.setAttribute("label", Scriptish_stringBundle("menu.install"));
-  this.toolsInstall.setAttribute("accesskey", Scriptish_stringBundle("menu.install.accesskey"));
-
-  $("scriptish-status").addEventListener("click", function(aEvt) {
-    Scriptish_BrowserUIM.onIconClick(aEvt);
-  }, false);
+  $("scriptish-status").addEventListener(
+      "click", hitch(Scriptish_BrowserUIM, "onIconClick"), false);
 
   $("scriptish-tools-menupop").addEventListener("popupshowing", function(aEvt) {
     // set the enabled/disabled state
     Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
         "checked", Scriptish_getEnabled());
     aEvt.stopPropagation();
-  }, false);
-
-  this.toolsInstall.addEventListener("command", function(aEvt) {
-    Scriptish_configDownloader.startInstall(gBrowser.currentURI);
   }, false);
 
   var toggleFunc = function() { Scriptish_BrowserUIM.onToggleStatus() };
@@ -141,47 +122,34 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   }, false);
 
   // update visual status when enabled state changes
-  this.statusWatcher = Scriptish_hitch(Scriptish_BrowserUIM, "refreshStatus");
+  this.statusWatcher = hitch(Scriptish_BrowserUIM, "refreshStatus");
   Scriptish_prefRoot.watch("enabled", this.statusWatcher);
 
   // hook various events
   $("appcontent").addEventListener(
-      "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
-  $("sidebar").addEventListener(
-      "DOMContentLoaded", Scriptish_hitch(this, "contentLoad"), true);
+      "DOMContentLoaded", hitch(this, "contentLoad"), true);
+  var sidebar = $("sidebar") || $("sidebar-box");
+  sidebar.addEventListener(
+      "DOMContentLoaded", hitch(this, "contentLoad"), true);
   $("contentAreaContextMenu").addEventListener(
-      "popupshowing", Scriptish_hitch(this, "contextMenuShowing"), false);
-  $("menu_ToolsPopup").addEventListener(
-      "popupshowing", Scriptish_hitch(this, "toolsMenuShowing"), false);
-
-  // we use this to determine if we are the active window sometimes
-  this.winWat = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-                          .getService(Components.interfaces.nsIWindowWatcher);
+      "popupshowing", hitch(this, "contextMenuShowing"), false);
 
   // this gives us onLocationChange
-  this.tabBrowser.addProgressListener(this,
-    Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+  gBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
 
   // register for notifications from scriptish-service about ui type things
-  var gmSvc = Components.classes["@scriptish.erikvold.com/scriptish-service;1"]
-                  .getService().wrappedJSObject;
-  this.gmSvc = gmSvc;
-  if (gmSvc.updateChk) setTimeout(function() { gmSvc.updateChk() }, 100);
+  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 100);
 }
 
-// registerMenuCommand
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   var commander = this.getCommander(menuCommand.window);
-
-  commander.registerMenuCommand(menuCommand.name,
-                                menuCommand.doCommand,
-                                menuCommand.accelKey,
-                                menuCommand.accelModifiers,
-                                menuCommand.accessKey);
-};
+  commander.registerMenuCommand(
+      menuCommand.name, menuCommand.doCommand, menuCommand.accelKey,
+      menuCommand.accelModifiers, menuCommand.accessKey);
+}
 
 /**
  * Gets called when a DOMContentLoaded event occurs somewhere in the browser.
@@ -189,39 +157,32 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
  * it's menu items and activate them.
  */
 Scriptish_BrowserUI.contentLoad = function(e) {
-  var tools = {};
-  Components.utils.import(
-      "resource://scriptish/utils/Scriptish_isGreasemonkeyable.js", tools);
-
   if (!Scriptish_getEnabled()) return;
-
   var safeWin = e.target.defaultView;
   var unsafeWin = safeWin.wrappedJSObject;
   var href = safeWin.location.href;
 
-  if (tools.Scriptish_isGreasemonkeyable(href)) {
+  if (Scriptish_isGreasemonkeyable(href)) {
     // if this content load is in the focused tab, attach the menuCommaander
-    if (unsafeWin == this.tabBrowser.selectedBrowser.contentWindow) {
+    if (unsafeWin == gBrowser.selectedBrowser.contentWindow) {
       var commander = this.getCommander(safeWin);
       this.currentMenuCommander = commander;
       this.currentMenuCommander.attach();
     }
 
-    this.gmSvc.domContentLoaded(safeWin, window, this);
-
-    safeWin.addEventListener("pagehide", Scriptish_hitch(this, "contentUnload"), false);
+    gmSvc.domContentLoaded(safeWin, window);
+    safeWin.addEventListener("pagehide", hitch(this, "contentUnload"), false);
   }
 
   // Show the scriptish install banner if we are navigating to a .user.js
   // file in a top-level tab.  If the file was previously cached it might have
   // been given a number after .user, like gmScript.user-12.js
-  if (safeWin == safeWin.top &&
-      href.match(/\.user(?:-\d+)?\.js$/) &&
-      !/text\/html/i.test(safeWin.document.contentType)) {
-    var browser = this.tabBrowser.getBrowserForDocument(safeWin.document);
+  if (safeWin == safeWin.top && href.match(/\.user(?:-\d+)?\.js$/)
+      && !/text\/html/i.test(safeWin.document.contentType)) {
+    var browser = gBrowser.getBrowserForDocument(safeWin.document);
     this.showInstallBanner(browser);
   }
-};
+}
 
 
 /**
@@ -230,16 +191,14 @@ Scriptish_BrowserUI.contentLoad = function(e) {
  */
 Scriptish_BrowserUI.showInstallBanner = function(browser) {
   var greeting = Scriptish_stringBundle("greeting.msg");
-
-  var notificationBox = this.tabBrowser.getNotificationBox(browser);
+  var notificationBox = gBrowser.getNotificationBox(browser);
 
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
   // them ourselves in the case of reload, or they stack up.
   for (var i = 0, child; child = notificationBox.childNodes[i]; i++) {
-    if (child.getAttribute("value") == "install-userscript") {
+    if (child.getAttribute("value") == "install-userscript")
       notificationBox.removeNotification(child);
-    }
   }
 
   var notification = notificationBox.appendNotification(
@@ -247,14 +206,13 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
     "install-userscript",
     "chrome://scriptish/skin/icon_small.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
-    [{
-      label: Scriptish_stringBundle("greeting.btn"),
+    [{label: Scriptish_stringBundle("greeting.btn"),
       accessKey: Scriptish_stringBundle("greeting.btnAccess"),
       popup: null,
-      callback: Scriptish_hitch(this, "installCurrentScript")
+      callback: hitch(this, "installCurrentScript")
     }]
   );
-};
+}
 
 /**
  * Open the tab to show the contents of a script and display the banner to let
@@ -262,7 +220,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
  */
 Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
   this.scriptDownloader_ = aSD;
-  this.tabBrowser.selectedTab = this.tabBrowser.addTab(aURL);
+  gBrowser.selectedTab = gBrowser.addTab(aURL);
 }
 
 /**
@@ -270,21 +228,16 @@ Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
  * install-userscript, which happens when the install bar is clicked.
  */
 Scriptish_BrowserUI.observe = function(subject, topic, data) {
-  if (topic == "install-userscript") {
-    if (window == this.winWat.activeWindow) {
-      this.installCurrentScript();
-    }
-  } else {
+  if (topic == "install-userscript")
+    if (window == Services.ww.activeWindow) this.installCurrentScript();
+  else
     throw new Error("Unexpected topic received: {" + topic + "}");
-  }
 };
 
-/**
- * Handles the install button getting clicked.
- */
+// Handles the install button getting clicked.
 Scriptish_BrowserUI.installCurrentScript = function() {
   this.scriptDownloader_.installScript();
-};
+}
 
 /**
  * The browser's location has changed. Usually, we don't care. But in the case
@@ -297,32 +250,29 @@ Scriptish_BrowserUI.onLocationChange = function(a,b,c) {
     this.currentMenuCommander = null;
   }
 
-  var menuCommander = this.getCommander(this.tabBrowser.selectedBrowser.
-                                        contentWindow);
+  var menuCommander = this.getCommander(
+      gBrowser.selectedBrowser.contentWindow);
 
   if (menuCommander) {
     this.currentMenuCommander = menuCommander;
     this.currentMenuCommander.attach();
   }
-};
+}
 
 /**
  * A content document has unloaded. We need to remove it's menuCommander to
  * avoid leaking it's memory.
  */
 Scriptish_BrowserUI.contentUnload = function(e) {
-  if (e.persisted || !this.menuCommanders || 0 == this.menuCommanders.length) {
+  if (e.persisted || !this.menuCommanders || 0 == this.menuCommanders.length)
     return;
-  }
 
   var unsafeWin = e.target.defaultView;
 
   // looping over commanders rather than using getCommander because we need
   // the index into commanders.splice.
   for (var i = 0, item; item = this.menuCommanders[i]; i++) {
-    if (item.win != unsafeWin) {
-      continue;
-    }
+    if (item.win != unsafeWin) continue;
 
     if (item.commander == this.currentMenuCommander) {
       this.currentMenuCommander.detach();
@@ -330,10 +280,9 @@ Scriptish_BrowserUI.contentUnload = function(e) {
     }
 
     this.menuCommanders.splice(i, 1);
-
     break;
   }
-};
+}
 
 /**
  * The browser XUL has unloaded. We need to let go of the pref watcher so
@@ -343,9 +292,9 @@ Scriptish_BrowserUI.contentUnload = function(e) {
  */
 Scriptish_BrowserUI.chromeUnload = function() {
   Scriptish_prefRoot.unwatch("enabled", this.statusWatcher);
-  this.tabBrowser.removeProgressListener(this);
+  gBrowser.removeProgressListener(this);
   delete this.menuCommanders;
-};
+}
 
 /**
  * Called when the content area context menu is showing. We figure out whether
@@ -353,99 +302,47 @@ Scriptish_BrowserUI.chromeUnload = function() {
  */
 Scriptish_BrowserUI.contextMenuShowing = function() {
   var contextItem = this.contextItem;
-  var contextSep = document.getElementById("scriptish-context-menu-viewsource-sep");
-
+  var contextSep = $("scriptish-context-menu-viewsource-sep");
   var culprit = document.popupNode;
 
-  while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a") {
-     culprit = culprit.parentNode;
-  }
+  while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a")
+    culprit = culprit.parentNode;
 
-  contextItem.hidden = contextSep.hidden =
-      !this.getUserScriptLinkUnderPointer();
-};
+  contextItem.hidden = contextSep.hidden = !this.getUserScriptLinkUnderPointer();
+}
 
 
 Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
   var culprit = document.popupNode;
 
-  while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a") {
-     culprit = culprit.parentNode;
-  }
+  while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a")
+    culprit = culprit.parentNode;
 
-  if (!culprit || !culprit.href ||
-      !culprit.href.match(/\.user\.js(\?|$)/i)) {
+  if (!culprit || !culprit.href || !culprit.href.match(/\.user\.js(\?|$)/i))
     return null;
-  }
-
-  var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
-                        .getService(Components.interfaces.nsIIOService);
-  var uri = ioSvc.newURI(culprit.href, null, null);
-
-  return uri;
-};
-
-Scriptish_BrowserUI.toolsMenuShowing = function() {
-  if (window.content && window.content.location &&
-      window.content.location.href.match(/\.user(?:-\d+)\.js(?:\?|$)/i)) {
-    // Better to use hidden than collapsed because collapsed still allows you to
-    // select the item using keyboard navigation, but hidden doesn't.
-	  this.toolsInstall.setAttribute("hidden", "false");
-  }
-};
+  return tools.NetUtil.newURI(culprit.href);
+}
 
 /**
  * Helper method which gets the menuCommander corresponding to a given
  * document
  */
-Scriptish_BrowserUI.getCommander = function(unsafeWin) {
-  for (var i = 0; i < this.menuCommanders.length; i++) {
-    if (this.menuCommanders[i].win == unsafeWin) {
+Scriptish_BrowserUI.getCommander = function(aWin) {
+  for (var i = 0; i < this.menuCommanders.length; i++)
+    if (this.menuCommanders[i].win === aWin)
       return this.menuCommanders[i].commander;
-    }
-  }
-
-  var tools = {};
-  Components.utils.import("resource://scriptish/menucommander.js", tools);
 
   // no commander found. create one and add it.
-  var commander = new tools.Scriptish_MenuCommander(document);
-  this.menuCommanders.push({win:unsafeWin, commander:commander});
-
+  var commander = new Scriptish_MenuCommander(document);
+  this.menuCommanders.push({win: aWin, commander: commander});
   return commander;
-};
+}
 
 function Scriptish_showPopup(aEvent) {
-  function urlsOfAllFrames(contentWindow) {
-    function collect(contentWindow) {
-      urls = urls.concat(urlsOfAllFrames(contentWindow));
-    }
-    var urls = [contentWindow.location.href];
-    Array.slice(contentWindow.frames).forEach(collect);
-    return urls;
-  }
-
-  function uniq(a) {
-    var seen = {}, list = [], item;
-    for (var i = 0; i < a.length; i++) {
-      item = a[i];
-      if (!seen.hasOwnProperty(item))
-        seen[item] = list.push(item);
-    }
-    return list;
-  }
-
   function scriptsMatching(urls) {
-
     function testMatchURLs(script) {
-
-      function testMatchURL(url) {
-        return script.matchesURL(url);
-      }
-
-      return urls.some(testMatchURL);
+      return urls.some(function(url) script.matchesURL(url));
     }
-
     return Scriptish_config.getMatchingScripts(testMatchURLs);
   }
 
@@ -455,12 +352,13 @@ function Scriptish_showPopup(aEvent) {
     mi.setAttribute("label", script.name);
     mi.script = script;
     mi.setAttribute("type", "checkbox");
+    mi.setAttribute("closemenu", "none");
     mi.setAttribute("checked", script.enabled.toString());
     popup.insertBefore(mi, tail);
   }
 
   var popup = aEvent.target;
-  var tail = document.getElementById("scriptish-status-no-scripts-sep");
+  var tail = $("scriptish-status-no-scripts-sep");
 
   // set the enabled/disabled state
   Scriptish_BrowserUI.statusEnabledItem.setAttribute(
@@ -469,24 +367,20 @@ function Scriptish_showPopup(aEvent) {
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; i >= 0; i--) {
     var node = popup.childNodes[i];
-    if (node.script || node.getAttribute("value") == "hack") {
+    if (node.script || node.getAttribute("value") == "hack")
       popup.removeChild(node);
-    }
   }
 
-  var urls = uniq( urlsOfAllFrames( getBrowser().contentWindow ));
-  var runsOnTop = scriptsMatching( [urls.shift()] ); // first url = top window
-  var runsFramed = scriptsMatching( urls ); // remainder are all its subframes
+  var urls = Scriptish_getURLsForContentWindow(getBrowser().contentWindow);
+  var runsOnTop = scriptsMatching([urls.shift()]); // first url = top window
+  var runsFramed = scriptsMatching(urls); // remainder are all its subframes
 
   // drop all runsFramed scripts already present in runsOnTop
   for (var i = 0; i < runsOnTop.length; i++) {
     var j = 0, item = runsOnTop[i];
     while (j < runsFramed.length) {
-      if (item === runsFramed[j]) {
-        runsFramed.splice(j, 1);
-      } else {
-        j++;
-      }
+      if (item === runsFramed[j]) runsFramed.splice(j, 1);
+      else j++;
     }
   }
 
@@ -502,29 +396,32 @@ function Scriptish_showPopup(aEvent) {
   runsOnTop.forEach(appendScriptToPopup);
 
   var foundInjectedScript = !!(runsFramed.length + runsOnTop.length);
-  document.getElementById("scriptish-status-no-scripts").collapsed = foundInjectedScript;
+  $("scriptish-status-no-scripts").collapsed = foundInjectedScript;
 }
 
 /**
  * Handle clicking one of the items in the popup. Left-click toggles the enabled
  * state, rihgt-click opens in an editor.
  */
-function Scriptish_popupClicked(aEvent) {
-  var tools = {};
-
-  if (aEvent.button == 0 || aEvent.button == 2) {
-    var script = aEvent.target.script;
-    if (!script) return;
-
-    if (aEvent.button == 0) // left-click: toggle enabled state
-      script.enabled =! script.enabled;
-    else { // right-click: open in editor
-      Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
-      tools.Scriptish_openInEditor(script, window);
-    }
-
-    closeMenus(aEvent.target);
+function Scriptish_popupClicked(aEvt) {
+  var script = aEvt.target.script;
+  if (!script) return;
+  switch (aEvt.button) {
+    // left-click
+    case 0:
+      script.enabled = !script.enabled;
+      break;
+    // right-click
+    case 2:
+      Scriptish_openInEditor(script, window);
+      $("scriptish-status-popup").hidePopup();
+      break;
   }
+}
+
+Scriptish_BrowserUI.viewContextItemClicked = function() {
+  Scriptish_configDownloader.startViewScript(
+      Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
 }
 
 // necessary for webProgressListener implementation
@@ -534,9 +431,6 @@ Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
 Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
-Scriptish_BrowserUI.viewContextItemClicked = function() {
-  Scriptish_configDownloader.startViewScript(
-      Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
-};
-
-Scriptish_BrowserUI.init();
+window.addEventListener("load", hitch(Scriptish_BrowserUI, "chromeLoad"), false);
+window.addEventListener("unload", hitch(Scriptish_BrowserUI, "chromeUnload"), false);
+})(Components.utils.import, {})

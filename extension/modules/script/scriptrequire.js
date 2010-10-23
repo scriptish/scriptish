@@ -1,55 +1,8 @@
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["ScriptRequire"];
+Components.utils.import("resource://scriptish/script/scriptdependency.js");
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
-
-function ScriptRequire(script) {
-  this._script = script;
-
-  this._downloadURL = null; // Only for scripts not installed
-  this._tempFile = null; // Only for scripts not installed
-  this._filename = null;
-  this.type = "require";
-  this.updateScript = false;
+function ScriptRequire() {
+  ScriptDependency.apply(this, arguments);
 }
-
-ScriptRequire.prototype = {
-  get _file() {
-    var file = this._script._basedirFile;
-    file.append(this._filename);
-    return file;
-  },
-
-  get fileURL() { return Scriptish_getUriFromFile(this._file).spec; },
-  get textContent() { return Scriptish_getContents(this._file); },
-
-  _initFile: function() {
-    var name = this._downloadURL.substr(this._downloadURL.lastIndexOf("/") + 1);
-    if(name.indexOf("?") > 0) {
-      name = name.substr(0, name.indexOf("?"));
-    }
-    name = this._script._initFileName(name, true);
-
-    var file = this._script._basedirFile;
-    file.append(name);
-    file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
-    this._filename = file.leafName;
-
-    Scriptish_log("Moving dependency file from " + this._tempFile.path + " to " + file.path);
-
-    file.remove(true);
-    this._tempFile.moveTo(file.parent, file.leafName);
-    this._tempFile = null;
-  },
-
-  get urlToDownload() { return this._downloadURL; },
-  setDownloadedFile: function(file) {
-    this._tempFile = file;
-    if (this.updateScript)
-      this._initFile();
-  }
-};
+ScriptRequire.prototype = new ScriptDependency();
+ScriptRequire.prototype.constructor = ScriptRequire;

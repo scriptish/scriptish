@@ -1,4 +1,3 @@
-// JSM exported symbols
 var EXPORTED_SYMBOLS = ["Scriptish_MenuCommander"];
 
 Components.utils.import("resource://scriptish/logging.js");
@@ -72,14 +71,13 @@ Scriptish_MenuCommander.prototype.attach = function() {
     this.menuPopup2.appendChild(this.menuItems2[i]);
   }
 
-  for (var i = 0; i < this.keys.length; i++) {
+  for (var i = 0; i < this.keys.length; i++)
     this.keyset.appendChild(this.keys[i]);
-  }
 
   this.setDisabled(this.menuItems.length == 0);
   this.attached = true;
 
-  Scriptish_log("< Scriptish_MenuCommander.attach");
+  //Scriptish_log("< Scriptish_MenuCommander.attach");
 };
 
 Scriptish_MenuCommander.prototype.detach = function() {
@@ -92,14 +90,13 @@ Scriptish_MenuCommander.prototype.detach = function() {
     this.menuPopup2.removeChild(this.menuItems2[i]);
   }
 
-  for (var i = 0; i < this.keys.length; i++) {
+  for (var i = 0; i < this.keys.length; i++)
     this.keyset.removeChild(this.keys[i]);
-  }
 
   this.setDisabled(true);
   this.attached = false;
 
-  Scriptish_log("< Scriptish_MenuCommander.detach");
+  //Scriptish_log("< Scriptish_MenuCommander.detach");
 };
 
 //TODO: restructure accel/access validation to be at register time.
@@ -124,7 +121,7 @@ function(commandName, commandFunc, accessKey) {
     }
   }
 
-  Scriptish_log("< Scriptish_MenuCommander.createMenuItem");
+  //Scriptish_log("< Scriptish_MenuCommander.createMenuItem");
   return menuItem;
 };
 
@@ -157,7 +154,7 @@ Scriptish_MenuCommander.prototype.createKey =
     key.setAttribute("id", id);
     menuItem.setAttribute("key", id);
 
-    Scriptish_log("< Scriptish_MenuCommander.createKey");
+    //Scriptish_log("< Scriptish_MenuCommander.createKey");
     return key;
   };
 

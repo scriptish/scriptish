@@ -1,6 +1,5 @@
 var EXPORTED_SYMBOLS = ["GM_worker"];
-
-const Ci = Components.interfaces;
+const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
@@ -11,6 +10,7 @@ const GM_worker = function (aResource, aPgURL) {
   const self = this;
   var created = false;
   var alive = true;
+  var thread = Services.tm.newThread(0);
   var tempWorker = {
     postMessage: function() {},
     thread: {
@@ -32,41 +32,43 @@ const GM_worker = function (aResource, aPgURL) {
   this.terminate = function() {
     if (!alive) return;
     alive = false;
-    fakeWorker.thread.shutdown();
+    gTimer.setTimeout(function() {
+      Services.tm.mainThread.dispatch(
+          new Dispatcher(null, thread, "shutdown"), Ci.nsIThread.DISPATCH_NORMAL);
+    }, 0);
+    Scriptish_log("terminated GM_worker");
     fakeWorker = tempWorker;
   }
 
   gTimer.setTimeout(function() {
     fakeWorker =
-        new fake_worker(self, aResource.textContent, aResource.fileURL, aPgURL);
+        new fake_worker(
+            thread, self, aResource.textContent, aResource.fileURL, aPgURL);
   }, 0);
 }
 
 
-function fake_worker(aBoss, aJSContent, aJSPath, aPgURL) {
+function fake_worker(aThread, aBoss, aJSContent, aJSPath, aPgURL) {
   const self = this;
   this.boss = aBoss;
   this.jsContent = aJSContent;
   this.jsPath = aJSPath;
   this.sandbox = Cu.Sandbox(aPgURL);
   this.timer = new Timer();
-  this.thread = Services.tm.newThread(0);
+  this.thread = aThread;
 
-  for (let [k, v] in Iterator(this._functions)) {
+  for (let [k, v] in Iterator(this._functions))
     this.sandbox.importFunction(v, k);
-  }
 
   this.sandbox.importFunction(function postMessage(aMsg) {
     var msg = (typeof aMsg != "object") ? (aMsg + "") : JSON.stringify(aMsg);
     Services.tm.mainThread.dispatch(
-        new Dispatcher(msg, self, "_onmessage"),
-        Ci.nsIThread.DISPATCH_NORMAL);
+        new Dispatcher(msg, self, "_onmessage"), Ci.nsIThread.DISPATCH_NORMAL);
   }, "postMessage")
 
   this.sandbox.importFunction(function close() {
     Services.tm.mainThread.dispatch(
-        new Dispatcher(null, self, "_terminate"),
-        Ci.nsIThread.DISPATCH_SYNC);
+        new Dispatcher(null, self, "_terminate"), Ci.nsIThread.DISPATCH_SYNC);
   }, "close")
 
   this.thread.dispatch(this, Ci.nsIThread.DISPATCH_NORMAL);
@@ -86,8 +88,7 @@ fake_worker.prototype = {
       aFunc();
     } catch (e) {
       Services.tm.mainThread.dispatch(
-          new Dispatcher(e, this, "_onerror"),
-          Ci.nsIThread.DISPATCH_NORMAL);
+          new Dispatcher(e, this, "_onerror"), Ci.nsIThread.DISPATCH_NORMAL);
     }
   },
 
@@ -153,16 +154,4 @@ function Dispatcher(aArg, aObj, aFuncName) {
 Dispatcher.prototype = {
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIRunnable]),
   run: function () { this.obj[this.func](this.arg); }
-}
-
-function trapErrors(aFunc) {
-  return function () {
-    try {
-      aFunc.apply(this, arguments);
-    } catch (e) {
-      Services.tm.mainThread.dispatch(
-          new Dispatcher(e, this, "_onerror"),
-          Ci.nsIThread.DISPATCH_NORMAL);
-    }
-  }
 }
