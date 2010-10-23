@@ -1,5 +1,5 @@
 Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_config.js");
+Components.utils.import("resource://scriptish/scriptish.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_createUserScriptSource.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
@@ -40,7 +40,7 @@ function doInstall() {
   foStream.write(script, script.length);
   foStream.close();
 
-  var config = Scriptish_config;
+  var config = Scriptish.config;
 
   // create a script object with parsed metadata,
   script = config.parse(script);

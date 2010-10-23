@@ -3,10 +3,7 @@ Components.utils.import("resource://scriptish/constants.js");
 
 const MIN_INT_32 = -0x80000000;
 const MAX_INT_32 = 0x7FFFFFFF;
-
-XPCOMUtils.defineLazyGetter(this, "Scriptish_prefRoot", function() {
-  return new Scriptish_PrefManager();
-});
+const Scriptish_prefRoot = new Scriptish_PrefManager();
 
 /**
  * Simple API on top of preferences for extensions.scriptish.
@@ -74,10 +71,10 @@ function Scriptish_PrefManager(startPoint) {
         break;
     }
 
-    if (!goodType) {
-      throw new Error("Unsupported type for GM_setValue. Supported types " +
-                      "are: string, bool, and 32 bit integers.");
-    }
+    if (!goodType)
+      throw new Error(
+          "Unsupported type for GM_setValue. Supported types are: "
+          + "string, bool, and 32 bit integers.");
 
     // underlying preferences object throws an exception if new pref has a
     // different type than old one. i think we should not do this, so delete

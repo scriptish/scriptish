@@ -8,7 +8,7 @@ const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 
 const CP = Ci.nsIContentPolicy;
@@ -67,7 +67,7 @@ ScriptishService.prototype = {
 
     var ret = CP.ACCEPT;
     // don't intercept anything when Scriptish is not enabled
-    if (!Scriptish_getEnabled()) return ret;
+    if (!Scriptish.enabled) return ret;
     // don't interrupt the view-source: scheme
     if ("view-source" == cl.scheme) return ret;
 

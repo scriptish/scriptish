@@ -3,8 +3,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_BrowserUIM"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_setEnabled.js");
-Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 
@@ -34,13 +33,13 @@ Scriptish_BrowserUIM.prototype = {
     }
   },
   onToggleStatus: function() {
-    Scriptish_setEnabled(!Scriptish_getEnabled());
+    Scriptish.enabled = !Scriptish.enabled;
   },
   refreshStatus: function() {
     var tbImg = this.$("scriptish-button");
     var menu = this.$("scriptish_general_menu");
 
-    if (Scriptish_getEnabled()) {
+    if (Scriptish.enabled) {
       menu.setAttribute("image", ICON_16_ON);
       tbImg && tbImg.setAttribute("image", ICON_24_ON);
     } else {

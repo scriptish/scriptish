@@ -4,7 +4,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/script/scripticon.js");
-Cu.import("resource://scriptish/utils/Scriptish_config.js");
+Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
@@ -72,7 +72,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     }
 
     var source = this.req_.responseText;
-    this.script = Scriptish_config.parse(source, this.uri_);
+    this.script = Scriptish.config.parse(source, this.uri_);
 
     var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
@@ -241,7 +241,7 @@ ScriptDownloader.prototype.installScript = function() {
     this.scriptInstaller.changed("InstallEnded");
   } else if (this.dependenciesLoaded_) {
     var script = this.script;
-    Scriptish_config.install(script);
+    Scriptish.config.install(script);
   } else {
     this.installOnCompletion_ = true;
   }

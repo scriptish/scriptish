@@ -7,12 +7,10 @@ var Scriptish_BrowserUIM;
 (function(import, tools){
 import("resource://scriptish/content/browser.js");
 import("resource://scriptish/prefmanager.js");
-import("resource://scriptish/utils/Scriptish_config.js");
+import("resource://scriptish/scriptish.js");
 import("resource://scriptish/utils/Scriptish_hitch.js", tools);
-import("resource://scriptish/utils/Scriptish_getEnabled.js");
 import("resource://scriptish/utils/Scriptish_stringBundle.js");
 import("resource://scriptish/utils/Scriptish_openInEditor.js");
-import("resource://scriptish/utils/Scriptish_isGreasemonkeyable.js");
 import("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
 import("resource://scriptish/config/configdownloader.js");
 import("resource://scriptish/menucommander.js");
@@ -105,7 +103,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   $("scriptish-tools-menupop").addEventListener("popupshowing", function(aEvt) {
     // set the enabled/disabled state
     Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
-        "checked", Scriptish_getEnabled());
+        "checked", Scriptish.enabled);
     aEvt.stopPropagation();
   }, false);
 
@@ -167,12 +165,12 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
  * it's menu items and activate them.
  */
 Scriptish_BrowserUI.contentLoad = function(e) {
-  if (!Scriptish_getEnabled()) return;
+  if (!Scriptish.enabled) return;
   var safeWin = e.target.defaultView;
   var unsafeWin = safeWin.wrappedJSObject;
   var href = safeWin.location.href;
 
-  if (Scriptish_isGreasemonkeyable(href)) {
+  if (Scriptish.isGreasemonkeyable(href)) {
     // if this content load is in the focused tab, attach the menuCommaander
     if (unsafeWin == gBrowser.selectedBrowser.contentWindow) {
       var commander = this.getCommander(safeWin);
@@ -350,7 +348,7 @@ function Scriptish_showPopup(aEvent) {
     function testMatchURLs(script) {
       return urls.some(function(url) script.matchesURL(url));
     }
-    return Scriptish_config.getMatchingScripts(testMatchURLs);
+    return Scriptish.config.getMatchingScripts(testMatchURLs);
   }
 
   function appendScriptToPopup(script) {
@@ -370,7 +368,7 @@ function Scriptish_showPopup(aEvent) {
   // set the enabled/disabled state
   var statusEnabledItem = $("scriptish-tb-enabled-item");
   statusEnabledItem && statusEnabledItem.setAttribute(
-      "checked", Scriptish_getEnabled());
+      "checked", Scriptish.enabled);
 
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; i >= 0; i--) {

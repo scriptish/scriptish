@@ -1,5 +1,4 @@
 var EXPORTED_SYMBOLS = ["Scriptish_installUri"];
-
 Components.utils.import("resource://scriptish/third-party/Timer.js");
 Components.utils.import("resource://scriptish/config/configdownloader.js");
 
