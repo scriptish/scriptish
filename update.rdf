@@ -33,8 +33,8 @@
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
-                <em:minVersion>4.0b5pre</em:minVersion>
-                <em:maxVersion>4.0.*</em:maxVersion>
+                <em:minVersion>2.1a3</em:minVersion>
+                <em:maxVersion>2.1.*</em:maxVersion>
                 <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b5.xpi</em:updateLink>
                 <em:updateHash>sha1:c378b6213091dd2f5e97ab1d3176b5ba6468755d</em:updateHash>
               </RDF:Description>
