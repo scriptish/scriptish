@@ -9,12 +9,14 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
+Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 
 const CP = Ci.nsIContentPolicy;
 
 function ScriptishService() {
   this.wrappedJSObject = this;
+  this.timer = new Timer();
   this.updateChk = function() {
     Services.scriptloader
         .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
@@ -149,14 +151,23 @@ ScriptishService.prototype = {
       // hack XPathResult since that is so commonly used
       sandbox.XPathResult = Ci.nsIDOMXPathResult;
 
-      // add our own APIs
+      // add GM_* API to sandbox
       for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
       sandbox.console = fbConsole || new tools.GM_console(script);
 
       sandbox.unsafeWindow = unsafeContentWin;
       sandbox.__proto__ = wrappedContentWin;
 
-      this.evalInSandbox(script, sandbox);
+      let delay = script.delay;
+      if (delay || delay === 0) {
+        let (script = script, sb = sandbox, self = this) {
+          self.timer.setTimeout(function(){
+            self.evalInSandbox(script, sandbox);
+          }, script.delay);
+        }
+      } else {
+        this.evalInSandbox(script, sandbox);
+      }
     }
   },
 

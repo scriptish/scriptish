@@ -68,6 +68,7 @@ function Script(config) {
   this._matches = [];
   this._includeRegExps = [];
   this._excludeRegExps = [];
+  this._delay = null;
   this._requires = [];
   this._resources = [];
   this._screenshots = [];
@@ -77,7 +78,6 @@ function Script(config) {
   this._rawMeta = null;
   this._jsversion = null;
 }
-
 Script.prototype = {
   isCompatible: true,
   blocklistState: 0,
@@ -233,6 +233,11 @@ Script.prototype = {
   get iconURL() this._icon.fileURL,
   get enabled() this._enabled,
   set enabled(enabled) { this.userDisabled = !enabled; },
+  get delay() this._delay,
+  set delay(aNum) {
+    let val = parseInt(aNum, 10);
+    this._delay = ((val || val === 0) && val > 0) ? val : null;
+  },
 
   get includes() this._includes.concat(),
   get excludes() this._excludes.concat(),
@@ -408,6 +413,7 @@ Script.prototype = {
     this._includeRegExps = newScript._includeRegExps;
     this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
+    this._delay = newScript._delay;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
@@ -537,6 +543,7 @@ Script.prototype = {
     scriptNode.setAttribute("author", this._author);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
+    scriptNode.setAttribute("delay", this._delay);
     scriptNode.setAttribute("icon", this.icon.filename);
     scriptNode.setAttribute("enabled", this._enabled);
     scriptNode.setAttribute("basedir", this._basedir);
@@ -672,6 +679,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "version":
           script["_" + header] = value;
           continue;
+        case "delay":
+          script.delay = value;
         case "updateurl":
             if (value.match(/^https?:\/\//)) script._updateURL = value;
             continue;
@@ -874,6 +883,7 @@ Script.load = function load(aConfig, aNode) {
   script._description = aNode.getAttribute("description");
   script.icon.fileURL = aNode.getAttribute("icon");
   script._enabled = aNode.getAttribute("enabled") == true.toString();
+  script.delay = aNode.getAttribute("delay");
 
   aConfig.addScript(script);
   return fileModified;
