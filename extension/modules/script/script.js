@@ -84,7 +84,7 @@ Script.prototype = {
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
   applyBackgroundUpdates: false,
-  get isActive() !this.appDisabled || !this.userDisabled,
+  get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
   get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
