@@ -46,20 +46,14 @@ const Timer = function() {
         false, Ci.nsITimer.TYPE_ONE_SHOT, aCallback, TimeoutCallback, aDelay,
         Array.slice(arguments, 2));
   }
-
-  this.clearTimeout = function(aTimerID) {
-    timers.removeTimer(aTimerID);
-  }
+  this.clearTimeout = function(aTimerID) timers.removeTimer(aTimerID);
 
   this.setInterval = function(aCallback, aDelay) {
     return timers.addTimer(
         true, Ci.nsITimer.TYPE_REPEATING_SLACK, aCallback, IntervalCallback,
         aDelay, Array.slice(arguments, 2));
   }
-
-  this.clearInterval = function(aTimerID) {
-    timers.removeTimer(aTimerID);
-  }
+  this.clearInterval = function(aTimerID) timers.removeTimer(aTimerID);
 }
 
 
@@ -78,7 +72,7 @@ Timers.prototype = {
 
     if (!aInterval) {
       var self = this;
-      removeFunc = function() { self.removeTimer(timerID); }
+      removeFunc = function() self.removeTimer(timerID);
     }
 
     timer.initWithCallback(
@@ -86,7 +80,7 @@ Timers.prototype = {
     return timerID;
   },
   removeTimer: function(aTimerID) {
-    var timer = this.cache[this.nextTimerID];
+    var timer = this.cache[aTimerID];
     if (!timer) return;
     timer.cancel();
     delete this.cache[this.nextTimerID];
