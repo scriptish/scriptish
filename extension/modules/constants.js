@@ -2,8 +2,7 @@ var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
     "Services", "Instances"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+const {classes: Cc, interfaces: Ci} = Components;
 var Services = {};
 (function(import, tools){
   import("resource://gre/modules/XPCOMUtils.jsm");
