@@ -12,7 +12,7 @@ Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 
-const CP = Ci.nsIContentPolicy;
+const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 
 function ScriptishService() {
   this.wrappedJSObject = this;
@@ -156,7 +156,7 @@ ScriptishService.prototype = {
           script, url, wrappedContentWin, unsafeContentWin, chromeWin);
 
       // hack XPathResult since that is so commonly used
-      sandbox.XPathResult = Ci.nsIDOMXPathResult;
+      sandbox.XPathResult = XPATH_RESULT;
 
       // add GM_* API to sandbox
       for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
