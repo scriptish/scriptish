@@ -132,20 +132,27 @@ ScriptishService.prototype = {
   },
 
   injectScripts: function(scripts, url, wrappedContentWin, chromeWin) {
-    var sandbox;
-    var script;
-    var unsafeContentWin = wrappedContentWin.wrappedJSObject;
-    var tools = {};
+    let self = this;
+    let sandbox;
+    let script;
+    let unsafeContentWin = wrappedContentWin.wrappedJSObject;
+    let tools = {};
     Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
 
+    let delays = [];
+    wrappedContentWin.addEventListener("unload", function() {
+      for (let [, timerID] in Iterator(delays))
+        self.timer.clearTimeout(timerID);
+    }, true);
+
     // detect and grab reference to firebug console and context, if it exists
-    var fbConsole = Scriptish_getFirebugConsole(unsafeContentWin, chromeWin);
+    let fbConsole = Scriptish_getFirebugConsole(unsafeContentWin, chromeWin);
 
     for (var i = 0; script = scripts[i++];) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
 
-      var GM_API = new tools.GM_API(
+      let GM_API = new tools.GM_API(
           script, url, wrappedContentWin, unsafeContentWin, chromeWin);
 
       // hack XPathResult since that is so commonly used
@@ -160,10 +167,10 @@ ScriptishService.prototype = {
 
       let delay = script.delay;
       if (delay || delay === 0) {
-        let (script = script, sb = sandbox, self = this) {
-          self.timer.setTimeout(function(){
+        let (script = script, sb = sandbox) {
+          delays.push(self.timer.setTimeout(function() {
             self.evalInSandbox(script, sandbox);
-          }, script.delay);
+          }, script.delay));
         }
       } else {
         this.evalInSandbox(script, sandbox);
