@@ -1,7 +1,7 @@
 // Checks if Scriptish was updated/installed
-(function(import, tools) {
-  import("resource://scriptish/prefmanager.js", tools);
-  import("resource://scriptish/constants.js", tools);
+(function(inc, tools) {
+  inc("resource://scriptish/prefmanager.js", tools);
+  inc("resource://scriptish/constants.js", tools);
   var pref = tools.Scriptish_prefRoot;
   var currentVer = pref.getValue("version", "0.0");
 

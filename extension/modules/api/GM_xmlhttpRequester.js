@@ -1,9 +1,9 @@
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
-(function(import){
-  import("resource://scriptish/constants.js");
-  import("resource://scriptish/logging.js");
-  import("resource://scriptish/utils/Scriptish_hitch.js");
-  import("resource://scriptish/api.js");
+(function(inc){
+  inc("resource://scriptish/constants.js");
+  inc("resource://scriptish/logging.js");
+  inc("resource://scriptish/utils/Scriptish_hitch.js");
+  inc("resource://scriptish/api.js");
 })(Components.utils.import)
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {

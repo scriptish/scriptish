@@ -1,7 +1,7 @@
 var EXPORTED_SYMBOLS = ["Scriptish_logError", "Scriptish_log"];
-(function(import){
-  import("resource://scriptish/constants.js");
-  import("resource://scriptish/prefmanager.js");
+(function(inc){
+  inc("resource://scriptish/constants.js");
+  inc("resource://scriptish/prefmanager.js");
 })(Components.utils.import)
 
 // Utility to create an error message in the log without throwing an error.

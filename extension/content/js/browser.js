@@ -4,18 +4,18 @@ var Scriptish_BrowserUI = {
 };
 var Scriptish_BrowserUIM;
 
-(function(import, tools){
-import("resource://scriptish/content/browser.js");
-import("resource://scriptish/prefmanager.js");
-import("resource://scriptish/scriptish.js");
-import("resource://scriptish/utils/Scriptish_hitch.js", tools);
-import("resource://scriptish/utils/Scriptish_stringBundle.js");
-import("resource://scriptish/utils/Scriptish_openInEditor.js");
-import("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
-import("resource://scriptish/config/configdownloader.js");
-import("resource://scriptish/menucommander.js");
-import("resource://scriptish/logging.js");
-import("resource://scriptish/constants.js", tools);
+(function(inc, tools){
+inc("resource://scriptish/content/browser.js");
+inc("resource://scriptish/prefmanager.js");
+inc("resource://scriptish/scriptish.js");
+inc("resource://scriptish/utils/Scriptish_hitch.js", tools);
+inc("resource://scriptish/utils/Scriptish_stringBundle.js");
+inc("resource://scriptish/utils/Scriptish_openInEditor.js");
+inc("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
+inc("resource://scriptish/config/configdownloader.js");
+inc("resource://scriptish/menucommander.js");
+inc("resource://scriptish/logging.js");
+inc("resource://scriptish/constants.js", tools);
 var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;

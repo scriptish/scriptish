@@ -4,11 +4,11 @@ var EXPORTED_SYMBOLS = [
 
 const {classes: Cc, interfaces: Ci} = Components;
 var Services = {};
-(function(import, tools){
-  import("resource://gre/modules/XPCOMUtils.jsm");
-  import("resource://gre/modules/NetUtil.jsm");
-  import("resource://gre/modules/AddonManager.jsm");
-  import("resource://gre/modules/Services.jsm", tools);
+(function(inc, tools){
+  inc("resource://gre/modules/XPCOMUtils.jsm");
+  inc("resource://gre/modules/NetUtil.jsm");
+  inc("resource://gre/modules/AddonManager.jsm");
+  inc("resource://gre/modules/Services.jsm", tools);
 
   Services.__proto__ = tools.Services;
 })(Components.utils.import, {})
