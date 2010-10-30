@@ -185,7 +185,8 @@ ScriptishService.prototype = {
     try {
       for (let [, req] in Iterator(aScript.requires)) {
         fileURL = req.fileURL;
-        Cu.evalInSandbox(req.textContent, aSandbox, jsVer, fileURLPrefix+fileURL, 1);
+        Cu.evalInSandbox(
+            req.textContent + "\n", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       }
     } catch (e) {
       return Scriptish_logError(e, 0, fileURL, e.lineNumber);
