@@ -191,7 +191,7 @@ ScriptishService.prototype = {
       return Scriptish_logError(e, 0, fileURL, e.lineNumber);
     }
 
-    var src = aScript.textContent;
+    var src = aScript.textContent + "\n";
     fileURL = aScript.fileURL;
     try {
       try {
