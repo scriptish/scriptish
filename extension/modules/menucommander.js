@@ -62,6 +62,7 @@ Scriptish_MenuCommander.prototype.attach = function() {
 
   this.setDisabled(this.tbMenuItems.length == 0);
   this.attached = true;
+  return this;
 }
 
 Scriptish_MenuCommander.prototype.detach = function() {

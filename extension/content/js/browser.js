@@ -134,11 +134,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.statusWatcher = hitch(Scriptish_BrowserUIM, "refreshStatus");
   Scriptish_prefRoot.watch("enabled", this.statusWatcher);
 
-  // hook various events
-  $("appcontent").addEventListener(
-      "DOMContentLoaded", hitch(this, "contentLoad"), true);
-  ($("sidebar") || $("sidebar-box")).addEventListener(
-      "DOMContentLoaded", hitch(this, "contentLoad"), true);
+  // hook on to context menu popup event
   $("contentAreaContextMenu").addEventListener(
       "popupshowing", hitch(this, "contextMenuShowing"), false);
 
@@ -157,39 +153,6 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   commander.registerMenuCommand(
       menuCommand.name, menuCommand.doCommand, menuCommand.accelKey,
       menuCommand.accelModifiers, menuCommand.accessKey);
-}
-
-/**
- * Gets called when a DOMContentLoaded event occurs somewhere in the browser.
- * If that document is in in the top-level window of the focused tab, find
- * it's menu items and activate them.
- */
-Scriptish_BrowserUI.contentLoad = function(e) {
-  if (!Scriptish.enabled) return;
-  var safeWin = e.target.defaultView;
-  var unsafeWin = safeWin.wrappedJSObject;
-  var href = safeWin.location.href;
-
-  if (Scriptish.isGreasemonkeyable(href)) {
-    // if this content load is in the focused tab, attach the menuCommaander
-    if (unsafeWin == gBrowser.selectedBrowser.contentWindow) {
-      var commander = this.getCommander(safeWin);
-      this.currentMenuCommander = commander;
-      this.currentMenuCommander.attach();
-    }
-
-    gmSvc.domContentLoaded(safeWin, window);
-    safeWin.addEventListener("pagehide", hitch(this, "contentUnload"), false);
-  }
-
-  // Show the scriptish install banner if we are navigating to a .user.js
-  // file in a top-level tab.  If the file was previously cached it might have
-  // been given a number after .user, like gmScript.user-12.js
-  if (safeWin == safeWin.top && href.match(/\.user(?:-\d+)?\.js$/)
-      && !/text\/html/i.test(safeWin.document.contentType)) {
-    var browser = gBrowser.getBrowserForDocument(safeWin.document);
-    this.showInstallBanner(browser);
-  }
 }
 
 
@@ -272,17 +235,14 @@ Scriptish_BrowserUI.contentUnload = function(e) {
   if (e.persisted || !this.menuCommanders || 0 == this.menuCommanders.length)
     return;
 
-  var unsafeWin = e.target.defaultView;
+  let win = e.target.defaultView;
 
-  // looping over commanders rather than using getCommander because we need
-  // the index into commanders.splice.
+  // not using getCommander because we need to splice the commanders array.
   for (var i = 0, item; item = this.menuCommanders[i]; i++) {
-    if (item.win != unsafeWin) continue;
+    if (item.win !== win) continue;
 
-    if (item.commander == this.currentMenuCommander) {
-      this.currentMenuCommander.detach();
-      this.currentMenuCommander = null;
-    }
+    if (item.commander === this.currentMenuCommander)
+      this.currentMenuCommander = this.currentMenuCommander.detach();
 
     this.menuCommanders.splice(i, 1);
     break;
