@@ -25,6 +25,8 @@ const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
+const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
+const defaultRunAt = runAtValues[1]
 
 function noUpdateFound(aListener) {
   aListener.onNoUpdateAvailable(this);
@@ -75,8 +77,10 @@ function Script(config) {
   this._noframes = false;
   this._dependFail = false
   this.delayInjection = false;
+  this.delayedInjectors = [];
   this._rawMeta = null;
   this._jsversion = null;
+  this["_run-at"] = null;
 }
 Script.prototype = {
   isCompatible: true,
@@ -257,6 +261,12 @@ Script.prototype = {
   get resources() this._resources.concat(),
   get noframes() this._noframes,
   get jsversion() this._jsversion || maxJSVer,
+  get runAt() this["_run-at"] || defaultRunAt,
+  useDelayedInjectors: function() {
+    for (let [, injector] in Iterator(this.delayedInjectors)) injector(this);
+    this.delayInjection = false;
+    this.delayedInjectors = [];
+  },
 
   get homepageURL() {
     var url = this._homepageURL;
@@ -392,7 +402,7 @@ Script.prototype = {
 
   replaceScriptWith: function(aNewScript) {
     this.removeFiles();
-    this.updateFromNewScript(aNewScript.installProcess(), true);
+    this.updateFromNewScript(aNewScript.installProcess());
 
     // notification that update is complete
     var msg = "'" + this.name;
@@ -402,7 +412,7 @@ Script.prototype = {
     this.updateHelper();
     this._changed("update");
   },
-  updateFromNewScript: function(newScript, aDL) {
+  updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
@@ -423,10 +433,11 @@ Script.prototype = {
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
+    this["_run-at"] = newScript.runAt;
     this._noframes = newScript._noframes;
     this._version = newScript._version;
 
-    if (aDL) {
+    if (!scriptInjector) {
       this._file = newScript._file;
       this._basedir = newScript._basedir;
       this._filename = newScript._filename;
@@ -454,6 +465,7 @@ Script.prototype = {
 
         // This flag needs to be set now so the scriptDownloader can turn it off
         this.delayInjection = true;
+        this.delayedInjectors.push(scriptInjector);
 
         Cu.import("resource://scriptish/config/configdownloader.js", tools);
         // Redownload dependencies.
@@ -550,6 +562,7 @@ Script.prototype = {
     scriptNode.setAttribute("modified", this._modified);
     scriptNode.setAttribute("dependhash", this._dependhash);
     if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
+    if (this["_run-at"]) scriptNode.setAttribute("run-at", this["_run-at"]);
 
     if (this.homepageURL)
       scriptNode.setAttribute("homepageURL", this.homepageURL);
@@ -689,15 +702,21 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           script._homepageURL = value;
           continue;
         case "jsversion":
-          var jsVerIndx = JSVersions.indexOf(value);
-          if (jsVerIndx === -1) {
-            throw new Error("'" + value + "' is an invalid value for @jsversion.");
+          let jsVerIndx = JSVersions.indexOf(value);
+          if (-1 === jsVerIndx) {
+            throw new Error("'" + value + "' is an invalid value for @jsversion");
           } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
             throw new Error("The @jsversion value '" + value + "' is not "
                 + "supported by this version of Firefox.");
           } else {
             script._jsversion = JSVersions[jsVerIndx];
           }
+          continue;
+        case "run-at":
+          let runAtIndx = runAtValues.indexOf(value);
+          if (0 > runAtIndx)
+            throw new Error("'" + value + "' is an invalid value for @run-at");
+          script["_run-at"] = runAtValues[runAtIndx];
           continue;
         case "contributor":
           script.addContributor(value);
@@ -810,6 +829,7 @@ Script.load = function load(aConfig, aNode) {
   script._homepageURL = aNode.getAttribute("homepageURL")
       || aNode.getAttribute("homepage") || null;
   script._jsversion = aNode.getAttribute("jsversion") || null;
+  script["_run-at"] = aNode.getAttribute("run-at") || null;
 
   if (!script.fileExists()) {
     script.uninstallProcess();

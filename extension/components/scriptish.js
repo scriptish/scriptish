@@ -43,7 +43,6 @@ ScriptishService.prototype = {
   observe: function(aSubject, aTopic, aData) {
     switch (aTopic) {
       case "content-document-global-created":
-        Scriptish_log(aSubject.location.href);
         this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject));
         break;
     }
@@ -59,42 +58,73 @@ ScriptishService.prototype = {
       Cu.import("resource://scriptish/config/config.js", tools);
       this._config = new tools.Config(this._scriptFoldername);
     }
-
     return this._config;
   },
 
   docReady: function(safeWin, chromeWin) {
-    Scriptish_log(safeWin + " " + chromeWin);
+    if (!Scriptish.enabled || !chromeWin) return;
+
     let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
     let gBrowser = chromeWin.gBrowser;
-    let unsafeWin = safeWin.wrappedJSObject;
     let href = safeWin.location.href;
+    // Show the scriptish install banner if the user is navigating to a .user.js
+    // file in a top-level tab.  If the file was previously cached it might have
+    // been given a number after .user, like gmScript.user-12.js
+    if (safeWin === safeWin.top && href.match(/\.user(?:-\d+)?\.js$/)
+        && !/text\/html/i.test(safeWin.document.contentType)) {
+      gmBrowserUI.showInstallBanner(
+          gBrowser.getBrowserForDocument(safeWin.document));
+    }
+    if (!Scriptish.isGreasemonkeyable(href)) return;
+
+    let unsafeWin = safeWin.wrappedJSObject;
     let self = this;
+    let tools = {};
+    Cu.import("resource://scriptish/prefmanager.js", tools);
 
-    safeWin.addEventListener("DOMContentLoaded", function() {
-      if (!Scriptish.enabled) return;
-      if (Scriptish.isGreasemonkeyable(href)) {
-        // if the focused tab's window is loading, then attach menuCommaander
-        if (safeWin === gBrowser.selectedBrowser.contentWindow) {
-          gmBrowserUI.currentMenuCommander =
-              gmBrowserUI.getCommander(safeWin).attach();
-        }
+    // check if there are any modified scripts
+    if (tools.Scriptish_prefRoot.getValue('enableScriptRefreshing'))
+      this.config.updateModifiedScripts(function(scripts) (
+          self.injectScripts(scripts, href, safeWin, chromeWin)));
 
-        var scripts = self.initScripts(href, safeWin, chromeWin);
-        self.injectScripts(scripts, href, safeWin, chromeWin);
-        safeWin.addEventListener(
-            "pagehide", Scriptish_hitch(gmBrowserUI, "contentUnload"), false);
-      }
+    // if the focused tab's window is loading, then attach menuCommaander
+    if (safeWin === gBrowser.selectedBrowser.contentWindow)
+      gmBrowserUI.currentMenuCommander =
+          gmBrowserUI.getCommander(safeWin).attach();
 
-      // Show the scriptish install banner if the user is navigating to a .user.js
-      // file in a top-level tab.  If the file was previously cached it might have
-      // been given a number after .user, like gmScript.user-12.js
-      if (safeWin === safeWin.top && href.match(/\.user(?:-\d+)?\.js$/)
-          && !/text\/html/i.test(safeWin.document.contentType)) {
-        gmBrowserUI.showInstallBanner(
-            gBrowser.getBrowserForDocument(safeWin.document));
-      }
-    }, true);
+    // find matching scripts
+    let scripts = this.initScripts(href, safeWin, chromeWin);
+
+    if (scripts["document-end"].length || scripts["document-idle"].length) {
+      safeWin.addEventListener("DOMContentLoaded", function() {
+        if (!Scriptish.enabled || !Scriptish.isGreasemonkeyable(href)) return;
+
+        // inject @run-at document-idle scripts
+        if (scripts["document-idle"].length)
+          self.timer.setTimeout(function() {
+            self.injectScripts(
+                scripts["document-idle"], href, safeWin, chromeWin);
+          }, 0);
+
+        // inject @run-at document-end scripts
+        self.injectScripts(scripts["document-end"], href, safeWin, chromeWin);
+      }, true);
+    }
+
+    if (scripts["window-load"].length) {
+      safeWin.addEventListener("load", function() {
+        if (!Scriptish.enabled || !Scriptish.isGreasemonkeyable(href)) return;
+
+        // inject @run-at document-end scripts
+        self.injectScripts(scripts["window-load"], href, safeWin, chromeWin);
+      }, true);
+    }
+
+    // inject @run-at document-start scripts
+    self.injectScripts(scripts["document-start"], href, safeWin, chromeWin);
+
+    safeWin.addEventListener(
+        "pagehide", Scriptish_hitch(gmBrowserUI, "contentUnload"), false);
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
@@ -144,30 +174,26 @@ ScriptishService.prototype = {
   },
 
   initScripts: function(url, wrappedContentWin, chromeWin) {
-    var scripts;
-    var tools = {};
-    Cu.import("resource://scriptish/prefmanager.js", tools);
+    let scripts = {
+      "document-start": [],
+      "document-end": [],
+      "document-idle": [],
+      "window-load": []
+    };
 
-    // Todo: Try to implement this w/out global state.
-    this.config.wrappedContentWin = wrappedContentWin;
-    this.config.chromeWin = chromeWin;
-
-    if (tools.Scriptish_prefRoot.getValue('enableScriptRefreshing'))
-      this.config.updateModifiedScripts();
-
-    var basicCheck = function(script) {
-      return !script.delayInjection && script.enabled &&
-          !script.needsUninstall && script.matchesURL(url);
+    function basicChk(script) {
+      let chk = !script.delayInjection && script.enabled
+          && !script.needsUninstall && script.matchesURL(url);
+      if (chk) scripts[script.runAt].push(script);
+      return chk;
     };
 
     // is the window the top most window in the iframe stack?
-    if (wrappedContentWin !== wrappedContentWin.top) {
-      scripts = this.config.getMatchingScripts(function(script) {
-        return !script.noframes && basicCheck(script);
-      });
-    } else {
-      scripts = this.config.getMatchingScripts(basicCheck);
-    }
+    if (wrappedContentWin !== wrappedContentWin.top)
+      this.config.getMatchingScripts(function(script) (
+          !script.noframes && basicChk(script)));
+    else
+      this.config.getMatchingScripts(basicChk);
 
     return scripts;
   },

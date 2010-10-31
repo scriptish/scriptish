@@ -155,8 +155,8 @@ Config.prototype = {
     configStream.close();
   },
 
-  get scripts() { return this._scripts.concat(); },
-  getMatchingScripts: function(testFunc) { return this._scripts.filter(testFunc); },
+  get scripts() this._scripts.concat(),
+  getMatchingScripts: function(testFunc) this._scripts.filter(testFunc),
   injectScript: function(script) {
     var unsafeWin = this.wrappedContentWin.wrappedJSObject;
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
@@ -166,19 +166,19 @@ Config.prototype = {
       Services.scriptish.injectScripts([script], href, unsafeWin, this.chromeWin);
   },
 
-  updateModifiedScripts: function() {
+  updateModifiedScripts: function(scriptInjector) {
     // Find any updated scripts
     var scripts = this.getMatchingScripts(function(script) script.isModified());
-    if (0 == scripts.length) return;
+    if (0 >= scripts.length) return;
 
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           script.textContent,
           script._downloadURL && NetUtil.newURI(script._downloadURL),
           script);
-      script.updateFromNewScript(parsedScript);
+      script.updateFromNewScript(parsedScript, scriptInjector);
     }
 
     this._save();
   }
-};
+}
