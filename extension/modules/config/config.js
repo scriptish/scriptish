@@ -132,7 +132,9 @@ Config.prototype = {
   },
 
   uninstallScripts: function() {
-    for (var i = 0, script; script = this._scripts[i]; i++) {
+    let scripts = this._scripts;
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      let script = scripts[i];
       if (script.needsUninstall) {
         this._scripts.splice(i, 1);
         script.uninstallProcess();
