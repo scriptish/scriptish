@@ -152,24 +152,20 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
     if (!GM_apiLeakCheck("GM_xmlhttpRequest")) return;
-    return getXmlhttpRequester().contentStartRequest.apply(
-        getXmlhttpRequester(), arguments);
+    let xhr = getXmlhttpRequester();
+    return xhr.contentStartRequest.apply(xhr, arguments);
   }
 
   this.GM_registerMenuCommand = function GM_registerMenuCommand(
-      aCommandName,
-      aCommandFunc,
-      aAccelKey,
-      aAccelModifiers,
-      aAccessKey) {
+      aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
     if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
 
     aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
-      name: aCommandName,
+      name: aCmdName,
       accelKey: aAccelKey,
       accelModifiers: aAccelModifiers,
       accessKey: aAccessKey,
-      doCommand: aCommandFunc,
+      doCommand: aCmdFunc,
       window: aSafeWin});
   }
 
