@@ -741,6 +741,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
                 value));
           }
           continue;
+        case "defaulticon":
         case "icon":
         case "iconurl":
           try {
