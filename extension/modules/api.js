@@ -8,6 +8,7 @@ Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 
 const moduleFilename = Components.stack.filename;
 const NS_XHTML = "http://www.w3.org/1999/xhtml";
+const DOLITTLE = function(){};
 
 // Examines the stack to determine if an API should be callable.
 function GM_apiLeakCheck(apiName) {
@@ -165,8 +166,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return xhr.contentStartRequest.apply(xhr, arguments);
   }
 
-  if (aSafeWin != aSafeWin.top) {
-    this.GM_registerMenuCommand = function(){};
+  if (aSafeWin !== aSafeWin.top) {
+    this.GM_registerMenuCommand = DOLITTLE;
   } else {
     this.GM_registerMenuCommand = function GM_registerMenuCommand(
         aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
