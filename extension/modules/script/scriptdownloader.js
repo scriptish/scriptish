@@ -168,8 +168,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
     function(dep, file, channel) {
   Scriptish_log("Dependency Download complete " + dep.urlToDownload);
   try {
-    var httpChannel =
-      channel.QueryInterface(Ci.nsIHttpChannel);
+    var httpChannel = channel.QueryInterface(Ci.nsIHttpChannel);
   } catch(e) {
     var httpChannel = false;
   }
@@ -283,15 +282,15 @@ function PersistProgressListener(persist) {
 }
 
 PersistProgressListener.prototype.QueryInterface = function(aIID) {
- if (aIID.equals(Ci.nsIWebProgressListener)) return this;
- throw Components.results.NS_NOINTERFACE;
+  if (aIID.equals(Ci.nsIWebProgressListener)) return this;
+  throw Components.results.NS_NOINTERFACE;
 };
 
 // nsIWebProgressListener
 PersistProgressListener.prototype.onProgressChange =
-  PersistProgressListener.prototype.onLocationChange =
-    PersistProgressListener.prototype.onStatusChange =
-      PersistProgressListener.prototype.onSecurityChange = function(){};
+    PersistProgressListener.prototype.onLocationChange =
+        PersistProgressListener.prototype.onStatusChange =
+            PersistProgressListener.prototype.onSecurityChange = function(){};
 
 PersistProgressListener.prototype.onStateChange =
   function(aWebProgress, aRequest, aStateFlags, aStatus) {

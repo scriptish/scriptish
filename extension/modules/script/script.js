@@ -161,9 +161,9 @@ Script.prototype = {
   },
   removeSettings: function() {
     if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
-        // Remove saved preferences
-        Scriptish_prefRoot.remove(this.prefroot);
-      }
+      // Remove saved preferences
+      Scriptish_prefRoot.remove(this.prefroot);
+    }
   },
   removeFiles: function() {
     try {
@@ -569,7 +569,7 @@ Script.prototype = {
     if (this._downloadURL)
       scriptNode.setAttribute("downloadURL", this._downloadURL);
     if (this._updateURL)
-        scriptNode.setAttribute("updateURL", this._updateURL);
+      scriptNode.setAttribute("updateURL", this._updateURL);
 
     return scriptNode;
   },
@@ -600,7 +600,7 @@ Script.prototype = {
   updateHelper: function () {
     AddonManagerPrivate.callAddonListeners("onUninstalled", this);
     AddonManagerPrivate.callInstallListeners(
-            "onExternalInstall", null, this, null, false);
+        "onExternalInstall", null, this, null, false);
   },
   modificationProcess: function() {
     // notification that modification is complete
@@ -611,7 +611,6 @@ Script.prototype = {
 
     this.updateHelper();
     this._changed("modified", null, true);
-    
   }
 };
 
@@ -695,8 +694,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "delay":
           script.delay = value;
         case "updateurl":
-            if (value.match(/^https?:\/\//)) script._updateURL = value;
-            continue;
+          if (value.match(/^https?:\/\//)) script._updateURL = value;
+          continue;
         case "website":
         case "homepage":
         case "homepageurl":
