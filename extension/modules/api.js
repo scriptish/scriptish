@@ -10,8 +10,7 @@ const moduleFilename = Components.stack.filename;
 
 // Examines the stack to determine if an API should be callable.
 function GM_apiLeakCheck(apiName) {
-  var stack = Components.stack;
-  apiName = apiName;
+  let stack = Components.stack;
 
   do {
     // Valid stack frames for GM api calls are: native and js when coming from
@@ -27,7 +26,7 @@ function GM_apiLeakCheck(apiName) {
     }
   } while (stack = stack.caller);
   return true;
-};
+}
 
 function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
   // Pop back onto browser scope and call event handler.
