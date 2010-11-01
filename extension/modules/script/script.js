@@ -673,7 +673,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
     if (!value) {
       switch (header) {
         case "noframes":
-          script["_" + header] = true;
+          script["_noframes"] = true;
           continue;
       }
     } else {
@@ -696,6 +696,10 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           continue;
         case "updateurl":
           if (value.match(/^https?:\/\//)) script._updateURL = value;
+          continue;
+        case "injectframes":
+          if (value != "0") continue;
+          script["_noframes"] = true;
           continue;
         case "website":
         case "homepage":
