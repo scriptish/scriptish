@@ -697,6 +697,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "updateurl":
             if (value.match(/^https?:\/\//)) script._updateURL = value;
             continue;
+        case "website":
         case "homepage":
         case "homepageurl":
           script._homepageURL = value;
