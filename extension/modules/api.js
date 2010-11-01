@@ -165,17 +165,20 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return xhr.contentStartRequest.apply(xhr, arguments);
   }
 
-  this.GM_registerMenuCommand = function GM_registerMenuCommand(
-      aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
-    if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
-
-    aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
-      name: aCmdName,
-      accelKey: aAccelKey,
-      accelModifiers: aAccelModifiers,
-      accessKey: aAccessKey,
-      doCommand: aCmdFunc,
-      window: aSafeWin});
+  if (aSafeWin != aSafeWin.top) {
+    this.GM_registerMenuCommand = function(){};
+  } else {
+    this.GM_registerMenuCommand = function GM_registerMenuCommand(
+        aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
+      if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
+      aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
+        name: aCmdName,
+        accelKey: aAccelKey,
+        accelModifiers: aAccelModifiers,
+        accessKey: aAccessKey,
+        doCommand: aCmdFunc,
+        window: aSafeWin});
+    }
   }
 
   this.GM_worker = function GM_worker(resourceName) {
