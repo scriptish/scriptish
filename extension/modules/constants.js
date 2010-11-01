@@ -1,8 +1,9 @@
 var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
-    "Services", "Instances"];
+    "Services", "Instances", "timeout"];
 
 const {classes: Cc, interfaces: Ci} = Components;
+const ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
 var Services = {};
 (function(inc, tools){
   inc("resource://gre/modules/XPCOMUtils.jsm");
@@ -73,3 +74,8 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
     Services, "suhtml", "@mozilla.org/feed-unescapehtml;1",
     "nsIScriptableUnescapeHTML");
+
+function timeout(cb, delay) {
+  Instances.timer.initWithCallback(
+      { notify: function(){ cb.call(null) } }, delay, ONE_SHOT);
+}
