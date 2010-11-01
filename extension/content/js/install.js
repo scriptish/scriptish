@@ -24,7 +24,7 @@ var Scriptish_Install = {
     this.extraButton_.setAttribute("label",
         Scriptish_stringBundle("install.showscriptsource"));
     this.extraButton_.addEventListener(
-            "command", function() { Scriptish_Install.onShowSource() }, false);
+        "command", function() { Scriptish_Install.onShowSource() }, false);
 
     this.acceptButton_ = this.dialog_.getButton("accept");
     this.acceptButton_.setAttribute("label",
