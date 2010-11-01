@@ -367,7 +367,7 @@ function Scriptish_showPopup(aEvent) {
 
 /**
  * Handle clicking one of the items in the popup. Left-click toggles the enabled
- * state, rihgt-click opens in an editor.
+ * state, right-click opens in an editor.
  */
 function Scriptish_popupClicked(aEvt) {
   var script = aEvt.target.script;
