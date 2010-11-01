@@ -144,23 +144,17 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_openInTab = function GM_openInTab(aURL) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-
-    var newTab = aChromeWin.openNewTabWith(aURL, document);
-    // Source:
     // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
-    var newWindow = aChromeWin.gBrowser
-        .getBrowserForTab(newTab)
-        .docShell
-        .QueryInterface(Ci.nsIInterfaceRequestor)
-        .getInterface(Ci.nsIDOMWindow);
-    return newWindow;
-  };
+    return aChromeWin.gBrowser
+        .getBrowserForTab(aChromeWin.openNewTabWith(aURL, document)).docShell
+        .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
+  }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
     if (!GM_apiLeakCheck("GM_xmlhttpRequest")) return;
     return getXmlhttpRequester().contentStartRequest.apply(
         getXmlhttpRequester(), arguments);
-  };
+  }
 
   this.GM_registerMenuCommand = function GM_registerMenuCommand(
       aCommandName,
@@ -177,7 +171,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       accessKey: aAccessKey,
       doCommand: aCommandFunc,
       window: aSafeWin});
-  };
+  }
 
   this.GM_worker = function GM_worker(resourceName) {
     if (!GM_apiLeakCheck("GM_worker")) return;
@@ -187,7 +181,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     var worker = new tools.GM_worker(getResources().getDep(resourceName), aURL);
     workers.push(worker)
     return worker;
-  };
+  }
 
   this.GM_updatingEnabled = true;
 }
