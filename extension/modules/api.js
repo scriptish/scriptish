@@ -29,13 +29,13 @@ function GM_apiLeakCheck(apiName) {
   return true;
 };
 
-function GM_apiSafeCallback(aWindow, aThis, aCallback, aArgs) {
+function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
   // Pop back onto browser scope and call event handler.
   // Have to use nested function here instead of Scriptish_hitch because
   // otherwise aCallback.apply can point to window.setTimeout, which
   // can be abused to get increased privileges.
-  new XPCNativeWrapper(aWindow, "setTimeout()")
-      .setTimeout(function() { aCallback.apply(aThis, aArgs); }, 0);
+  new XPCNativeWrapper(aWin, "setTimeout()")
+      .setTimeout(function() { aCb.apply(aThis, aArgs); }, 0);
 }
 
 function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
