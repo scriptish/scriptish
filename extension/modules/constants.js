@@ -69,3 +69,7 @@ if (Cc["@mozilla.org/privatebrowsing;1"]) {
 XPCOMUtils.defineLazyServiceGetter(
     Services, "sis", "@mozilla.org/scriptableinputstream;1",
     "nsIScriptableInputStream");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Services, "suhtml", "@mozilla.org/feed-unescapehtml;1",
+    "nsIScriptableUnescapeHTML");

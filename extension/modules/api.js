@@ -7,6 +7,7 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 
 const moduleFilename = Components.stack.filename;
+const NS_XHTML = "http://www.w3.org/1999/xhtml";
 
 // Examines the stack to determine if an API should be callable.
 function GM_apiLeakCheck(apiName) {
@@ -93,6 +94,15 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       head.appendChild(style);
     }
     return style;
+  }
+
+  this.GM_safeHTMLParser = function GM_safeHTMLParser(aHTMLStr) {
+    if (!GM_apiLeakCheck("GM_safeHTMLParser")) return;
+    let doc = document.implementation.createDocument(NS_XHTML, "html", null);
+    let body = document.createElementNS(NS_XHTML, "body");
+    doc.documentElement.appendChild(body);
+    body.appendChild(Services.suhtml.parseFragment(aHTMLStr, false, null, body));
+    return doc;
   }
 
   this.GM_log = function GM_log() getLogger().log.apply(getLogger(), arguments)
