@@ -693,6 +693,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           continue;
         case "delay":
           script.delay = value;
+          continue;
         case "updateurl":
           if (value.match(/^https?:\/\//)) script._updateURL = value;
           continue;
