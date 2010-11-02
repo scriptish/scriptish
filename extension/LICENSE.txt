@@ -19,6 +19,6 @@ This library is released under the Creative Commons-License BY-SA
 http://creativecommons.org/licenses/by-sa/3.0/
 
 The uso_medium.png icon contained within Scriptish is the property of
-UserScripts.org http://userscripts.org
+UserScripts.org http://userscripts.org and is being used with their consent
 
 License copies can be found in the license directory.
