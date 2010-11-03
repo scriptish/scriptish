@@ -24,7 +24,7 @@ window.addEventListener("load", function() {
   tmp.checked = Scriptish_prefRoot.getValue("uninstallPreferences");
 
 
-  $("caption-downloadURL")
+  $("caption-update")
       .setAttribute("label", Scriptish_stringBundle("Update"));
   tmp = $("check-downloadURL");
   tmp.setAttribute("label", Scriptish_stringBundle("UseDownloadURL"));

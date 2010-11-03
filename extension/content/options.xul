@@ -22,7 +22,7 @@
     </groupbox>
     
     <groupbox>
-      <caption id="caption-downloadURL"/>
+      <caption id="caption-update"/>
       <checkbox id="check-downloadURL"/>
     </groupbox>
     
