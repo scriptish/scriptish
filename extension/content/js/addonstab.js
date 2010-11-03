@@ -2,6 +2,7 @@
 (function($){
 var Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/addonprovider.js");
 Cu.import("resource://scriptish/scriptish.js");
@@ -30,6 +31,17 @@ window.addEventListener("load", function() {
     isEnabled: addonIsInstalledScript,
     doCommand: function(aAddon) Scriptish_openFolder(aAddon._file)
   };
+  gViewController.commands.cmd_scriptish_userscript_dl_link = {
+    isEnabled: function(aAddon) {
+      if (!(addonIsInstalledScript(aAddon)
+              && Scriptish_prefRoot.getValue("enableCopyDownloadURL")
+              && aAddon.urlToDownload))
+        return false;
+      try {NetUtil.newURI(aAddon.urlToDownload)} catch (e) {return false;}
+      return true;
+    },
+    doCommand: function(aAddon) Services.cb.copyString(aAddon.urlToDownload)
+  };
 
   function hideUSMenuitem(aEvt) {
     aEvt.target.setAttribute("disabled",
@@ -44,6 +56,11 @@ window.addEventListener("load", function() {
   tmp = $("menuitem_scriptish_userscript_show");
   tmp.setAttribute("label", Scriptish_stringBundle("openfolder"));
   tmp.setAttribute("accesskey", Scriptish_stringBundle("openfolder.ak"));
+  tmp.addEventListener("popupshowing", hideUSMenuitem, false);
+  
+  tmp = $("menuitem_scriptish_userscript_dl_link");
+  tmp.setAttribute("label", Scriptish_stringBundle("copydownloadURL"));
+  tmp.setAttribute("accesskey", Scriptish_stringBundle("copydownloadURL.ak"));
   tmp.addEventListener("popupshowing", hideUSMenuitem, false);
 
   $("category-userscripts").setAttribute(

@@ -6,12 +6,15 @@
   <commandset id="viewCommandSet">
     <command id="cmd_scriptish_userscript_edit"/>
     <command id="cmd_scriptish_userscript_show"/>
+    <command id="cmd_scriptish_userscript_dl_link"/>
   </commandset>
   <menupopup id="addonitem-popup">
     <menuitem id="menuitem_scriptish_userscript_edit"
         command="cmd_scriptish_userscript_edit" type="userscript"/>
     <menuitem id="menuitem_scriptish_userscript_show"
         command="cmd_scriptish_userscript_show" type="userscript"/>
+    <menuitem id="menuitem_scriptish_userscript_dl_link"
+        command="cmd_scriptish_userscript_dl_link" type="userscript"/>
   </menupopup>
 
   <richlistbox id="categories">
