@@ -263,8 +263,8 @@ Script.prototype = {
   get jsversion() this._jsversion || maxJSVer,
   get runAt() this["_run-at"] || defaultRunAt,
   useDelayedInjectors: function() {
-    for (let [, injector] in Iterator(this.delayedInjectors)) injector(this);
     this.delayInjection = false;
+    for (let [, injector] in Iterator(this.delayedInjectors)) injector(this);
     this.delayedInjectors = [];
   },
 

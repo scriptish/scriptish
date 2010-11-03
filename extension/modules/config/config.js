@@ -169,18 +169,17 @@ Config.prototype = {
   },
 
   updateModifiedScripts: function(scriptInjector) {
-    // Find any updated scripts
-    var scripts = this.getMatchingScripts(function(script) script.isModified());
-    if (0 >= scripts.length) return;
-
-    for (var i = 0, script; script = scripts[i]; i++) {
-      var parsedScript = this.parse(
+    for (let [, script] in Iterator(this._scripts)) {
+      if (script.delayInjection) {
+        script.delayedInjectors.push(scriptInjector);
+        continue;
+      }
+      if (!script.isModified()) continue;
+      let parsedScript = this.parse(
           script.textContent,
-          script._downloadURL && NetUtil.newURI(script._downloadURL),
-          script);
+          script._downloadURL && NetUtil.newURI(script._downloadURL), script);
       script.updateFromNewScript(parsedScript, scriptInjector);
     }
-
     this._save();
   }
 }

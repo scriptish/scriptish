@@ -16,6 +16,16 @@ Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js");
 
 const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
+const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
+
+function isScriptRunnable(script, url, topWin) {
+  let chk = !(!topWin && script.noframes)
+      && !script.delayInjection
+      && script.enabled
+      && !script.needsUninstall
+      && script.matchesURL(url);
+  return chk;
+};
 
 function ScriptishService() {
   this.wrappedJSObject = this;
@@ -84,8 +94,35 @@ ScriptishService.prototype = {
 
     // check if there are any modified scripts
     if (tools.Scriptish_prefRoot.getValue('enableScriptRefreshing'))
-      this.config.updateModifiedScripts(function(scripts) (
-          self.injectScripts(scripts, href, safeWin, chromeWin)));
+      this.config.updateModifiedScripts(function(script) {
+        if (!Scriptish.enabled || !Scriptish.isGreasemonkeyable(href)
+            || !isScriptRunnable(script, href, safeWin === safeWin.top))
+          return;
+        let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
+        function inject() {self.injectScripts([script], href, safeWin, chromeWin)}
+        switch (script.runAt) {
+        case "document-end":
+          if (2 > rdyStateIdx) {
+            safeWin.addEventListener("DOMContentLoaded", inject, true);
+            return;
+          }
+          break;
+        case "document-idle":
+          if (2 > rdyStateIdx) {
+            safeWin.addEventListener(
+                "DOMContentLoaded", function() timeout(inject, 0), true);
+            return;
+          }
+          break;
+        case "window-load":
+          if (4 > rdyStateIdx) {
+            safeWin.addEventListener("load", inject, true);
+            return;
+          }
+          break;
+        }
+        inject();
+      });
 
     // if the focused tab's window is loading, then attach menuCommaander
     if (safeWin === gBrowser.selectedBrowser.contentWindow)
@@ -93,7 +130,7 @@ ScriptishService.prototype = {
           gmBrowserUI.getCommander(safeWin).attach();
 
     // find matching scripts
-    let scripts = this.initScripts(href, safeWin, chromeWin);
+    let scripts = this.initScripts(href, safeWin);
 
     if (scripts["document-end"].length || scripts["document-idle"].length) {
       safeWin.addEventListener("DOMContentLoaded", function() {
@@ -173,7 +210,7 @@ ScriptishService.prototype = {
     return file.parent.equals(tmpDir) && file.leafName != "newscript.user.js";
   },
 
-  initScripts: function(url, wrappedContentWin, chromeWin) {
+  initScripts: function(url, wrappedContentWin) {
     let scripts = {
       "document-start": [],
       "document-end": [],
@@ -181,20 +218,12 @@ ScriptishService.prototype = {
       "window-load": []
     };
 
-    function basicChk(script) {
-      let chk = !script.delayInjection && script.enabled
-          && !script.needsUninstall && script.matchesURL(url);
+    let isTopWin = wrappedContentWin === wrappedContentWin.top;
+    this.config.getMatchingScripts(function(script) {
+      let chk = isScriptRunnable(script, url, isTopWin);
       if (chk) scripts[script.runAt].push(script);
       return chk;
-    };
-
-    // is the window the top most window in the iframe stack?
-    if (wrappedContentWin !== wrappedContentWin.top)
-      this.config.getMatchingScripts(function(script) (
-          !script.noframes && basicChk(script)));
-    else
-      this.config.getMatchingScripts(basicChk);
-
+    });
     return scripts;
   },
 
