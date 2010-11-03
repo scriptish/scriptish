@@ -31,7 +31,7 @@ window.addEventListener("load", function() {
     isEnabled: addonIsInstalledScript,
     doCommand: function(aAddon) Scriptish_openFolder(aAddon._file)
   };
-  gViewController.commands.cmd_scriptish_userscript_link = {
+  gViewController.commands.cmd_scriptish_userscript_dl_link = {
     isEnabled: function(aAddon) addonIsInstalledScript(aAddon)
         && Scriptish_prefRoot.getValue("enableCopyDownloadURL"),
     doCommand: function(aAddon) Services.cb.copyString(aAddon.urlToDownload)
@@ -52,7 +52,7 @@ window.addEventListener("load", function() {
   tmp.setAttribute("accesskey", Scriptish_stringBundle("openfolder.ak"));
   tmp.addEventListener("popupshowing", hideUSMenuitem, false);
   
-  tmp = $("menuitem_scriptish_userscript_link");
+  tmp = $("menuitem_scriptish_userscript_dl_link");
   tmp.setAttribute("label", Scriptish_stringBundle("copydownloadURL"));
   tmp.setAttribute("accesskey", Scriptish_stringBundle("copydownloadURL.ak"));
   tmp.addEventListener("popupshowing", hideUSMenuitem, false);
