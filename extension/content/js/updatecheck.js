@@ -14,13 +14,14 @@
     // add toolbaritem to add-on bar
     var chromeWin = tools.Services.wm.getMostRecentWindow("navigator:browser");
     var gAddonBar = chromeWin.document.getElementById("addon-bar");
+    var addToBar = gAddonBar || chromeWin.getNavToolbox();
     if (chromeWin.document.getElementById("scriptish-tb-item")) return;
-    var addonSet = gAddonBar.getAttribute("currentset").split(",");
+    var addonSet = addToBar.getAttribute("currentset").split(",");
     addonSet.push("scriptish-tb-item");
     addonSet = addonSet.join(",");
-    gAddonBar.setAttribute("currentset", addonSet);
-    gAddonBar.currentSet = addonSet;
+    addToBar.setAttribute("currentset", addonSet);
+    addToBar.currentSet = addonSet;
     chromeWin.BrowserToolboxCustomizeDone(true);
-    chromeWin.document.persist("addon-bar", "currentset");
+    chromeWin.document.persist(addToBar.getAttribute("id"), "currentset");
   }
 })(Components.utils.import, {})

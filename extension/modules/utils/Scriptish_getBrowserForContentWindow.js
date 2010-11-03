@@ -5,7 +5,7 @@ function Scriptish_getBrowserForContentWindow(aWin) {
   var browserEnumerator = Services.wm.getEnumerator("navigator:browser");
   while (browserEnumerator.hasMoreElements()) {
     browserWin = browserEnumerator.getNext();
-    var tabBrowser = browserWin.gBrowser;
+    var tabBrowser = browserWin.getBrowser();
     var numTabs = tabBrowser.browsers.length;
 
     for (var i = 0; i < numTabs; i++) {
