@@ -32,8 +32,14 @@ window.addEventListener("load", function() {
     doCommand: function(aAddon) Scriptish_openFolder(aAddon._file)
   };
   gViewController.commands.cmd_scriptish_userscript_dl_link = {
-    isEnabled: function(aAddon) addonIsInstalledScript(aAddon)
-        && Scriptish_prefRoot.getValue("enableCopyDownloadURL"),
+    isEnabled: function(aAddon) {
+      if (!(addonIsInstalledScript(aAddon)
+              && Scriptish_prefRoot.getValue("enableCopyDownloadURL")
+              && aAddon.urlToDownload))
+        return false;
+      try {NetUtil.newURI(aAddon.urlToDownload)} catch (e) {return false;}
+      return true;
+    },
     doCommand: function(aAddon) Services.cb.copyString(aAddon.urlToDownload)
   };
 
