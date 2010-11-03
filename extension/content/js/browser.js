@@ -85,7 +85,8 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
     Scriptish_BrowserUI.tbBtnSetup();
   }
   gNavToolbox.addEventListener("DOMNodeInserted", tbBtnAdd, false);
-  $("addon-bar").addEventListener("DOMNodeInserted", tbBtnAdd, false);
+  let addonBar = $("addon-bar");
+  if (addonBar) addonBar.addEventListener("DOMNodeInserted", tbBtnAdd, false);
   if ($("scriptish-tb-item")) this.tbBtnSetup();
 
   // get all required DOM elements
