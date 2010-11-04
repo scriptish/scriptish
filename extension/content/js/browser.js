@@ -229,28 +229,6 @@ Scriptish_BrowserUI.reattachMenuCmds = function() {
 }
 
 /**
- * A content document has unloaded. We need to remove it's menuCommander to
- * avoid leaking it's memory.
- */
-Scriptish_BrowserUI.contentUnload = function(e) {
-  if (e.persisted || !this.menuCommanders || 0 == this.menuCommanders.length)
-    return;
-
-  let win = e.target.defaultView;
-
-  // not using getCommander because we need to splice the commanders array.
-  for (var i = 0, item; item = this.menuCommanders[i]; i++) {
-    if (item.win !== win) continue;
-
-    if (item.commander === this.currentMenuCommander)
-      this.currentMenuCommander = this.currentMenuCommander.detach();
-
-    this.menuCommanders.splice(i, 1);
-    break;
-  }
-}
-
-/**
  * The browser XUL has unloaded. We need to let go of the pref watcher so
  * that a non-existant window is not informed when scriptish enabled state
  * changes. And we need to let go of the progress listener so that we don't

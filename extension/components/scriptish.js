@@ -25,7 +25,7 @@ function isScriptRunnable(script, url, topWin) {
       && !script.needsUninstall
       && script.matchesURL(url);
   return chk;
-};
+}
 
 function ScriptishService() {
   this.wrappedJSObject = this;
@@ -90,16 +90,24 @@ ScriptishService.prototype = {
     let unsafeWin = safeWin.wrappedJSObject;
     let self = this;
     let tools = {};
+    let winClosed = false;
     Cu.import("resource://scriptish/prefmanager.js", tools);
 
+    function shouldNotRun() (
+      winClosed || !Scriptish.enabled || !Scriptish.isGreasemonkeyable(href));
+
     // check if there are any modified scripts
-    if (tools.Scriptish_prefRoot.getValue('enableScriptRefreshing'))
+    if (tools.Scriptish_prefRoot.getValue("enableScriptRefreshing"))
       this.config.updateModifiedScripts(function(script) {
-        if (!Scriptish.enabled || !Scriptish.isGreasemonkeyable(href)
+        if (shouldNotRun()
             || !isScriptRunnable(script, href, safeWin === safeWin.top))
           return;
+
         let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
-        function inject() {self.injectScripts([script], href, safeWin, chromeWin)}
+        function inject() {
+          if (shouldNotRun()) return;
+          self.injectScripts([script], href, safeWin, chromeWin);
+        }
         switch (script.runAt) {
         case "document-end":
           if (2 > rdyStateIdx) {
@@ -134,11 +142,12 @@ ScriptishService.prototype = {
 
     if (scripts["document-end"].length || scripts["document-idle"].length) {
       safeWin.addEventListener("DOMContentLoaded", function() {
-        if (!Scriptish.enabled || !Scriptish.isGreasemonkeyable(href)) return;
+        if (shouldNotRun()) return;
 
         // inject @run-at document-idle scripts
         if (scripts["document-idle"].length)
           self.timer.setTimeout(function() {
+            if (shouldNotRun()) return;
             self.injectScripts(
                 scripts["document-idle"], href, safeWin, chromeWin);
           }, 0);
@@ -150,9 +159,8 @@ ScriptishService.prototype = {
 
     if (scripts["window-load"].length) {
       safeWin.addEventListener("load", function() {
-        if (!Scriptish.enabled || !Scriptish.isGreasemonkeyable(href)) return;
-
-        // inject @run-at document-end scripts
+        if (shouldNotRun()) return;
+        // inject @run-at window-load scripts
         self.injectScripts(scripts["window-load"], href, safeWin, chromeWin);
       }, true);
     }
@@ -160,8 +168,21 @@ ScriptishService.prototype = {
     // inject @run-at document-start scripts
     self.injectScripts(scripts["document-start"], href, safeWin, chromeWin);
 
-    safeWin.addEventListener(
-        "pagehide", Scriptish_hitch(gmBrowserUI, "contentUnload"), false);
+    safeWin.addEventListener("pagehide", function(e) {
+      winClosed = true;
+      self.docUnload(safeWin, gmBrowserUI);
+    }, false);
+  },
+  docUnload: function(aWin, aGMBrowserUI) {
+    let menuCmders = aGMBrowserUI.menuCommanders;
+    if (!menuCmders || 0 == menuCmders.length) return;
+    let curMenuCmder = this.currentMenuCommander;
+    for (let [i, item] in Iterator(menuCmders)) {
+      if (item.win !== aWin) continue;
+      if (item.commander === curMenuCmder) curMenuCmder = curMenuCmder.detach();
+      menuCmders.splice(i, 1);
+      break;
+    }
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
