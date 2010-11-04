@@ -13,9 +13,9 @@
   if (0 >= tools.Services.vc.compare(currentVer, "0.1b5")) {
     // add toolbaritem to add-on bar
     var chromeWin = tools.Services.wm.getMostRecentWindow("navigator:browser");
-    var gAddonBar = chromeWin.document.getElementById("addon-bar");
-    var addToBar = gAddonBar || chromeWin.getNavToolbox();
-    if (chromeWin.document.getElementById("scriptish-tb-item")) return;
+    var addToBar = chromeWin.document.getElementById("addon-bar");
+    if (!addToBar || chromeWin.document.getElementById("scriptish-tb-item"))
+      return;
     var addonSet = addToBar.getAttribute("currentset").split(",");
     addonSet.push("scriptish-tb-item");
     addonSet = addonSet.join(",");
