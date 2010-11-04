@@ -264,6 +264,7 @@ Script.prototype = {
   get runAt() this["_run-at"] || defaultRunAt,
   useDelayedInjectors: function() {
     this.delayInjection = false;
+    this.updateHelper();
     for (let [, injector] in Iterator(this.delayedInjectors)) injector(this);
     this.delayedInjectors = [];
   },
