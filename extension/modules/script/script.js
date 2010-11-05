@@ -310,7 +310,7 @@ Script.prototype = {
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
-    var url = this.updateURL();
+    var url = this.updateURL;
     if (!url || !url.match(/^https:\/\//)) return false;
     return true;
   },
