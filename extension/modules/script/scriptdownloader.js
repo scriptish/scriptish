@@ -186,9 +186,14 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
-      this.errorInstallDependency(
-        dep, "Error! Server Returned : " + httpChannel.responseStatus + ": " +
-        httpChannel.responseStatusText);
+      // silently ignore failed download of icon
+      if (dep instanceof ScriptIcon) {
+        this.downloadNextDependency();
+      } else {
+        this.errorInstallDependency(
+          dep, "Error! Server Returned : " + httpChannel.responseStatus + ": " +
+          httpChannel.responseStatusText);
+      }
     }
   } else {
     dep.setDownloadedFile(file);
