@@ -2,7 +2,7 @@ var EXPORTED_SYMBOLS = ["ScriptInstall"];
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/logging.js");
 
-// Implements the AddonInstall interface https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonInstall
+// Implements https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonInstall
 function ScriptInstall(aScript) {
   this._listeners = [];
   this._script = aScript;

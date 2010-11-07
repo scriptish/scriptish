@@ -26,7 +26,7 @@ const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
 const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
-const defaultRunAt = runAtValues[1]
+const defaultRunAt = runAtValues[1];
 
 function noUpdateFound(aListener) {
   aListener.onNoUpdateAvailable(this);
@@ -40,7 +40,7 @@ function updateFound(aListener) {
   if (aListener.onUpdateFinished) aListener.onUpdateFinished(this);
 }
 
-// Implements Addon https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
+// Implements https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
 function Script(config) {
   this._config = config;
   this._observers = [];
