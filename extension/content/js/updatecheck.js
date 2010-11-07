@@ -23,5 +23,6 @@
     addToBar.currentSet = addonSet;
     chromeWin.BrowserToolboxCustomizeDone(true);
     chromeWin.document.persist(addToBar.getAttribute("id"), "currentset");
+    if ("addon-bar" == addToBar.getAttribute("id")) addToBar.collapsed = false;
   }
 })(Components.utils.import, {})
