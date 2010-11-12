@@ -395,7 +395,7 @@ Script.prototype = {
 
   fileExists: function() {
     try {
-      return this._basedirFile.exists() || this._file.exists();
+      return this._file.exists();
     } catch (e) {
       return false;
     }
