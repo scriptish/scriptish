@@ -173,6 +173,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
     var httpChannel = false;
   }
 
+  let errMsgStart = "Error loading dependency " + dep.urlToDownload + "\n";
   if (httpChannel) {
     if (httpChannel.requestSucceeded) {
       if (this.updateScript) {
@@ -181,18 +182,20 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       }
 
       if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType))
-        this.errorInstallDependency(dep, "Error! @icon is not a image MIME type");
+        Scriptish_logError(new Error(
+            errMsgStart + "Error! @icon is not a image MIME type"));
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
-      // silently ignore failed download of icon
+      let errMsg = "Error! Server Returned : " + httpChannel.responseStatus
+          + ": " + httpChannel.responseStatusText;
+
       if (dep instanceof ScriptIcon) {
+        Scriptish_logError(new Error(errMsgStart + errMsg));
         this.downloadNextDependency();
       } else {
-        this.errorInstallDependency(
-          dep, "Error! Server Returned : " + httpChannel.responseStatus + ": " +
-          httpChannel.responseStatusText);
+        this.errorInstallDependency(dep, errMsg);
       }
     }
   } else {
