@@ -133,9 +133,12 @@ ScriptishService.prototype = {
       });
 
     // if the focused tab's window is loading, then attach menuCommaander
-    if (safeWin === gBrowser.selectedBrowser.contentWindow)
+    if (safeWin === gBrowser.selectedBrowser.contentWindow) {
+      if (gmBrowserUI.currentMenuCommander)
+        gmBrowserUI.currentMenuCommander.detach();
       gmBrowserUI.currentMenuCommander =
           gmBrowserUI.getCommander(safeWin).attach();
+    }
 
     // find matching scripts
     let scripts = this.initScripts(href, safeWin);
