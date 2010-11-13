@@ -753,8 +753,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           try {
             script.icon.setIcon(value, aURI);
           } catch (e) {
-            if (!aUpdateScript) throw e;
-            script._dependFail = true;
+            if (aUpdateScript) script._dependFail = true;
+            else Scriptish_logError(e);
             continue;
           }
           script._rawMeta += header + '\0' + value + '\0';
