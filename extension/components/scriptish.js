@@ -19,6 +19,10 @@ const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
 
 function isScriptRunnable(script, url, topWin) {
+  if (!script.fileExists()) {
+    script.uninstall();
+    return false;
+  }
   let chk = !(!topWin && script.noframes)
       && !script.delayInjection
       && script.enabled
