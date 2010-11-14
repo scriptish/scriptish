@@ -173,6 +173,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
     var httpChannel = false;
   }
 
+  let errMsgStart = "Error loading dependency " + dep.urlToDownload + "\n";
   if (httpChannel) {
     if (httpChannel.requestSucceeded) {
       if (this.updateScript) {
@@ -180,15 +181,29 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
         dep.updateScript = true;
       }
 
-      if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType))
-        this.errorInstallDependency(dep, "Error! @icon is not a image MIME type");
+      if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType)) {
+        file.remove(false);
+        dep._script.resetIcon();
+        Scriptish_logError(new Error(
+            errMsgStart + "Error! @icon is not a image MIME type"));
+        this.downloadNextDependency();
+        return;
+      }
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
-      this.errorInstallDependency(
-        dep, "Error! Server Returned : " + httpChannel.responseStatus + ": " +
-        httpChannel.responseStatusText);
+      let errMsg = "Error! Server Returned : " + httpChannel.responseStatus
+          + ": " + httpChannel.responseStatusText;
+
+      if (dep instanceof ScriptIcon) {
+        file.remove(false);
+        dep._script.resetIcon();
+        Scriptish_logError(new Error(errMsgStart + errMsg));
+        this.downloadNextDependency();
+      } else {
+        this.errorInstallDependency(dep, errMsg);
+      }
     }
   } else {
     dep.setDownloadedFile(file);
@@ -246,7 +261,8 @@ ScriptDownloader.prototype.installScript = function() {
   return true;
 }
 ScriptDownloader.prototype.cleanupTempFiles = function() {
-  for (var i = 0, file; file = this.tempFiles_[i++];) file.remove(false);
+  for (let [, file] in Iterator(this.tempFiles_))
+    file.exists() && file.remove(false);
 }
 ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
   if (!aTimer)

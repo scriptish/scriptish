@@ -148,6 +148,8 @@ Script.prototype = {
   },
   checkRemoteVersionErr: function(aCallback) aCallback(this, false),
 
+  resetIcon: function() this._icon = new ScriptIcon(this),
+
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
     this.needsUninstall = true;
@@ -753,8 +755,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           try {
             script.icon.setIcon(value, aURI);
           } catch (e) {
-            if (!aUpdateScript) throw e;
-            script._dependFail = true;
+            if (aUpdateScript) script._dependFail = true;
+            else Scriptish_logError(e);
             continue;
           }
           script._rawMeta += header + '\0' + value + '\0';

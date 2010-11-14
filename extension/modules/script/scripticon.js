@@ -1,5 +1,6 @@
 var EXPORTED_SYMBOLS = ["ScriptIcon"];
 Components.utils.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/logging.js");
 Components.utils.import("resource://scriptish/script/scriptdependency.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
