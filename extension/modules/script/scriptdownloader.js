@@ -118,14 +118,20 @@ ScriptDownloader.prototype.fetchDependencies = function() {
   if (this.script.icon.hasDownloadURL())
     deps.push(this.script.icon);
 
-  for (var i = 0; i < deps.length; i++) {
-    var dep = deps[i];
+  for (let [, dep] in Iterator(deps)) {
     if (this.checkDependencyURL(dep.urlToDownload)) {
       this.depQueue_.push(dep);
     } else {
-      this.errorInstallDependency(dep,
-        "SecurityException: Request to local and chrome url's is forbidden");
-      return;
+      let errMsg =
+          "SecurityException: Request to local and chrome url's is forbidden";
+      if (dep instanceof ScriptIcon) {
+        dep._script.resetIcon();
+        Scriptish_logError(new Error(
+            "Error loading dependency " + dep.urlToDownload + "\n" + errMsg));
+      } else {
+        this.errorInstallDependency(dep, errMsg);
+        return;
+      }
     }
   }
   this.downloadNextDependency();
