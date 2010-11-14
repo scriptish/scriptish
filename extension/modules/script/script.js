@@ -148,6 +148,8 @@ Script.prototype = {
   },
   checkRemoteVersionErr: function(aCallback) aCallback(this, false),
 
+  resetIcon: function() this._icon = new ScriptIcon(this),
+
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
     this.needsUninstall = true;

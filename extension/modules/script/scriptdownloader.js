@@ -181,9 +181,14 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
         dep.updateScript = true;
       }
 
-      if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType))
+      if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType)) {
+        file.remove(false);
+        dep._script.resetIcon();
         Scriptish_logError(new Error(
             errMsgStart + "Error! @icon is not a image MIME type"));
+        this.downloadNextDependency();
+        return;
+      }
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
@@ -192,6 +197,8 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
           + ": " + httpChannel.responseStatusText;
 
       if (dep instanceof ScriptIcon) {
+        file.remove(false);
+        dep._script.resetIcon();
         Scriptish_logError(new Error(errMsgStart + errMsg));
         this.downloadNextDependency();
       } else {
@@ -254,7 +261,8 @@ ScriptDownloader.prototype.installScript = function() {
   return true;
 }
 ScriptDownloader.prototype.cleanupTempFiles = function() {
-  for (var i = 0, file; file = this.tempFiles_[i++];) file.remove(false);
+  for (let [, file] in Iterator(this.tempFiles_))
+    file.exists() && file.remove(false);
 }
 ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
   if (!aTimer)
