@@ -2,12 +2,20 @@ var EXPORTED_SYMBOLS = ["Scriptish_BrowserUIM"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_setEnabled.js");
-Cu.import("resource://scriptish/utils/Scriptish_getEnabled.js");
+Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 
+const ICON_16_ON = "chrome://scriptish/skin/icon_16.png";
+const ICON_16_OFF = "chrome://scriptish/skin/icon_16_disabled.png";
+const ICON_24_ON = "chrome://scriptish/skin/icon_24.png";
+const ICON_24_OFF = "chrome://scriptish/skin/icon_24_disabled.png";
+const ICON_32_ON = "chrome://scriptish/skin/icon_medium.png";
+const ICON_32_OFF = "chrome://scriptish/skin/icon_32_disabled.png";
+
 function Scriptish_BrowserUIM(aWin, aBrowserUI) {
+  this.$ = function(aID) aWin.document.getElementById(aID);
   this._win = aWin;
   this._browserUI = aBrowserUI;
 
@@ -16,26 +24,31 @@ function Scriptish_BrowserUIM(aWin, aBrowserUI) {
 }
 Scriptish_BrowserUIM.prototype = {
   onIconClick: function(aEvt) {
-    if (!aEvt.button)
-      this.onToggleStatus();
-    else if (aEvt.button == 1)
-      Scriptish_openManager();
+    if ("menu-button" == aEvt.originalTarget.type) return;
+    switch (aEvt.button) {
+      case 0:
+        this.onToggleStatus();
+        break;
+      case 1:
+        Scriptish_openManager();
+        break;
+    }
   },
   onToggleStatus: function() {
-    Scriptish_setEnabled(!Scriptish_getEnabled());
+    Scriptish.enabled = !Scriptish.enabled;
   },
   refreshStatus: function() {
-    var img = this._win.document.getElementById("scriptish-status-image");
-    var menu = this._win.document.getElementById("scriptish_general_menu");
+    var tbImg = this.$("scriptish-button");
+    var menu = this.$("scriptish_general_menu");
 
-    if (Scriptish_getEnabled()) {
-      img.setAttribute("src", "chrome://scriptish/skin/icon_small.png");
-      menu.setAttribute("image", "chrome://scriptish/skin/icon_small.png");
-      img.tooltipText = Scriptish_stringBundle("tooltip.enabled");
+    if (Scriptish.enabled) {
+      menu.setAttribute("image", ICON_16_ON);
+      tbImg && tbImg.setAttribute(
+          "image", "seamonkey" == Scriptish.APP ? ICON_32_ON : ICON_24_ON);
     } else {
-      img.setAttribute("src", "chrome://scriptish/skin/icon_small_disabled.png");
-      menu.setAttribute("src", "chrome://scriptish/skin/icon_small_disabled.png");
-      img.tooltipText = Scriptish_stringBundle("tooltip.disabled");
+      menu.setAttribute("src", ICON_16_OFF);
+      tbImg && tbImg.setAttribute(
+          "image", "seamonkey" == Scriptish.APP ? ICON_32_OFF : ICON_24_OFF);
     }
   },
   openChromeWindow: function(aURL) {

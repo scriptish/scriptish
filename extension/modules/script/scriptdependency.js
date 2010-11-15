@@ -1,9 +1,9 @@
 var EXPORTED_SYMBOLS = ["ScriptDependency"];
-(function(import) {
-import("resource://scriptish/constants.js");
-import("resource://scriptish/logging.js");
-import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-import("resource://scriptish/utils/Scriptish_getContents.js");
+(function(inc) {
+inc("resource://scriptish/constants.js");
+inc("resource://scriptish/logging.js");
+inc("resource://scriptish/utils/Scriptish_getUriFromFile.js");
+inc("resource://scriptish/utils/Scriptish_getContents.js");
 })(Components.utils.import)
 
 function ScriptDependency(aScript) {

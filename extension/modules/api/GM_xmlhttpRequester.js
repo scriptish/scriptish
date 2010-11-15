@@ -1,9 +1,9 @@
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
-(function(import){
-  import("resource://scriptish/constants.js");
-  import("resource://scriptish/logging.js");
-  import("resource://scriptish/utils/Scriptish_hitch.js");
-  import("resource://scriptish/api.js");
+(function(inc){
+  inc("resource://scriptish/constants.js");
+  inc("resource://scriptish/logging.js");
+  inc("resource://scriptish/utils/Scriptish_hitch.js");
+  inc("resource://scriptish/api.js");
 })(Components.utils.import)
 
 function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
@@ -38,8 +38,8 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     case "http":
     case "https":
     case "ftp":
-        var req = new this.chromeWindow.XMLHttpRequest();
-        Scriptish_hitch(this, "chromeStartRequest", url, details, req)();
+      var req = new this.chromeWindow.XMLHttpRequest();
+      Scriptish_hitch(this, "chromeStartRequest", url, details, req)();
       break;
     default:
       throw new Error("Disallowed scheme in URL: " + details.url);
@@ -57,7 +57,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
 // this function is intended to be called in chrome's security context, so
 // that it can access other domains without security warning
 GM_xmlhttpRequester.prototype.chromeStartRequest =
-function(safeUrl, details, req) {
+    function(safeUrl, details, req) {
   Scriptish_log("> GM_xmlhttpRequest.chromeStartRequest");
 
   this.setupRequestEvent(this.unsafeContentWin, req, "onload", details);

@@ -1,25 +1,22 @@
 var EXPORTED_SYMBOLS = ["ScriptInstall"];
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/logging.js");
-Components.utils.import("resource://scriptish/third-party/Timer.js");
 
-const gTimer = new Timer();
-
-// Implements the AddonInstall interface https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonInstall
+// Implements https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonInstall
 function ScriptInstall(aScript) {
   this._listeners = [];
   this._script = aScript;
 }
 ScriptInstall.prototype = {
   changed: function(aType) {
-    var self = this;
+    let self = this;
     switch (aType) {
       case "DownloadStarted":
         this.state = AddonManager.STATE_DOWNLOADING;
         break;
       case "DownloadEnded":
         this.state = AddonManager.STATE_DOWNLOADED;
-        gTimer.setTimeout(function() {
+        timeout(function() {
           self.changed("InstallStarted");
           self.scriptDownloader.installScript();
         }, 0)

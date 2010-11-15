@@ -6,20 +6,6 @@
       <RDF:Seq>
         <RDF:li>
           <RDF:Description>
-            <em:version>0.1b4</em:version>
-            <em:targetApplication>
-              <RDF:Description>
-                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-                <em:minVersion>4.0b5pre</em:minVersion>
-                <em:maxVersion>4.0.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b4.xpi</em:updateLink>
-                <em:updateHash>sha1:df200fe64284b5aebd3d0f6a836294a5a03c8faa</em:updateHash>
-              </RDF:Description>
-            </em:targetApplication>
-          </RDF:Description>
-        </RDF:li>
-        <RDF:li>
-          <RDF:Description>
             <em:version>0.1b5</em:version>
             <em:targetApplication>
               <RDF:Description>
@@ -33,10 +19,24 @@
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
-                <em:minVersion>4.0b5pre</em:minVersion>
-                <em:maxVersion>4.0.*</em:maxVersion>
+                <em:minVersion>2.1a3</em:minVersion>
+                <em:maxVersion>2.1.*</em:maxVersion>
                 <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b5.xpi</em:updateLink>
                 <em:updateHash>sha1:c378b6213091dd2f5e97ab1d3176b5ba6468755d</em:updateHash>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0.1b6</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>4.0b5pre</em:minVersion>
+                <em:maxVersion>4.0.*</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b6.xpi</em:updateLink>
+                <em:updateHash>sha1:fb5d5f7a19a55ea4f1265921f5bea6586f657938</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>
@@ -44,6 +44,6 @@
       </RDF:Seq>
     </em:updates>
 
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAJeYcvo7DY2EmJI71nUeq8AgAYYEd0oWeCov/2vMk5kKfhQXmglpZFSsjhU7GZJVshGdnaZJrDFHObwj6a3BGLK0s/EfVgKUZtEDfB0M+pJc+Tp71Ml6dIZzvgCk9Kwt4V79VX5vY7Xh85GiE2j1ObEaCRFP6oKxq6e6zzuxkHZP</em:signature>
+    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAImXOXuoiSFIwNA4QyYRjS0us7G8hv6htagGJfqZsi4V4NJ/rDirrqxhl8fEouNAlRKUUxI44S0+zbwJ490ScaO6Dz60vB8ODsg/wFbtByylpbb/UJfcccs3FceCHMrZzBfjhmwSv4RB/mH6hT/EAUcpE8kCT3zaOI4kWRGEQy1D</em:signature>
   </RDF:Description>
 </RDF:RDF>

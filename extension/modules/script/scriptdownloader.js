@@ -4,7 +4,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/script/scripticon.js");
-Cu.import("resource://scriptish/utils/Scriptish_config.js");
+Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
@@ -72,7 +72,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     }
 
     var source = this.req_.responseText;
-    this.script = Scriptish_config.parse(source, this.uri_);
+    this.script = Scriptish.config.parse(source, this.uri_);
 
     var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
@@ -118,14 +118,20 @@ ScriptDownloader.prototype.fetchDependencies = function() {
   if (this.script.icon.hasDownloadURL())
     deps.push(this.script.icon);
 
-  for (var i = 0; i < deps.length; i++) {
-    var dep = deps[i];
+  for (let [, dep] in Iterator(deps)) {
     if (this.checkDependencyURL(dep.urlToDownload)) {
       this.depQueue_.push(dep);
     } else {
-      this.errorInstallDependency(dep,
-        "SecurityException: Request to local and chrome url's is forbidden");
-      return;
+      let errMsg =
+          "SecurityException: Request to local and chrome url's is forbidden";
+      if (dep instanceof ScriptIcon) {
+        dep._script.resetIcon();
+        Scriptish_logError(new Error(
+            "Error loading dependency " + dep.urlToDownload + "\n" + errMsg));
+      } else {
+        this.errorInstallDependency(dep, errMsg);
+        return;
+      }
     }
   }
   this.downloadNextDependency();
@@ -168,12 +174,12 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
     function(dep, file, channel) {
   Scriptish_log("Dependency Download complete " + dep.urlToDownload);
   try {
-    var httpChannel =
-      channel.QueryInterface(Ci.nsIHttpChannel);
+    var httpChannel = channel.QueryInterface(Ci.nsIHttpChannel);
   } catch(e) {
     var httpChannel = false;
   }
 
+  let errMsgStart = "Error loading dependency " + dep.urlToDownload + "\n";
   if (httpChannel) {
     if (httpChannel.requestSucceeded) {
       if (this.updateScript) {
@@ -181,15 +187,29 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
         dep.updateScript = true;
       }
 
-      if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType))
-        this.errorInstallDependency(dep, "Error! @icon is not a image MIME type");
+      if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType)) {
+        file.remove(false);
+        dep._script.resetIcon();
+        Scriptish_logError(new Error(
+            errMsgStart + "Error! @icon is not a image MIME type"));
+        this.downloadNextDependency();
+        return;
+      }
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
-      this.errorInstallDependency(
-        dep, "Error! Server Returned : " + httpChannel.responseStatus + ": " +
-        httpChannel.responseStatusText);
+      let errMsg = "Error! Server Returned : " + httpChannel.responseStatus
+          + ": " + httpChannel.responseStatusText;
+
+      if (dep instanceof ScriptIcon) {
+        file.remove(false);
+        dep._script.resetIcon();
+        Scriptish_logError(new Error(errMsgStart + errMsg));
+        this.downloadNextDependency();
+      } else {
+        this.errorInstallDependency(dep, errMsg);
+      }
     }
   } else {
     dep.setDownloadedFile(file);
@@ -214,8 +234,7 @@ ScriptDownloader.prototype.checkDependencyURL = function(url) {
 ScriptDownloader.prototype.finishInstall = function() {
   if (this.updateScript) {
     // Inject the script now that we have the new dependencies
-    this.script.delayInjection = false;
-    this.script._config.injectScript(this.script);
+    this.script.useDelayedInjectors();
 
     // Save new values to config.xml
     this.script._config._save();
@@ -241,14 +260,15 @@ ScriptDownloader.prototype.installScript = function() {
     this.scriptInstaller.changed("InstallEnded");
   } else if (this.dependenciesLoaded_) {
     var script = this.script;
-    Scriptish_config.install(script);
+    Scriptish.config.install(script);
   } else {
     this.installOnCompletion_ = true;
   }
   return true;
 }
 ScriptDownloader.prototype.cleanupTempFiles = function() {
-  for (var i = 0, file; file = this.tempFiles_[i++];) file.remove(false);
+  for (let [, file] in Iterator(this.tempFiles_))
+    file.exists() && file.remove(false);
 }
 ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
   if (!aTimer)
@@ -284,15 +304,15 @@ function PersistProgressListener(persist) {
 }
 
 PersistProgressListener.prototype.QueryInterface = function(aIID) {
- if (aIID.equals(Ci.nsIWebProgressListener)) return this;
- throw Components.results.NS_NOINTERFACE;
+  if (aIID.equals(Ci.nsIWebProgressListener)) return this;
+  throw Components.results.NS_NOINTERFACE;
 };
 
 // nsIWebProgressListener
 PersistProgressListener.prototype.onProgressChange =
-  PersistProgressListener.prototype.onLocationChange =
-    PersistProgressListener.prototype.onStatusChange =
-      PersistProgressListener.prototype.onSecurityChange = function(){};
+    PersistProgressListener.prototype.onLocationChange =
+        PersistProgressListener.prototype.onStatusChange =
+            PersistProgressListener.prototype.onSecurityChange = function(){};
 
 PersistProgressListener.prototype.onStateChange =
   function(aWebProgress, aRequest, aStateFlags, aStatus) {

@@ -1,1 +1,6 @@
+#scriptish-button {
+-moz-image-region: rect(0pt, 180px, 20px, 160px);
+-moz-box-orient: horizontal;
+}
+
 #gm-status {width: 16px;}

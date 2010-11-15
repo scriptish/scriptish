@@ -25,6 +25,8 @@ const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
+const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
+const defaultRunAt = runAtValues[1];
 
 function noUpdateFound(aListener) {
   aListener.onNoUpdateAvailable(this);
@@ -38,7 +40,7 @@ function updateFound(aListener) {
   if (aListener.onUpdateFinished) aListener.onUpdateFinished(this);
 }
 
-// Implements Addon https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
+// Implements https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
 function Script(config) {
   this._config = config;
   this._observers = [];
@@ -68,23 +70,25 @@ function Script(config) {
   this._matches = [];
   this._includeRegExps = [];
   this._excludeRegExps = [];
+  this._delay = null;
   this._requires = [];
   this._resources = [];
   this._screenshots = [];
   this._noframes = false;
   this._dependFail = false
   this.delayInjection = false;
+  this.delayedInjectors = [];
   this._rawMeta = null;
   this._jsversion = null;
+  this["_run-at"] = null;
 }
-
 Script.prototype = {
   isCompatible: true,
   blocklistState: 0,
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
   applyBackgroundUpdates: false,
-  get isActive() !this.appDisabled || !this.userDisabled,
+  get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
   get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
@@ -144,6 +148,8 @@ Script.prototype = {
   },
   checkRemoteVersionErr: function(aCallback) aCallback(this, false),
 
+  resetIcon: function() this._icon = new ScriptIcon(this),
+
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
     this.needsUninstall = true;
@@ -157,9 +163,9 @@ Script.prototype = {
   },
   removeSettings: function() {
     if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
-        // Remove saved preferences
-        Scriptish_prefRoot.remove(this.prefroot);
-      }
+      // Remove saved preferences
+      Scriptish_prefRoot.remove(this.prefroot);
+    }
   },
   removeFiles: function() {
     try {
@@ -233,6 +239,11 @@ Script.prototype = {
   get iconURL() this._icon.fileURL,
   get enabled() this._enabled,
   set enabled(enabled) { this.userDisabled = !enabled; },
+  get delay() this._delay,
+  set delay(aNum) {
+    let val = parseInt(aNum, 10);
+    this._delay = ((val || val === 0) && val > 0) ? val : null;
+  },
 
   get includes() this._includes.concat(),
   get excludes() this._excludes.concat(),
@@ -252,6 +263,13 @@ Script.prototype = {
   get resources() this._resources.concat(),
   get noframes() this._noframes,
   get jsversion() this._jsversion || maxJSVer,
+  get runAt() this["_run-at"] || defaultRunAt,
+  useDelayedInjectors: function() {
+    this.delayInjection = false;
+    this.updateHelper();
+    for (let [, injector] in Iterator(this.delayedInjectors)) injector(this);
+    this.delayedInjectors = [];
+  },
 
   get homepageURL() {
     var url = this._homepageURL;
@@ -294,7 +312,7 @@ Script.prototype = {
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
-    var url = this.updateURL();
+    var url = this.updateURL;
     if (!url || !url.match(/^https:\/\//)) return false;
     return true;
   },
@@ -379,7 +397,7 @@ Script.prototype = {
 
   fileExists: function() {
     try {
-      return this._basedirFile.exists() || this._file.exists();
+      return this._file.exists();
     } catch (e) {
       return false;
     }
@@ -387,7 +405,7 @@ Script.prototype = {
 
   replaceScriptWith: function(aNewScript) {
     this.removeFiles();
-    this.updateFromNewScript(aNewScript.installProcess(), true);
+    this.updateFromNewScript(aNewScript.installProcess());
 
     // notification that update is complete
     var msg = "'" + this.name;
@@ -397,7 +415,7 @@ Script.prototype = {
     this.updateHelper();
     this._changed("update");
   },
-  updateFromNewScript: function(newScript, aDL) {
+  updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
 
@@ -408,6 +426,7 @@ Script.prototype = {
     this._includeRegExps = newScript._includeRegExps;
     this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
+    this._delay = newScript._delay;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
@@ -417,10 +436,11 @@ Script.prototype = {
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
+    this["_run-at"] = newScript.runAt;
     this._noframes = newScript._noframes;
     this._version = newScript._version;
 
-    if (aDL) {
+    if (!scriptInjector) {
       this._file = newScript._file;
       this._basedir = newScript._basedir;
       this._filename = newScript._filename;
@@ -448,6 +468,7 @@ Script.prototype = {
 
         // This flag needs to be set now so the scriptDownloader can turn it off
         this.delayInjection = true;
+        this.delayedInjectors.push(scriptInjector);
 
         Cu.import("resource://scriptish/config/configdownloader.js", tools);
         // Redownload dependencies.
@@ -537,19 +558,21 @@ Script.prototype = {
     scriptNode.setAttribute("author", this._author);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
+    scriptNode.setAttribute("delay", this._delay);
     scriptNode.setAttribute("icon", this.icon.filename);
     scriptNode.setAttribute("enabled", this._enabled);
     scriptNode.setAttribute("basedir", this._basedir);
     scriptNode.setAttribute("modified", this._modified);
     scriptNode.setAttribute("dependhash", this._dependhash);
     if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
+    if (this["_run-at"]) scriptNode.setAttribute("run-at", this["_run-at"]);
 
     if (this.homepageURL)
       scriptNode.setAttribute("homepageURL", this.homepageURL);
     if (this._downloadURL)
       scriptNode.setAttribute("downloadURL", this._downloadURL);
     if (this._updateURL)
-        scriptNode.setAttribute("updateURL", this._updateURL);
+      scriptNode.setAttribute("updateURL", this._updateURL);
 
     return scriptNode;
   },
@@ -580,7 +603,7 @@ Script.prototype = {
   updateHelper: function () {
     AddonManagerPrivate.callAddonListeners("onUninstalled", this);
     AddonManagerPrivate.callInstallListeners(
-            "onExternalInstall", null, this, null, false);
+        "onExternalInstall", null, this, null, false);
   },
   modificationProcess: function() {
     // notification that modification is complete
@@ -591,7 +614,6 @@ Script.prototype = {
 
     this.updateHelper();
     this._changed("modified", null, true);
-    
   }
 };
 
@@ -648,131 +670,146 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
 
     var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
     if (match === null) continue;
-
     var header = match[1].toLowerCase();
-    var value = (match[2]+"").trimRight();
+    var value = match[2];
 
-    switch (header) {
-      case "id":
-        value && (script.id = value);
-        continue;
-      case "author":
-        !script.author && value && (script.author = value);
-        continue;
-      case "name":
-      case "namespace":
-      case "description":
-      case "version":
-        value && (script["_" + header] = value);
-        continue;
-      case "updateurl":
+    if (!value) {
+      switch (header) {
+        case "noframes":
+          script["_noframes"] = true;
+          continue;
+      }
+    } else {
+      value = value.trimRight();
+      switch (header) {
+        case "id":
+          script.id = value;
+          continue;
+        case "author":
+          !script.author && (script.author = value);
+          continue;
+        case "name":
+        case "namespace":
+        case "description":
+        case "version":
+          script["_" + header] = value;
+          continue;
+        case "delay":
+          script.delay = value;
+          continue;
+        case "updateurl":
           if (value.match(/^https?:\/\//)) script._updateURL = value;
           continue;
-      case "homepage":
-      case "homepageurl":
-        value && (script._homepageURL = value);
-        continue;
-      case "jsversion":
-        var jsVerIndx = JSVersions.indexOf(value);
-        if (jsVerIndx === -1) {
-          throw new Error("'" + value + "' is an invalid value for @jsversion.");
-        } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
-          throw new Error("The @jsversion value '" + value + "' is not "
-              + "supported by this version of Firefox.");
-        } else {
-          script._jsversion = JSVersions[jsVerIndx];
-        }
-        continue;
-      case "contributor":
-        script.addContributor(value);
-        continue;
-      case "include":
-        script.addInclude(value);
-        continue;
-      case "exclude":
-        script.addExclude(value);
-        continue;
-      case "match":
-        value && script._matches.push(new MatchPattern(value));
-        continue;
-      case 'screenshot':
-        if (!value || !AddonManagerPrivate.AddonScreenshot) continue;
-        var splitValue = value.match(valueSplitter);
-        if (splitValue) {
-          script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
-              splitValue[1], splitValue[2]));
-        } else {
-          script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
-              value));
-        }
-        continue;
-      case "icon":
-      case "iconurl":
-        if (!value) continue;
-        try {
-          script.icon.setIcon(value, aURI);
-        } catch (e) {
-          if (!aUpdateScript) throw e;
-          script._dependFail = true;
+        case "injectframes":
+          if (value != "0") continue;
+          script["_noframes"] = true;
           continue;
-        }
-        script._rawMeta += header + '\0' + value + '\0';
-        continue;
-      case "require":
-        if (!value) continue;
-        try {
-          var reqUri = NetUtil.newURI(value, null, aURI);
-          var scriptRequire = new ScriptRequire(script);
-          scriptRequire._downloadURL = reqUri.spec;
-          script._requires.push(scriptRequire);
+        case "website":
+        case "homepage":
+        case "homepageurl":
+          script._homepageURL = value;
+          continue;
+        case "jsversion":
+          let jsVerIndx = JSVersions.indexOf(value);
+          if (-1 === jsVerIndx) {
+            throw new Error("'" + value + "' is an invalid value for @jsversion");
+          } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
+            throw new Error("The @jsversion value '" + value + "' is not "
+                + "supported by this version of Firefox.");
+          } else {
+            script._jsversion = JSVersions[jsVerIndx];
+          }
+          continue;
+        case "run-at":
+          let runAtIndx = runAtValues.indexOf(value);
+          if (0 > runAtIndx)
+            throw new Error("'" + value + "' is an invalid value for @run-at");
+          script["_run-at"] = runAtValues[runAtIndx];
+          continue;
+        case "contributor":
+          script.addContributor(value);
+          continue;
+        case "include":
+          script.addInclude(value);
+          continue;
+        case "exclude":
+          script.addExclude(value);
+          continue;
+        case "match":
+          script._matches.push(new MatchPattern(value));
+          continue;
+        case 'screenshot':
+          if (!AddonManagerPrivate.AddonScreenshot) continue;
+          var splitValue = value.match(valueSplitter);
+          if (splitValue) {
+            script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+                splitValue[1], splitValue[2]));
+          } else {
+            script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+                value));
+          }
+          continue;
+        case "defaulticon":
+        case "icon":
+        case "iconurl":
+          try {
+            script.icon.setIcon(value, aURI);
+          } catch (e) {
+            if (aUpdateScript) script._dependFail = true;
+            else Scriptish_logError(e);
+            continue;
+          }
           script._rawMeta += header + '\0' + value + '\0';
-        } catch (e) {
-          if (aUpdateScript) {
-            script._dependFail = true;
-          } else {
-            throw new Error('Failed to @require '+ value);
+          continue;
+        case "require":
+          try {
+            var reqUri = NetUtil.newURI(value, null, aURI);
+            var scriptRequire = new ScriptRequire(script);
+            scriptRequire._downloadURL = reqUri.spec;
+            script._requires.push(scriptRequire);
+            script._rawMeta += header + '\0' + value + '\0';
+          } catch (e) {
+            if (aUpdateScript) {
+              script._dependFail = true;
+            } else {
+              throw new Error('Failed to @require '+ value);
+            }
           }
-        }
-        continue;
-      case "resource":
-        if (!value) continue;
-        var res = value.match(valueSplitter);
-        if (res === null) {
-          // NOTE: Unlocalized strings
-          throw new Error("Invalid syntax for @resource declaration '" +
-                          value + "'. Resources are declared like: " +
-                          "@resource <name> <url>.");
-        }
-        var resName = res[1];
-        if (previousResourceNames[resName]) {
-          throw new Error("Duplicate resource name '" + resName + "' " +
-                          "detected. Each resource must have a unique " +
-                          "name.");
-        } else {
-          previousResourceNames[resName] = true;
-        }
-        try {
-          var resUri = NetUtil.newURI(res[2], null, aURI);
-          var scriptResource = new ScriptResource(script);
-          scriptResource._name = resName;
-          scriptResource._downloadURL = resUri.spec;
-          script._resources.push(scriptResource);
-          script._rawMeta +=
-              header + '\0' + resName + '\0' + resUri.spec + '\0';
-        } catch (e) {
-          if (aUpdateScript) {
-            script._dependFail = true;
-          } else {
-            throw new Error(
-                'Failed to get @resource '+ resName +' from '+ res[2]);
+          continue;
+        case "resource":
+          var res = value.match(valueSplitter);
+          if (res === null) {
+            // NOTE: Unlocalized strings
+            throw new Error("Invalid syntax for @resource declaration '" +
+                            value + "'. Resources are declared like: " +
+                            "@resource <name> <url>.");
           }
-        }
-        continue;
-      case "noframes":
-        if (!value) script["_" + header] = true;
-        continue;
-      default:
-        continue;
+          var resName = res[1];
+          if (previousResourceNames[resName]) {
+            throw new Error("Duplicate resource name '" + resName + "' " +
+                            "detected. Each resource must have a unique " +
+                            "name.");
+          } else {
+            previousResourceNames[resName] = true;
+          }
+          try {
+            var resUri = NetUtil.newURI(res[2], null, aURI);
+            var scriptResource = new ScriptResource(script);
+            scriptResource._name = resName;
+            scriptResource._downloadURL = resUri.spec;
+            script._resources.push(scriptResource);
+            script._rawMeta +=
+                header + '\0' + resName + '\0' + resUri.spec + '\0';
+          } catch (e) {
+            if (aUpdateScript) {
+              script._dependFail = true;
+            } else {
+              throw new Error(
+                  'Failed to get @resource '+ resName +' from '+ res[2]);
+            }
+          }
+          continue;
+      }
     }
   }
 
@@ -801,6 +838,7 @@ Script.load = function load(aConfig, aNode) {
   script._homepageURL = aNode.getAttribute("homepageURL")
       || aNode.getAttribute("homepage") || null;
   script._jsversion = aNode.getAttribute("jsversion") || null;
+  script["_run-at"] = aNode.getAttribute("run-at") || null;
 
   if (!script.fileExists()) {
     script.uninstallProcess();
@@ -874,6 +912,7 @@ Script.load = function load(aConfig, aNode) {
   script._description = aNode.getAttribute("description");
   script.icon.fileURL = aNode.getAttribute("icon");
   script._enabled = aNode.getAttribute("enabled") == true.toString();
+  script.delay = aNode.getAttribute("delay");
 
   aConfig.addScript(script);
   return fileModified;

@@ -10,7 +10,7 @@ function Scriptish_getFirebugConsole(unsafeContentWin, chromeWin) {
     var fbVersion = parseFloat(chromeWin.Firebug.version, 10);
     var fbConsole = chromeWin.Firebug.Console;
     var fbContext = chromeWin.TabWatcher &&
-      chromeWin.TabWatcher.getContextByWindow(unsafeContentWin);
+        chromeWin.TabWatcher.getContextByWindow(unsafeContentWin);
 
     // Firebug 1.4 will give no context, when disabled for the current site.
     if ('undefined' == typeof fbContext) return null;

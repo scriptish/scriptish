@@ -1,15 +1,15 @@
 var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
-    "Services", "Instances"];
+    "Services", "Instances", "timeout"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+const {classes: Cc, interfaces: Ci} = Components;
+const ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
 var Services = {};
-(function(import, tools){
-  import("resource://gre/modules/XPCOMUtils.jsm");
-  import("resource://gre/modules/NetUtil.jsm");
-  import("resource://gre/modules/AddonManager.jsm");
-  import("resource://gre/modules/Services.jsm", tools);
+(function(inc, tools){
+  inc("resource://gre/modules/XPCOMUtils.jsm");
+  inc("resource://gre/modules/NetUtil.jsm");
+  inc("resource://gre/modules/AddonManager.jsm");
+  inc("resource://gre/modules/Services.jsm", tools);
 
   Services.__proto__ = tools.Services;
 })(Components.utils.import, {})
@@ -70,3 +70,12 @@ if (Cc["@mozilla.org/privatebrowsing;1"]) {
 XPCOMUtils.defineLazyServiceGetter(
     Services, "sis", "@mozilla.org/scriptableinputstream;1",
     "nsIScriptableInputStream");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Services, "suhtml", "@mozilla.org/feed-unescapehtml;1",
+    "nsIScriptableUnescapeHTML");
+
+function timeout(cb, delay) {
+  Instances.timer.initWithCallback(
+      { notify: function(){ cb.call(null) } }, delay, ONE_SHOT);
+}

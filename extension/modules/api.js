@@ -3,16 +3,16 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_config.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 
 const moduleFilename = Components.stack.filename;
+const NS_XHTML = "http://www.w3.org/1999/xhtml";
+const DOLITTLE = function(){};
 
 // Examines the stack to determine if an API should be callable.
 function GM_apiLeakCheck(apiName) {
-  var stack = Components.stack;
-  apiName = apiName;
+  let stack = Components.stack;
 
   do {
     // Valid stack frames for GM api calls are: native and js when coming from
@@ -28,15 +28,15 @@ function GM_apiLeakCheck(apiName) {
     }
   } while (stack = stack.caller);
   return true;
-};
+}
 
-function GM_apiSafeCallback(aWindow, aThis, aCallback, aArgs) {
+function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
   // Pop back onto browser scope and call event handler.
   // Have to use nested function here instead of Scriptish_hitch because
   // otherwise aCallback.apply can point to window.setTimeout, which
   // can be abused to get increased privileges.
-  new XPCNativeWrapper(aWindow, "setTimeout()")
-      .setTimeout(function() { aCallback.apply(aThis, aArgs); }, 0);
+  new XPCNativeWrapper(aWin, "setTimeout()")
+      .setTimeout(function() { aCb.apply(aThis, aArgs); }, 0);
 }
 
 function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
@@ -97,6 +97,15 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return style;
   }
 
+  this.GM_safeHTMLParser = function GM_safeHTMLParser(aHTMLStr) {
+    if (!GM_apiLeakCheck("GM_safeHTMLParser")) return;
+    let doc = document.implementation.createDocument(NS_XHTML, "html", null);
+    let body = document.createElementNS(NS_XHTML, "body");
+    doc.documentElement.appendChild(body);
+    body.appendChild(Services.suhtml.parseFragment(aHTMLStr, false, null, body));
+    return doc;
+  }
+
   this.GM_log = function GM_log() getLogger().log.apply(getLogger(), arguments)
 
   this.GM_notification =
@@ -145,40 +154,33 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_openInTab = function GM_openInTab(aURL) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-
-    var newTab = aChromeWin.openNewTabWith(aURL, document);
-    // Source:
     // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
-    var newWindow = aChromeWin.gBrowser
-        .getBrowserForTab(newTab)
-        .docShell
-        .QueryInterface(Ci.nsIInterfaceRequestor)
-        .getInterface(Ci.nsIDOMWindow);
-    return newWindow;
-  };
+    return aChromeWin.gBrowser
+        .getBrowserForTab(aChromeWin.openNewTabWith(aURL, document)).docShell
+        .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
+  }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
     if (!GM_apiLeakCheck("GM_xmlhttpRequest")) return;
-    return getXmlhttpRequester().contentStartRequest.apply(
-        getXmlhttpRequester(), arguments);
-  };
+    let xhr = getXmlhttpRequester();
+    return xhr.contentStartRequest.apply(xhr, arguments);
+  }
 
-  this.GM_registerMenuCommand = function GM_registerMenuCommand(
-      aCommandName,
-      aCommandFunc,
-      aAccelKey,
-      aAccelModifiers,
-      aAccessKey) {
-    if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
-
-    aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
-      name: aCommandName,
-      accelKey: aAccelKey,
-      accelModifiers: aAccelModifiers,
-      accessKey: aAccessKey,
-      doCommand: aCommandFunc,
-      window: aSafeWin});
-  };
+  if (aSafeWin !== aSafeWin.top) {
+    this.GM_registerMenuCommand = DOLITTLE;
+  } else {
+    this.GM_registerMenuCommand = function GM_registerMenuCommand(
+        aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
+      if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
+      aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
+        name: aCmdName,
+        accelKey: aAccelKey,
+        accelModifiers: aAccelModifiers,
+        accessKey: aAccessKey,
+        doCommand: aCmdFunc,
+        window: aSafeWin});
+    }
+  }
 
   this.GM_worker = function GM_worker(resourceName) {
     if (!GM_apiLeakCheck("GM_worker")) return;
@@ -188,7 +190,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     var worker = new tools.GM_worker(getResources().getDep(resourceName), aURL);
     workers.push(worker)
     return worker;
-  };
+  }
 
   this.GM_updatingEnabled = true;
 }

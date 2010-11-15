@@ -4,19 +4,18 @@ var Scriptish_BrowserUI = {
 };
 var Scriptish_BrowserUIM;
 
-(function(import, tools){
-import("resource://scriptish/content/browser.js");
-import("resource://scriptish/prefmanager.js");
-import("resource://scriptish/utils/Scriptish_config.js");
-import("resource://scriptish/utils/Scriptish_hitch.js", tools);
-import("resource://scriptish/utils/Scriptish_getEnabled.js");
-import("resource://scriptish/utils/Scriptish_stringBundle.js");
-import("resource://scriptish/utils/Scriptish_openInEditor.js");
-import("resource://scriptish/utils/Scriptish_isGreasemonkeyable.js");
-import("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
-import("resource://scriptish/config/configdownloader.js");
-import("resource://scriptish/menucommander.js");
-import("resource://scriptish/constants.js", tools);
+(function(inc, tools){
+inc("resource://scriptish/content/browser.js");
+inc("resource://scriptish/prefmanager.js");
+inc("resource://scriptish/scriptish.js");
+inc("resource://scriptish/utils/Scriptish_hitch.js", tools);
+inc("resource://scriptish/utils/Scriptish_stringBundle.js");
+inc("resource://scriptish/utils/Scriptish_openInEditor.js");
+inc("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
+inc("resource://scriptish/config/configdownloader.js");
+inc("resource://scriptish/menucommander.js");
+inc("resource://scriptish/logging.js");
+inc("resource://scriptish/constants.js", tools);
 var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;
@@ -26,92 +25,39 @@ function hitch() tools.Scriptish_hitch.apply(null, arguments);
 Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
-/**
- * The browser XUL has loaded. Find the elements we need and set up our
- * listeners and wrapper objects.
- */
-Scriptish_BrowserUI.chromeLoad = function(e) {
-  Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, this);
-
-  // get all required DOM elements
-  this.statusEnabledItem = $("scriptish-sb-enabled-item");
-  this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
-  this.contextItem = $("scriptish-context-menu-viewsource");
-
-  var tmEle = $('scriptish_general_menu');
-  tmEle.setAttribute("label", Scriptish_stringBundle("menu.title"));
-  tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.title.accesskey"));
-
-  var tmStatusEle = $('scriptish-tools-enabled-item');
-  tmStatusEle.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
-  tmStatusEle.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.accesskey"));
-
-  $("scriptish-status").addEventListener(
+Scriptish_BrowserUI.tbBtnSetup = function() {
+  var statusEnabledItem = $("scriptish-tb-enabled-item");
+  $("scriptish-button").addEventListener(
       "click", hitch(Scriptish_BrowserUIM, "onIconClick"), false);
 
-  $("scriptish-tools-menupop").addEventListener("popupshowing", function(aEvt) {
-    // set the enabled/disabled state
-    Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
-        "checked", Scriptish_getEnabled());
-    aEvt.stopPropagation();
-  }, false);
+  statusEnabledItem.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
+  statusEnabledItem.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.ak"));
+  statusEnabledItem.addEventListener("command", function() { Scriptish_BrowserUIM.onToggleStatus() }, false);
 
-  var toggleFunc = function() { Scriptish_BrowserUIM.onToggleStatus() };
-
-  this.statusEnabledItem.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
-  this.statusEnabledItem.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.accesskey"));
-  this.statusEnabledItem.addEventListener("command", toggleFunc, false);
-
-  this.toolsMenuEnabledItem.addEventListener("command", toggleFunc, false);
-
-  $('scriptish-status-no-scripts').setAttribute(
+  $("scriptish-tb-no-scripts").setAttribute(
       "label", Scriptish_stringBundle("statusbar.noscripts"));
 
-  var stopEvt = function(aEvt) { aEvt.stopPropagation() };
-  var sbCmdsEle = $("scriptish-commands-sb");
+  var sbCmdsEle = $("scriptish-tb-cmds");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
-  sbCmdsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.commands.accesskey"));
-  sbCmdsEle.addEventListener("popupshowing", stopEvt, false);
-  var tmCmdsEle = $("scriptish-commands-sb2");
-  tmCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
-  tmCmdsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.commands.accesskey"));
-  tmCmdsEle.addEventListener("popupshowing", stopEvt, false);
+  sbCmdsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.commands.ak"));
+  sbCmdsEle.addEventListener("popupshowing", function(aEvt) { aEvt.stopPropagation() }, true);
 
-  var newUSFunc = function(){ Scriptish_BrowserUIM.newUserScript() };
-  var tmNewUSEle = $("scriptish-tools-new");
-  tmNewUSEle.setAttribute("label", Scriptish_stringBundle("menu.new"));
-  tmNewUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.new.accesskey"));
-  tmNewUSEle.addEventListener("command", newUSFunc, false);
-
-  var sbNewUSEle = $("scriptish-sb-new-us");
+  var sbNewUSEle = $("scriptish-tb-new-us");
   sbNewUSEle.setAttribute("label", Scriptish_stringBundle("menu.new"));
-  sbNewUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.new.accesskey"));
-  sbNewUSEle.addEventListener("command", newUSFunc, false);
+  sbNewUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.new.ak"));
+  sbNewUSEle.addEventListener("command", function(){ Scriptish_BrowserUIM.newUserScript() }, false);
 
-  var showUserScriptsFunc = function(){ Scriptish_BrowserUIM.showUserscriptList() };
-  var tmShowUSEle = $("scriptish-tools-show-us");
-  tmShowUSEle.setAttribute("label", Scriptish_stringBundle("menu.manage"));
-  tmShowUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.manage.accesskey"));
-  tmShowUSEle.addEventListener("command", showUserScriptsFunc, false);
-
-  var sbShowUSEle = $("scriptish-sb-show-us");
+  var sbShowUSEle = $("scriptish-tb-show-us");
   sbShowUSEle.setAttribute("label", Scriptish_stringBundle("menu.manage"));
-  sbShowUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.manage.accesskey"));
-  sbShowUSEle.addEventListener("command", showUserScriptsFunc, false);
+  sbShowUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.manage.ak"));
+  sbShowUSEle.addEventListener("command", function(){ Scriptish_BrowserUIM.showUserscriptList() }, false);
 
-  var showOptionsEle = $("scriptish-sb-options");
-  var showOptionsFunc = function(){ Scriptish_BrowserUIM.openOptionsWin() };
+  var showOptionsEle = $("scriptish-tb-options");
   showOptionsEle.setAttribute("label", Scriptish_stringBundle("options")+"...");
-  showOptionsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.options.accesskey"));
-  showOptionsEle.addEventListener("command", showOptionsFunc, false);
+  showOptionsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.options.ak"));
+  showOptionsEle.addEventListener("command", function(){ Scriptish_BrowserUIM.openOptionsWin() }, false);
 
-  this.contextItem.setAttribute("label", Scriptish_stringBundle("menu.show"));
-  this.contextItem.setAttribute("accesskey", Scriptish_stringBundle("menu.show.accesskey"));
-  this.contextItem.addEventListener("command", function(aEvt) {
-    Scriptish_BrowserUI.viewContextItemClicked(aEvt);
-  }, false)
-
-  var sbPopUp = $("scriptish-status-popup");
+  var sbPopUp = $("scriptish-tb-popup");
   sbPopUp.addEventListener("click", function(aEvt) {
     Scriptish_popupClicked(aEvt);
     aEvt.stopPropagation();
@@ -121,16 +67,75 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
     aEvt.stopPropagation();
   }, false);
 
+  // update enabled icon
+  Scriptish_BrowserUIM.refreshStatus();
+
+  (Scriptish_BrowserUI.tbBtnSetup = Scriptish_BrowserUI.reattachMenuCmds)();
+}
+
+/**
+ * The browser XUL has loaded. Find the elements we need and set up our
+ * listeners and wrapper objects.
+ */
+Scriptish_BrowserUI.chromeLoad = function(e) {
+  Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, this);
+
+  var tbBtnAdd = function(evt) {
+    if ("scriptish-tb-item" != evt.target.id) return;
+    Scriptish_BrowserUI.tbBtnSetup();
+  }
+  getNavToolbox().addEventListener("DOMNodeInserted", tbBtnAdd, false);
+  let addonBar = $("addon-bar");
+  if (addonBar) addonBar.addEventListener("DOMNodeInserted", tbBtnAdd, false);
+  if ($("scriptish-tb-item")) this.tbBtnSetup();
+
+  // get all required DOM elements
+  this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
+  this.contextItem = $("scriptish-context-menu-viewsource");
+
+  var tmEle = $('scriptish_general_menu');
+  tmEle.setAttribute("label", Scriptish_stringBundle("menu.title"));
+  tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.title.ak"));
+
+  var tmStatusEle = $('scriptish-tools-enabled-item');
+  tmStatusEle.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
+  tmStatusEle.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.ak"));
+
+  $("scriptish-tools-menupop").addEventListener("popupshowing", function(aEvt) {
+    // set the enabled/disabled state
+    Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
+        "checked", Scriptish.enabled);
+    aEvt.stopPropagation();
+  }, false);
+
+  this.toolsMenuEnabledItem.addEventListener("command", function() { Scriptish_BrowserUIM.onToggleStatus() }, false);
+
+  var tmCmdsEle = $("scriptish-tools-commands");
+  tmCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
+  tmCmdsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.commands.ak"));
+  tmCmdsEle.addEventListener("popupshowing", function(aEvt) { aEvt.stopPropagation() }, false);
+
+  var tmNewUSEle = $("scriptish-tools-new");
+  tmNewUSEle.setAttribute("label", Scriptish_stringBundle("menu.new"));
+  tmNewUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.new.ak"));
+  tmNewUSEle.addEventListener("command", function(){ Scriptish_BrowserUIM.newUserScript() }, false);
+
+  var tmShowUSEle = $("scriptish-tools-show-us");
+  tmShowUSEle.setAttribute("label", Scriptish_stringBundle("menu.manage"));
+  tmShowUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.manage.ak"));
+  tmShowUSEle.addEventListener("command", function(){ Scriptish_BrowserUIM.showUserscriptList() }, false);
+
+  this.contextItem.setAttribute("label", Scriptish_stringBundle("menu.show"));
+  this.contextItem.setAttribute("accesskey", Scriptish_stringBundle("menu.show.ak"));
+  this.contextItem.addEventListener("command", function(aEvt) {
+    Scriptish_BrowserUI.viewContextItemClicked(aEvt);
+  }, false)
+
   // update visual status when enabled state changes
   this.statusWatcher = hitch(Scriptish_BrowserUIM, "refreshStatus");
   Scriptish_prefRoot.watch("enabled", this.statusWatcher);
 
-  // hook various events
-  $("appcontent").addEventListener(
-      "DOMContentLoaded", hitch(this, "contentLoad"), true);
-  var sidebar = $("sidebar") || $("sidebar-box");
-  sidebar.addEventListener(
-      "DOMContentLoaded", hitch(this, "contentLoad"), true);
+  // hook on to context menu popup event
   $("contentAreaContextMenu").addEventListener(
       "popupshowing", hitch(this, "contextMenuShowing"), false);
 
@@ -149,39 +154,6 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   commander.registerMenuCommand(
       menuCommand.name, menuCommand.doCommand, menuCommand.accelKey,
       menuCommand.accelModifiers, menuCommand.accessKey);
-}
-
-/**
- * Gets called when a DOMContentLoaded event occurs somewhere in the browser.
- * If that document is in in the top-level window of the focused tab, find
- * it's menu items and activate them.
- */
-Scriptish_BrowserUI.contentLoad = function(e) {
-  if (!Scriptish_getEnabled()) return;
-  var safeWin = e.target.defaultView;
-  var unsafeWin = safeWin.wrappedJSObject;
-  var href = safeWin.location.href;
-
-  if (Scriptish_isGreasemonkeyable(href)) {
-    // if this content load is in the focused tab, attach the menuCommaander
-    if (unsafeWin == gBrowser.selectedBrowser.contentWindow) {
-      var commander = this.getCommander(safeWin);
-      this.currentMenuCommander = commander;
-      this.currentMenuCommander.attach();
-    }
-
-    gmSvc.domContentLoaded(safeWin, window);
-    safeWin.addEventListener("pagehide", hitch(this, "contentUnload"), false);
-  }
-
-  // Show the scriptish install banner if we are navigating to a .user.js
-  // file in a top-level tab.  If the file was previously cached it might have
-  // been given a number after .user, like gmScript.user-12.js
-  if (safeWin == safeWin.top && href.match(/\.user(?:-\d+)?\.js$/)
-      && !/text\/html/i.test(safeWin.document.contentType)) {
-    var browser = gBrowser.getBrowserForDocument(safeWin.document);
-    this.showInstallBanner(browser);
-  }
 }
 
 
@@ -204,10 +176,10 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
   var notification = notificationBox.appendNotification(
     greeting,
     "install-userscript",
-    "chrome://scriptish/skin/icon_small.png",
+    "chrome://scriptish/skin/icon_16.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
     [{label: Scriptish_stringBundle("greeting.btn"),
-      accessKey: Scriptish_stringBundle("greeting.btnAccess"),
+      accessKey: Scriptish_stringBundle("greeting.btn.ak"),
       popup: null,
       callback: hitch(this, "installCurrentScript")
     }]
@@ -245,43 +217,15 @@ Scriptish_BrowserUI.installCurrentScript = function() {
  * User Script Commands submenu.
  */
 Scriptish_BrowserUI.onLocationChange = function(a,b,c) {
-  if (this.currentMenuCommander != null) {
-    this.currentMenuCommander.detach();
-    this.currentMenuCommander = null;
-  }
-
-  var menuCommander = this.getCommander(
-      gBrowser.selectedBrowser.contentWindow);
-
-  if (menuCommander) {
-    this.currentMenuCommander = menuCommander;
-    this.currentMenuCommander.attach();
-  }
+  this.reattachMenuCmds();
 }
-
-/**
- * A content document has unloaded. We need to remove it's menuCommander to
- * avoid leaking it's memory.
- */
-Scriptish_BrowserUI.contentUnload = function(e) {
-  if (e.persisted || !this.menuCommanders || 0 == this.menuCommanders.length)
-    return;
-
-  var unsafeWin = e.target.defaultView;
-
-  // looping over commanders rather than using getCommander because we need
-  // the index into commanders.splice.
-  for (var i = 0, item; item = this.menuCommanders[i]; i++) {
-    if (item.win != unsafeWin) continue;
-
-    if (item.commander == this.currentMenuCommander) {
-      this.currentMenuCommander.detach();
-      this.currentMenuCommander = null;
-    }
-
-    this.menuCommanders.splice(i, 1);
-    break;
+Scriptish_BrowserUI.reattachMenuCmds = function() {
+  if (this.currentMenuCommander) {
+    Scriptish_BrowserUI.currentMenuCommander.detach();
+    Scriptish_BrowserUI.currentMenuCommander = null;
   }
+  var menuCommander = Scriptish_BrowserUI.getCommander(gBrowser.selectedBrowser.contentWindow);
+  if (menuCommander) (Scriptish_BrowserUI.currentMenuCommander = menuCommander).attach();
 }
 
 /**
@@ -343,7 +287,7 @@ function Scriptish_showPopup(aEvent) {
     function testMatchURLs(script) {
       return urls.some(function(url) script.matchesURL(url));
     }
-    return Scriptish_config.getMatchingScripts(testMatchURLs);
+    return Scriptish.config.getMatchingScripts(testMatchURLs);
   }
 
   function appendScriptToPopup(script) {
@@ -358,11 +302,12 @@ function Scriptish_showPopup(aEvent) {
   }
 
   var popup = aEvent.target;
-  var tail = $("scriptish-status-no-scripts-sep");
+  var tail = $("scriptish-tb-no-scripts-sep");
 
   // set the enabled/disabled state
-  Scriptish_BrowserUI.statusEnabledItem.setAttribute(
-      "checked", Scriptish_getEnabled());
+  var statusEnabledItem = $("scriptish-tb-enabled-item");
+  statusEnabledItem && statusEnabledItem.setAttribute(
+      "checked", Scriptish.enabled);
 
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; i >= 0; i--) {
@@ -395,13 +340,13 @@ function Scriptish_showPopup(aEvent) {
   }
   runsOnTop.forEach(appendScriptToPopup);
 
-  var foundInjectedScript = !!(runsFramed.length + runsOnTop.length);
-  $("scriptish-status-no-scripts").collapsed = foundInjectedScript;
+  $("scriptish-tb-no-scripts").collapsed =
+      !!(runsFramed.length + runsOnTop.length);
 }
 
 /**
  * Handle clicking one of the items in the popup. Left-click toggles the enabled
- * state, rihgt-click opens in an editor.
+ * state, right-click opens in an editor.
  */
 function Scriptish_popupClicked(aEvt) {
   var script = aEvt.target.script;
@@ -414,7 +359,7 @@ function Scriptish_popupClicked(aEvt) {
     // right-click
     case 2:
       Scriptish_openInEditor(script, window);
-      $("scriptish-status-popup").hidePopup();
+      $("scriptish-tb-popup").hidePopup();
       break;
   }
 }

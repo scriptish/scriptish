@@ -2,7 +2,6 @@ var EXPORTED_SYMBOLS = ["Config"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
@@ -133,7 +132,9 @@ Config.prototype = {
   },
 
   uninstallScripts: function() {
-    for (var i = 0, script; script = this._scripts[i]; i++) {
+    let scripts = this._scripts;
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      let script = scripts[i];
       if (script.needsUninstall) {
         this._scripts.splice(i, 1);
         script.uninstallProcess();
@@ -156,8 +157,8 @@ Config.prototype = {
     configStream.close();
   },
 
-  get scripts() { return this._scripts.concat(); },
-  getMatchingScripts: function(testFunc) { return this._scripts.filter(testFunc); },
+  get scripts() this._scripts.concat(),
+  getMatchingScripts: function(testFunc) this._scripts.filter(testFunc),
   injectScript: function(script) {
     var unsafeWin = this.wrappedContentWin.wrappedJSObject;
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
@@ -167,19 +168,18 @@ Config.prototype = {
       Services.scriptish.injectScripts([script], href, unsafeWin, this.chromeWin);
   },
 
-  updateModifiedScripts: function() {
-    // Find any updated scripts
-    var scripts = this.getMatchingScripts(function(script) script.isModified());
-    if (0 == scripts.length) return;
-
-    for (var i = 0, script; script = scripts[i]; i++) {
-      var parsedScript = this.parse(
+  updateModifiedScripts: function(scriptInjector) {
+    for (let [, script] in Iterator(this._scripts)) {
+      if (script.delayInjection) {
+        script.delayedInjectors.push(scriptInjector);
+        continue;
+      }
+      if (!script.isModified()) continue;
+      let parsedScript = this.parse(
           script.textContent,
-          script._downloadURL && NetUtil.newURI(script._downloadURL),
-          script);
-      script.updateFromNewScript(parsedScript);
+          script._downloadURL && NetUtil.newURI(script._downloadURL), script);
+      script.updateFromNewScript(parsedScript, scriptInjector);
     }
-
     this._save();
   }
-};
+}

@@ -1,11 +1,13 @@
 Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_config.js");
+Components.utils.import("resource://scriptish/scriptish.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_createUserScriptSource.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 var $ = function(aID) document.getElementById(aID);
 
 window.addEventListener("load", function() {
   $("scriptish").setAttribute("title", Scriptish_stringBundle("menu.new"));
+  $("label-id").setAttribute("value", Scriptish_stringBundle("newscript.id"));
   $("label-name").setAttribute("value", Scriptish_stringBundle("newscript.name"));
   $("label-namespace").setAttribute("value", Scriptish_stringBundle("newscript.namespace"));
   $("label-description").setAttribute("value", Scriptish_stringBundle("newscript.description"));
@@ -13,7 +15,8 @@ window.addEventListener("load", function() {
   $("label-excludes").setAttribute("value", Scriptish_stringBundle("newscript.excludes"));
   $("label-includes").setAttribute("value", Scriptish_stringBundle("newscript.includes"));
 
-  // load default namespace from pref
+  // load defaults
+  $("id").value = Scriptish_prefRoot.getValue("newscript_id", "");
   $("namespace").value = Scriptish_prefRoot.getValue("newscript_namespace", "");
 
   // default the includes with the current page's url
@@ -37,7 +40,7 @@ function doInstall() {
   foStream.write(script, script.length);
   foStream.close();
 
-  var config = Scriptish_config;
+  var config = Scriptish.config;
 
   // create a script object with parsed metadata,
   script = config.parse(script);
@@ -65,45 +68,17 @@ function doInstall() {
 
 // assemble the XUL fields into a script template
 function createScriptSource() {
-  var script = ["// ==UserScript=="];
-
-  var tmp = $("name").value;
-  if ("" == tmp) {
-    alert(Scriptish_stringBundle("newscript.noname"));
-    return false;
-  } else {
-    script.push("// @name           " + tmp);
+  var header = {
+    id: $("id").value,
+    name: $("name").value,
+    namespace: $("namespace").value,
+    description: $("description").value,
+    includes: $("includes").value ? $("includes").value.match(/.+/g) : [],
+    excludes: $("excludes").value ? $("excludes").value.match(/.+/g) : []
   }
-
-  tmp = $("namespace").value;
-  if ("" == tmp) {
-    alert(Scriptish_stringBundle("newscript.nonamespace"));
-    return false;
-  } else {
-    script.push("// @namespace      " + tmp);
+  try {
+    return Scriptish_createUserScriptSource(header);
+  } catch (e) {
+    alert(e.message);
   }
-
-  tmp = $("descr").value;
-  if ("" != tmp) {
-    script.push("// @description    " + tmp);
-  }
-
-  tmp = $("includes").value;
-  if ("" != tmp) {
-    tmp = "// @include        " + tmp.match(/.+/g).join("\n// @include        ");
-    script.push(tmp);
-  }
-
-  tmp = $("excludes").value;
-  if ("" != tmp) {
-    tmp = "// @exclude        " + tmp.match(/.+/g).join("\n// @exclude        ");
-    script.push(tmp);
-  }
-
-  script.push("// ==/UserScript==");
-
-  var ending = "\n";
-  // TODO: improve
-  if (window.navigator.platform.match(/^Win/)) ending = "\r\n";
-  return script.join(ending);
 }
