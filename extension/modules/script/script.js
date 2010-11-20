@@ -87,7 +87,7 @@ Script.prototype = {
   blocklistState: 0,
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
-  applyBackgroundUpdates: false,
+  applyBackgroundUpdates: AddonManager.AUTOUPDATE_DISABLE,
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
