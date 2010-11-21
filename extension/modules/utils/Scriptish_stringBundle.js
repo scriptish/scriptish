@@ -16,5 +16,10 @@ const engBundle = Services.strings.createBundle((function(){
 function Scriptish_stringBundle(aKey) {
   if (Scriptish_prefRoot.getValue("useDefaultLocale"))
     return engBundle.GetStringFromName(aKey);
-  return defaultBundle.GetStringFromName(aKey) || engBundle.GetStringFromName(aKey);
+  try {
+    return defaultBundle.GetStringFromName(aKey)
+        || engBundle.GetStringFromName(aKey);
+  } catch (e) {
+    return engBundle.GetStringFromName(aKey);
+  }
 }
