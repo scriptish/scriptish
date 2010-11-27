@@ -40,15 +40,16 @@ Scriptish_BrowserUIM.prototype = {
   refreshStatus: function() {
     var tbImg = this.$("scriptish-button");
     var menu = this.$("scriptish_general_menu");
+    var appName = Services.appinfo.name;
 
     if (Scriptish.enabled) {
       menu.setAttribute("image", ICON_16_ON);
       tbImg && tbImg.setAttribute(
-          "image", "seamonkey" == Scriptish.APP ? ICON_32_ON : ICON_24_ON);
+          "image", "SeaMonkey" == appName ? ICON_32_ON : ICON_24_ON);
     } else {
       menu.setAttribute("src", ICON_16_OFF);
       tbImg && tbImg.setAttribute(
-          "image", "seamonkey" == Scriptish.APP ? ICON_32_OFF : ICON_24_OFF);
+          "image", "SeaMonkey" == appName ? ICON_32_OFF : ICON_24_OFF);
     }
   },
   openChromeWindow: function(aURL) {
