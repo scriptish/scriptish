@@ -3,7 +3,6 @@
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     id="scriptish"
     buttons="accept,cancel"
-    ondialogaccept="return doInstall();"
     orient="vertical">
   <script type="application/x-javascript" src="chrome://scriptish/content/js/newscript.js" />
 
