@@ -418,7 +418,7 @@ Script.prototype = {
   },
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
     // Copy new values.
     this.updateAvailable = false;
@@ -452,7 +452,7 @@ Script.prototype = {
       this._dependhash = newScript._dependhash;
       if (newScript._downloadURL) this._downloadURL = newScript._downloadURL;
     } else {
-      var dependhash = tools.Scriptish_sha1(newScript._rawMeta);
+      var dependhash = tools.Scriptish_cryptoHash(newScript._rawMeta);
       if (dependhash != this._dependhash && !newScript._dependFail) {
         this._dependhash = dependhash;
         this._icon = newScript._icon;
@@ -592,12 +592,12 @@ Script.prototype = {
       this._resources[i]._initFile();
 
     var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
     if (Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
 
     this._modified = this._file.lastModifiedTime;
-    this._dependhash = tools.Scriptish_sha1(this._rawMeta);
+    this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
   },
 
@@ -850,14 +850,14 @@ Script.load = function load(aConfig, aNode) {
       || !aNode.hasAttribute("dependhash")
       || !aNode.hasAttribute("version")) {
     var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
         aConfig, Scriptish_getContents(script._file), 
         script._downloadURL && NetUtil.newURI(script._downloadURL),
         script);
-    script._dependhash = tools.Scriptish_sha1(parsedScript._rawMeta);
+    script._dependhash = tools.Scriptish_cryptoHash(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;
   } else {
