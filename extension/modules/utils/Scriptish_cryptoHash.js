@@ -1,7 +1,7 @@
 var EXPORTED_SYMBOLS = ["Scriptish_cryptoHash"];
 Components.utils.import("resource://scriptish/constants.js");
 
-const Scriptish_cryptoHash = function(aString, aAlg, aCharset) {
+function Scriptish_cryptoHash(aString, aAlg, aCharset) {
   try {
     aString = aString.toString();
   } catch(e) {
