@@ -191,7 +191,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     workers.push(worker)
     return worker;
   }
-  
+
   this.GM_cryptoHash = function GM_cryptoHash() {
     if (!GM_apiLeakCheck("GM_cryptoHash")) return;
     var tools = {};
