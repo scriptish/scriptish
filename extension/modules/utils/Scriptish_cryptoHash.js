@@ -29,9 +29,6 @@ function Scriptish_cryptoHash(aString, aAlg, aCharset) {
   ch.update(data, data.length);
   var hash = ch.finish(false); // hash as raw octets
 
-  var hex = [];
-  for (var i = 0; i < hash.length; i++) {
-    hex.push( ("0" + hash.charCodeAt(i).toString(16)).slice(-2) );
-  }
-  return hex.join('');
+  return [("0" + hash.charCodeAt(i).toString(16)).slice(-2) for (i in hash)]
+      .join("");
 }
