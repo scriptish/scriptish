@@ -20,15 +20,8 @@ function Scriptish_cryptoHash(aString, aAlg, aCharset) {
     throw new Error("Invalid charset specified.");
   }
 
-  // Make sure we're working with Unicode
-  if (!/^UTF-(?:8|16|32)$/.test(unicodeConverter.charset))
-    aString = unicodeConverter.ConvertToUnicode(aString);
-
-  var data = unicodeConverter.convertToByteArray(aString, {});
-
-  ch.update(data, data.length);
-  var hash = ch.finish(false); // hash as raw octets
-
+  ch.updateFromStream(unicodeConverter.convertToInputStream(str), str.length);
+  let hash = ch.finish(false); // hash as raw octets
   return [("0" + hash.charCodeAt(i).toString(16)).slice(-2) for (i in hash)]
       .join("");
 }
