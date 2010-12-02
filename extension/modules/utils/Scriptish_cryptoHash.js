@@ -23,7 +23,8 @@ function Scriptish_cryptoHash(aString, aAlg, aCharset) {
     throw new Error("Invalid charset specified.");
   }
 
-  ch.updateFromStream(unicodeConverter.convertToInputStream(str), PR_UINT32_MAX);
+  if (str)
+    ch.updateFromStream(unicodeConverter.convertToInputStream(str), PR_UINT32_MAX);
   let hash = ch.finish(false); // hash as raw octets
   return [("0" + hash.charCodeAt(i).toString(16)).slice(-2) for (i in hash)]
       .join("");
