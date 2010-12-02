@@ -9,7 +9,7 @@ function Scriptish_cryptoHash(aString, aAlg, aCharset) {
   let unicodeConverter = Instances.suc;
   let str = aString + "";
   let alg = ((aAlg || "SHA1") + "").trim().toUpperCase();
-  let charset = (aCharset || "UTF-8") + "";
+  let charset = ((aCharset || "UTF-8") + "").trim();
 
   try {
     ch.initWithString(alg);
