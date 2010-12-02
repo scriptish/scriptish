@@ -1,9 +1,7 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getContents"];
-
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
+Components.utils.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/logging.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 
 function Scriptish_getContents(file, charset) {
   if (!charset) charset = "UTF-8";

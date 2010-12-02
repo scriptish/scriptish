@@ -192,5 +192,12 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return worker;
   }
 
+  this.GM_cryptoHash = function GM_cryptoHash() {
+    if (!GM_apiLeakCheck("GM_cryptoHash")) return;
+    var tools = {};
+    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
+    return tools.Scriptish_cryptoHash.apply(null, arguments);
+  }
+
   this.GM_updatingEnabled = true;
 }
