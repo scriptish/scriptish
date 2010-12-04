@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://scriptish/skin/install.css" type="text/css"?>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-    xmlns:html="http://www.w3.org/1999/xhtml" id="scriptish"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    id="scriptish"
     style="width: 42em; height:32em;"
+    persist="width,height"
     buttons="accept,cancel,extra1"
     defaultButton="cancel">
   <script type="text/javascript" src="chrome://scriptish/content/js/install.js"/>
