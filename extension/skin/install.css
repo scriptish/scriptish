@@ -1,11 +1,20 @@
+@import "chrome://global/skin/global.css";
+@import "chrome://mozapps/content/xpinstall/xpinstallConfirm.css";
+@import "chrome://mozapps/skin/xpinstall/xpinstallConfirm.css";
+
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
 
 #install{margin-bottom:1em;}
 
-#itemBox{
+#installBox{
   padding:0;
-  overflow:auto;
   -moz-appearance:textfield;
   margin:2px 4px;
+}
+#itemBox {
+  padding-top: 1ex;
+  overflow:auto;
 }
 
 #script-desc-vbox{
@@ -13,8 +22,12 @@
   color: InfoText;
   border-bottom:1px black dotted;
   padding:0.5em;
-  margin:0;
-  margin-bottom:0.5em;
+}
+
+#scriptIcon {
+  width: 32px;
+  height: 32px;
+  margin-right: 1ex;
 }
 
 #scriptDescription{margin:0;}
@@ -29,3 +42,8 @@
 #excludes-desc, #includes-desc, #matches-desc{font-style:italic;}
 
 #itemBox vbox.display:not(#script-desc-vbox){display:inherit;}
+
+html|ol {
+  margin-top: 0;
+  padding-top: 0;
+}
