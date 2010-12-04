@@ -5,6 +5,17 @@
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="chrome://scriptish/content/js/browser.js"/>
 
+  <broadcasterset id="mainBroadcasterSet">
+    <broadcaster id="scriptish-tb-popup-brd"/>
+    <broadcaster id="scriptish-button-brd"/>
+    <broadcaster id="scriptish-tb-no-scripts-brd"/>
+    <broadcaster id="scriptish-tb-cmds-brd"/>
+    <broadcaster id="scriptish-tb-new-us-brd"/>
+    <broadcaster id="scriptish-tb-show-us-brd"/>
+    <broadcaster id="scriptish-tb-options-brd"/>
+    <broadcaster id="scriptish-tb-enabled-brd"/>
+  </broadcasterset>
+
   <menupopup id="menu_ToolsPopup">
     <menu id="scriptish_general_menu" insertbefore="javascriptConsole"/>
   </menupopup>
@@ -28,20 +39,21 @@
         class="chromeclass-toolbar-additional"
         label="Scriptish">
       <toolbarbutton id="scriptish-button"
+          observes="scriptish-button-brd"
           type="menu-button"
           class="toolbarbutton-1"
           image="chrome://scriptish/skin/icon_24.png"
           label="Scriptish">
-        <menupopup id="scriptish-tb-popup">
-          <menuitem id="scriptish-tb-no-scripts"/>
+        <menupopup id="scriptish-tb-popup" observes="scriptish-tb-popup-brd">
+          <menuitem id="scriptish-tb-no-scripts" observes="scriptish-tb-no-scripts-brd"/>
           <menuseparator id="scriptish-tb-no-scripts-sep"/>
-          <menu id="scriptish-tb-cmds" disabled="false"><menupopup/></menu>
+          <menu id="scriptish-tb-cmds" observes="scriptish-tb-cmds-brd" disabled="false"><menupopup/></menu>
           <menuseparator/>
-          <menuitem id="scriptish-tb-new-us"/>
-          <menuitem id="scriptish-tb-show-us"/>
+          <menuitem id="scriptish-tb-new-us" observes="scriptish-tb-new-us-brd"/>
+          <menuitem id="scriptish-tb-show-us" observes="scriptish-tb-show-us-brd"/>
           <menuseparator/>
-          <menuitem id="scriptish-tb-options"/>
-          <menuitem id="scriptish-tb-enabled-item" type="checkbox"/>
+          <menuitem id="scriptish-tb-options" observes="scriptish-tb-options-brd"/>
+          <menuitem id="scriptish-tb-enabled-item" observes="scriptish-tb-enabled-brd" type="checkbox"/>
         </menupopup>
       </toolbarbutton>
     </toolbaritem>

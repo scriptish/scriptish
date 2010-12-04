@@ -26,51 +26,54 @@ Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
 Scriptish_BrowserUI.tbBtnSetup = function() {
-  var statusEnabledItem = $("scriptish-tb-enabled-item");
-  $("scriptish-button").addEventListener(
-      "click", hitch(Scriptish_BrowserUIM, "onIconClick"), false);
+  var statusEnabledItem = $("scriptish-tb-enabled-brd");
+  $("scriptish-button-brd").setAttribute(
+      "onclick", "Scriptish_BrowserUIM.onIconClick(event)");
 
-  statusEnabledItem.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
-  statusEnabledItem.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.ak"));
-  statusEnabledItem.addEventListener("command", function() { Scriptish_BrowserUIM.onToggleStatus() }, false);
+  statusEnabledItem.setAttribute("label",
+      Scriptish_stringBundle("statusbar.enabled"));
+  statusEnabledItem.setAttribute("accesskey",
+      Scriptish_stringBundle("statusbar.enabled.ak"));
+  statusEnabledItem.setAttribute("oncommand",
+      "Scriptish_BrowserUIM.onToggleStatus()");
 
-  $("scriptish-tb-no-scripts").setAttribute(
+  $("scriptish-tb-no-scripts-brd").setAttribute(
       "label", Scriptish_stringBundle("statusbar.noscripts"));
 
-  var sbCmdsEle = $("scriptish-tb-cmds");
+  var sbCmdsEle = $("scriptish-tb-cmds-brd");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
-  sbCmdsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.commands.ak"));
-  sbCmdsEle.addEventListener("popupshowing", function(aEvt) { aEvt.stopPropagation() }, true);
+  sbCmdsEle.setAttribute("accesskey",
+      Scriptish_stringBundle("menu.commands.ak"));
+  sbCmdsEle.setAttribute("onpopupshowing", "event.stopPropagation()");
 
-  var sbNewUSEle = $("scriptish-tb-new-us");
+  var sbNewUSEle = $("scriptish-tb-new-us-brd");
   sbNewUSEle.setAttribute("label", Scriptish_stringBundle("menu.new"));
   sbNewUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.new.ak"));
-  sbNewUSEle.addEventListener("command", function(){ Scriptish_BrowserUIM.newUserScript() }, false);
+  sbNewUSEle.setAttribute("oncommand", "Scriptish_BrowserUIM.newUserScript()");
 
-  var sbShowUSEle = $("scriptish-tb-show-us");
+  var sbShowUSEle = $("scriptish-tb-show-us-brd");
   sbShowUSEle.setAttribute("label", Scriptish_stringBundle("menu.manage"));
   sbShowUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.manage.ak"));
-  sbShowUSEle.addEventListener("command", function(){ Scriptish_BrowserUIM.showUserscriptList() }, false);
+  sbShowUSEle.setAttribute("oncommand",
+      "Scriptish_BrowserUIM.showUserscriptList()");
 
-  var showOptionsEle = $("scriptish-tb-options");
+  var showOptionsEle = $("scriptish-tb-options-brd");
   showOptionsEle.setAttribute("label", Scriptish_stringBundle("options")+"...");
-  showOptionsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.options.ak"));
-  showOptionsEle.addEventListener("command", function(){ Scriptish_BrowserUIM.openOptionsWin() }, false);
+  showOptionsEle.setAttribute("accesskey",
+      Scriptish_stringBundle("menu.options.ak"));
+  showOptionsEle.setAttribute("oncommand",
+      "Scriptish_BrowserUIM.openOptionsWin()");
 
-  var sbPopUp = $("scriptish-tb-popup");
-  sbPopUp.addEventListener("click", function(aEvt) {
-    Scriptish_popupClicked(aEvt);
-    aEvt.stopPropagation();
-  }, false);
-  sbPopUp.addEventListener("popupshowing", function(aEvt) {
-    Scriptish_showPopup(aEvt);
-    aEvt.stopPropagation();
-  }, false);
+  var sbPopUp = $("scriptish-tb-popup-brd");
+  sbPopUp.setAttribute("onclick",
+      "Scriptish_popupClicked(event);event.stopPropagation();");
+  sbPopUp.setAttribute("onpopupshowing",
+      "Scriptish_showPopup(event);event.stopPropagation();");
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
 
-  (Scriptish_BrowserUI.tbBtnSetup = Scriptish_BrowserUI.reattachMenuCmds)();
+  delete Scriptish_BrowserUI["tbBtnSetup"];
 }
 
 /**
@@ -80,14 +83,7 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
 Scriptish_BrowserUI.chromeLoad = function(e) {
   Scriptish_BrowserUIM = new Scriptish_BrowserUIM(window, this);
 
-  var tbBtnAdd = function(evt) {
-    if ("scriptish-tb-item" != evt.target.id) return;
-    Scriptish_BrowserUI.tbBtnSetup();
-  }
-  getNavToolbox().addEventListener("DOMNodeInserted", tbBtnAdd, false);
-  let addonBar = $("addon-bar");
-  if (addonBar) addonBar.addEventListener("DOMNodeInserted", tbBtnAdd, false);
-  if ($("scriptish-tb-item")) this.tbBtnSetup();
+  this.tbBtnSetup();
 
   // get all required DOM elements
   this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
@@ -282,7 +278,46 @@ Scriptish_BrowserUI.getCommander = function(aWin) {
   return commander;
 }
 
+Scriptish_BrowserUI.viewContextItemClicked = function() {
+  Scriptish_configDownloader.startViewScript(
+      Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
+}
+
+// necessary for webProgressListener implementation
+Scriptish_BrowserUI.onProgressChange = function(webProgress,b,c,d,e,f){};
+Scriptish_BrowserUI.onStateChange = function(a,b,c,d){};
+Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
+Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
+Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
+
+window.addEventListener("load", hitch(Scriptish_BrowserUI, "chromeLoad"), false);
+window.addEventListener("unload", hitch(Scriptish_BrowserUI, "chromeUnload"), false);
+})(Components.utils.import, {})
+
+/**
+ * Handle clicking one of the items in the popup. Left-click toggles the enabled
+ * state, right-click opens in an editor.
+ */
+function Scriptish_popupClicked(aEvt) {
+  var script = aEvt.target.script;
+  if (!script) return;
+  switch (aEvt.button) {
+    // left-click
+    case 0:
+      script.enabled = !script.enabled;
+      break;
+    // right-click
+    case 2:
+      Scriptish_openInEditor(script, window);
+      $("scriptish-tb-popup").hidePopup();
+      break;
+  }
+}
+
 function Scriptish_showPopup(aEvent) {
+  var $ = function(aID) document.getElementById(aID);
+  Scriptish_BrowserUI.reattachMenuCmds();
+
   function scriptsMatching(urls) {
     function testMatchURLs(script) {
       return urls.some(function(url) script.matchesURL(url));
@@ -343,39 +378,3 @@ function Scriptish_showPopup(aEvent) {
   $("scriptish-tb-no-scripts").collapsed =
       !!(runsFramed.length + runsOnTop.length);
 }
-
-/**
- * Handle clicking one of the items in the popup. Left-click toggles the enabled
- * state, right-click opens in an editor.
- */
-function Scriptish_popupClicked(aEvt) {
-  var script = aEvt.target.script;
-  if (!script) return;
-  switch (aEvt.button) {
-    // left-click
-    case 0:
-      script.enabled = !script.enabled;
-      break;
-    // right-click
-    case 2:
-      Scriptish_openInEditor(script, window);
-      $("scriptish-tb-popup").hidePopup();
-      break;
-  }
-}
-
-Scriptish_BrowserUI.viewContextItemClicked = function() {
-  Scriptish_configDownloader.startViewScript(
-      Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
-}
-
-// necessary for webProgressListener implementation
-Scriptish_BrowserUI.onProgressChange = function(webProgress,b,c,d,e,f){};
-Scriptish_BrowserUI.onStateChange = function(a,b,c,d){};
-Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
-Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
-Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
-
-window.addEventListener("load", hitch(Scriptish_BrowserUI, "chromeLoad"), false);
-window.addEventListener("unload", hitch(Scriptish_BrowserUI, "chromeUnload"), false);
-})(Components.utils.import, {})

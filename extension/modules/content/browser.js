@@ -38,17 +38,17 @@ Scriptish_BrowserUIM.prototype = {
     Scriptish.enabled = !Scriptish.enabled;
   },
   refreshStatus: function() {
-    var tbImg = this.$("scriptish-button");
+    var tbImg = this.$("scriptish-button-brd");
     var menu = this.$("scriptish_general_menu");
     var appName = Services.appinfo.name;
 
     if (Scriptish.enabled) {
       menu.setAttribute("image", ICON_16_ON);
-      tbImg && tbImg.setAttribute(
+      tbImg.setAttribute(
           "image", "SeaMonkey" == appName ? ICON_32_ON : ICON_24_ON);
     } else {
       menu.setAttribute("src", ICON_16_OFF);
-      tbImg && tbImg.setAttribute(
+      tbImg.setAttribute(
           "image", "SeaMonkey" == appName ? ICON_32_OFF : ICON_24_OFF);
     }
   },
