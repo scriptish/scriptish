@@ -22,9 +22,10 @@ function setupIncludes(type, items) {
 
   let [box, desc] = [$(type), $(type + '-desc')];
   let list = $nHTML('ol');
-  if (type == 'match')
-    items = items.map(function(e) e.pattern);
-  items.forEach(function(i) list.appendChild($nHTML('li', i)));
+  if (type == "matches")
+    items.forEach(function(i) list.appendChild($nHTML("li", i.pattern)));
+  else
+    items.forEach(function(i) list.appendChild($nHTML('li', i)));
   desc.appendChild(list);
   box.setAttribute("class", "display");
 }
