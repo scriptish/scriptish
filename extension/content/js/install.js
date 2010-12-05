@@ -51,13 +51,11 @@ addEventListener("load", function() { try  { (function() {
 
   // setup buttons
   let dialog = document.documentElement;
-  let [extraButton, acceptButton] = ["extra1", "accept"]
+  let [acceptButton, cancelButton] = ["accept", "cancel"]
     .map(function(e) dialog.getButton(e));
-  extraButton.setAttribute("type", "checkbox");
-  extraButton.setAttribute("label",
-                           Scriptish_stringBundle("install.showscriptsource"));
   acceptButton.setAttribute("label",
                             Scriptish_stringBundle("install.installbutton"));
+  cancelButton.focus();
 
   // setup other l10n
   $("matches-label").setAttribute("value", Scriptish_stringBundle("install.matches"));
@@ -94,14 +92,18 @@ addEventListener("load", function() { try  { (function() {
   desc.appendChild($nHTML("br"));
   desc.appendChild($t(script.description));
 
-  // setup button event listeners
-  addEventListener('dialogaccept', function() {
+  // setup action event listeners
+  addEventListener("dialogaccept", function() {
     if (scriptDownloader.installScript())
       removeEventListener("unload", cleanup, false);
     delayedClose();
   }, false);
-  addEventListener('dialogcancel', delayedClose, false);
-  addEventListener('dialogextra1', function() {
+  addEventListener("dialogcancel", delayedClose, false);
+
+  let showSource = $('showSource');
+  showSource.setAttribute("value",
+                          Scriptish_stringBundle("install.showscriptsource"));
+  showSource.addEventListener("click", function() {
     removeEventListener("unload", cleanup, false);
     scriptDownloader.showScriptView();
     delayedClose();

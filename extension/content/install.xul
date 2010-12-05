@@ -5,7 +5,7 @@
     id="scriptish"
     style="width: 42em; height:32em;"
     persist="width,height"
-    buttons="accept,cancel,extra1"
+    buttons="accept,cancel"
     defaultButton="cancel">
   <script type="text/javascript" src="chrome://scriptish/content/js/install.js"/>
   <hbox align="start" id="xpinstallheader">
@@ -36,6 +36,9 @@
         <description id="excludes-desc"/>
       </vbox>
       <spacer flex="1"/>
+      <hbox id="showSource-box" flex="1" pack="end" align="end">
+        <label id="showSource" class="text-link"/>
+      </hbox>
     </vbox>
   </vbox>
 </dialog>
