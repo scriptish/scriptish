@@ -1,5 +1,6 @@
 const NS_HTML = "http://www.w3.org/1999/xhtml";
 
+Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 function $(id) document.getElementById(id);
@@ -66,7 +67,28 @@ addEventListener("load", function() { try  { (function() {
   $("warning2").appendChild($t(Scriptish_stringBundle("install.warning2")));
 
   // setup script info
-  $('scriptIcon').src = script.iconURL;
+  let icon = $('scriptIcon');
+  try {
+    icon.onerror = function() {
+      // XXX: right now doesn't get called because of a bad dependency
+      // with ScriptDependency
+      icon.src = script.iconURL;
+    };
+    // at this point we should have a temp file if
+    // a) the script has an icon assigned
+    // b) the icon points to a valid location
+    if (script.icon.tempFile) {
+      icon.src = NetUtil.newURI(script.icon.tempFile).spec;
+    }
+    else {
+      throw new Error("no temp file");
+    }
+  }
+  catch (ex) {
+    Components.utils.reportError(ex);
+    icon.src = script.iconURL;
+  }
+
   let desc = $("scriptDescription");
   desc.appendChild($nHTML("strong", script.name + " " + script.version));
   desc.appendChild($nHTML("br"));

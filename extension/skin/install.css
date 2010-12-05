@@ -25,8 +25,8 @@
 }
 
 #scriptIcon {
-  width: 32px;
-  height: 32px;
+  max-width: 48px;
+  max-height: 48px;
   margin-right: 1ex;
 }
 
