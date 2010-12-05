@@ -1,18 +1,18 @@
 var EXPORTED_SYMBOLS = ["Config"];
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
-Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
-Cu.import("resource://scriptish/utils/Scriptish_getProfileFile.js");
-Cu.import("resource://scriptish/utils/Scriptish_notification.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
-Cu.import("resource://scriptish/third-party/Timer.js");
-Cu.import("resource://scriptish/script/script.js");
-
+(function(inc) {
+inc("resource://scriptish/constants.js");
+inc("resource://scriptish/logging.js");
+inc("resource://scriptish/utils/Scriptish_getContents.js");
+inc("resource://scriptish/utils/Scriptish_hitch.js");
+inc("resource://scriptish/utils/Scriptish_getWriteStream.js");
+inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
+inc("resource://scriptish/utils/Scriptish_notification.js");
+inc("resource://scriptish/utils/Scriptish_stringBundle.js");
+inc("resource://scriptish/utils/Scriptish_openManager.js");
+inc("resource://scriptish/third-party/Timer.js");
+inc("resource://scriptish/script/script.js");
+})(Components.utils.import);
 
 function Config(aBaseDir) {
   this.timer = new Timer();
@@ -25,7 +25,6 @@ function Config(aBaseDir) {
   this._configFile.append("config.xml");
 
   this._initScriptDir();
-
   this._load();
 }
 Config.prototype = {
@@ -53,13 +52,9 @@ Config.prototype = {
     this._notifyObservers(script, event, data);
   },
 
-  installIsUpdate: function(script) {
-    return this._find(script.id) > -1;
-  },
+  installIsUpdate: function(script) this._find(script.id) > -1,
 
-  addScript: function(aScript) {
-    this._scripts.push(aScript);
-  },
+  addScript: function(aScript) { this._scripts.push(aScript); },
 
   _find: function(aID, aType) {
     var scripts = this._scripts;
