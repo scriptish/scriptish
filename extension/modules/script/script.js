@@ -713,10 +713,11 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "jsversion":
           let jsVerIndx = JSVersions.indexOf(value);
           if (-1 === jsVerIndx) {
-            throw new Error("'" + value + "' is an invalid value for @jsversion");
+            throw new Error("@jsversion " + value + " " +
+                Scriptish_stringBundle("error.isInvalidValue"));
           } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
-            throw new Error("The @jsversion value '" + value + "' is not "
-                + "supported by this version of Firefox.");
+            throw new Error("@jsversion " + value + " " +
+                Scriptish_stringBundle("error.notSupported.Firefox"));
           } else {
             script._jsversion = JSVersions[jsVerIndx];
           }
@@ -724,7 +725,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "run-at":
           let runAtIndx = runAtValues.indexOf(value);
           if (0 > runAtIndx)
-            throw new Error("'" + value + "' is an invalid value for @run-at");
+            throw new Error("@run-at " + value + " " +
+                Scriptish_stringBundle("error.isInvalidValue"));
           script["_run-at"] = runAtValues[runAtIndx];
           continue;
         case "contributor":
@@ -773,23 +775,21 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
             if (aUpdateScript) {
               script._dependFail = true;
             } else {
-              throw new Error('Failed to @require '+ value);
+              throw new Error(Scriptish_stringBundle("error.retrieving") +
+                              " @require: '" + value + "'");
             }
           }
           continue;
         case "resource":
           var res = value.match(valueSplitter);
           if (res === null) {
-            // NOTE: Unlocalized strings
-            throw new Error("Invalid syntax for @resource declaration '" +
-                            value + "'. Resources are declared like: " +
-                            "@resource <name> <url>.");
+            throw new Error(Scriptish_stringBundle("error.resource.syntax") +
+                            ": '" + value + "'");
           }
           var resName = res[1];
           if (previousResourceNames[resName]) {
-            throw new Error("Duplicate resource name '" + resName + "' " +
-                            "detected. Each resource must have a unique " +
-                            "name.");
+            throw new Error("'" + resName + "' " +
+                            Scriptish_stringBundle("error.resource.dupName"));
           } else {
             previousResourceNames[resName] = true;
           }
@@ -806,7 +806,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
               script._dependFail = true;
             } else {
               throw new Error(
-                  'Failed to get @resource '+ resName +' from '+ res[2]);
+                  Scriptish_stringBundle("error.retrieving") +
+                  " @resource '" + resName + "' (" + res[2] + ")");
             }
           }
           continue;

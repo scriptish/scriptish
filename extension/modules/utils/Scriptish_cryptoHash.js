@@ -1,5 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_cryptoHash"];
 Components.utils.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 // this tells updateFromStream to read the entire string 
 const PR_UINT32_MAX = 0xffffffff;
@@ -14,13 +15,13 @@ function Scriptish_cryptoHash(aString, aAlg, aCharset) {
   try {
     ch.initWithString(alg);
   } catch (e) {
-    throw new Error("Invalid hash algorithm specified.");
+    throw new Error(Scriptish_stringBundle("error.hash.algorithm"));
   }
 
   try {
     unicodeConverter.charset = charset;
   } catch(e) {
-    throw new Error("Invalid charset specified.");
+    throw new Error(Scriptish_stringBundle("error.charset"));
   }
 
   if (str)
