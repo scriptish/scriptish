@@ -35,10 +35,9 @@
         <label id="excludes-label"/>
         <description id="excludes-desc"/>
       </vbox>
-      <spacer flex="1"/>
-      <hbox id="showSource-box" flex="1" pack="end" align="end">
-        <label id="showSource" class="text-link"/>
-      </hbox>
     </vbox>
+    <hbox id="showSource-box" flex="1" pack="end" align="end">
+      <label id="showSource" class="text-link"/>
+    </hbox>
   </vbox>
 </dialog>
