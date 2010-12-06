@@ -15,7 +15,7 @@ let on = addEventListener;
 
 function setupIncludes(type, items) {
   if (!items.length) return;
-  let [box, desc, list] = [$(type), $(type + "-desc"), $nHTML("ol")];
+  let [box, desc, list] = [$(type), $(type + "-desc"), $nHTML("ul")];
   if (type == "matches")
     items.forEach(function(i) list.appendChild($nHTML("li", i.pattern)));
   else
