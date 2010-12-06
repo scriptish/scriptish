@@ -22,13 +22,13 @@ var Scriptish_Install = {
     this.extraButton_ = this.dialog_.getButton("extra1");
     this.extraButton_.setAttribute("type", "checkbox");
     this.extraButton_.setAttribute("label",
-        Scriptish_stringBundle("install.showscriptsource"));
+        Scriptish_stringBundle("install.showScriptSource"));
     this.extraButton_.addEventListener(
         "command", function() { Scriptish_Install.onShowSource() }, false);
 
     this.acceptButton_ = this.dialog_.getButton("accept");
     this.acceptButton_.setAttribute("label",
-        Scriptish_stringBundle("install.installbutton"));
+        Scriptish_stringBundle("install.installButton"));
     this.acceptButton_.addEventListener(
         "command", function() { Scriptish_Install.onOK() }, false);
 
@@ -36,8 +36,8 @@ var Scriptish_Install = {
         "command", function() { Scriptish_Install.onCancel() }, false);
 
     $("matches-label").setAttribute("value", Scriptish_stringBundle("install.matches"));
-    $("includes-label").setAttribute("value", Scriptish_stringBundle("install.runson"));
-    $("excludes-label").setAttribute("value", Scriptish_stringBundle("install.butnoton"));
+    $("includes-label").setAttribute("value", Scriptish_stringBundle("install.runsOn"));
+    $("excludes-label").setAttribute("value", Scriptish_stringBundle("install.butNotOn"));
     $("warning1").setAttribute("value", Scriptish_stringBundle("install.warning1"));
     $("warning2").setAttribute("value", Scriptish_stringBundle("install.warning2"));
 

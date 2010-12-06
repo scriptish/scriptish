@@ -52,7 +52,7 @@ const Scriptish_getEditor = function(parentWindow, change) {
       Scriptish_prefRoot.setValue("editor", filePicker.file.path);
       return filePicker.file;
     } else {
-      Scriptish_alert(Scriptish_stringBundle("editor.please_pick_executable"));
+      Scriptish_alert(Scriptish_stringBundle("editor.pleasePickExecutable"));
     }
   }
 }

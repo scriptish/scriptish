@@ -9,12 +9,12 @@ function Scriptish_createUserScriptSource(aHeader) {
   if (aHeader.id)
     script.push("// @id             "+aHeader.id);
   else
-    throw new Error(Scriptish_stringBundle("newscript.noid"));
+    throw new Error(Scriptish_stringBundle("newscript.noID"));
 
   if (aHeader.name)
     script.push("// @name           "+aHeader.name);
   else
-    throw new Error(Scriptish_stringBundle("newscript.noname"));
+    throw new Error(Scriptish_stringBundle("newscript.noName"));
 
   if (aHeader.namespace)
     script.push("// @namespace      "+aHeader.namespace);

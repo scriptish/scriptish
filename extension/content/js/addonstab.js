@@ -53,8 +53,8 @@ window.addEventListener("load", function() {
 
   (function() {
     let items = {'edit': 'edit',
-                 'show': 'openfolder',
-                 'dl_link': 'copydownloadURL'};
+                 'show': 'openFolder',
+                 'dl_link': 'copyDownloadURL'};
     for (let key in items) {
       let string = items[key];
       $("br_scriptish_userscript_" + key).setAttribute("label", Scriptish_stringBundle(string));
