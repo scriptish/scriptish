@@ -5,27 +5,21 @@ Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 function $(id) document.getElementById(id);
 function $t(text) document.createTextNode(text);
-function $nNS(ns, tag, text, attrs) {
-  let rv = document.createElementNS(ns, tag);
-  if (!!text)
-    rv.appendChild($t(text));
-  attrs = attrs || {};
-  for (let a in attrs)
-    rv.setAttribute(a, attrs[a]);
-  return rv;
+function $nHTML(tag, text, attrs) {
+  let rtnEle = document.createElementNS(NS_HTML, tag);
+  if (text) rtnEle.appendChild($t(text));
+  if (attrs) for (let a in attrs) rtnEle.setAttribute(a, attrs[a]);
+  return rtnEle;
 }
-function $nHTML(tag, text, attrs) $nNS(NS_HTML, tag, text, attrs);
+let on = addEventListener;
 
 function setupIncludes(type, items) {
-  if (!items.length)
-    return;
-
-  let [box, desc] = [$(type), $(type + '-desc')];
-  let list = $nHTML('ol');
+  if (!items.length) return;
+  let [box, desc, list] = [$(type), $(type + "-desc"), $nHTML("ol")];
   if (type == "matches")
     items.forEach(function(i) list.appendChild($nHTML("li", i.pattern)));
   else
-    items.forEach(function(i) list.appendChild($nHTML('li', i)));
+    items.forEach(function(i) list.appendChild($nHTML("li", i)));
   desc.appendChild(list);
   box.setAttribute("class", "display");
 }
@@ -40,9 +34,7 @@ const scriptDownloader = window.arguments[0];
 document.title = Scriptish_stringBundle("install.title");
 
 
-addEventListener("load", function() { try  { (function() {
-  //removeEventListener("load", arguments.callee, true);
-
+on("load", function() {
   let script = scriptDownloader.script;
 
   // setup lists
@@ -52,41 +44,30 @@ addEventListener("load", function() { try  { (function() {
 
   // setup buttons
   let dialog = document.documentElement;
-  let [acceptButton, cancelButton] = ["accept", "cancel"]
-    .map(function(e) dialog.getButton(e));
-  acceptButton.setAttribute("label",
-                            Scriptish_stringBundle("install.installbutton"));
-  cancelButton.focus();
+  dialog.getButton("accept").setAttribute("label",
+      Scriptish_stringBundle("install.installbutton"));
+  dialog.getButton("cancel").focus();
 
   // setup other l10n
-  $("matches-label").setAttribute("value", Scriptish_stringBundle("install.matches"));
-  $("includes-label").setAttribute("value", Scriptish_stringBundle("install.runson"));
-  $("excludes-label").setAttribute("value", Scriptish_stringBundle("install.butnoton"));
+  $("matches-label").setAttribute("value",
+      Scriptish_stringBundle("install.matches"));
+  $("includes-label").setAttribute("value",
+      Scriptish_stringBundle("install.runson"));
+  $("excludes-label").setAttribute("value",
+      Scriptish_stringBundle("install.butnoton"));
   $("warning1").appendChild($t(Scriptish_stringBundle("install.warning1")));
   $("warning2").appendChild($t(Scriptish_stringBundle("install.warning2")));
 
   // setup script info
-  let icon = $('scriptIcon');
-  try {
-    icon.onerror = function() {
-      // XXX: right now doesn't get called because of a bad dependency
-      // with ScriptDependency
-      icon.src = script.iconURL;
-    };
-    // at this point we should have a temp file if
-    // a) the script has an icon assigned
-    // b) the icon points to a valid location
-    if (script.icon.tempFile) {
-      icon.src = NetUtil.newURI(script.icon.tempFile).spec;
-    }
-    else {
-      throw new Error("no temp file");
-    }
+  let icon = $("scriptIcon");
+  if (script.icon.tempFile) {
+    try {
+      let src = NetUtil.newURI(script.icon.tempFile).spec;
+      icon.onerror = function() { icon.src = script.iconURL };
+      icon.src = src;
+    } catch (e) {}
   }
-  catch (ex) {
-    Components.utils.reportError(ex);
-    icon.src = script.iconURL;
-  }
+  if (!icon.src) icon.src = script.iconURL;
 
   let desc = $("scriptDescription");
   desc.appendChild($nHTML("strong", script.name + " " + script.version));
@@ -94,22 +75,21 @@ addEventListener("load", function() { try  { (function() {
   desc.appendChild($t(script.description));
 
   // setup action event listeners
-  addEventListener("dialogaccept", function() {
+  on("dialogaccept", function() {
     if (scriptDownloader.installScript())
       removeEventListener("unload", cleanup, false);
     delayedClose();
   }, false);
-  addEventListener("dialogcancel", delayedClose, false);
+  on("dialogcancel", delayedClose, false);
 
-  let showSource = $('showSource');
+  let showSource = $("showSource");
   showSource.setAttribute("value",
-                          Scriptish_stringBundle("install.showscriptsource"));
+      Scriptish_stringBundle("install.showscriptsource"));
   showSource.addEventListener("click", function() {
     removeEventListener("unload", cleanup, false);
     scriptDownloader.showScriptView();
     delayedClose();
   }, false);
+}, true);
 
-})() } catch(ex) { Components.utils.reportError(ex); throw ex; }}, true); // addEventListener(load)
-
-addEventListener("unload", cleanup, false);
+on("unload", cleanup, false);
