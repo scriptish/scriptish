@@ -1,4 +1,5 @@
 const NS_HTML = "http://www.w3.org/1999/xhtml";
+const scriptDownloader = window.arguments[0];
 
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
@@ -24,13 +25,11 @@ function setupIncludes(type, items) {
   box.setAttribute("class", "display");
 }
 
-function cleanup() Scriptish_Install.scriptDownloader_.cleanupTempFiles();
+function cleanup() scriptDownloader.cleanupTempFiles();
 function delayedClose() setTimeout(function() close(), 0);
 
 
 /* Main */
-
-const scriptDownloader = window.arguments[0];
 document.title = Scriptish_stringBundle("install.title");
 
 
