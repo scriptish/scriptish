@@ -1,87 +1,94 @@
+const NS_HTML = "http://www.w3.org/1999/xhtml";
+const scriptDownloader = window.arguments[0];
+
+Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-var Scriptish_Install = {
-  init: function() {
-    this.doc = document;
-    var $ = function(aID) document.getElementById(aID);
-    this.htmlNs_ = "http://www.w3.org/1999/xhtml";
-    this.scriptDownloader_ = window.arguments[0];
-    var script = this.script_ = this.scriptDownloader_.script;
+function $(id) document.getElementById(id);
+function $t(text) document.createTextNode(text);
+function $nHTML(tag, text, attrs) {
+  let rtnEle = document.createElementNS(NS_HTML, tag);
+  if (text) rtnEle.appendChild($t(text));
+  if (attrs) for (let a in attrs) rtnEle.setAttribute(a, attrs[a]);
+  return rtnEle;
+}
+let on = addEventListener;
 
-    if (script.matches.length || script.includes.length) {
-      this.setupIncludes("match", "matches", "matches-desc", script.matches);
-      this.setupIncludes("include", "includes", "includes-desc", script.includes);
-    } else {
-      $('includes').setAttribute("class", "display");
-    }
-    this.setupIncludes("include", "excludes", "excludes-desc", script.excludes);
+function setupIncludes(type, items) {
+  if (!items.length) return;
+  let [box, desc, list] = [$(type), $(type + "-desc"), $nHTML("ul")];
+  if (type == "matches")
+    items.forEach(function(i) list.appendChild($nHTML("li", i.pattern)));
+  else
+    items.forEach(function(i) list.appendChild($nHTML("li", i)));
+  desc.appendChild(list);
+  box.setAttribute("class", "display");
+}
 
-    this.dialog_ = document.documentElement;
-    this.dialog_.setAttribute("title", Scriptish_stringBundle("install.title"));
+function cleanup() scriptDownloader.cleanupTempFiles();
+function delayedClose() setTimeout(function() close(), 0);
 
-    this.extraButton_ = this.dialog_.getButton("extra1");
-    this.extraButton_.setAttribute("type", "checkbox");
-    this.extraButton_.setAttribute("label",
-        Scriptish_stringBundle("install.showscriptsource"));
-    this.extraButton_.addEventListener(
-        "command", function() { Scriptish_Install.onShowSource() }, false);
 
-    this.acceptButton_ = this.dialog_.getButton("accept");
-    this.acceptButton_.setAttribute("label",
-        Scriptish_stringBundle("install.installbutton"));
-    this.acceptButton_.addEventListener(
-        "command", function() { Scriptish_Install.onOK() }, false);
+/* Main */
+document.title = Scriptish_stringBundle("install.title");
 
-    this.dialog_.getButton("cancel").addEventListener(
-        "command", function() { Scriptish_Install.onCancel() }, false);
 
-    $("matches-label").setAttribute("value", Scriptish_stringBundle("install.matches"));
-    $("includes-label").setAttribute("value", Scriptish_stringBundle("install.runson"));
-    $("excludes-label").setAttribute("value", Scriptish_stringBundle("install.butnoton"));
-    $("warning1").setAttribute("value", Scriptish_stringBundle("install.warning1"));
-    $("warning2").setAttribute("value", Scriptish_stringBundle("install.warning2"));
+on("load", function() {
+  let script = scriptDownloader.script;
 
-    var desc = $("scriptDescription");
-    desc.appendChild(this.doc.createElementNS(this.htmlNs_, "strong"));
-    desc.firstChild.appendChild(this.doc.createTextNode(script.name + " " + script.version));
-    desc.appendChild(this.doc.createElementNS(this.htmlNs_, "br"));
-    desc.appendChild(this.doc.createTextNode(script.description));
-  },
+  // setup lists
+  setupIncludes("matches", script.matches);
+  setupIncludes("includes", script.includes);
+  setupIncludes("excludes", script.excludes);
 
-  setupIncludes: function(type, box, desc, includes) {
-    if (!includes.length) return;
-    desc = document.getElementById(desc);
-    document.getElementById(box).setAttribute("class", "display");
+  // setup buttons
+  let dialog = document.documentElement;
+  dialog.getButton("accept").setAttribute("label",
+      Scriptish_stringBundle("install.installbutton"));
+  dialog.getButton("cancel").focus();
 
-    if (type == "match") {
-      for (var i = 0; i < includes.length; i++) {
-        desc.appendChild(document.createTextNode(includes[i].pattern));
-        desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
-      }
-    } else {
-      for (var i = 0; i < includes.length; i++) {
-        desc.appendChild(document.createTextNode(includes[i]));
-        desc.appendChild(document.createElementNS(this.htmlNs_, "br"));
-      }
-    }
+  // setup other l10n
+  $("matches-label").setAttribute("value",
+      Scriptish_stringBundle("install.matches"));
+  $("includes-label").setAttribute("value",
+      Scriptish_stringBundle("install.runson"));
+  $("excludes-label").setAttribute("value",
+      Scriptish_stringBundle("install.butnoton"));
+  $("warning1").appendChild($t(Scriptish_stringBundle("install.warning1")));
+  $("warning2").appendChild($t(Scriptish_stringBundle("install.warning2")));
 
-    desc.removeChild(desc.lastChild);
-  },
+  // setup script info
+  let icon = $("scriptIcon");
+  if (script.icon.tempFile) {
+    try {
+      let src = NetUtil.newURI(script.icon.tempFile).spec;
+      icon.onerror = function() { icon.src = script.iconURL };
+      icon.src = src;
+    } catch (e) {}
+  }
+  if (!icon.src) icon.src = script.iconURL;
 
-  onOK: function() {
-    if (this.scriptDownloader_.installScript())
-      window.removeEventListener("unload", Scriptish_Install.cleanup, false);
-    Scriptish_Install.close();
-  },
-  onCancel: function() Scriptish_Install.close(),
-  onShowSource: function() {
-    window.removeEventListener("unload", Scriptish_Install.cleanup, false);
-    this.scriptDownloader_.showScriptView();
-    Scriptish_Install.close();
-  },
-  cleanup: function() Scriptish_Install.scriptDownloader_.cleanupTempFiles(),
-  close: function() window.setTimeout(function() window.close(), 0)
-};
+  let desc = $("scriptDescription");
+  desc.appendChild($nHTML("strong", script.name + " " + script.version));
+  desc.appendChild($nHTML("br"));
+  desc.appendChild($t(script.description));
 
-window.addEventListener("unload", Scriptish_Install.cleanup, false);
-window.addEventListener("load", function() { Scriptish_Install.init() }, false);
+  // setup action event listeners
+  on("dialogaccept", function() {
+    if (scriptDownloader.installScript())
+      removeEventListener("unload", cleanup, false);
+    delayedClose();
+  }, false);
+  on("dialogcancel", delayedClose, false);
+
+  let showSource = $("showSource");
+  showSource.setAttribute("value",
+      Scriptish_stringBundle("install.showscriptsource"));
+  showSource.addEventListener("click", function() {
+    removeEventListener("unload", cleanup, false);
+    scriptDownloader.showScriptView();
+    delayedClose();
+  }, false);
+}, true);
+
+on("unload", cleanup, false);
