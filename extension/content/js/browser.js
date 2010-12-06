@@ -309,7 +309,7 @@ function Scriptish_popupClicked(aEvt) {
     // right-click
     case 2:
       Scriptish_openInEditor(script, window);
-      $("scriptish-tb-popup").hidePopup();
+      document.getElementById("scriptish-tb-popup").hidePopup();
       break;
   }
 }
