@@ -42,7 +42,6 @@
           observes="scriptish-button-brd"
           type="menu-button"
           class="toolbarbutton-1"
-          image="chrome://scriptish/skin/icon_24.png"
           label="Scriptish">
         <menupopup id="scriptish-tb-popup" observes="scriptish-tb-popup-brd">
           <menuitem id="scriptish-tb-no-scripts" observes="scriptish-tb-no-scripts-brd"/>
