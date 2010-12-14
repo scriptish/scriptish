@@ -16,10 +16,10 @@
 
     // add toolbaritem to add-on bar
     var addToBar = chromeWin.document.getElementById("addon-bar");
-    if (!addToBar || chromeWin.document.getElementById("scriptish-tb-item"))
+    if (!addToBar || chromeWin.document.getElementById("scriptish-button"))
       return;
     var addonSet = addToBar.getAttribute("currentset").split(",");
-    addonSet.push("scriptish-tb-item");
+    addonSet.push("scriptish-button");
     addonSet = addonSet.join(",");
     addToBar.setAttribute("currentset", addonSet);
     addToBar.currentSet = addonSet;

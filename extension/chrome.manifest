@@ -5,6 +5,7 @@ category  content-policy @scriptish.erikvold.com/scriptish-service;1 @scriptish.
 content    scriptish    content/
 resource   scriptish    modules/
 skin       scriptish    classic/1.0 skin/
+style      chrome://global/content/customizeToolbar.xul chrome://scriptish/skin/browser.css
 
 overlay    chrome://browser/content/browser.xul chrome://scriptish/content/browser.xul
 overlay    chrome://navigator/content/navigator.xul chrome://scriptish/content/browser.xul
