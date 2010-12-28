@@ -1,5 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_prefRoot", "Scriptish_PrefManager"];
 Components.utils.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const MIN_INT_32 = -0x80000000;
 const MAX_INT_32 = 0x7FFFFFFF;
@@ -71,10 +72,8 @@ function Scriptish_PrefManager(startPoint) {
         break;
     }
 
-    if (!goodType) {
-      Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+    if (!goodType)
       throw new Error(Scriptish_stringBundle("error.pref.type"));
-    }
 
     // underlying preferences object throws an exception if new pref has a
     // different type than old one. i think we should not do this, so delete
