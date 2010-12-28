@@ -38,7 +38,7 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
       "Scriptish_BrowserUIM.onToggleStatus()");
 
   $("scriptish-tb-no-scripts-brd").setAttribute(
-      "label", Scriptish_stringBundle("statusbar.noscripts"));
+      "label", Scriptish_stringBundle("statusbar.noScripts"));
 
   var sbCmdsEle = $("scriptish-tb-cmds-brd");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));

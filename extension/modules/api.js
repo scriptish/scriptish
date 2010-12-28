@@ -3,8 +3,8 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const moduleFilename = Components.stack.filename;
 const NS_XHTML = "http://www.w3.org/1999/xhtml";
@@ -22,8 +22,7 @@ function GM_apiLeakCheck(apiName) {
         stack.filename != Services.scriptish.filename &&
         stack.filename.substr(0, 6) != "chrome") {
       Scriptish_logError(new Error(
-          "Scriptish access violation: unsafeWindow cannot call " +
-          apiName + "."));
+          Scriptish_stringBundle("error.api.unsafeAccess") + ": " + apiName));
       return false;
     }
   } while (stack = stack.caller);

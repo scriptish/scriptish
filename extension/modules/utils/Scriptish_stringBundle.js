@@ -1,6 +1,5 @@
 var EXPORTED_SYMBOLS = ["Scriptish_stringBundle"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/prefmanager.js");
 
 const defaultBundle = Services.strings.createBundle("chrome://scriptish/locale/scriptish.properties");
 const engBundle = Services.strings.createBundle((function(){
@@ -13,8 +12,14 @@ const engBundle = Services.strings.createBundle((function(){
   return tmp.join("/")
 })());
 
+XPCOMUtils.defineLazyGetter(this, "Scriptish_getPref", function() {
+  let tools = {};
+  Components.utils.import("resource://scriptish/prefmanager.js", tools);
+  return function(aVal) tools.Scriptish_prefRoot.getValue(aVal);
+});
+
 function Scriptish_stringBundle(aKey) {
-  if (Scriptish_prefRoot.getValue("useDefaultLocale"))
+  if (Scriptish_getPref("useDefaultLocale"))
     return engBundle.GetStringFromName(aKey);
   try {
     return defaultBundle.GetStringFromName(aKey)

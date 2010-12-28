@@ -40,6 +40,7 @@ var EXPORTED_SYMBOLS = ['MatchPattern'];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const validScheme = ['http', 'https', 'ftp', 'file'];
 
@@ -55,7 +56,7 @@ function MatchPattern(pattern){
   try {
     var uri = NetUtil.newURI(pattern);
   } catch (e) {
-    throw new Error("Pattern could not be parsed by nsURI: " + e);
+    throw new Error(Scriptish_stringBundle("error.pattern.parsing") + ": " + e);
   }
 
   var scheme = uri.scheme;
@@ -64,13 +65,13 @@ function MatchPattern(pattern){
 
   if (scheme === 'file') {
     if (!validatePath.test(path)) {
-      throw new Error("File scheme match pattern does not conform to pattern rules");
+      throw new Error(Scriptish_stringBundle("error.matchPattern.rules.file"));
     }
   }
   else {
     if (validScheme.indexOf(scheme) < 0 || !validateHost.test(host) ||
         !validatePath.test(path)) {
-      throw new Error("@match pattern does not conform to pattern rules");
+      throw new Error(Scriptish_stringBundle("error.matchPattern.rules"));
     }
 
     if (host == "*" && uri.path == "/") path = host;

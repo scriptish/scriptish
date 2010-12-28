@@ -44,16 +44,16 @@ on("load", function() {
   // setup buttons
   let dialog = document.documentElement;
   dialog.getButton("accept").setAttribute("label",
-      Scriptish_stringBundle("install.installbutton"));
+      Scriptish_stringBundle("install.installButton"));
   dialog.getButton("cancel").focus();
 
   // setup other l10n
   $("matches-label").setAttribute("value",
       Scriptish_stringBundle("install.matches"));
   $("includes-label").setAttribute("value",
-      Scriptish_stringBundle("install.runson"));
+      Scriptish_stringBundle("install.runsOn"));
   $("excludes-label").setAttribute("value",
-      Scriptish_stringBundle("install.butnoton"));
+      Scriptish_stringBundle("install.butNotOn"));
   $("warning1").appendChild($t(Scriptish_stringBundle("install.warning1")));
   $("warning2").appendChild($t(Scriptish_stringBundle("install.warning2")));
 
@@ -83,7 +83,7 @@ on("load", function() {
 
   let showSource = $("showSource");
   showSource.setAttribute("value",
-      Scriptish_stringBundle("install.showscriptsource"));
+      Scriptish_stringBundle("install.showScriptSource"));
   showSource.addEventListener("click", function() {
     removeEventListener("unload", cleanup, false);
     scriptDownloader.showScriptView();

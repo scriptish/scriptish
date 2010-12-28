@@ -36,7 +36,8 @@ Config.prototype = {
   removeObserver: function(observer, script) {
     var observers = script ? script._observers : this._observers;
     var index = observers.indexOf(observer);
-    if (index == -1) throw new Error("Observer not found");
+    if (index == -1)
+      throw new Error(Scriptish_stringBundle("error.observerNotFound"));
     observers.splice(index, 1);
   },
 
