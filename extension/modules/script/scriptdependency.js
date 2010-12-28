@@ -23,7 +23,7 @@ ScriptDependency.prototype = {
     file.append(this._filename);
     return file;
   },
-
+  get tempFile() this._tempFile,
   get fileURL() Scriptish_getUriFromFile(this._file).spec,
   get textContent() Scriptish_getContents(this._file),
 
