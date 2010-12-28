@@ -1,38 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getFirebugConsole"];
-Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/logging.js");
 
 function Scriptish_getFirebugConsole(win, chromeWin) {
-  chromeWin = chromeWin.top;
-  if ('undefined' == typeof chromeWin.Firebug) return null;
-
-  try {
-    var fbVersion = parseFloat(chromeWin.Firebug.version, 10);
-    if(fbVersion >= 1.7)
-      return chromeWin.Firebug.getConsoleByGlobal(win);
-
-    var fbConsole = chromeWin.Firebug.Console;
-    var fbContext = chromeWin.TabWatcher &&
-        chromeWin.TabWatcher.getContextByWindow(win);
-
-    // Firebug 1.4 will give no context, when disabled for the current site.
-    if ('undefined' == typeof fbContext) return null;
-
-    function findActiveContext() {
-      for (var i = 0; i < fbContext.activeConsoleHandlers.length; i++)
-        if (fbContext.activeConsoleHandlers[i].window == win)
-          return fbContext.activeConsoleHandlers[i];
-      return null;
-    }
-
-    if (!fbConsole.isEnabled(fbContext)) return null;
-
-    if (fbVersion >= 1.3) {
-      fbConsole.injector.attachIfNeeded(fbContext, win);
-      return findActiveContext();
-    }
-  } catch (e) {
-    Scriptish_log('Scriptish getFirebugConsole() error:\n'+uneval(e)+'\n');
-  }
-  return null;
+  if (!chromeWin.Firebug || !chromeWin.Firebug.getConsoleByGlobal) return null;
+  return chromeWin.Firebug.getConsoleByGlobal(win);
 }
