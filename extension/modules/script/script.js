@@ -620,6 +620,7 @@ Script.prototype = {
 
 Script.parseVersion = function Script_parseVersion(aSrc) {
   var lines = aSrc.match(/\s*\/\/ [=@].*/g);
+  if (!lines) return null;
   var lnIdx = 0;
   var result = {};
   var foundMeta = false;
