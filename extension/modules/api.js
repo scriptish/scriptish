@@ -44,12 +44,6 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var _storage = null;
   var _resources = null;
   var _logger = null;
-  var workers = [];
-
-  // terminate workers
-  aSafeWin.addEventListener("unload", function() {
-    for (var i = 0, worker; worker = workers[i++];) worker.terminate();
-  }, true);
 
   function getXmlhttpRequester() {
     if (!_xmlhttpRequester) {
@@ -179,16 +173,6 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
         doCommand: aCmdFunc,
         window: aSafeWin});
     }
-  }
-
-  this.GM_worker = function GM_worker(resourceName) {
-    if (!GM_apiLeakCheck("GM_worker")) return;
-
-    var tools = {};
-    Cu.import("resource://scriptish/api/GM_worker.js", tools);
-    var worker = new tools.GM_worker(getResources().getDep(resourceName), aURL);
-    workers.push(worker)
-    return worker;
   }
 
   this.GM_cryptoHash = function GM_cryptoHash() {
