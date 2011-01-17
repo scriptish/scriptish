@@ -60,6 +60,10 @@
   </toolbarpalette>
 
   <popup id="contentAreaContextMenu">
+    <menuitem id="scriptish-context-menu-install"
+        class="menuitem-iconic"
+        image="chrome://scriptish/skin/icon_16.png"
+        insertbefore="context-openlink"/>
     <menuitem id="scriptish-context-menu-viewsource"
         class="menuitem-iconic"
         image="chrome://scriptish/skin/icon_16.png"
