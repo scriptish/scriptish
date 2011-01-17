@@ -9,6 +9,7 @@ skin       scriptish    classic/1.0 skin/
 overlay    chrome://browser/content/browser.xul chrome://scriptish/content/browser.xul
 overlay    chrome://navigator/content/navigator.xul chrome://scriptish/content/browser.xul
 overlay    about:addons chrome://scriptish/content/addonstab.xul
+overlay    chrome://mozapps/content/extensions/extensions.xul chrome://scriptish/content/addonstab.xul
 
 overlay    chrome://scriptish/content/install.xul chrome://scriptish/content/closewindow.xul
 overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/closewindow.xul
