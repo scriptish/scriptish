@@ -48,12 +48,10 @@ Scriptish_BrowserUIM.prototype = {
 
     if (Scriptish.enabled) {
       menu.setAttribute("image", ICON_16_ON);
-      tbImg.setAttribute(
-          "image", "SeaMonkey" == appName ? ICON_32_ON : ICON_24_ON);
+      tbImg.removeAttribute("scriptish-disabled");
     } else {
-      menu.setAttribute("src", ICON_16_OFF);
-      tbImg.setAttribute(
-          "image", "SeaMonkey" == appName ? ICON_32_OFF : ICON_24_OFF);
+      menu.setAttribute("image", ICON_16_OFF);
+      tbImg.setAttribute("scriptish-disabled", "scriptish-disabled");
     }
   },
   openChromeWindow: function(aURL) {
