@@ -32,6 +32,10 @@ Scriptish_BrowserUIM.prototype = {
       case 1:
         Scriptish_openManager();
         break;
+      case 2:
+        this.$("toolbar-context-menu").hidePopup();
+        this.$("scriptish-tb-popup").openPopup(this.$("scriptish-button"), "before_end", 0, 0, false, false);
+        break;
     }
   },
   onToggleStatus: function() {

@@ -19,7 +19,7 @@ window.addEventListener("load", function() {
   $("caption-uninstall")
       .setAttribute("label", Scriptish_stringBundle("Uninstall"));
   tmp = $("check-uninstall");
-  tmp.setAttribute("label", Scriptish_stringBundle("AlsoUninstallPrefs"));
+  tmp.setAttribute("label", Scriptish_stringBundle("options.alsoUninstallPrefs"));
   tmp.addEventListener("command", Scriptish_setUninstallPrefs, false);
   tmp.checked = Scriptish_prefRoot.getValue("uninstallPreferences");
 
@@ -27,15 +27,15 @@ window.addEventListener("load", function() {
   $("caption-update")
       .setAttribute("label", Scriptish_stringBundle("Update"));
   tmp = $("check-downloadURL");
-  tmp.setAttribute("label", Scriptish_stringBundle("UseDownloadURL"));
+  tmp.setAttribute("label", Scriptish_stringBundle("options.useDownloadURL"));
   tmp.addEventListener("command", Scriptish_setUpdatePrefs, false);
   tmp.checked = Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL");
   
   $("caption-addonmanager")
-      .setAttribute("label", Scriptish_stringBundle("options.addonmanager"));
+      .setAttribute("label", Scriptish_stringBundle("options.addonManager"));
   tmp = $("check-copydownloadURL");
   tmp.setAttribute(
-      "label", Scriptish_stringBundle("options.enablecopydownloadURL"));
+      "label", Scriptish_stringBundle("options.enableCopyDownloadURL"));
   tmp.addEventListener("command", Scriptish_setAddonManagerPrefs, false);
   tmp.checked = Scriptish_prefRoot.getValue("enableCopyDownloadURL");
 }, false);

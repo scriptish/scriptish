@@ -3,6 +3,7 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
   inc("resource://scriptish/constants.js");
   inc("resource://scriptish/logging.js");
   inc("resource://scriptish/utils/Scriptish_hitch.js");
+  inc("resource://scriptish/utils/Scriptish_stringBundle.js");
   inc("resource://scriptish/api.js");
 })(Components.utils.import)
 
@@ -29,7 +30,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     var url = uri.spec;
   } catch (e) {
     // A malformed URL won't be parsed properly.
-    throw new Error("Invalid URL: " + details.url);
+    throw new Error(Scriptish_stringBundle("error.api.reqURL") + ": " + details.url);
   }
 
   // This is important - without it, GM_xmlhttpRequest can be used to get
@@ -42,7 +43,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
       Scriptish_hitch(this, "chromeStartRequest", url, details, req)();
       break;
     default:
-      throw new Error("Disallowed scheme in URL: " + details.url);
+      throw new Error(Scriptish_stringBundle("error.api.reqURL.scheme") + ": " + details.url);
   }
 
   Scriptish_log("< GM_xmlhttpRequest.contentStartRequest");

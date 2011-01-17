@@ -12,6 +12,7 @@ inc("resource://scriptish/utils/Scriptish_hitch.js", tools);
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_openInEditor.js");
 inc("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
+inc("resource://scriptish/utils/Scriptish_installUri.js");
 inc("resource://scriptish/config/configdownloader.js");
 inc("resource://scriptish/menucommander.js");
 inc("resource://scriptish/logging.js");
@@ -38,7 +39,7 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
       "Scriptish_BrowserUIM.onToggleStatus()");
 
   $("scriptish-tb-no-scripts-brd").setAttribute(
-      "label", Scriptish_stringBundle("statusbar.noscripts"));
+      "label", Scriptish_stringBundle("statusbar.noScripts"));
 
   var sbCmdsEle = $("scriptish-tb-cmds-brd");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
@@ -87,7 +88,8 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
   // get all required DOM elements
   this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
-  this.contextItem = $("scriptish-context-menu-viewsource");
+  this.contextItemInstall = $("scriptish-context-menu-install");
+  this.contextItemVS = $("scriptish-context-menu-viewsource");
 
   var tmEle = $('scriptish_general_menu');
   tmEle.setAttribute("label", Scriptish_stringBundle("menu.title"));
@@ -121,9 +123,16 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   tmShowUSEle.setAttribute("accesskey", Scriptish_stringBundle("menu.manage.ak"));
   tmShowUSEle.addEventListener("command", function(){ Scriptish_BrowserUIM.showUserscriptList() }, false);
 
-  this.contextItem.setAttribute("label", Scriptish_stringBundle("menu.show"));
-  this.contextItem.setAttribute("accesskey", Scriptish_stringBundle("menu.show.ak"));
-  this.contextItem.addEventListener("command", function(aEvt) {
+  this.contextItemInstall.setAttribute("label", Scriptish_stringBundle("menu.install"));
+  this.contextItemInstall.setAttribute("accesskey", Scriptish_stringBundle("menu.install.ak"));
+  this.contextItemInstall.addEventListener("command", function(aEvt) {
+    Scriptish_installUri(
+        Scriptish_BrowserUI.getUserScriptLinkUnderPointer(), window);
+  }, false)
+
+  this.contextItemVS.setAttribute("label", Scriptish_stringBundle("menu.show"));
+  this.contextItemVS.setAttribute("accesskey", Scriptish_stringBundle("menu.show.ak"));
+  this.contextItemVS.addEventListener("command", function(aEvt) {
     Scriptish_BrowserUI.viewContextItemClicked(aEvt);
   }, false)
 
@@ -241,14 +250,14 @@ Scriptish_BrowserUI.chromeUnload = function() {
  * to show our context items.
  */
 Scriptish_BrowserUI.contextMenuShowing = function() {
-  var contextItem = this.contextItem;
-  var contextSep = $("scriptish-context-menu-viewsource-sep");
-  var culprit = document.popupNode;
-
+  let culprit = document.popupNode;
   while (culprit && culprit.tagName && culprit.tagName.toLowerCase() != "a")
     culprit = culprit.parentNode;
 
-  contextItem.hidden = contextSep.hidden = !this.getUserScriptLinkUnderPointer();
+  this.contextItemInstall.hidden
+      = this.contextItemVS.hidden
+      = $("scriptish-context-menu-viewsource-sep").hidden
+      = !this.getUserScriptLinkUnderPointer();
 }
 
 
