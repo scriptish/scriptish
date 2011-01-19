@@ -68,8 +68,7 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   var sbPopUp = $("scriptish-tb-popup-brd");
   sbPopUp.setAttribute("onclick",
       "Scriptish_popupClicked(event);event.stopPropagation();");
-  sbPopUp.setAttribute("onpopupshowing",
-      "Scriptish_showPopup(event);event.stopPropagation();");
+  sbPopUp.setAttribute("onpopupshowing", "Scriptish_showPopup(event);");
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
@@ -103,7 +102,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
     // set the enabled/disabled state
     Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
         "checked", Scriptish.enabled);
-    aEvt.stopPropagation();
   }, false);
 
   this.toolsMenuEnabledItem.addEventListener("command", function() { Scriptish_BrowserUIM.onToggleStatus() }, false);
@@ -111,7 +109,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   var tmCmdsEle = $("scriptish-tools-commands");
   tmCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
   tmCmdsEle.setAttribute("accesskey", Scriptish_stringBundle("menu.commands.ak"));
-  tmCmdsEle.addEventListener("popupshowing", function(aEvt) { aEvt.stopPropagation() }, false);
 
   var tmNewUSEle = $("scriptish-tools-new");
   tmNewUSEle.setAttribute("label", Scriptish_stringBundle("menu.new"));
