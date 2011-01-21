@@ -26,7 +26,7 @@ function setupIncludes(type, items) {
 }
 
 function cleanup() scriptDownloader.cleanupTempFiles();
-function delayedClose() setTimeout(function() close(), 0);
+function delayedClose() setTimeout(close, 0);
 
 
 /* Main */
