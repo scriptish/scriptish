@@ -147,9 +147,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_openInTab = function GM_openInTab(aURL) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-    // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
     return aChromeWin.gBrowser
-        .getBrowserForTab(aChromeWin.openNewTabWith(aURL, document)).docShell
+        .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)).docShell
         .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
   }
 
