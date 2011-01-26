@@ -145,8 +145,27 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return getResources().getResourceText.apply(getResources(), arguments)
   }
 
-  this.GM_openInTab = function GM_openInTab(aURL) {
+  this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
+
+    if (aReuse) {
+      // Try to use an existing tab
+      let browserEnumerator = Services.wm.getEnumerator("navigator:browser");
+      while (browserEnumerator.hasMoreElements()) {
+        let browserWin = browserEnumerator.getNext();
+        let tabBrowser = browserWin.getBrowser();
+        for (let [, tab] in Iterator(tabBrowser.tabs)) {
+          if (!tab) continue;
+          let win = tab.linkedBrowser.contentWindow;
+          if (aURL === win.location.href) {
+            tabBrowser.selectedTab = tab;
+            browserWin.focus();
+            return aReuse;
+          }
+        }
+      }
+    }
+
     return aChromeWin.gBrowser
         .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)).docShell
         .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
