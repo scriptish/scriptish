@@ -272,7 +272,7 @@ ScriptishService.prototype = {
     }, true);
 
     // detect and grab reference to firebug console and context, if it exists
-    let fbConsole = Scriptish_getFirebugConsole(unsafeContentWin, chromeWin);
+    let fbConsole = Scriptish_getFirebugConsole(wrappedContentWin, chromeWin);
 
     for (var i = 0; script = scripts[i++];) {
       sandbox = new Cu.Sandbox(wrappedContentWin);

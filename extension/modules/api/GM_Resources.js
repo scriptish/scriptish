@@ -2,6 +2,7 @@ var EXPORTED_SYMBOLS = ["GM_Resources"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 function GM_Resources(script){
   this.script = script;
@@ -26,7 +27,6 @@ GM_Resources.prototype.getDep = function(name) {
       return resource;
     }
   }
-
-  // NOTE: Non localised string
-  throw new Error("No resource with name: " + name);
+  throw new Error(
+    Scriptish_stringBundle("error.api.noResourceWithName") + ": '" + name + "'");
 }

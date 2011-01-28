@@ -7,6 +7,7 @@ var $ = function(aID) document.getElementById(aID);
 
 window.addEventListener("load", function() {
   $("scriptish").setAttribute("title", Scriptish_stringBundle("menu.new"));
+  $("scriptish").setAttribute("ondialogaccept", "return doInstall();");
   $("label-id").setAttribute("value", Scriptish_stringBundle("newscript.id"));
   $("label-name").setAttribute("value", Scriptish_stringBundle("newscript.name"));
   $("label-namespace").setAttribute("value", Scriptish_stringBundle("newscript.namespace"));

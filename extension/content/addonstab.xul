@@ -4,9 +4,22 @@
   <script type="application/x-javascript" src="chrome://scriptish/content/js/addonstab.js" />
 
   <commandset id="viewCommandSet">
-    <command id="cmd_scriptish_userscript_edit"/>
-    <command id="cmd_scriptish_userscript_show"/>
-    <command id="cmd_scriptish_userscript_dl_link"/>
+    <!-- looks a little convoluted, but is required for the list-view
+         controls binding to work correctly.
+         The broadcasters only contain the label, while the commands,
+         additionally to being commands, also contain the access keys.
+         The binding will pick up only the broadcaster, as using the
+         command would disable the buttons, effectively hiding them.
+    -->
+    <broadcaster id="br_scriptish_userscript_edit"/>
+    <command id="cmd_scriptish_userscript_edit"
+             observes="br_scriptish_userscript_edit"/>
+    <broadcaster id="br_scriptish_userscript_show"/>
+    <command id="cmd_scriptish_userscript_show"
+             observes="br_scriptish_userscript_show"/>
+    <broadcaster id="br_scriptish_userscript_dl_link"/>
+    <command id="cmd_scriptish_userscript_dl_link"
+             observes="br_scriptish_userscript_dl_link"/>
   </commandset>
   <menupopup id="addonitem-popup">
     <menuitem id="menuitem_scriptish_userscript_edit"
@@ -24,4 +37,13 @@
         value="addons://list/userscript">
     </richlistitem>
   </richlistbox>
+
+  <hbox id="detail-controls">
+      <button class="addon-control button_scriptish_userscript_edit"
+              command="cmd_scriptish_userscript_edit"
+              insertbefore="detail-prefs-btn" />
+      <button class="addon-control button_scriptish_userscript_show"
+              command="cmd_scriptish_userscript_show"
+              insertbefore="detail-prefs-btn" />
+  </hbox>
 </overlay>

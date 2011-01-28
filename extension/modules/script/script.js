@@ -87,7 +87,8 @@ Script.prototype = {
   blocklistState: 0,
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
-  applyBackgroundUpdates: false,
+  applyBackgroundUpdates: AddonManager.AUTOUPDATE_DISABLE,
+  operationsRequiringRestart: AddonManager.OP_NEEDS_RESTART_NONE,
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
@@ -312,9 +313,9 @@ Script.prototype = {
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
-    var url = this.updateURL;
-    if (!url || !url.match(/^https:\/\//)) return false;
-    return true;
+    let url = this.updateURL;
+    if (!url || url.match(/^https:\/\//)) return true;
+    return false;
   },
 
   get _file() {
@@ -417,7 +418,7 @@ Script.prototype = {
   },
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
     // Copy new values.
     this.updateAvailable = false;
@@ -451,7 +452,7 @@ Script.prototype = {
       this._dependhash = newScript._dependhash;
       if (newScript._downloadURL) this._downloadURL = newScript._downloadURL;
     } else {
-      var dependhash = tools.Scriptish_sha1(newScript._rawMeta);
+      var dependhash = tools.Scriptish_cryptoHash(newScript._rawMeta);
       if (dependhash != this._dependhash && !newScript._dependFail) {
         this._dependhash = dependhash;
         this._icon = newScript._icon;
@@ -591,12 +592,12 @@ Script.prototype = {
       this._resources[i]._initFile();
 
     var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
     if (Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
 
     this._modified = this._file.lastModifiedTime;
-    this._dependhash = tools.Scriptish_sha1(this._rawMeta);
+    this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
   },
 
@@ -619,6 +620,7 @@ Script.prototype = {
 
 Script.parseVersion = function Script_parseVersion(aSrc) {
   var lines = aSrc.match(/\s*\/\/ [=@].*/g);
+  if (!lines) return null;
   var lnIdx = 0;
   var result = {};
   var foundMeta = false;
@@ -712,10 +714,11 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "jsversion":
           let jsVerIndx = JSVersions.indexOf(value);
           if (-1 === jsVerIndx) {
-            throw new Error("'" + value + "' is an invalid value for @jsversion");
+            throw new Error("@jsversion " + value + " " +
+                Scriptish_stringBundle("error.isInvalidValue"));
           } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
-            throw new Error("The @jsversion value '" + value + "' is not "
-                + "supported by this version of Firefox.");
+            throw new Error("@jsversion " + value + " " +
+                Scriptish_stringBundle("error.notSupported.Firefox"));
           } else {
             script._jsversion = JSVersions[jsVerIndx];
           }
@@ -723,7 +726,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "run-at":
           let runAtIndx = runAtValues.indexOf(value);
           if (0 > runAtIndx)
-            throw new Error("'" + value + "' is an invalid value for @run-at");
+            throw new Error("@run-at " + value + " " +
+                Scriptish_stringBundle("error.isInvalidValue"));
           script["_run-at"] = runAtValues[runAtIndx];
           continue;
         case "contributor":
@@ -772,23 +776,21 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
             if (aUpdateScript) {
               script._dependFail = true;
             } else {
-              throw new Error('Failed to @require '+ value);
+              throw new Error(Scriptish_stringBundle("error.retrieving") +
+                              " @require: '" + value + "'");
             }
           }
           continue;
         case "resource":
           var res = value.match(valueSplitter);
           if (res === null) {
-            // NOTE: Unlocalized strings
-            throw new Error("Invalid syntax for @resource declaration '" +
-                            value + "'. Resources are declared like: " +
-                            "@resource <name> <url>.");
+            throw new Error(Scriptish_stringBundle("error.resource.syntax") +
+                            ": '" + value + "'");
           }
           var resName = res[1];
           if (previousResourceNames[resName]) {
-            throw new Error("Duplicate resource name '" + resName + "' " +
-                            "detected. Each resource must have a unique " +
-                            "name.");
+            throw new Error("'" + resName + "' " +
+                            Scriptish_stringBundle("error.resource.dupName"));
           } else {
             previousResourceNames[resName] = true;
           }
@@ -805,7 +807,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
               script._dependFail = true;
             } else {
               throw new Error(
-                  'Failed to get @resource '+ resName +' from '+ res[2]);
+                  Scriptish_stringBundle("error.retrieving") +
+                  " @resource '" + resName + "' (" + res[2] + ")");
             }
           }
           continue;
@@ -849,14 +852,14 @@ Script.load = function load(aConfig, aNode) {
       || !aNode.hasAttribute("dependhash")
       || !aNode.hasAttribute("version")) {
     var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_sha1.js", tools);
+    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
         aConfig, Scriptish_getContents(script._file), 
         script._downloadURL && NetUtil.newURI(script._downloadURL),
         script);
-    script._dependhash = tools.Scriptish_sha1(parsedScript._rawMeta);
+    script._dependhash = tools.Scriptish_cryptoHash(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;
   } else {

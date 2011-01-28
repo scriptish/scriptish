@@ -6,14 +6,14 @@
       <RDF:Seq>
         <RDF:li>
           <RDF:Description>
-            <em:version>0.1b5</em:version>
+            <em:version>0.1b7</em:version>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                 <em:minVersion>4.0b5pre</em:minVersion>
                 <em:maxVersion>4.0.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b5.xpi</em:updateLink>
-                <em:updateHash>sha1:c378b6213091dd2f5e97ab1d3176b5ba6468755d</em:updateHash>
+                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b7.xpi</em:updateLink>
+                <em:updateHash>sha1:f36214319143c03ea4be762640061e9cfdfc26f9</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
             <em:targetApplication>
@@ -21,22 +21,8 @@
                 <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
                 <em:minVersion>2.1a3</em:minVersion>
                 <em:maxVersion>2.1.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b5.xpi</em:updateLink>
-                <em:updateHash>sha1:c378b6213091dd2f5e97ab1d3176b5ba6468755d</em:updateHash>
-              </RDF:Description>
-            </em:targetApplication>
-          </RDF:Description>
-        </RDF:li>
-        <RDF:li>
-          <RDF:Description>
-            <em:version>0.1b6</em:version>
-            <em:targetApplication>
-              <RDF:Description>
-                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-                <em:minVersion>4.0b5pre</em:minVersion>
-                <em:maxVersion>4.0.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b6.xpi</em:updateLink>
-                <em:updateHash>sha1:fb5d5f7a19a55ea4f1265921f5bea6586f657938</em:updateHash>
+                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1b7.xpi</em:updateLink>
+                <em:updateHash>sha1:f36214319143c03ea4be762640061e9cfdfc26f9</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>
@@ -44,6 +30,6 @@
       </RDF:Seq>
     </em:updates>
 
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAImXOXuoiSFIwNA4QyYRjS0us7G8hv6htagGJfqZsi4V4NJ/rDirrqxhl8fEouNAlRKUUxI44S0+zbwJ490ScaO6Dz60vB8ODsg/wFbtByylpbb/UJfcccs3FceCHMrZzBfjhmwSv4RB/mH6hT/EAUcpE8kCT3zaOI4kWRGEQy1D</em:signature>
+    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBACq9TtBg/OKYTDeSS3sQ+MYNpx3xQfaSD5N+yNsFCTlmLtOwjL4aKhTV7lnu/V9Vpy1gfGmWlYMI6S0F5+y4qAdOYE8bGbxF2GsK79FAEw69cwEJT+5Uyiz3C5N0HqcEHvIkjjqHawXXXXivwMJ60CnaCVZEEWwx28WEVx8DsxfI</em:signature>
   </RDF:Description>
 </RDF:RDF>

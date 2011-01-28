@@ -32,23 +32,25 @@ Scriptish_BrowserUIM.prototype = {
       case 1:
         Scriptish_openManager();
         break;
+      case 2:
+        this.$("scriptish-tb-popup").openPopup(this.$("scriptish-button"), "before_end", 0, 0, false, false);
+        break;
     }
   },
   onToggleStatus: function() {
     Scriptish.enabled = !Scriptish.enabled;
   },
   refreshStatus: function() {
-    var tbImg = this.$("scriptish-button");
+    var tbImg = this.$("scriptish-button-brd");
     var menu = this.$("scriptish_general_menu");
+    var appName = Services.appinfo.name;
 
     if (Scriptish.enabled) {
       menu.setAttribute("image", ICON_16_ON);
-      tbImg && tbImg.setAttribute(
-          "image", "seamonkey" == Scriptish.APP ? ICON_32_ON : ICON_24_ON);
+      tbImg.removeAttribute("scriptish-disabled");
     } else {
-      menu.setAttribute("src", ICON_16_OFF);
-      tbImg && tbImg.setAttribute(
-          "image", "seamonkey" == Scriptish.APP ? ICON_32_OFF : ICON_24_OFF);
+      menu.setAttribute("image", ICON_16_OFF);
+      tbImg.setAttribute("scriptish-disabled", "scriptish-disabled");
     }
   },
   openChromeWindow: function(aURL) {

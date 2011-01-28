@@ -18,7 +18,7 @@
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
 
-    <em:version>0.1b6</em:version>
+    <em:version>0.1b7</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
@@ -47,6 +47,9 @@
     <em:contributor>Pak Kei (logo); http://arkidect.com/</em:contributor>
     <em:contributor>Sergio Abreu; http://sitedosergio.sitesbr.net/</em:contributor>
     <em:contributor>Tommi Rautava/</em:contributor>
+    <em:contributor>Nils Maier</em:contributor>
+    <em:contributor>Melih Bilgil; http://picol.org</em:contributor>
+    <em:contributor>John J. Barton</em:contributor>
 
     <em:translator>nishikawasasaki(kohsei yamamoto)</em:translator>
 

@@ -3,8 +3,8 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const moduleFilename = Components.stack.filename;
 const NS_XHTML = "http://www.w3.org/1999/xhtml";
@@ -22,8 +22,7 @@ function GM_apiLeakCheck(apiName) {
         stack.filename != Services.scriptish.filename &&
         stack.filename.substr(0, 6) != "chrome") {
       Scriptish_logError(new Error(
-          "Scriptish access violation: unsafeWindow cannot call " +
-          apiName + "."));
+          Scriptish_stringBundle("error.api.unsafeAccess") + ": " + apiName));
       return false;
     }
   } while (stack = stack.caller);
@@ -45,12 +44,6 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var _storage = null;
   var _resources = null;
   var _logger = null;
-  var workers = [];
-
-  // terminate workers
-  aSafeWin.addEventListener("unload", function() {
-    for (var i = 0, worker; worker = workers[i++];) worker.terminate();
-  }, true);
 
   function getXmlhttpRequester() {
     if (!_xmlhttpRequester) {
@@ -154,9 +147,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_openInTab = function GM_openInTab(aURL) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-    // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
     return aChromeWin.gBrowser
-        .getBrowserForTab(aChromeWin.openNewTabWith(aURL, document)).docShell
+        .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)).docShell
         .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
   }
 
@@ -182,14 +174,11 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     }
   }
 
-  this.GM_worker = function GM_worker(resourceName) {
-    if (!GM_apiLeakCheck("GM_worker")) return;
-
+  this.GM_cryptoHash = function GM_cryptoHash() {
+    if (!GM_apiLeakCheck("GM_cryptoHash")) return;
     var tools = {};
-    Cu.import("resource://scriptish/api/GM_worker.js", tools);
-    var worker = new tools.GM_worker(getResources().getDep(resourceName), aURL);
-    workers.push(worker)
-    return worker;
+    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
+    return tools.Scriptish_cryptoHash.apply(null, arguments);
   }
 
   this.GM_updatingEnabled = true;

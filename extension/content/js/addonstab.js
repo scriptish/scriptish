@@ -51,20 +51,18 @@ window.addEventListener("load", function() {
         !("addons://list/userscript" == gViewController.currentViewId));
   }
 
-  var tmp = $("menuitem_scriptish_userscript_edit");
-  tmp.setAttribute("label", Scriptish_stringBundle("edit"));
-  tmp.setAttribute("accesskey", Scriptish_stringBundle("edit.ak"));
-  tmp.addEventListener("popupshowing", hideUSMenuitem, false);
-
-  tmp = $("menuitem_scriptish_userscript_show");
-  tmp.setAttribute("label", Scriptish_stringBundle("openfolder"));
-  tmp.setAttribute("accesskey", Scriptish_stringBundle("openfolder.ak"));
-  tmp.addEventListener("popupshowing", hideUSMenuitem, false);
-  
-  tmp = $("menuitem_scriptish_userscript_dl_link");
-  tmp.setAttribute("label", Scriptish_stringBundle("copydownloadURL"));
-  tmp.setAttribute("accesskey", Scriptish_stringBundle("copydownloadURL.ak"));
-  tmp.addEventListener("popupshowing", hideUSMenuitem, false);
+  (function() {
+    let items = {'edit': 'edit',
+                 'show': 'openFolder',
+                 'dl_link': 'copyDownloadURL'};
+    for (let key in items) {
+      let string = items[key];
+      $("br_scriptish_userscript_" + key).setAttribute("label", Scriptish_stringBundle(string));
+      let cmd = $("cmd_scriptish_userscript_" + key);
+      cmd.setAttribute("accesskey", Scriptish_stringBundle(string + ".ak"));
+      cmd.addEventListener("popupshowing", hideUSMenuitem, false);
+    }
+  })();
 
   $("category-userscripts").setAttribute(
       "name", Scriptish_stringBundle("userscripts"));

@@ -3,12 +3,13 @@ var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
-Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
-Cu.import("resource://scriptish/utils/Scriptish_alert.js");
+Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
+Cu.import("resource://scriptish/utils/Scriptish_alert.js");
+Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
+Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 const gTimer = new Timer();
 
 function ScriptDownloader(uri, contentWin) {
@@ -64,8 +65,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   try {
     // If loading from file, status might be zero on success
     if (this.req_.status != 200 && this.req_.status != 0) {
-      // NOTE: Unlocalized string
-      Scriptish_alert("Error loading user script:\n" +
+      Scriptish_alert(Scriptish_stringBundle("error.script.loading") + ":\n" +
       this.req_.status + ": " +
       this.req_.statusText);
       return;
@@ -105,8 +105,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     }
 
   } catch (e) {
-    // NOTE: unlocalized string
-    Scriptish_alert("Script could not be installed " + e);
+    Scriptish_alert(Scriptish_stringBundle("error.script.installing") + ": " + e);
     throw e;
   }
 }
@@ -122,12 +121,12 @@ ScriptDownloader.prototype.fetchDependencies = function() {
     if (this.checkDependencyURL(dep.urlToDownload)) {
       this.depQueue_.push(dep);
     } else {
-      let errMsg =
-          "SecurityException: Request to local and chrome url's is forbidden";
+      let errMsg = Scriptish_stringBundle("error.dependency.local");
       if (dep instanceof ScriptIcon) {
         dep._script.resetIcon();
         Scriptish_logError(new Error(
-            "Error loading dependency " + dep.urlToDownload + "\n" + errMsg));
+            Scriptish_stringBundle("error.dependency.loading") + ": " +
+            dep.urlToDownload + "\n" + errMsg));
       } else {
         this.errorInstallDependency(dep, errMsg);
         return;
@@ -179,7 +178,8 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
     var httpChannel = false;
   }
 
-  let errMsgStart = "Error loading dependency " + dep.urlToDownload + "\n";
+  let errMsgStart = Scriptish_stringBundle("error.dependency.loading") + ": " +
+      dep.urlToDownload + "\n";
   if (httpChannel) {
     if (httpChannel.requestSucceeded) {
       if (this.updateScript) {
@@ -191,7 +191,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
         file.remove(false);
         dep._script.resetIcon();
         Scriptish_logError(new Error(
-            errMsgStart + "Error! @icon is not a image MIME type"));
+            errMsgStart + Scriptish_stringBundle("error.icon.notImage")));
         this.downloadNextDependency();
         return;
       }
@@ -199,8 +199,8 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
-      let errMsg = "Error! Server Returned : " + httpChannel.responseStatus
-          + ": " + httpChannel.responseStatusText;
+      let errMsg = Scriptish_stringBundle("error.dependency.serverReturned") + ": "
+          + httpChannel.responseStatus + ": " + httpChannel.responseStatusText;
 
       if (dep instanceof ScriptIcon) {
         file.remove(false);
@@ -245,7 +245,8 @@ ScriptDownloader.prototype.finishInstall = function() {
   }
 }
 ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
-  this.dependencyError = "Error loading dependency " + dep.urlToDownload + "\n" + msg;
+  this.dependencyError = Scriptish_stringBundle("error.dependency.loading") + ": "
+      + dep.urlToDownload + "\n" + msg;
   Scriptish_log(this.dependencyError);
   if (this.scriptInstaller) return this.scriptInstaller.changed("DownloadFailed");
   if (this.installOnCompletion_) Scriptish_alert(this.dependencyError);
