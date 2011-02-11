@@ -145,11 +145,33 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return getResources().getResourceText.apply(getResources(), arguments)
   }
 
-  this.GM_openInTab = function GM_openInTab(aURL) {
+  this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-    return aChromeWin.gBrowser
-        .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)).docShell
-        .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
+
+    // Try to reuse an existing tab
+    if (aReuse) {
+      let browserEnumerator = Services.wm.getEnumerator("navigator:browser");
+
+      while (browserEnumerator.hasMoreElements()) {
+        let browserWin = browserEnumerator.getNext();
+        let tabBrowser = browserWin.gBrowser;
+        let i = tabBrowser.browsers.length - 1;
+
+        for (; ~i; i--) {
+          let browser = tabBrowser.getBrowserAtIndex(i);
+          // TODO: check rel=canonical too
+          if (aURL === browser.currentURI.spec) {
+            tabBrowser.selectedTab = tabBrowser.tabContainer.childNodes[i];
+            browserWin.focus();
+            return getWindowForBrowser(browser);
+          }
+        }
+      }
+    }
+
+    // Opening a new tab
+    return getWindowForBrowser(aChromeWin.gBrowser
+        .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)))
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
@@ -183,3 +205,6 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_updatingEnabled = true;
 }
+
+function getWindowForBrowser(browser) browser.docShell
+    .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
