@@ -146,8 +146,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   }
 
   this.GM_getMetadata = function(aKey, aLocalVal) {
+    let key = aKey.toLowerCase().trim();
     if (aLocalVal) {
-      let key = aKey.toLowerCase();
       switch (key) {
       case "id":
       case "name":
@@ -175,7 +175,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       }
     }
 
-    return aScript.getScriptHeader(aKey);
+    return aScript.getScriptHeader(key);
   }
 
   this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
