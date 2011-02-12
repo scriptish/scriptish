@@ -363,6 +363,12 @@ Script.prototype = {
     return size;
   },
 
+  getScriptHeader: function(aKey) {
+    // TODO: cache headers and clear cache when the script is modified..
+    var headers = Script.header_parse(Scriptish_getContents(this._file));
+    return headers[aKey];
+  },
+
   get screenshots() this._screenshots,
 
   _initFileName: function(name, useExt) {
@@ -674,6 +680,42 @@ Script.parseVersion = function Script_parseVersion(aSrc) {
     if (match !== null) return match[1];
   }
   return null;
+}
+
+// TODO: DRY this by combining it with Script.parse some way..
+Script.header_parse = function(aSource) {
+  var headers = {};
+
+  // read one line at a time looking for start meta delimiter or EOF
+  var lines = aSource.match(metaRegExp);
+  var i = 0;
+  var result;
+  var foundMeta = false;
+
+  // used for duplicate resource name detection
+  var previousResourceNames = {};
+
+  if (!lines) lines = [""];
+  while (result = lines[i++]) {
+    if (!foundMeta) {
+      if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
+      continue;
+    }
+
+    if (result.indexOf("// ==/UserScript==") == 0) {
+      // done gathering up meta lines
+      break;
+    }
+
+    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
+    if (match === null) continue;
+    var header = match[1];
+    var value = match[2];
+
+    if (!headers[header]) headers[header] = [value];
+    else headers[header].push(value)
+  }
+  return headers;
 }
 
 Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {

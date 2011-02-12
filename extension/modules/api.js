@@ -145,6 +145,39 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return getResources().getResourceText.apply(getResources(), arguments)
   }
 
+  this.GM_getMetadata = function(aKey, aLocalVal) {
+    if (aLocalVal) {
+      let key = aKey.toLowerCase();
+      switch (key) {
+      case "id":
+      case "name":
+      case "namespace":
+      case "creator":
+      case "autor":
+      case "description":
+      case "version":
+      case "jsversion":
+      case "delay":
+      case "noframes":
+        return aScript[key];
+      case "homepage":
+      case "homepageurl":
+        return aScript.homepageURL;
+      case "updateurl":
+        return aScript.updateURL;
+      case "contributor":
+      case "include":
+      case "exclude":
+      case "screenshot":
+        return aScript[key + "s"];
+      case "match":
+        return aScript[key + "es"];
+      }
+    }
+
+    return aScript.getScriptHeader(aKey);
+  }
+
   this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
 
