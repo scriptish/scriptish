@@ -41,6 +41,9 @@ function doSave() {
     script.user_includes = postInc.match(/.+/g);
     script.user_excludes = postExc.match(/.+/g);
     Scriptish.config._save();
+
+    // display modified notification
+    script.modificationProcess();
   }
 
   script.includesDisabled = $("disableScriptIncludes").checked;
