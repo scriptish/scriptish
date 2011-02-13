@@ -4,7 +4,6 @@ Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 var $ = function(aID) document.getElementById(aID);
 var script;
-var initInc, initExc;
 
 window.addEventListener("load", function() {
   var scriptID = window.location.search.match(/[\?&]id=([^&,]+)/i);
@@ -24,20 +23,20 @@ window.addEventListener("load", function() {
 
   $("includes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.includes"));
   $("excludes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.excludes"));
-  $("includes").value = initInc = script.user_includes.join("\n");
-  $("excludes").value = initExc = script.user_excludes.join("\n");
+  $("includes").value = script.getUserIncStr();
+  $("excludes").value = script.getUserIncStr("exclude");
 
   return true;
 }, false);
 
 function doSave() {
-  let postInc = $("includes").value;
-  let postExc = $("excludes").value;
+  let postInc = $("includes").value.trim();
+  let postExc = $("excludes").value.trim();
 
-  if (initInc !== postInc || initExc !== postExc) {
+  if (script.getUserIncStr() != postInc || script.getUserIncStr("exclude") != postExc) {
     script.user_includes = postInc.match(/.+/g);
     script.user_excludes = postExc.match(/.+/g);
-    Scriptish.config._save();
+    Scriptish.config._save();Scriptish_log("save");
   }
 
   return true;

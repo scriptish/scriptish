@@ -257,6 +257,7 @@ Script.prototype = {
   get includes() this._includes.concat(),
   get excludes() this._excludes.concat(),
   get user_includes() this._user_includes.concat(),
+  getUserIncStr: function(type) this["_user_" + (type || "include") + "s"].join("\n"),
   get user_excludes() this._user_excludes.concat(),
   set user_includes(aPatterns) {
     this._user_includes = [];
