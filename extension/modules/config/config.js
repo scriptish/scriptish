@@ -10,6 +10,7 @@ inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
 inc("resource://scriptish/utils/Scriptish_notification.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_openManager.js");
+inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/third-party/Timer.js");
 inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
@@ -18,6 +19,8 @@ function Config(aBaseDir) {
   this.timer = new Timer();
   this._observers = [];
   this._saveTimer = null;
+  this._excludes = [];
+  this._excludeRegExps = [];
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
 
@@ -68,11 +71,22 @@ Config.prototype = {
   _load: function() {
     var configContents = Scriptish_getContents(this._configFile);
     var doc = Instances.dp.parseFromString(configContents, "text/xml");
-    var nodes = doc.evaluate("/UserScriptConfig/Script", doc, null, 0, null);
+    var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
     var fileModified = false;
+    let excludes = [];
 
-    for (var node = null; node = nodes.iterateNext(); )
-      fileModified = Script.load(this, node) || fileModified;
+    for (var node; node = nodes.iterateNext();) {
+      switch (node.nodeName) {
+      case "Script":
+        fileModified = Script.load(this, node) || fileModified;
+        break;
+      case "Exclude":
+        excludes.push(node.firstChild.nodeValue.trim());
+        break;
+      }
+    }
+    this.addExclude(excludes);
+
     if (fileModified) this._save();
   },
 
@@ -88,16 +102,24 @@ Config.prototype = {
     }
     delete this["_saveTimer"];
 
-    var doc = Instances.dp.parseFromString(
-        "<UserScriptConfig/>", "text/xml");
+    var doc = Instances.dp.parseFromString("<UserScriptConfig/>", "text/xml");
     var scripts = this._scripts;
     var len = scripts.length;
     var firstChild = doc.firstChild;
-    for (var i = 0, script; script = scripts[i]; i++) {
-      firstChild.appendChild(doc.createTextNode("\n\t"));
-      firstChild.appendChild(script.createXMLNode(doc));
-    }
-    firstChild.appendChild(doc.createTextNode("\n"));
+    let nt = "\n\t";
+    function addNode(str, node) firstChild.appendChild(doc.createTextNode(str))
+        && node && firstChild.appendChild(node);
+
+    // add script info
+    for (var i = 0, script; script = scripts[i]; i++)
+      addNode(nt, script.createXMLNode(doc));
+
+    // add global excludes info
+    for (let [, exclude] in Iterator(this.excludes))
+      addNode(nt, doc.createElement("Exclude"))
+          .appendChild(doc.createTextNode(exclude));
+
+    addNode("\n");
 
     var configStream = Scriptish_getWriteStream(this._configFile);
     Instances.ds.serializeToStream(doc, configStream, "utf-8");
@@ -151,6 +173,22 @@ Config.prototype = {
     var xml = "<UserScriptConfig/>";
     configStream.write(xml, xml.length);
     configStream.close();
+  },
+
+  get excludes() this._excludes.concat(),
+  set excludes(excludes) {
+    this._excludes = [];
+    this._excludeRegExps = [];
+    this.addExclude(excludes)
+  },
+  get excludeRegExps() this._excludeRegExps.concat(),
+  addExclude: function(excludes) {
+    if (!excludes) return;
+    excludes = (typeof excludes == "string") ? [excludes] : excludes;
+    for (let [, exclude] in Iterator(excludes)) {
+      this._excludes.push(exclude);
+      this._excludeRegExps.push(Scriptish_convert2RegExp(exclude));
+    }
   },
 
   get scripts() this._scripts.concat(),

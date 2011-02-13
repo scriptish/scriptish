@@ -6,6 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
@@ -194,7 +195,8 @@ Script.prototype = {
     function testII(aMatchPattern) { return aMatchPattern.doMatch(aUrl); }
 
     let includes = this._user_includeRegExps.concat(this._includeRegExps);
-    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps);
+    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
+        .concat(Scriptish.config.excludeRegExps);
 
     return (includes.some(testI) || this._matches.some(testII))
         && !excludes.some(testI);

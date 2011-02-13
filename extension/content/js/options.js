@@ -1,13 +1,17 @@
+Components.utils.import("resource://scriptish/scriptish.js");
+Components.utils.import("resource://scriptish/logging.js");
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
+var $ = function(aID) document.getElementById(aID);
+
 window.addEventListener("load", function() {
-  var d = document;
-  var $ = function(aID) d.getElementById(aID);
   var tmp;
 
   tmp = Scriptish_stringBundle("options");
-  $("scriptish-options-dialog").setAttribute("title", "Scriptish - " + tmp);
+  let dialog = $("scriptish-options-dialog");
+  dialog.setAttribute("title", "Scriptish - " + tmp);
+  dialog.setAttribute("ondialogaccept", "return doSave();");
   $("scriptish-header").setAttribute("description", tmp);
   $("caption-editor")
       .setAttribute("label", Scriptish_stringBundle("options.editor"));
@@ -20,43 +24,40 @@ window.addEventListener("load", function() {
       .setAttribute("label", Scriptish_stringBundle("Uninstall"));
   tmp = $("check-uninstall");
   tmp.setAttribute("label", Scriptish_stringBundle("options.alsoUninstallPrefs"));
-  tmp.addEventListener("command", Scriptish_setUninstallPrefs, false);
   tmp.checked = Scriptish_prefRoot.getValue("uninstallPreferences");
-
 
   $("caption-update")
       .setAttribute("label", Scriptish_stringBundle("Update"));
   tmp = $("check-downloadURL");
   tmp.setAttribute("label", Scriptish_stringBundle("options.useDownloadURL"));
-  tmp.addEventListener("command", Scriptish_setUpdatePrefs, false);
   tmp.checked = Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL");
-  
+
   $("caption-addonmanager")
       .setAttribute("label", Scriptish_stringBundle("options.addonManager"));
   tmp = $("check-copydownloadURL");
   tmp.setAttribute(
       "label", Scriptish_stringBundle("options.enableCopyDownloadURL"));
-  tmp.addEventListener("command", Scriptish_setAddonManagerPrefs, false);
   tmp.checked = Scriptish_prefRoot.getValue("enableCopyDownloadURL");
+
+  // Setup global excludes
+  $("excludes-caption").setAttribute("label", Scriptish_stringBundle("options.excludes"));
+  $("excludes").value = Scriptish.config.excludes.join("\n");
 }, false);
-
-function Scriptish_setUninstallPrefs(checkbox) {
-  Scriptish_prefRoot.setValue("uninstallPreferences",
-      !!document.getElementById("check-uninstall").checked);
-}
-
-function Scriptish_setUpdatePrefs(checkbox) {
-  Scriptish_prefRoot.setValue("useDownloadURLForUpdateURL",
-      !!document.getElementById("check-downloadURL").checked);
-}
-
-function Scriptish_setAddonManagerPrefs(checkbox) {
-  Scriptish_prefRoot.setValue("enableCopyDownloadURL",
-      !!document.getElementById("check-copydownloadURL").checked);
-}
 
 function Scriptish_getEditor() {
   var tools = {};
   Components.utils.import("resource://scriptish/utils/Scriptish_getEditor.js", tools);
   tools.Scriptish_getEditor(window, true);
+}
+
+function doSave() {
+  Scriptish_prefRoot.setValue("uninstallPreferences",
+      !!$("check-uninstall").checked);
+  Scriptish_prefRoot.setValue("useDownloadURLForUpdateURL",
+      !!$("check-downloadURL").checked);
+  Scriptish_prefRoot.setValue("enableCopyDownloadURL",
+      !!$("check-copydownloadURL").checked);
+
+  Scriptish.config.excludes = $("excludes").value.match(/.+/g);
+  Scriptish.config._save();
 }
