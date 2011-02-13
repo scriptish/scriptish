@@ -368,7 +368,7 @@ Script.prototype = {
 
   getScriptHeader: function(aKey) {
     // TODO: cache headers and clear cache when the script is modified..
-    var headers = Script.header_parse(Scriptish_getContents(this._file));
+    var headers = Script.header_parse(Scriptish_getContents(this._tempFile || this._file));
     return aKey ? headers[aKey] : headers;
   },
 

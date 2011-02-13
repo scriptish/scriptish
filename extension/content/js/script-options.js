@@ -36,7 +36,7 @@ function doSave() {
   if (script.getUserIncStr() != postInc || script.getUserIncStr("exclude") != postExc) {
     script.user_includes = postInc.match(/.+/g);
     script.user_excludes = postExc.match(/.+/g);
-    Scriptish.config._save();Scriptish_log("save");
+    Scriptish.config._save();
   }
 
   return true;
