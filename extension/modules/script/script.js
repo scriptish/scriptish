@@ -276,7 +276,7 @@ Script.prototype = {
     this.addPattern(((aUserVal) ? "_user" : "") + "_exclude", aPattern)),
   addPattern: function(aPrefix, aPattern) {
     if (!aPattern) return;
-    var patterns = (aPattern instanceof Array) ? aPattern : [aPattern];
+    var patterns = (typeof aPattern == "string") ? [aPattern] : aPattern;
     for (let [, pattern] in Iterator(patterns)) {
       this[aPrefix + "s"].push(pattern);
       this[aPrefix + "RegExps"].push(Scriptish_convert2RegExp(pattern));
