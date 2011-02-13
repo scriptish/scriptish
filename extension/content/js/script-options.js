@@ -23,16 +23,21 @@ window.addEventListener("load", function() {
 
   $("includes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.includes"));
   $("excludes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.excludes"));
-  $("includes").value = script.user_includes.toString().replace(/,/g, "\n");
-  $("excludes").value = script.user_excludes.toString().replace(/,/g, "\n");
+  $("includes").value = script.getUserIncStr();
+  $("excludes").value = script.getUserIncStr("exclude");
 
   return true;
 }, false);
 
 function doSave() {
-  script.user_includes = $("includes").value.match(/.+/g);
-  script.user_excludes = $("excludes").value.match(/.+/g);
-  Scriptish.config._save();
+  let postInc = $("includes").value.trim();
+  let postExc = $("excludes").value.trim();
+
+  if (script.getUserIncStr() != postInc || script.getUserIncStr("exclude") != postExc) {
+    script.user_includes = postInc.match(/.+/g);
+    script.user_excludes = postExc.match(/.+/g);
+    Scriptish.config._save();Scriptish_log("save");
+  }
 
   return true;
 }

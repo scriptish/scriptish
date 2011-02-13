@@ -153,7 +153,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       case "name":
       case "namespace":
       case "creator":
-      case "autor":
+      case "author":
       case "description":
       case "version":
       case "jsversion":
