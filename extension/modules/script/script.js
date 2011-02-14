@@ -86,6 +86,7 @@ function Script(config) {
   this["_run-at"] = null;
 }
 Script.prototype = {
+  includesDisabled: false,
   isCompatible: true,
   blocklistState: 0,
   appDisabled: false,
@@ -191,9 +192,13 @@ Script.prototype = {
   },
 
   matchesURL: function(aUrl) {
-    function testI(regExp) { return regExp.test(aUrl); }
-    function testII(aMatchPattern) { return aMatchPattern.doMatch(aUrl); }
+    function testI(regExp) regExp.test(aUrl);
 
+    if (this.includesDisabled)
+      return this._user_includeRegExps.some(testI)
+          && !this._user_excludeRegExps.some(testI);
+
+    function testII(aMatchPattern) aMatchPattern.doMatch(aUrl);
     let includes = this._user_includeRegExps.concat(this._includeRegExps);
     let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
         .concat(Scriptish.config.excludeRegExps);
@@ -610,6 +615,7 @@ Script.prototype = {
     scriptNode.setAttribute("dependhash", this._dependhash);
     if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
     if (this["_run-at"]) scriptNode.setAttribute("run-at", this["_run-at"]);
+    if (this.includesDisabled) scriptNode.setAttribute("includesDisabled", true);
 
     if (this.homepageURL)
       scriptNode.setAttribute("homepageURL", this.homepageURL);
@@ -911,6 +917,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
 Script.load = function load(aConfig, aNode) {
   var script = new Script(aConfig);
   var fileModified = false;
+  let tmp;
 
   script._filename = aNode.getAttribute("filename");
   script._basedir = aNode.getAttribute("basedir") || ".";
@@ -921,6 +928,8 @@ Script.load = function load(aConfig, aNode) {
       || aNode.getAttribute("homepage") || null;
   script._jsversion = aNode.getAttribute("jsversion") || null;
   script["_run-at"] = aNode.getAttribute("run-at") || null;
+  tmp = (aNode.getAttribute("includesDisabled") || "").toLowerCase();
+  if (tmp) script.includesDisabled = ("false" == tmp) ? false : true;
 
   if (!script.fileExists()) {
     script.uninstallProcess();

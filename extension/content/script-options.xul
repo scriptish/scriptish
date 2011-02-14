@@ -16,5 +16,9 @@
 
     <label id="excludes-label" control="excludes"/>
     <textbox id="excludes" multiline="true" rows="4" cols="60"/>
+
+    <separator class="thin"/>
+
+    <checkbox id="disableScriptIncludes"/>
   </vbox>
 </dialog>
