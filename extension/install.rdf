@@ -6,12 +6,14 @@
     <em:localized>
       <Description>
         <em:locale>ja-JP</em:locale>
+        <em:name>Scriptish</em:name>
         <em:description>Firefox用のスクリプトマネージャ</em:description>
       </Description>
     </em:localized>
     <em:localized>
       <Description>
         <em:locale>ru-RU</em:locale>
+        <em:name>Scriptish</em:name>
         <em:description>Управление пользовательских скриптов для Firefox</em:description>
       </Description>
     </em:localized>
