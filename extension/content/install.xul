@@ -35,6 +35,14 @@
         <label id="excludes-label"/>
         <description id="excludes-desc"/>
       </vbox>
+      <vbox id="requires">
+        <label id="requires-label"/>
+        <description id="requires-desc"/>
+      </vbox>
+      <vbox id="resources">
+        <label id="resources-label"/>
+        <description id="resources-desc"/>
+      </vbox>
     </vbox>
     <hbox id="showSource-box" flex="1" pack="end" align="end">
       <label id="showSource" class="text-link"/>

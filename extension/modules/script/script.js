@@ -6,6 +6,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
@@ -70,6 +71,8 @@ function Script(config) {
   this._matches = [];
   this._includeRegExps = [];
   this._excludeRegExps = [];
+  this.user_includes = [];
+  this.user_excludes = [];
   this._delay = null;
   this._requires = [];
   this._resources = [];
@@ -191,8 +194,12 @@ Script.prototype = {
     function testI(regExp) { return regExp.test(aUrl); }
     function testII(aMatchPattern) { return aMatchPattern.doMatch(aUrl); }
 
-    return (this._includeRegExps.some(testI) || this._matches.some(testII)) &&
-        !this._excludeRegExps.some(testI);
+    let includes = this._user_includeRegExps.concat(this._includeRegExps);
+    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
+        .concat(Scriptish.config.excludeRegExps);
+
+    return (includes.some(testI) || this._matches.some(testII))
+        && !excludes.some(testI);
   },
 
   _changed: function(aEvt, aData, aDontChg) {
@@ -236,6 +243,7 @@ Script.prototype = {
   },
   get description() this._description,
   get version() this._version,
+  get optionsURL() "chrome://scriptish/content/script-options.xul?id=" + this.id,
   get icon() this._icon,
   get iconURL() this._icon.fileURL,
   get enabled() this._enabled,
@@ -248,16 +256,31 @@ Script.prototype = {
 
   get includes() this._includes.concat(),
   get excludes() this._excludes.concat(),
-  get matches() this._matches.concat(),
-  addInclude: function(aPattern) {
-    if (!aPattern) return;
-    this._includes.push(aPattern);
-    this._includeRegExps.push(Scriptish_convert2RegExp(aPattern));
+  get user_includes() this._user_includes.concat(),
+  getUserIncStr: function(type) this["_user_" + (type || "include") + "s"].join("\n"),
+  get user_excludes() this._user_excludes.concat(),
+  set user_includes(aPatterns) {
+    this._user_includes = [];
+    this._user_includeRegExps = [];
+    this.addInclude(aPatterns, true)
   },
-  addExclude: function(aPattern) {
+  set user_excludes(aPatterns) {
+    this._user_excludes = [];
+    this._user_excludeRegExps = [];
+    this.addExclude(aPatterns, true)
+  },
+  get matches() this._matches.concat(),
+  addInclude: function(aPattern, aUserVal) (
+    this.addPattern(((aUserVal) ? "_user" : "") + "_include", aPattern)),
+  addExclude: function(aPattern, aUserVal) (
+    this.addPattern(((aUserVal) ? "_user" : "") + "_exclude", aPattern)),
+  addPattern: function(aPrefix, aPattern) {
     if (!aPattern) return;
-    this._excludes.push(aPattern);
-    this._excludeRegExps.push(Scriptish_convert2RegExp(aPattern));
+    var patterns = (typeof aPattern == "string") ? [aPattern] : aPattern;
+    for (let [, pattern] in Iterator(patterns)) {
+      this[aPrefix + "s"].push(pattern);
+      this[aPrefix + "RegExps"].push(Scriptish_convert2RegExp(pattern));
+    }
   },
 
   get requires() this._requires.concat(),
@@ -341,6 +364,12 @@ Script.prototype = {
     for each (var r in this._requires) size += r._file.fileSize;
     for each (var r in this._resources) size += r._file.fileSize;
     return size;
+  },
+
+  getScriptHeader: function(aKey) {
+    // TODO: cache headers and clear cache when the script is modified..
+    var headers = Script.header_parse(Scriptish_getContents(this._tempFile || this._file));
+    return aKey ? headers[aKey] : headers;
   },
 
   get screenshots() this._screenshots,
@@ -511,6 +540,20 @@ Script.prototype = {
       scriptNode.appendChild(matchNode);
     }
 
+    for (let [, include] in Iterator(this._user_includes)) {
+      let node = doc.createElement("UserInclude");
+      node.appendChild(doc.createTextNode(include));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(node);
+    }
+
+    for (let [, exclude] in Iterator(this._user_excludes)) {
+      let node = doc.createElement("UserExclude");
+      node.appendChild(doc.createTextNode(exclude));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(node);
+    }
+
     len = this._screenshots.length;
     for (var j = 0; j < len; j++) {
       var screenshotNode = doc.createElement("Screenshot");
@@ -640,6 +683,42 @@ Script.parseVersion = function Script_parseVersion(aSrc) {
     if (match !== null) return match[1];
   }
   return null;
+}
+
+// TODO: DRY this by combining it with Script.parse some way..
+Script.header_parse = function(aSource) {
+  var headers = {};
+
+  // read one line at a time looking for start meta delimiter or EOF
+  var lines = aSource.match(metaRegExp);
+  var i = 0;
+  var result;
+  var foundMeta = false;
+
+  // used for duplicate resource name detection
+  var previousResourceNames = {};
+
+  if (!lines) lines = [""];
+  while (result = lines[i++]) {
+    if (!foundMeta) {
+      if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
+      continue;
+    }
+
+    if (result.indexOf("// ==/UserScript==") == 0) {
+      // done gathering up meta lines
+      break;
+    }
+
+    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
+    if (match === null) continue;
+    var header = match[1];
+    var value = match[2];
+
+    if (!headers[header]) headers[header] = [value];
+    else headers[header].push(value)
+  }
+  return headers;
 }
 
 Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
@@ -882,6 +961,12 @@ Script.load = function load(aConfig, aNode) {
       case "Match":
         script._matches.push(new MatchPattern(childNode.firstChild.nodeValue.trim()));
         break;
+      case "UserInclude":
+          script.addInclude(childNode.firstChild.nodeValue.trim(), true);
+          break;
+      case "UserExclude":
+          script.addExclude(childNode.firstChild.nodeValue.trim(), true);
+          break;
       case "Require":
         var scriptRequire = new ScriptRequire(script);
         scriptRequire._filename = childNode.getAttribute("filename");

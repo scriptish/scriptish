@@ -7,6 +7,7 @@ function Scriptish_getBrowserForContentWindow(aWin) {
     let browserWin = browserEnumerator.getNext();
     let tabBrowser = browserWin.getBrowser();
     for (let [, tab] in Iterator(tabBrowser.tabs)) {
+      if (!tab) continue;
       let win = tab.linkedBrowser.contentWindow;
       if (aWin === win || aWin.top === win) return browserWin;
     }

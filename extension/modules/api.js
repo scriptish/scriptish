@@ -145,11 +145,66 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return getResources().getResourceText.apply(getResources(), arguments)
   }
 
-  this.GM_openInTab = function GM_openInTab(aURL) {
+  this.GM_getMetadata = function(aKey, aLocalVal) {
+    if (aLocalVal) {
+      let key = aKey.toLowerCase();
+      switch (key) {
+      case "id":
+      case "name":
+      case "namespace":
+      case "creator":
+      case "author":
+      case "description":
+      case "version":
+      case "jsversion":
+      case "delay":
+      case "noframes":
+        return aScript[key];
+      case "homepage":
+      case "homepageurl":
+        return aScript.homepageURL;
+      case "updateurl":
+        return aScript.updateURL;
+      case "contributor":
+      case "include":
+      case "exclude":
+      case "screenshot":
+        return aScript[key + "s"];
+      case "match":
+        return aScript[key + "es"];
+      }
+    }
+
+    return aScript.getScriptHeader(aKey);
+  }
+
+  this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-    return aChromeWin.gBrowser
-        .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)).docShell
-        .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
+
+    // Try to reuse an existing tab
+    if (aReuse) {
+      let browserEnumerator = Services.wm.getEnumerator("navigator:browser");
+
+      while (browserEnumerator.hasMoreElements()) {
+        let browserWin = browserEnumerator.getNext();
+        let tabBrowser = browserWin.gBrowser;
+        let i = tabBrowser.browsers.length - 1;
+
+        for (; ~i; i--) {
+          let browser = tabBrowser.getBrowserAtIndex(i);
+          // TODO: check rel=canonical too
+          if (aURL === browser.currentURI.spec) {
+            tabBrowser.selectedTab = tabBrowser.tabContainer.childNodes[i];
+            browserWin.focus();
+            return getWindowForBrowser(browser);
+          }
+        }
+      }
+    }
+
+    // Opening a new tab
+    return getWindowForBrowser(aChromeWin.gBrowser
+        .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)))
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
@@ -183,3 +238,6 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_updatingEnabled = true;
 }
+
+function getWindowForBrowser(browser) browser.docShell
+    .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);

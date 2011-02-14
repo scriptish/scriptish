@@ -10,6 +10,11 @@
 
   <vbox>
     <groupbox>
+      <caption id="excludes-caption" control="excludes"/>
+      <textbox id="excludes" multiline="true" rows="4" cols="60"/>
+    </groupbox>
+
+    <groupbox>
       <caption id="caption-editor"/>
       <button id="btn-editor">
         <label id="label-editor"/>
@@ -20,12 +25,12 @@
       <caption id="caption-uninstall"/>
       <checkbox id="check-uninstall"/>
     </groupbox>
-    
+
     <groupbox>
       <caption id="caption-update"/>
       <checkbox id="check-downloadURL"/>
     </groupbox>
-    
+
     <groupbox>
       <caption id="caption-addonmanager"/>
       <checkbox id="check-copydownloadURL"/>
