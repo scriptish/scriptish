@@ -6,19 +6,21 @@
     <em:localized>
       <Description>
         <em:locale>ja-JP</em:locale>
+        <em:name>Scriptish</em:name>
         <em:description>Firefox用のスクリプトマネージャ</em:description>
       </Description>
     </em:localized>
     <em:localized>
       <Description>
         <em:locale>ru-RU</em:locale>
+        <em:name>Scriptish</em:name>
         <em:description>Управление пользовательских скриптов для Firefox</em:description>
       </Description>
     </em:localized>
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
 
-    <em:version>0.1b8</em:version>
+    <em:version>0.1b9</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
