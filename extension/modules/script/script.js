@@ -228,10 +228,12 @@ Script.prototype = {
   get author() this._author,
   set author(aVal) {
     this._author = aVal;
-    if (AddonManagerPrivate.AddonAuthor)
-      this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
-    else
+    if (AddonManagerPrivate.AddonAuthor) {
+      let author = aVal.trim().match(/((?:[^;<h]|h[^t]|ht[^t]|htt[^p]|http[^:]|http:[^\/]|http:\/[^\/])+)[;<]?(?:\s*<?([^<>@\s;]+@[^<>@\s;]+)(?:[>;];?)?)?(?:\s*(https?:\/\/[^\s;]*))?/i);
+      this._creator = new AddonManagerPrivate.AddonAuthor(author[1].trim(), author[3]);
+    } else {
       this._creator = aVal;
+    }
   },
   get contributors() {
     if (!AddonManagerPrivate.AddonAuthor) return this._contributors;
