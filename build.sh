@@ -12,14 +12,15 @@ XPI="scriptish-$VER.xpi"
 
 # Copy base structure to a temporary build directory and change to it
 echo "Creating working directory ..."
-cd extension
 rm -rf build
 mkdir build
+cp LICENSE.txt build/
+cd extension
 cp -r \
-  chrome.manifest components content defaults install.rdf license LICENSE.txt \
+  chrome.manifest components content defaults install.rdf license \
       locale modules skin \
-  build/
-cd build
+  ../build/
+cd ../build
 
 if [ "amo" = "$1" ]; then
   (sed -e 's/<em\:update.*//g' install.rdf > install.rdf.$$ &&
@@ -35,9 +36,8 @@ find . -depth -name '#*' -exec rm -rf "{}" \;
 find . -depth -name '.DS_Store' -exec rm "{}" \;
 
 echo "Creating $XPI ..."
-zip -qr9XD "../../$XPI" *
+zip -qr9XD "../$XPI" *
 
 echo "Cleaning up temporary files ..."
 cd ..
 rm -rf build
-cd ..
