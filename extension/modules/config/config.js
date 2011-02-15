@@ -1,5 +1,7 @@
 var EXPORTED_SYMBOLS = ["Config"];
 
+const SCRIPTISH_CONFIG = "scriptish-config.xml";
+
 (function(inc) {
 inc("resource://scriptish/constants.js");
 inc("resource://scriptish/logging.js");
@@ -24,11 +26,19 @@ function Config(aBaseDir) {
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
 
-  this._configFile = this._scriptDir;
-  this._configFile.append("config.xml");
+  let configFile = this._scriptDir;
+  configFile.append(SCRIPTISH_CONFIG);
+  if (!configFile.exists()) {
+    (configFile = this._scriptDir).append("config.xml");
+    if (!configFile.exists())
+        (configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
+  }
+
+  this._configFile = configFile;
 
   this._initScriptDir();
   this._load();
+  (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
 }
 Config.prototype = {
   addObserver: function(observer, script) {
@@ -87,6 +97,8 @@ Config.prototype = {
     }
     this.addExclude(excludes);
 
+    // the delay b4 save here is very important now that config.xml is used when
+    // scriptish-config.xml DNE
     if (fileModified) this._save();
   },
 
