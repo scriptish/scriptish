@@ -227,11 +227,15 @@ Script.prototype = {
   get creator() this._creator,
   get author() this._author,
   set author(aVal) {
-    this._author = this._creator = aVal;
+    this._author = aVal.trim();
     if (AddonManagerPrivate.AddonAuthor) {
-      let author = aVal.trim().match(/((?:[^;<h]|h[^t]|ht[^t]|htt[^p]|http[^:]|http:[^\/]|http:\/[^\/])+)[;<]?(?:\s*<?([^<>@\s;]+@[^<>@\s;]+)(?:[>;];?)?)?(?:\s*(https?:\/\/[^\s;]*))?/i);
-      if (author && typeof(author[1]) == "string" && typeof(author[3]) == "string")
-        this._creator = new AddonManagerPrivate.AddonAuthor(author[1].trim(), author[3]);
+      let author = aVal.match(/((?:[^;<h]|h[^t]|ht[^t]|htt[^p]|http[^:]|http:[^\/]|http:\/[^\/])+)[;<]?(?:\s*<?([^<>@\s;]+@[^<>@\s;]+)(?:[>;];?)?)?(?:\s*(https?:\/\/[^\s;]*))?/i);
+      if (author && author[3])
+        this._creator = new AddonManagerPrivate.AddonAuthor((author[1] || aVal).trim(), author[3]);
+      else
+        this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
+    } else {
+      this._creator = aVal;
     }
   },
   get contributors() {
