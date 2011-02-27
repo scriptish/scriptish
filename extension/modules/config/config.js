@@ -39,6 +39,8 @@ function Config(aBaseDir) {
   this._initScriptDir();
   this._load();
   (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
+
+  Components.utils.import("resource://scriptish/addonprovider.js");
 }
 Config.prototype = {
   addObserver: function(observer, script) {
