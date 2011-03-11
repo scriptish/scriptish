@@ -757,7 +757,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
       break;
     }
 
-    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
+    var match = result.match(/\/\/\s?\@(\S+)(?:\s+([^\r\f\n]+))?/);
     if (match === null) continue;
     var header = match[1].toLowerCase();
     var value = match[2];
