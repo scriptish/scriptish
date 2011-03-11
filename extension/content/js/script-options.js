@@ -43,7 +43,7 @@ function doSave() {
     Scriptish.config._save();
 
     // display modified notification
-    script.modificationProcess();
+    script.modificationProcess(true);
   }
 
   script.includesDisabled = $("disableScriptIncludes").checked;

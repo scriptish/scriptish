@@ -660,14 +660,14 @@ Script.prototype = {
     AddonManagerPrivate.callInstallListeners(
         "onExternalInstall", null, this, null, false);
   },
-  modificationProcess: function() {
+  modificationProcess: function(noReload) {
     // notification that modification is complete
     var msg = "'" + this.name;
     if (this.version) msg += " " + this.version;
     msg += "' " + Scriptish_stringBundle("statusbar.modified");
     Scriptish_notification(msg, null, null, function() Scriptish_openManager());
 
-    this.updateHelper();
+    if (!noReload) this.updateHelper();
     this._changed("modified", null, true);
   }
 };
