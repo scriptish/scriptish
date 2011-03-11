@@ -22,7 +22,7 @@ Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://scriptish/third-party/MatchPattern.js");
 Cu.import("resource://scriptish/config/configdownloader.js");
 
-const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
+const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
@@ -751,16 +751,14 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   if (!lines) lines = [""];
   while (result = lines[i++]) {
     if (!foundMeta) {
-      if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
+      if (result.match(/\/\/[ \t]*==UserScript==/i)) foundMeta = true;
       continue;
     }
 
-    if (result.indexOf("// ==/UserScript==") == 0) {
-      // done gathering up meta lines
-      break;
-    }
+    if (result.match(/\/\/[ \t]*==\/UserScript==/i))
+      break; // done gathering up meta lines
 
-    var match = result.match(/\/\/\s?\@(\S+)(?:\s+([^\r\f\n]+))?/);
+    var match = result.match(/\/\/[ \t]*\@(\S+)(?:\s+([^\r\f\n]+))?/);
     if (match === null) continue;
     var header = match[1].toLowerCase();
     var value = match[2];
