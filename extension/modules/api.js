@@ -215,17 +215,24 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   if (aSafeWin !== aSafeWin.top) {
     this.GM_registerMenuCommand = DOLITTLE;
+    this.GM_unregisterMenuCommand = DOLITTLE;
   } else {
     this.GM_registerMenuCommand = function GM_registerMenuCommand(
         aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
       if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
-      aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
+      return aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
         name: aCmdName,
         accelKey: aAccelKey,
         accelModifiers: aAccelModifiers,
         accessKey: aAccessKey,
         doCommand: aCmdFunc,
         window: aSafeWin});
+    }
+
+    this.GM_unregisterMenuCommand = function GM_unregisterMenuCommand(
+        commandUUID) {
+      if (!GM_apiLeakCheck("GM_unregisterMenuCommand")) return;
+      aChromeWin.Scriptish_BrowserUI.unregisterMenuCommand(commandUUID, aSafeWin);
     }
   }
 
