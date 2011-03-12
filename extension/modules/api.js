@@ -236,6 +236,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return tools.Scriptish_cryptoHash.apply(null, arguments);
   }
 
+  this.GM_generateUUID = function() Services.uuid.generateUUID().toString();
+
   this.GM_updatingEnabled = true;
 }
 

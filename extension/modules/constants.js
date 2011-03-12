@@ -75,6 +75,10 @@ XPCOMUtils.defineLazyServiceGetter(
     Services, "suhtml", "@mozilla.org/feed-unescapehtml;1",
     "nsIScriptableUnescapeHTML");
 
+XPCOMUtils.defineLazyServiceGetter(
+    Services, "uuid", "@mozilla.org/uuid-generator;1",
+    "nsIUUIDGenerator");
+
 function timeout(cb, delay) {
   Instances.timer.initWithCallback(
       { notify: function(){ cb.call(null) } }, delay, ONE_SHOT);
