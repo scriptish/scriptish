@@ -205,8 +205,8 @@ Config.prototype = {
     }
   },
 
-  get scripts() this._scripts.concat(),
-  getMatchingScripts: function(testFunc) this._scripts.filter(testFunc),
+  get scripts() this._scripts.sort(function(a, b) b.priority - a.priority).concat(),
+  getMatchingScripts: function(testFunc) this.scripts.filter(testFunc),
   injectScript: function(script) {
     var unsafeWin = this.wrappedContentWin.wrappedJSObject;
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;

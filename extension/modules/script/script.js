@@ -74,6 +74,7 @@ function Script(config) {
   this.user_includes = [];
   this.user_excludes = [];
   this._delay = null;
+  this.priority = 0;
   this._requires = [];
   this._resources = [];
   this._screenshots = [];
@@ -467,6 +468,7 @@ Script.prototype = {
     this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
     this._delay = newScript._delay;
+    this.priority = newScript.priority;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
@@ -613,6 +615,7 @@ Script.prototype = {
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
     scriptNode.setAttribute("delay", this._delay);
+    scriptNode.setAttribute("priority", this.priority);
     scriptNode.setAttribute("icon", this.icon.filename);
     scriptNode.setAttribute("enabled", this._enabled);
     scriptNode.setAttribute("basedir", this._basedir);
@@ -773,19 +776,25 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
       value = value.trimRight();
       switch (header) {
         case "id":
-          script.id = value;
+        case "delay":
+          script[header] = value;
+          continue;
+        case "priority":
+          !script.priority && (script.priority = parseInt(value, 10));
           continue;
         case "author":
-          !script.author && (script.author = value);
+          if (!script.author) {
+            script.author = value;
+            continue;
+          }
+        case "contributor":
+          script.addContributor(value);
           continue;
         case "name":
         case "namespace":
         case "description":
         case "version":
           script["_" + header] = value;
-          continue;
-        case "delay":
-          script.delay = value;
           continue;
         case "updateurl":
           if (value.match(/^https?:\/\//)) script._updateURL = value;
@@ -817,9 +826,6 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
             throw new Error("@run-at " + value + " " +
                 Scriptish_stringBundle("error.isInvalidValue"));
           script["_run-at"] = runAtValues[runAtIndx];
-          continue;
-        case "contributor":
-          script.addContributor(value);
           continue;
         case "include":
           script.addInclude(value);
@@ -1013,6 +1019,7 @@ Script.load = function load(aConfig, aNode) {
   script.icon.fileURL = aNode.getAttribute("icon");
   script._enabled = aNode.getAttribute("enabled") == true.toString();
   script.delay = aNode.getAttribute("delay");
+  script.priority = parseInt(aNode.getAttribute("priority"), 10) || 0;
 
   aConfig.addScript(script);
   return fileModified;
