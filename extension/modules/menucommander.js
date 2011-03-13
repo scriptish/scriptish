@@ -91,7 +91,8 @@ Scriptish_MenuCommander.prototype.unregisterMenuCommand = function(commandUUID) 
     let tbMenuItems = this.tbMenuItems;
     for (var i = tbMenuItems.length - 1; ~i; i--) {
       if (commandUUID == tbMenuItems[i].getAttribute("uuid")) {
-        menuPopup.removeChild(tbMenuItems[i]);
+        try {menuPopup.removeChild(tbMenuItems[i]);}
+        catch (e) {} // TB was added but not opened before the user changed pages
         tbMenuItems.splice(i, 1);
         removedSomething = true;
         break;
@@ -132,8 +133,10 @@ Scriptish_MenuCommander.prototype.detach = function() {
 
   var menuPopup = this.getTBMenu();
   if (menuPopup)
-    for (var i = 0; i < this.tbMenuItems.length; i++)
-      try {menuPopup.removeChild(this.tbMenuItems[i]);} catch (e) {}
+    for (var i = 0; i < this.tbMenuItems.length; i++) {
+      try {menuPopup.removeChild(this.tbMenuItems[i]);}
+      catch (e) {} // TB was added but not opened before the user changed pages
+    }
 
   this.setDisabled(true);
   this.attached = false;
