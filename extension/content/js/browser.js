@@ -160,7 +160,7 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
 
 Scriptish_BrowserUI.unregisterMenuCommand = function(commandUUID, aWin) {
   var commander = this.getCommander(aWin);
-  commander.unregisterMenuCommand(commandUUID);
+  return commander.unregisterMenuCommand(commandUUID);
 }
 
 
