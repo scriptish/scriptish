@@ -153,9 +153,14 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
   var commander = this.getCommander(menuCommand.window);
-  commander.registerMenuCommand(
+  return commander.registerMenuCommand(
       menuCommand.name, menuCommand.doCommand, menuCommand.accelKey,
       menuCommand.accelModifiers, menuCommand.accessKey);
+}
+
+Scriptish_BrowserUI.unregisterMenuCommand = function(commandUUID, aWin) {
+  var commander = this.getCommander(aWin);
+  commander.unregisterMenuCommand(commandUUID);
 }
 
 
