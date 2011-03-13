@@ -44,6 +44,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var _storage = null;
   var _resources = null;
   var _logger = null;
+  var menuCmdIDs = [];
+  var Scriptish_BrowserUI = aChromeWin.Scriptish_BrowserUI;
 
   function getXmlhttpRequester() {
     if (!_xmlhttpRequester) {
@@ -214,25 +216,27 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   }
 
   if (aSafeWin !== aSafeWin.top) {
-    this.GM_registerMenuCommand = DOLITTLE;
-    this.GM_unregisterMenuCommand = DOLITTLE;
+    this.GM_unregisterMenuCommand = this.GM_registerMenuCommand = DOLITTLE;
   } else {
     this.GM_registerMenuCommand = function GM_registerMenuCommand(
         aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
       if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
-      return aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
+      var uuid = Scriptish_BrowserUI.registerMenuCommand({
         name: aCmdName,
         accelKey: aAccelKey,
         accelModifiers: aAccelModifiers,
         accessKey: aAccessKey,
         doCommand: aCmdFunc,
         window: aSafeWin});
+      menuCmdIDs.push(uuid);
+      return uuid;
     }
 
-    this.GM_unregisterMenuCommand = function GM_unregisterMenuCommand(
-        commandUUID) {
-      if (!GM_apiLeakCheck("GM_unregisterMenuCommand")) return;
-      aChromeWin.Scriptish_BrowserUI.unregisterMenuCommand(commandUUID, aSafeWin);
+    this.GM_unregisterMenuCommand = function GM_unregisterMenuCommand(aUUID) {
+      var i = menuCmdIDs.indexOf(aUUID);
+      if (!~i) return false; // check the uuid is for a cmd made by the same script
+      menuCmdIDs.splice(i, 1);
+      return Scriptish_BrowserUI.unregisterMenuCommand(aUUID, aSafeWin);
     }
   }
 

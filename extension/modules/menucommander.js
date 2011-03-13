@@ -31,10 +31,12 @@ Scriptish_MenuCommander.prototype.registerMenuCommand =
 
   var commandUUID = Services.uuid.generateUUID().toString();
 
+  // create toolbar button menu item
   var menuItem =
       this.createMenuItem(commandUUID, commandName, commandFunc, accessKey);
   this.tbMenuItems.push(menuItem);
 
+  // create tools menu menu item
   var menuItem2 =
       this.createMenuItem(commandUUID, commandName, commandFunc, accessKey);
   this.toolsMenuItems.push(menuItem2);
@@ -59,29 +61,45 @@ Scriptish_MenuCommander.prototype.registerMenuCommand =
 }
 
 Scriptish_MenuCommander.prototype.unregisterMenuCommand = function(commandUUID) {
-  for (var i = 0; i < this.keys.length; i++) {
-    if (commandUUID == this.keys[i].getAttribute("uuid")) {
-      this.keyset.removeChild(this.keys[i]);
-      this.keys.splice(i, 1);
+  var removedSomething = false;
+
+  // remove key
+  var keys = this.keys;
+  for (var i = keys.length - 1; ~i; i--) {
+    if (commandUUID == keys[i].getAttribute("uuid")) {
+      this.keyset.removeChild(keys[i]);
+      keys.splice(i, 1);
+      removedSomething = true;
+      break;
     }
   }
 
-  for (var i = 0; i < this.toolsMenuItems.length; i++) {
-    if (commandUUID == this.toolsMenuItems[i].getAttribute("uuid")) {
-      this.toolsMenuPopup.removeChild(this.toolsMenuItems[i]);
-      this.toolsMenuItems.splice(i, 1);
+  // remove tools menu menu item
+  var toolsMenuItems = this.toolsMenuItems;
+  for (var i = toolsMenuItems.length - 1; ~i; i--) {
+    if (commandUUID == toolsMenuItems[i].getAttribute("uuid")) {
+      this.toolsMenuPopup.removeChild(toolsMenuItems[i]);
+      toolsMenuItems.splice(i, 1);
+      removedSomething = true;
+      break;
     }
   }
 
+  // remove toolbar button menu item
   var menuPopup = this.getTBMenu();
   if (menuPopup) {
-    for (var i = 0; i < this.tbMenuItems.length; i++) {
-      if (commandUUID == this.tbMenuItems[i].getAttribute("uuid")) {
-        try { menuPopup.removeChild(this.tbMenuItems[i]); } catch (e) {}
-        this.tbMenuItems.splice(i, 1);
+    let tbMenuItems = this.tbMenuItems;
+    for (var i = tbMenuItems.length - 1; ~i; i--) {
+      if (commandUUID == tbMenuItems[i].getAttribute("uuid")) {
+        menuPopup.removeChild(tbMenuItems[i]);
+        tbMenuItems.splice(i, 1);
+        removedSomething = true;
+        break;
       }
     }
   }
+
+  return removedSomething;
 }
 
 Scriptish_MenuCommander.prototype.attach = function() {
