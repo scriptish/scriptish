@@ -7,10 +7,11 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
   inc("resource://scriptish/api.js");
 })(Components.utils.import)
 
-function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
+function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl, aScript) {
   this.unsafeContentWin = unsafeContentWin;
   this.chromeWindow = chromeWindow;
   this.originUrl = originUrl;
+  this.script = aScript;
 }
 
 // this function gets called by user scripts in content security scope to
@@ -32,6 +33,12 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     // A malformed URL won't be parsed properly.
     throw new Error(Scriptish_stringBundle("error.api.reqURL") + ": " + details.url);
   }
+
+  // check if the script is allowed to access the url
+  if (!this.script.matchesDomain(url))
+    throw new Error(
+        "User script is attempting access to restricted domain '" + uri.host + "'",
+        this.script.fileURL);
 
   // This is important - without it, GM_xmlhttpRequest can be used to get
   // access to things like files and chrome. Careful.

@@ -52,7 +52,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       var tools = {};
       Cu.import("resource://scriptish/api/GM_xmlhttpRequester.js", tools);
       _xmlhttpRequester = new tools.GM_xmlhttpRequester(
-          aUnsafeContentWin, aChromeWin, aURL);
+          aUnsafeContentWin, aChromeWin, aURL, aScript);
     }
     return _xmlhttpRequester;
   }

@@ -66,6 +66,7 @@ function Script(config) {
   this._icon = new ScriptIcon(this);
   this._enabled = true;
   this.needsUninstall = false;
+  this.domains = [];
   this._includes = [];
   this._excludes = [];
   this._matches = [];
@@ -192,14 +193,31 @@ Script.prototype = {
     AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
   },
 
-  matchesURL: function(aUrl) {
-    function testI(regExp) regExp.test(aUrl);
+  matchesDomain: function(aURL) {
+    try {
+      var host = NetUtil.newURI(aURL).host;
+    } catch (e) {
+      return false;
+    }
 
+    var i = this.domains.length - 1;
+    if (!~i) return true; // when there are no @domains, then allow the host
+    for (; ~i; i--) if (host == this.domains[i]) return true;
+    return false;
+  },
+
+  matchesURL: function(aURL) {
+    function testI(regExp) regExp.test(aURL);
+    function testII(aMatchPattern) aMatchPattern.doMatch(aURL);
+
+    // check if the doamin is ok 
+    if (!this.matchesDomain(aURL)) return false;
+
+    // check if script @includes/@excludes are disabled
     if (this.includesDisabled)
       return this._user_includeRegExps.some(testI)
           && !this._user_excludeRegExps.some(testI);
 
-    function testII(aMatchPattern) aMatchPattern.doMatch(aUrl);
     let includes = this._user_includeRegExps.concat(this._includeRegExps);
     let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
         .concat(Scriptish.config.excludeRegExps);
@@ -466,6 +484,7 @@ Script.prototype = {
 
     // Copy new values.
     this.updateAvailable = false;
+    this.domains = newScript.domains;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
@@ -533,6 +552,13 @@ Script.prototype = {
       contributorNode.appendChild(doc.createTextNode(this.contributors[j]));
       scriptNode.appendChild(doc.createTextNode("\n\t\t"));
       scriptNode.appendChild(contributorNode);
+    }
+
+    for (var j = 0; j < this.domains.length; j++) {
+      var node = doc.createElement("Domain");
+      node.appendChild(doc.createTextNode(this.domains[j]));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(node);
     }
 
     for (var j = 0; j < this._includes.length; j++) {
@@ -831,6 +857,9 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
                 Scriptish_stringBundle("error.isInvalidValue"));
           script["_run-at"] = runAtValues[runAtIndx];
           continue;
+        case "domain":
+          script.domains.push(value);
+          continue;
         case "include":
           script.addInclude(value);
           continue;
@@ -974,6 +1003,9 @@ Script.load = function load(aConfig, aNode) {
       case "Contributor":
         script.addContributor(childNode.firstChild.nodeValue.trim());
         break;
+      case "Domain":
+          script.domains.push(childNode.firstChild.nodeValue.trim());
+          break;
       case "Include":
         script.addInclude(childNode.firstChild.nodeValue.trim());
         break;
