@@ -91,20 +91,12 @@ Config.prototype = {
     if (!usos) return false;
     if ("userscripts.org" == uri.host)
       for (var i = 0, uso; uso = usos[i++];)
-        if (uri.spec.match(new RegExp("(\/" + uso + "\/|\/" + uso + "\.user\.js)")))
+        if (uri.spec.match(new RegExp("(?:\/" + uso + "\/?$|\/" + uso + "\.user\.js)")))
           return true;
     return false;
   },
 
   _load: function() {
-    // load blocklist
-    if (this._blocklistFile.exists()) {
-      let blockListContents = Scriptish_getContents(this._blocklistFile);
-      let blocklist = Instances.json.decode(blockListContents);
-      this._blicklist = blocklist;
-      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
-    }
-
     // load config
     var configContents = Scriptish_getContents(this._configFile);
     var doc = Instances.dp.parseFromString(configContents, "text/xml");
@@ -123,6 +115,29 @@ Config.prototype = {
       }
     }
     this.addExclude(excludes);
+
+    // load blocklist
+    if (this._blocklistFile.exists()) {
+      let blockListContents = Scriptish_getContents(this._blocklistFile);
+      let blocklist = Instances.json.decode(blockListContents);
+      this._blocklist = blocklist;
+      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
+    }
+
+    // remove blocked scripts
+    var scripts = this._scripts;
+    for (var i = scripts.length - 1; ~i; i--) {
+      let uri = null, script = scripts[i];
+      try {
+        uri = NetUtil.newURI(script.homepageURL);
+      } catch (e) {}
+      if (!uri) continue;
+      if (this.isBlocked(uri)) {
+        this._scripts.splice(i, 1);
+        script.uninstallProcess();
+        Scriptish_log("Removing blocked userscript '" + script.name + "' from Scriptish", true); // TODO: l10n
+      }
+    }
 
     // the delay b4 save here is very important now that config.xml is used when
     // scriptish-config.xml DNE
