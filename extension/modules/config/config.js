@@ -38,6 +38,7 @@ function Config(aBaseDir) {
 
   this._configFile = configFile;
 
+  this._useBlocklist = Scriptish_prefRoot.getValue("useBlocklist");
   this._blocklist = {};
   this._blocklistHash = "";
   (this._blocklistFile = this._scriptDir).append(SCRIPTISH_BLOCKLIST);
@@ -117,7 +118,7 @@ Config.prototype = {
     this.addExclude(excludes);
 
     // load blocklist
-    if (this._blocklistFile.exists()) {
+    if (this._useBlocklist && this._blocklistFile.exists()) {
       let blockListContents = Scriptish_getContents(this._blocklistFile);
       let blocklist = Instances.json.decode(blockListContents);
       this._blocklist = blocklist;
@@ -238,7 +239,10 @@ Config.prototype = {
       configStream.close();
     }
 
-    // check for blocklist update
+    // Don't update if blocklist is disabled
+    if (!this._useBlocklist) return;
+
+    // Check for blocklist update
     var req = Instances.xhr;
     req.onload = function() {
       var json = req.responseText;
