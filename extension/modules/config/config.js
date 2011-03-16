@@ -1,6 +1,7 @@
 var EXPORTED_SYMBOLS = ["Config"];
 
 const SCRIPTISH_CONFIG = "scriptish-config.xml";
+const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 
 (function(inc) {
 inc("resource://scriptish/constants.js");
@@ -13,6 +14,7 @@ inc("resource://scriptish/utils/Scriptish_notification.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_openManager.js");
 inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
+inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
 inc("resource://scriptish/third-party/Timer.js");
 inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
@@ -35,6 +37,10 @@ function Config(aBaseDir) {
   }
 
   this._configFile = configFile;
+
+  this._blocklist = {};
+  this._blocklistHash = "";
+  (this._blocklistFile = this._scriptDir).append(SCRIPTISH_BLOCKLIST);
 
   this._initScriptDir();
   this._load();
@@ -80,7 +86,26 @@ Config.prototype = {
   },
   getScriptById: function(aID) this._find(aID, "script"),
 
+  isBlocked: function(uri) {
+    var usos = this._blocklist.uso;
+    if (!usos) return false;
+    if ("userscripts.org" == uri.host)
+      for (var i = 0, uso; uso = usos[i++];)
+        if (uri.spec.match(new RegExp("(\/" + uso + "\/|\/" + uso + "\.user\.js)")))
+          return true;
+    return false;
+  },
+
   _load: function() {
+    // load blocklist
+    if (this._blocklistFile.exists()) {
+      let blockListContents = Scriptish_getContents(this._blocklistFile);
+      let blocklist = Instances.json.decode(blockListContents);
+      this._blicklist = blocklist;
+      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
+    }
+
+    // load config
     var configContents = Scriptish_getContents(this._configFile);
     var doc = Instances.dp.parseFromString(configContents, "text/xml");
     var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
@@ -176,17 +201,49 @@ Config.prototype = {
 
   get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),
 
-  // Creates an empty configuration if none exist.
   _initScriptDir: function() {
+    var self = this;
+
+    // create an empty configuration if none exist.
     var dir = this._scriptDir;
-    if (dir.exists()) return;
-    // create script folder
-    dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
-    // create config.xml file
-    var configStream = Scriptish_getWriteStream(this._configFile);
-    var xml = "<UserScriptConfig/>";
-    configStream.write(xml, xml.length);
-    configStream.close();
+    if (!dir.exists()) {
+      // create script folder
+      dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
+
+      // create config.xml file
+      var configStream = Scriptish_getWriteStream(this._configFile);
+      var xml = "<UserScriptConfig/>";
+      configStream.write(xml, xml.length);
+      configStream.close();
+    }
+
+    // check for blocklist update
+    var req = Instances.xhr;
+    req.onload = function() {
+      var json = req.responseText;
+      try {
+        var blocklist = Instances.json.decode(json);
+      } catch (e) {
+        return;
+      }
+      if (!blocklist.uso) return;
+
+      var hash = Scriptish_cryptoHash(json);
+      if (self._blocklistHash == hash) return;
+
+      let file = self._blocklistFile;
+
+      // write blocklist
+      var BLStream = Scriptish_getWriteStream(file);
+      BLStream.write(json, json.length);
+      BLStream.close();
+      Scriptish_log("Updated Scriptish blocklist");
+
+      self._blocklist = blocklist;
+      self._blocklistHash = hash;
+    }; // if there is an error then just try again next time for now..
+    req.open("GET", "https://github.com/erikvold/scriptish/raw/master/blocklist.json", true);
+    req.send(null);
   },
 
   get excludes() this._excludes.concat(),

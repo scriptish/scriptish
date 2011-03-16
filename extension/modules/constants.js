@@ -26,6 +26,7 @@ var Instances = {
   get fos() Cc["@mozilla.org/network/file-output-stream;1"]
       .createInstance(Ci.nsIFileOutputStream),
   get fp() Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker),
+  get json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
   get lf() Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile),
   get process() Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess),
   get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
