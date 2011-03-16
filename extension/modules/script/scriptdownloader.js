@@ -5,12 +5,9 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/script/scripticon.js");
-Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-const gTimer = new Timer();
 
 function ScriptDownloader(uri, contentWin) {
   this.uri_ = uri || null;
@@ -42,9 +39,9 @@ ScriptDownloader.prototype.startDownload = function() {
   this.req_ = Instances.xhr;
   this.req_.overrideMimeType("text/plain");
   this.req_.open("GET", this.uri_.spec, true);
-  this.req_.onerror = Scriptish_hitch(this, "handleErr");
-  this.req_.onreadystatechange = Scriptish_hitch(this, "chkContentTypeB4DL");
-  this.req_.onload = Scriptish_hitch(this, "handleScriptDownloadComplete");
+  this.req_.onerror = this.handleErr.bind(this);
+  this.req_.onreadystatechange = this.chkContentTypeB4DL.bind(this);
+  this.req_.onload = this.handleScriptDownloadComplete.bind(this);
   this.req_.send(null);
 }
 ScriptDownloader.prototype.handleErr = function() {
@@ -90,7 +87,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script.setDownloadedFile(file);
 
-    gTimer.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
+    timeout(this.fetchDependencies.bind(this));
 
     switch (this.type) {
       case "install":
@@ -160,8 +157,8 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
     this.tempFiles_.push(file);
 
     var progressListener = new PersistProgressListener(persist);
-    progressListener.onFinish = Scriptish_hitch(
-        this, "handleDependencyDownloadComplete", dep, file, sourceChannel);
+    progressListener.onFinish =
+        this.handleDependencyDownloadComplete.bind(this, dep, file, sourceChannel);
     persist.progressListener = progressListener;
     persist.saveChannel(sourceChannel, file);
   } catch (e) {
@@ -273,7 +270,7 @@ ScriptDownloader.prototype.cleanupTempFiles = function() {
 }
 ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
   if (!aTimer)
-    return gTimer.setTimeout(Scriptish_hitch(this, "showInstallDialog", 1), 0);
+    return timeout(this.showInstallDialog.bind(this, 1));
 
   Services.wm.getMostRecentWindow("navigator:browser").openDialog(
       "chrome://scriptish/content/install.xul", "",

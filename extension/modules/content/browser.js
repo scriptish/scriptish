@@ -66,6 +66,6 @@ Scriptish_BrowserUIM.prototype = {
   },
   showUserscriptList: function() {
     Cu.import("resource://scriptish/addonprovider.js");
-    this._win.setTimeout(function() {Scriptish_openManager();}, 0);
+    timeout(Scriptish_openManager);
   }
 }
