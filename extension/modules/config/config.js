@@ -6,6 +6,7 @@ const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 (function(inc) {
 inc("resource://scriptish/constants.js");
 inc("resource://scriptish/logging.js");
+inc("resource://scriptish/prefmanager.js");
 inc("resource://scriptish/utils/Scriptish_getContents.js");
 inc("resource://scriptish/utils/Scriptish_hitch.js");
 inc("resource://scriptish/utils/Scriptish_getWriteStream.js");
@@ -122,20 +123,20 @@ Config.prototype = {
       let blocklist = Instances.json.decode(blockListContents);
       this._blocklist = blocklist;
       this._blocklistHash = Scriptish_cryptoHash(blockListContents);
-    }
 
-    // remove blocked scripts
-    var scripts = this._scripts;
-    for (var i = scripts.length - 1; ~i; i--) {
-      let uri = null, script = scripts[i];
-      try {
-        uri = NetUtil.newURI(script.homepageURL);
-      } catch (e) {}
-      if (!uri) continue;
-      if (this.isBlocked(uri)) {
-        this._scripts.splice(i, 1);
-        script.uninstallProcess();
-        Scriptish_log("Removing blocked userscript '" + script.name + "' from Scriptish", true); // TODO: l10n
+      // remove blocked scripts
+      var scripts = this._scripts;
+      for (var i = scripts.length - 1; ~i; i--) {
+        let uri = null, script = scripts[i];
+        try {
+          uri = NetUtil.newURI(script.homepageURL);
+        } catch (e) {}
+        if (!uri) continue;
+        if (this.isBlocked(uri)) {
+          this._scripts.splice(i, 1);
+          script.uninstallProcess();
+          Scriptish_log("Removing blocked userscript '" + script.name + "' from Scriptish", true); // TODO: l10n
+        }
       }
     }
 
