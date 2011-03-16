@@ -214,7 +214,7 @@ ScriptishService.prototype = {
       if (!Scriptish.config.isBlocked(cl))
         tools.Scriptish_installUri(cl, ctx.contentWindow); 
       else
-      timeout(function() Scriptish_alert("This script is blocked.")); // TODO: l10n
+        timeout(function() Scriptish_alert("This script is blocked.")); // TODO: l10n
       ret = CP.REJECT_REQUEST;
     }
 
