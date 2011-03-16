@@ -211,7 +211,10 @@ ScriptishService.prototype = {
 
     if (ct == CP.TYPE_DOCUMENT && cl.spec.match(/\.user\.js$/)
         && !this.ignoreNextScript_ && !this.isTempScript(cl)) {
-      tools.Scriptish_installUri(cl, ctx.contentWindow);
+      if (!Scriptish.config.isBlocked(cl))
+        tools.Scriptish_installUri(cl, ctx.contentWindow); 
+      else
+      timeout(function() Scriptish_alert("This script is blocked.")); // TODO: l10n
       ret = CP.REJECT_REQUEST;
     }
 

@@ -82,5 +82,5 @@ XPCOMUtils.defineLazyServiceGetter(
 
 function timeout(cb, delay) {
   Instances.timer.initWithCallback(
-      { notify: function(){ cb.call(null) } }, delay, ONE_SHOT);
+      { notify: function(){ cb.call(null) } }, delay || 0, ONE_SHOT);
 }
