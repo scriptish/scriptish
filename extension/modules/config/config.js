@@ -38,7 +38,7 @@ function Config(aBaseDir) {
 
   this._configFile = configFile;
 
-  this._useBlocklist = Scriptish_prefRoot.getValue("useBlocklist");
+  this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
   this._blocklist = {};
   this._blocklistHash = "";
   (this._blocklistFile = this._scriptDir).append(SCRIPTISH_BLOCKLIST);
