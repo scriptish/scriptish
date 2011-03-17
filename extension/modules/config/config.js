@@ -8,7 +8,6 @@ inc("resource://scriptish/constants.js");
 inc("resource://scriptish/logging.js");
 inc("resource://scriptish/prefmanager.js");
 inc("resource://scriptish/utils/Scriptish_getContents.js");
-inc("resource://scriptish/utils/Scriptish_hitch.js");
 inc("resource://scriptish/utils/Scriptish_getWriteStream.js");
 inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
 inc("resource://scriptish/utils/Scriptish_notification.js");
@@ -152,7 +151,7 @@ Config.prototype = {
       // Reduce work in the case of many changes near to each other in time.
       if (this._saveTimer) this.timer.clearTimeout(this._saveTimer);
       this._saveTimer =
-          this.timer.setTimeout(Scriptish_hitch(this, "_save", true), 250);
+          this.timer.setTimeout(this._save.bind(this, true), 250);
       return;
     }
     delete this["_saveTimer"];
