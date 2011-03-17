@@ -290,10 +290,10 @@ Config.prototype = {
 
     // Try to fetch a new list if blocklist is enabled and some time has passed
     let interval = Scriptish_prefRoot.getValue("blocklist.interval");
-    let lastFetch = Scriptish_prefRoot.getValue("blocklist.interval.lastFetch");
+    let lastFetch = Scriptish_prefRoot.getValue("blocklist.lastFetch");
     let now = Math.ceil((new Date()).getTime() / 1E3);
     if (now - lastFetch >= interval) {
-      Scriptish_prefRoot.setValue("blocklist.interval.lastFetch", now);
+      Scriptish_prefRoot.setValue("blocklist.lastFetch", now);
       this._fetchBlocklist();
     }
   },
