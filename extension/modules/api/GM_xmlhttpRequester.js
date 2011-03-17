@@ -7,9 +7,8 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
   inc("resource://scriptish/api.js");
 })(Components.utils.import)
 
-function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl, aScript) {
+function GM_xmlhttpRequester(unsafeContentWin, originUrl, aScript) {
   this.unsafeContentWin = unsafeContentWin;
-  this.chromeWindow = chromeWindow;
   this.originUrl = originUrl;
   this.script = aScript;
 }
@@ -46,7 +45,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     case "http":
     case "https":
     case "ftp":
-      var req = new this.chromeWindow.XMLHttpRequest();
+      var req = Instances.xhr;
       Scriptish_hitch(this, "chromeStartRequest", url, details, req)();
       break;
     default:
