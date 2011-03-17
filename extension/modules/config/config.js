@@ -98,8 +98,52 @@ Config.prototype = {
     return false;
   },
 
+  _fetchBlocklist: function() {
+    // Check for blocklist update
+    var self = this;
+    var req = Instances.xhr;
+    req.onload = function() {
+      var json = req.responseText;
+      try {
+        var blocklist = Instances.json.decode(json);
+      } catch (e) {
+        return;
+      }
+      if (!blocklist.uso) return;
+
+      var hash = Scriptish_cryptoHash(json);
+      if (self._blocklistHash == hash) return;
+
+      let file = self._blocklistFile;
+
+      // write blocklist
+      var BLStream = Scriptish_getWriteStream(file);
+      BLStream.write(json, json.length);
+      BLStream.close();
+      Scriptish_log("Updated Scriptish blocklist");
+
+      self._blocklist = blocklist;
+      self._blocklistHash = hash;
+    }; // if there is an error then just try again next time for now..
+    req.open("GET", this._blocklistURL, true);
+    req.send(null);
+  },
+
+  _loadBlocklist: function() {
+    if (this._blocklistFile.exists()) {
+      let blockListContents = Scriptish_getContents(this._blocklistFile);
+      let blocklist = Instances.json.decode(blockListContents);
+      this._blocklist = blocklist;
+      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
+
+      // block scripts
+      this._blockScripts();
+    }
+  },
+
   _load: function() {
     // load config
+    var self = this;
     var configContents = Scriptish_getContents(this._configFile);
     var doc = Instances.dp.parseFromString(configContents, "text/xml");
     var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
@@ -118,16 +162,20 @@ Config.prototype = {
     }
     this.addExclude(excludes);
 
-    // load blocklist
-    if (this._useBlocklist && this._blocklistFile.exists()) {
-      let blockListContents = Scriptish_getContents(this._blocklistFile);
-      let blocklist = Instances.json.decode(blockListContents);
-      this._blocklist = blocklist;
-      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
+    // Listen for the blocklist pref being modified
+    Scriptish_prefRoot.watch("blocklist.enabled", function() {
+      self._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
+      if (self._useBlocklist) {
+        // Blocklist was enabled.  Load the blocklist.
+        self._loadBlocklist();
+      } else {
+        // Blocklist was disabled.  Clean things up.
+        self._blocklist = {};
+      }
+    });
 
-      // block scripts
-      this._blockScripts();
-    }
+    // Load the blocklist
+    if (this._useBlocklist) this._loadBlocklist();
 
     // the delay b4 save here is very important now that config.xml is used when
     // scriptish-config.xml DNE
@@ -225,8 +273,6 @@ Config.prototype = {
   get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),
 
   _initScriptDir: function() {
-    var self = this;
-
     // create an empty configuration if none exist.
     var dir = this._scriptDir;
     if (!dir.exists()) {
@@ -240,36 +286,8 @@ Config.prototype = {
       configStream.close();
     }
 
-    // Don't update if blocklist is disabled
-    if (!this._useBlocklist) return;
-
-    // Check for blocklist update
-    var req = Instances.xhr;
-    req.onload = function() {
-      var json = req.responseText;
-      try {
-        var blocklist = Instances.json.decode(json);
-      } catch (e) {
-        return;
-      }
-      if (!blocklist.uso) return;
-
-      var hash = Scriptish_cryptoHash(json);
-      if (self._blocklistHash == hash) return;
-
-      let file = self._blocklistFile;
-
-      // write blocklist
-      var BLStream = Scriptish_getWriteStream(file);
-      BLStream.write(json, json.length);
-      BLStream.close();
-      Scriptish_log("Updated Scriptish blocklist");
-
-      self._blocklist = blocklist;
-      self._blocklistHash = hash;
-    }; // if there is an error then just try again next time for now..
-    req.open("GET", this._blocklistURL, true);
-    req.send(null);
+    // Update if blocklist is enabled
+    if (this._useBlocklist) this._fetchBlocklist();
   },
 
   get excludes() this._excludes.concat(),
