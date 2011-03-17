@@ -31,9 +31,8 @@ function GM_apiLeakCheck(apiName) {
 
 function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
   // Pop back onto browser scope and call event handler.
-  // Have to use nested function here instead of Scriptish_hitch because
-  // otherwise aCallback.apply can point to window.setTimeout, which
-  // can be abused to get increased privileges.
+  // Have to use nested function here otherwise aCallback.apply can point to
+  // window.setTimeout, which can be abused to get increased privileges.
   new XPCNativeWrapper(aWin, "setTimeout()")
       .setTimeout(function() aCb.apply(aThis, aArgs), 0);
 }

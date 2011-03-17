@@ -8,7 +8,6 @@ var Scriptish_BrowserUIM;
 inc("resource://scriptish/content/browser.js");
 inc("resource://scriptish/prefmanager.js");
 inc("resource://scriptish/scriptish.js");
-inc("resource://scriptish/utils/Scriptish_hitch.js", tools);
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_openInEditor.js");
 inc("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
@@ -21,7 +20,6 @@ var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;
 var $ = function(aID) document.getElementById(aID);
-function hitch() tools.Scriptish_hitch.apply(null, arguments);
 
 Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
@@ -134,12 +132,12 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   }, false)
 
   // update visual status when enabled state changes
-  this.statusWatcher = hitch(Scriptish_BrowserUIM, "refreshStatus");
+  this.statusWatcher = Scriptish_BrowserUIM.refreshStatus.bind(Scriptish_BrowserUIM);
   Scriptish_prefRoot.watch("enabled", this.statusWatcher);
 
   // hook on to context menu popup event
   $("contentAreaContextMenu").addEventListener(
-      "popupshowing", hitch(this, "contextMenuShowing"), false);
+      "popupshowing", this.contextMenuShowing.bind(this), false);
 
   // this gives us onLocationChange
   gBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
@@ -188,7 +186,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
     [{label: Scriptish_stringBundle("greeting.btn"),
       accessKey: Scriptish_stringBundle("greeting.btn.ak"),
       popup: null,
-      callback: hitch(this, "installCurrentScript")
+      callback: this.installCurrentScript.bind(this)
     }]
   );
 }
@@ -301,8 +299,8 @@ Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
 Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
 Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
-window.addEventListener("load", hitch(Scriptish_BrowserUI, "chromeLoad"), false);
-window.addEventListener("unload", hitch(Scriptish_BrowserUI, "chromeUnload"), false);
+window.addEventListener("load", Scriptish_BrowserUI.chromeLoad.bind(Scriptish_BrowserUI), false);
+window.addEventListener("unload", Scriptish_BrowserUI.chromeUnload.bind(Scriptish_BrowserUI), false);
 })(Components.utils.import, {})
 
 /**
