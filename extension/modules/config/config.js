@@ -39,6 +39,7 @@ function Config(aBaseDir) {
   this._configFile = configFile;
 
   this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
+  this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
   this._blocklist = {};
   this._blocklistHash = "";
   (this._blocklistFile = this._scriptDir).append(SCRIPTISH_BLOCKLIST);
@@ -267,7 +268,7 @@ Config.prototype = {
       self._blocklist = blocklist;
       self._blocklistHash = hash;
     }; // if there is an error then just try again next time for now..
-    req.open("GET", "https://github.com/erikvold/scriptish/raw/master/blocklist.json", true);
+    req.open("GET", this._blocklistURL, true);
     req.send(null);
   },
 
