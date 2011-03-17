@@ -22,6 +22,9 @@ cp -r \
   ../build/
 cd ../build
 
+sed -e 's/extension\/license/license/g' LICENSE.txt > LICENSE.txt.$$
+mv LICENSE.txt.$$ LICENSE.txt
+
 if [ "amo" = "$1" ]; then
   (sed -e 's/<em\:update.*//g' install.rdf > install.rdf.$$ &&
    mv install.rdf.$$ install.rdf)
