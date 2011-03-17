@@ -286,8 +286,16 @@ Config.prototype = {
       configStream.close();
     }
 
-    // Update if blocklist is enabled
-    if (this._useBlocklist) this._fetchBlocklist();
+    if (!this._useBlocklist) return;
+
+    // Try to fetch a new list if blocklist is enabled and some time has passed
+    let interval = Scriptish_prefRoot.getValue("blocklist.interval");
+    let lastFetch = Scriptish_prefRoot.getValue("blocklist.interval.lastFetch");
+    let now = Math.ceil((new Date()).getTime() / 1E3);
+    if (now - lastFetch >= interval) {
+      Scriptish_prefRoot.setValue("blocklist.interval.lastFetch", now);
+      this._fetchBlocklist();
+    }
   },
 
   get excludes() this._excludes.concat(),
