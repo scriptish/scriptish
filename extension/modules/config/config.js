@@ -7,12 +7,12 @@ const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 inc("resource://scriptish/constants.js");
 inc("resource://scriptish/logging.js");
 inc("resource://scriptish/prefmanager.js");
+inc("resource://scriptish/scriptish.js");
 inc("resource://scriptish/utils/Scriptish_getContents.js");
 inc("resource://scriptish/utils/Scriptish_getWriteStream.js");
 inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
 inc("resource://scriptish/utils/Scriptish_notification.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
-inc("resource://scriptish/utils/Scriptish_openManager.js");
 inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
 inc("resource://scriptish/third-party/Timer.js");
@@ -199,7 +199,7 @@ Config.prototype = {
       var msg = "'" + aNewScript.name;
       if (aNewScript.version) msg += " " + aNewScript.version;
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
-      Scriptish_notification(msg, null, null, function() Scriptish_openManager());
+      Scriptish_notification(msg, null, null, function() Scriptish.openManager());
     }
   },
 

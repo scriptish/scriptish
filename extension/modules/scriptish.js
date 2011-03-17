@@ -5,6 +5,13 @@ const Scriptish = {
   get config() Services.scriptish.config,
   get enabled() Scriptish_prefRoot.getValue("enabled", true),
   set enabled(aVal) Scriptish_prefRoot.setValue("enabled", !!aVal),
+  openManager: function Scriptish_openManager() {
+    var browserWin = Services.wm.getMostRecentWindow("navigator:browser");
+    if (browserWin.BrowserOpenAddonsMgr)
+      browserWin.BrowserOpenAddonsMgr("addons://list/userscript");
+    else if (browserWin.toEM)
+      browserWin.toEM("addons://list/userscript");
+  },
   isGreasemonkeyable: function Scriptish_isGreasemonkeyable(aURL) {
     // if the url provide is not a valid url, then an error could be thrown
     try {

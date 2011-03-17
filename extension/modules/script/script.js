@@ -12,7 +12,6 @@ Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
@@ -472,7 +471,7 @@ Script.prototype = {
     var msg = "'" + this.name;
     if (this.version) msg += " " + this.version;
     msg += "' " + Scriptish_stringBundle("statusbar.updated");
-    Scriptish_notification(msg, null, null, function() Scriptish_openManager());
+    Scriptish_notification(msg, null, null, function() Scriptish.openManager());
     this.updateHelper();
     this._changed("update");
   },
@@ -696,7 +695,7 @@ Script.prototype = {
     var msg = "'" + this.name;
     if (this.version) msg += " " + this.version;
     msg += "' " + Scriptish_stringBundle("statusbar.modified");
-    Scriptish_notification(msg, null, null, function() Scriptish_openManager());
+    Scriptish_notification(msg, null, null, function() Scriptish.openManager());
 
     if (!noReload) this.updateHelper();
     this._changed("modified", null, true);
