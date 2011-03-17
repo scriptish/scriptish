@@ -10,7 +10,6 @@ Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-Cu.import("resource://scriptish/utils/Scriptish_parseScriptName.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
@@ -944,7 +943,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
 
   // if no meta info, default to reasonable values
   if (!script._name && aURI) {
-    script._name = Scriptish_parseScriptName(
+    script._name = Script.parseScriptName(
         (aUpdateScript && aUpdateScript.filename) || (aURI && aURI.spec));
   }
   if (!script._namespace && script._downloadURL)
@@ -1059,3 +1058,6 @@ Script.load = function load(aConfig, aNode) {
   aConfig.addScript(script);
   return fileModified;
 };
+
+Script.parseScriptName = function(aURL) ((
+    /\/([^\/]+)\.user(?:-\d+)?\.js(?:[\?#].*)?$/.test(aURL || "")) ? RegExp.$1 : "")
