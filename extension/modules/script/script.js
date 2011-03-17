@@ -7,7 +7,6 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
@@ -143,8 +142,8 @@ Script.prototype = {
     if (!updateURL) return aCallback.call(this, false);
     var req = Instances.xhr;
     req.open("GET", updateURL, true);
-    req.onload = Scriptish_hitch(this, "checkRemoteVersion", req, aCallback);
-    req.onerror = Scriptish_hitch(this, "checkRemoteVersionErr", aCallback);
+    req.onload = this.checkRemoteVersion.bind(this, req, aCallback);
+    req.onerror = this.checkRemoteVersionErr.bind(this, aCallback);
     req.send(null);	
   },
   checkRemoteVersion: function(req, aCallback) {
