@@ -35,7 +35,7 @@ function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
   // otherwise aCallback.apply can point to window.setTimeout, which
   // can be abused to get increased privileges.
   new XPCNativeWrapper(aWin, "setTimeout()")
-      .setTimeout(function() { aCb.apply(aThis, aArgs); }, 0);
+      .setTimeout(function() aCb.apply(aThis, aArgs), 0);
 }
 
 function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {

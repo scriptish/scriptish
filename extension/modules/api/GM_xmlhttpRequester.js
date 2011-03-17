@@ -2,7 +2,6 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 (function(inc){
   inc("resource://scriptish/constants.js");
   inc("resource://scriptish/logging.js");
-  inc("resource://scriptish/utils/Scriptish_hitch.js");
   inc("resource://scriptish/utils/Scriptish_stringBundle.js");
   inc("resource://scriptish/api.js");
 })(Components.utils.import)
@@ -46,7 +45,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     case "https":
     case "ftp":
       var req = Instances.xhr;
-      Scriptish_hitch(this, "chromeStartRequest", url, details, req)();
+      this.chromeStartRequest(url, details, req);
       break;
     default:
       throw new Error(Scriptish_stringBundle("error.api.reqURL.scheme") + ": " + details.url);
