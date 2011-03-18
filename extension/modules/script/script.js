@@ -133,13 +133,16 @@ Script.prototype = {
   findUpdates: function(aListener, aReason) {
     if (aListener.onNoCompatibilityUpdateAvailable)
       aListener.onNoCompatibilityUpdateAvailable(this);
+
     switch (aReason) {
       case AddonManager.UPDATE_WHEN_NEW_APP_DETECTED:
       case AddonManager.UPDATE_WHEN_NEW_APP_INSTALLED:
       case AddonManager.UPDATE_WHEN_ADDON_INSTALLED:
         return noUpdateFound.call(this, aListener);
     }
+
     if (this.updateAvailable) return updateFound.call(this, aListener);
+
     this.checkForRemoteUpdate(function(aUpdate) {
       if (!aUpdate) return noUpdateFound.call(this, aListener);
       updateFound.call(this, aListener);
@@ -156,11 +159,12 @@ Script.prototype = {
   },
   checkRemoteVersion: function(req, aCallback) {
     if (4 > req.readyState) return;
-    if (req.status != 200 && req.status != 0) return aCallback(this, false);
+    if (req.status != 200 && req.status != 0) return aCallback.call(this, false);
+    if ("https" != req.channel.URI.scheme) return aCallback.call(this, false);
     var remoteVersion = Script.parseVersion(req.responseText);
     aCallback.call(this, !!(remoteVersion && Services.vc.compare(this.version, remoteVersion) < 0));
   },
-  checkRemoteVersionErr: function(aCallback) aCallback(this, false),
+  checkRemoteVersionErr: function(aCallback) aCallback.call(this, false),
 
   resetIcon: function() this._icon = new ScriptIcon(this),
 
