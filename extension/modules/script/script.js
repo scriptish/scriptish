@@ -492,6 +492,8 @@ Script.prototype = {
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
+    var oldPriority = this.priority;
+    var newPriority = newScript.priority;
 
     // Copy new values.
     this.updateAvailable = false;
@@ -502,7 +504,7 @@ Script.prototype = {
     this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
     this._delay = newScript._delay;
-    this.priority = newScript.priority;
+    this.priority = newPriority;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
@@ -552,6 +554,7 @@ Script.prototype = {
       }
       this.modificationProcess();
     }
+    if (oldPriority != newPriority) this._config.sortScripts();
   },
 
   createXMLNode: function(doc) {

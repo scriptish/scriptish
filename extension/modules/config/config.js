@@ -206,6 +206,7 @@ Config.prototype = {
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
       Scriptish_notification(msg, null, null, function() Scriptish.openManager());
     }
+    this.sortScripts();
   },
 
   uninstallScripts: function() {
@@ -282,8 +283,9 @@ Config.prototype = {
     }
   },
 
-  get scripts() this._scripts.sort(function(a, b) b.priority - a.priority).concat(),
+  get scripts() this._scripts.concat(),
   getMatchingScripts: function(testFunc) this.scripts.filter(testFunc),
+  sortScripts: function() this._scripts.sort(function(a, b) b.priority - a.priority),
   injectScript: function(script) {
     var unsafeWin = this.wrappedContentWin.wrappedJSObject;
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
