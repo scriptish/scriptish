@@ -123,25 +123,30 @@ Config.prototype = {
       this._blocklist = blocklist;
       this._blocklistHash = Scriptish_cryptoHash(blockListContents);
 
-      // remove blocked scripts
-      var scripts = this._scripts;
-      for (var i = scripts.length - 1; ~i; i--) {
-        let uri = null, script = scripts[i];
-        try {
-          uri = NetUtil.newURI(script.homepageURL);
-        } catch (e) {}
-        if (!uri) continue;
-        if (this.isBlocked(uri)) {
-          this._scripts.splice(i, 1);
-          script.uninstallProcess();
-          Scriptish_log("Removing blocked userscript '" + script.name + "' from Scriptish", true); // TODO: l10n
-        }
-      }
+      // block scripts
+      this._blockScripts();
     }
 
     // the delay b4 save here is very important now that config.xml is used when
     // scriptish-config.xml DNE
     if (fileModified) this._save();
+  },
+
+  _blockScripts: function() {
+    var scripts = this._scripts;
+    for (var i = scripts.length - 1; ~i; i--) {
+      let uri = null, script = scripts[i];
+      // check homepage url
+      try {
+        uri = NetUtil.newURI(script.homepageURL);
+      } catch (e) {}
+      if (uri && this.isBlocked(uri)) script.blocked = true;
+      // check update url
+      try {
+        uri = NetUtil.newURI(script.updateURL);
+      } catch (e) {}
+      if (uri && this.isBlocked(uri)) script.blocked = true;
+    }
   },
 
   _save: function(saveNow) {

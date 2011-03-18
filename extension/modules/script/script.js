@@ -87,7 +87,16 @@ function Script(config) {
 Script.prototype = {
   includesDisabled: false,
   isCompatible: true,
-  blocklistState: 0,
+  blocklistState: Ci.nsIBlocklistService.STATE_NOT_BLOCKED,
+  get blocked() (this.blocklistState === Ci.nsIBlocklistService.STATE_NOT_BLOCKED)
+      ? false : true,
+  set blocked(aVal) {
+    this.enabled = false;
+    this.blocklistState = aVal
+        ? Ci.nsIBlocklistService.STATE_BLOCKED
+        : Ci.nsIBlocklistService.STATE_NOT_BLOCKED;
+    return this.blocklistState;
+  },
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
   applyBackgroundUpdates: AddonManager.AUTOUPDATE_DISABLE,
@@ -96,8 +105,9 @@ Script.prototype = {
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
   get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
-  get userDisabled() !this._enabled,
+  get userDisabled() !this.enabled,
   set userDisabled(val) {
+    if (this.blocked) return true;
     if (val == this.userDisabled) return val;
 
     AddonManagerPrivate.callAddonListeners(
@@ -276,7 +286,7 @@ Script.prototype = {
   get optionsURL() "chrome://scriptish/content/script-options.xul?id=" + this.id,
   get icon() this._icon,
   get iconURL() this._icon.fileURL,
-  get enabled() this._enabled,
+  get enabled() !this.blocked && this._enabled,
   set enabled(enabled) { this.userDisabled = !enabled; },
   get delay() this._delay,
   set delay(aNum) {
@@ -639,6 +649,7 @@ Script.prototype = {
     scriptNode.setAttribute("name", this.name);
     scriptNode.setAttribute("namespace", this.namespace);
     scriptNode.setAttribute("author", this._author);
+    scriptNode.setAttribute("blocklistState", this.blocklistState);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
     scriptNode.setAttribute("delay", this._delay);
@@ -1050,6 +1061,8 @@ Script.load = function load(aConfig, aNode) {
   script.author = aNode.getAttribute("author");
   script._description = aNode.getAttribute("description");
   script.icon.fileURL = aNode.getAttribute("icon");
+  let blocklistState = parseInt(aNode.getAttribute("blocklistState"), 10);
+  if (blocklistState) script.blocklistState = blocklistState;
   script._enabled = aNode.getAttribute("enabled") == true.toString();
   script.delay = aNode.getAttribute("delay");
   script.priority = parseInt(aNode.getAttribute("priority"), 10) || 0;
