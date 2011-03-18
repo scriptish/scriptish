@@ -79,7 +79,7 @@ ScriptishService.prototype = {
 
     let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
     let gBrowser = chromeWin.gBrowser;
-    let href = safeWin.location.href;
+    let href = safeWin.location.href || safeWin.frameElement.src;
     // Show the scriptish install banner if the user is navigating to a .user.js
     // file in a top-level tab.  If the file was previously cached it might have
     // been given a number after .user, like gmScript.user-12.js
@@ -135,7 +135,7 @@ ScriptishService.prototype = {
         inject();
       });
 
-    // if the focused tab's window is loading, then attach menuCommaander
+    // if the focused tab's window is loading, then attach menuCommander
     if (safeWin === gBrowser.selectedBrowser.contentWindow) {
       if (gmBrowserUI.currentMenuCommander)
         gmBrowserUI.currentMenuCommander.detach();
@@ -175,6 +175,9 @@ ScriptishService.prototype = {
     self.injectScripts(scripts["document-start"], href, safeWin, chromeWin);
 
     safeWin.addEventListener("pagehide", function(e) {
+      // Ignore if we are inside a frame.
+      // This is okay since there will be no menuCommanders to remove.
+      if (safeWin.frameElement) return;
       winClosed = true;
       self.docUnload(safeWin, gmBrowserUI);
     }, false);
