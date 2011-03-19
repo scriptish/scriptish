@@ -187,17 +187,27 @@ Config.prototype = {
   _blockScripts: function() {
     var scripts = this._scripts;
     for (var i = scripts.length - 1; ~i; i--) {
-      let uri = null, script = scripts[i];
+      let uri, script = scripts[i];
+
       // check homepage url
       try {
         uri = NetUtil.newURI(script.homepageURL);
       } catch (e) {}
-      if (uri && this.isBlocked(uri)) script.blocked = true;
+      if (uri && this.isBlocked(uri)) {
+        script.blocked = true;
+        continue;
+      }
+
       // check update url
       try {
         uri = NetUtil.newURI(script.updateURL);
       } catch (e) {}
-      if (uri && this.isBlocked(uri)) script.blocked = true;
+      if (uri && this.isBlocked(uri)) {
+        script.blocked = true;
+        continue;
+      }
+
+      delete script["blocklistState"];
     }
   },
 
