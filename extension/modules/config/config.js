@@ -38,6 +38,8 @@ function Config(aBaseDir) {
 
   this._configFile = configFile;
 
+  this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
+  this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
   this._blocklist = {};
   this._blocklistHash = "";
   (this._blocklistFile = this._scriptDir).append(SCRIPTISH_BLOCKLIST);
@@ -96,8 +98,54 @@ Config.prototype = {
     return false;
   },
 
+  _fetchBlocklist: function() {
+    // Check for blocklist update
+    var self = this;
+    var req = Instances.xhr;
+    req.onload = function() {
+      var json = req.responseText;
+      try {
+        var blocklist = Instances.json.decode(json);
+      } catch (e) {
+        return;
+      }
+      if (!blocklist.uso) return;
+
+      var hash = Scriptish_cryptoHash(json);
+      if (self._blocklistHash == hash) return;
+
+      let file = self._blocklistFile;
+
+      // write blocklist
+      var BLStream = Scriptish_getWriteStream(file);
+      BLStream.write(json, json.length);
+      BLStream.close();
+      Scriptish_log("Updated Scriptish blocklist");
+
+      self._blocklist = blocklist;
+      self._blocklistHash = hash;
+
+      this._blockScripts();
+    }; // if there is an error then just try again next time for now..
+    req.open("GET", this._blocklistURL, true);
+    req.send(null);
+  },
+
+  _loadBlocklist: function() {
+    if (this._blocklistFile.exists()) {
+      let blockListContents = Scriptish_getContents(this._blocklistFile);
+      let blocklist = Instances.json.decode(blockListContents);
+      this._blocklist = blocklist;
+      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
+
+      // block scripts
+      this._blockScripts();
+    }
+  },
+
   _load: function() {
     // load config
+    var self = this;
     var configContents = Scriptish_getContents(this._configFile);
     var doc = Instances.dp.parseFromString(configContents, "text/xml");
     var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
@@ -116,16 +164,20 @@ Config.prototype = {
     }
     this.addExclude(excludes);
 
-    // load blocklist
-    if (this._blocklistFile.exists()) {
-      let blockListContents = Scriptish_getContents(this._blocklistFile);
-      let blocklist = Instances.json.decode(blockListContents);
-      this._blocklist = blocklist;
-      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
+    // Listen for the blocklist pref being modified
+    Scriptish_prefRoot.watch("blocklist.enabled", function() {
+      self._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
+      if (self._useBlocklist) {
+        // Blocklist was enabled.  Load the blocklist.
+        self._loadBlocklist();
+      } else {
+        // Blocklist was disabled.  Clean things up.
+        self._blocklist = {};
+      }
+    });
 
-      // block scripts
-      this._blockScripts();
-    }
+    // Load the blocklist
+    if (this._useBlocklist) this._loadBlocklist();
 
     // the delay b4 save here is very important now that config.xml is used when
     // scriptish-config.xml DNE
@@ -134,19 +186,7 @@ Config.prototype = {
 
   _blockScripts: function() {
     var scripts = this._scripts;
-    for (var i = scripts.length - 1; ~i; i--) {
-      let uri = null, script = scripts[i];
-      // check homepage url
-      try {
-        uri = NetUtil.newURI(script.homepageURL);
-      } catch (e) {}
-      if (uri && this.isBlocked(uri)) script.blocked = true;
-      // check update url
-      try {
-        uri = NetUtil.newURI(script.updateURL);
-      } catch (e) {}
-      if (uri && this.isBlocked(uri)) script.blocked = true;
-    }
+    for (var i = scripts.length - 1; ~i; i--) scripts[i].doBlockCheck();
   },
 
   _save: function(saveNow) {
@@ -223,8 +263,6 @@ Config.prototype = {
   get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),
 
   _initScriptDir: function() {
-    var self = this;
-
     // create an empty configuration if none exist.
     var dir = this._scriptDir;
     if (!dir.exists()) {
@@ -238,33 +276,16 @@ Config.prototype = {
       configStream.close();
     }
 
-    // check for blocklist update
-    var req = Instances.xhr;
-    req.onload = function() {
-      var json = req.responseText;
-      try {
-        var blocklist = Instances.json.decode(json);
-      } catch (e) {
-        return;
-      }
-      if (!blocklist.uso) return;
+    if (!this._useBlocklist) return;
 
-      var hash = Scriptish_cryptoHash(json);
-      if (self._blocklistHash == hash) return;
-
-      let file = self._blocklistFile;
-
-      // write blocklist
-      var BLStream = Scriptish_getWriteStream(file);
-      BLStream.write(json, json.length);
-      BLStream.close();
-      Scriptish_log("Updated Scriptish blocklist");
-
-      self._blocklist = blocklist;
-      self._blocklistHash = hash;
-    }; // if there is an error then just try again next time for now..
-    req.open("GET", "https://github.com/erikvold/scriptish/raw/master/blocklist.json", true);
-    req.send(null);
+    // Try to fetch a new list if blocklist is enabled and some time has passed
+    let interval = Scriptish_prefRoot.getValue("blocklist.interval");
+    let lastFetch = Scriptish_prefRoot.getValue("blocklist.lastFetch");
+    let now = Math.ceil((new Date()).getTime() / 1E3);
+    if (now - lastFetch >= interval) {
+      Scriptish_prefRoot.setValue("blocklist.lastFetch", now);
+      this._fetchBlocklist();
+    }
   },
 
   get excludes() this._excludes.concat(),

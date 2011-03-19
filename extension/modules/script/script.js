@@ -97,6 +97,26 @@ Script.prototype = {
         : Ci.nsIBlocklistService.STATE_NOT_BLOCKED;
     return this.blocklistState;
   },
+  doBlockCheck: function() {
+    let uri;
+
+    // check homepage url
+    try {
+      uri = NetUtil.newURI(this.homepageURL);
+    } catch (e) {}
+    if (uri && this._config.isBlocked(uri))
+      return this.blocked = true;
+
+    // check update url
+    try {
+      uri = NetUtil.newURI(this.updateURL);
+    } catch (e) {}
+    if (uri && this._config.isBlocked(uri))
+        return this.blocked = true;
+
+    delete this["blocklistState"];
+    return false;
+  },
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
   applyBackgroundUpdates: AddonManager.AUTOUPDATE_DISABLE,
@@ -496,6 +516,7 @@ Script.prototype = {
     var newPriority = newScript.priority;
 
     // Copy new values.
+    this.blocked = newScript.blocked;
     this.updateAvailable = false;
     this.domains = newScript.domains;
     this._includes = newScript._includes;
@@ -967,6 +988,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
     script._namespace = aURI.host;
   if (!script._description) script._description = "";
   if (!script._version) script._version = "";
+
+  script.doBlockCheck();
 
   return script;
 };
