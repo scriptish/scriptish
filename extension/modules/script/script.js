@@ -97,6 +97,26 @@ Script.prototype = {
         : Ci.nsIBlocklistService.STATE_NOT_BLOCKED;
     return this.blocklistState;
   },
+  doBlockCheck: function() {
+    let uri;
+
+    // check homepage url
+    try {
+      uri = NetUtil.newURI(this.homepageURL);
+    } catch (e) {}
+    if (uri && this._config.isBlocked(uri))
+      return this.blocked = true;
+
+    // check update url
+    try {
+      uri = NetUtil.newURI(this.updateURL);
+    } catch (e) {}
+    if (uri && this._config.isBlocked(uri))
+        return this.blocked = true;
+
+    delete this["blocklistState"];
+    return false;
+  },
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
   applyBackgroundUpdates: AddonManager.AUTOUPDATE_DISABLE,
