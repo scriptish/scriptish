@@ -188,7 +188,7 @@ ScriptishService.prototype = {
 
     // Ignore if we are inside a frame.
     // This is okay since there will be no menuCommanders to remove.
-    if (aEvt.frameElement) return true;
+    if (aWin.frameElement) return true;
 
     let menuCmders = aGMBrowserUI.menuCommanders;
     if (!menuCmders || 0 == menuCmders.length) return true;
