@@ -56,6 +56,7 @@ ScriptishService.prototype = {
   observe: function(aSubject, aTopic, aData) {
     switch (aTopic) {
       case "content-document-global-created":
+    	  Scriptish_log("content-document-global-created: "+ aSubject.location.href+" -frame: "+(!aSubject.frameElement || aSubject.frameElement.src));
         this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject));
         break;
     }
@@ -121,7 +122,7 @@ ScriptishService.prototype = {
         case "document-idle":
           if (2 > rdyStateIdx) {
             safeWin.addEventListener(
-                "DOMContentLoaded", function() timeout(inject, 0), true);
+                "DOMContentLoaded", function() timeout(inject), true);
             return;
           }
           break;
@@ -147,7 +148,7 @@ ScriptishService.prototype = {
     let scripts = this.initScripts(href, safeWin);
 
     if (scripts["document-end"].length || scripts["document-idle"].length) {
-      safeWin.addEventListener("DOMContentLoaded", function() {
+      safeWin.addEventListener("DOMContentLoaded", function() {Scriptish_log("DOMContentLoaded: "+href);
         if (shouldNotRun()) return;
 
         // inject @run-at document-idle scripts
@@ -174,7 +175,7 @@ ScriptishService.prototype = {
     // inject @run-at document-start scripts
     self.injectScripts(scripts["document-start"], href, safeWin, chromeWin);
 
-    safeWin.addEventListener("pagehide", function(aEvt) {
+    safeWin.addEventListener("pagehide", function(aEvt) {Scriptish_log("pagehide: "+href);Scriptish_log("persisted: "+aEvt.persisted);
       winClosed = self.docUnload(aEvt, safeWin, gmBrowserUI);
     }, false);
   },
