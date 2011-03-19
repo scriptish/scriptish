@@ -175,6 +175,9 @@ ScriptishService.prototype = {
     self.injectScripts(scripts["document-start"], href, safeWin, chromeWin);
 
     safeWin.addEventListener("pagehide", function(aEvt) {
+      if (safeWin.frameElement
+        && aEvt.target.location.href == "about:blank"
+        && safeWin.frameElement.src != "about:blank") return; // see bug 643181
       winClosed = self.docUnload(aEvt, safeWin, gmBrowserUI);
     }, false);
   },
