@@ -124,6 +124,8 @@ Config.prototype = {
 
       self._blocklist = blocklist;
       self._blocklistHash = hash;
+
+      this._blockScripts();
     }; // if there is an error then just try again next time for now..
     req.open("GET", this._blocklistURL, true);
     req.send(null);
