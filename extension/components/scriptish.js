@@ -174,17 +174,22 @@ ScriptishService.prototype = {
     // inject @run-at document-start scripts
     self.injectScripts(scripts["document-start"], href, safeWin, chromeWin);
 
-    safeWin.addEventListener("pagehide", function(e) {
-      // Ignore if we are inside a frame.
-      // This is okay since there will be no menuCommanders to remove.
-      if (safeWin.frameElement) return;
-      winClosed = true;
-      self.docUnload(safeWin, gmBrowserUI);
+    safeWin.addEventListener("pagehide", function(aEvt) {
+      winClosed = self.docUnload(aEvt, safeWin, gmBrowserUI);
     }, false);
   },
-  docUnload: function(aWin, aGMBrowserUI) {
+
+  docUnload: function(aEvt, aWin, aGMBrowserUI) {
+    // if persisted then the page/frame is bfcached, so unload will occur later
+    if (aEvt.persisted) return false;
+
+    // Ignore if we are inside a frame.
+    // This is okay since there will be no menuCommanders to remove.
+    if (aEvt.frameElement) return true;
+
     let menuCmders = aGMBrowserUI.menuCommanders;
-    if (!menuCmders || 0 == menuCmders.length) return;
+    if (!menuCmders || 0 == menuCmders.length) return true;
+
     let curMenuCmder = this.currentMenuCommander;
     for (let [i, item] in Iterator(menuCmders)) {
       if (item.win !== aWin) continue;
@@ -192,6 +197,7 @@ ScriptishService.prototype = {
       menuCmders.splice(i, 1);
       break;
     }
+    return true;
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
