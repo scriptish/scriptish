@@ -102,6 +102,8 @@ Config.prototype = {
     // Check for blocklist update
     var self = this;
     var req = Instances.xhr;
+    req.open("GET", this._blocklistURL, true);
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
     req.onload = function() {
       var json = req.responseText;
       try {
@@ -127,7 +129,6 @@ Config.prototype = {
 
       this._blockScripts();
     }; // if there is an error then just try again next time for now..
-    req.open("GET", this._blocklistURL, true);
     req.send(null);
   },
 
