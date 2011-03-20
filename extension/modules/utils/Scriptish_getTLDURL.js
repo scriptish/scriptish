@@ -1,7 +1,8 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getTLDURL"];
 Components.utils.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_memoize.js");
 
-function Scriptish_getTLDURL(aURL) {
+const Scriptish_getTLDURL = Scriptish_memoize(function(aURL) {
   let tldURL = aURL;
   try {
     let uri = NetUtil.newURI(aURL);
@@ -12,4 +13,4 @@ function Scriptish_getTLDURL(aURL) {
   } catch (e) {}
 
   return tldURL;
-}
+});
