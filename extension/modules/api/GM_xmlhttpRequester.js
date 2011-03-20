@@ -78,6 +78,9 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
 
   if (details.overrideMimeType) req.overrideMimeType(details.overrideMimeType);
 
+  if (details.ignoreCache)
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+
   if (details.headers) {
     var headers = details.headers;
 
