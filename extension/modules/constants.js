@@ -77,6 +77,10 @@ XPCOMUtils.defineLazyServiceGetter(
     "nsIScriptableUnescapeHTML");
 
 XPCOMUtils.defineLazyServiceGetter(
+    Services, "tld", "@mozilla.org/network/effective-tld-service;1",
+    "nsIEffectiveTLDService");
+
+XPCOMUtils.defineLazyServiceGetter(
     Services, "uuid", "@mozilla.org/uuid-generator;1",
     "nsIUUIDGenerator");
 

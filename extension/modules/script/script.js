@@ -9,6 +9,7 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
+Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
@@ -244,7 +245,8 @@ Script.prototype = {
   },
 
   matchesURL: function(aURL) {
-    function testI(regExp) regExp.test(aURL);
+    function testI(regExp) (
+        (regExp.isTLD) ? regExp.test(Scriptish_getTLDURL(aURL)) : regExp.test(aURL));
     function testII(aMatchPattern) aMatchPattern.doMatch(aURL);
 
     // check if the doamin is ok 
