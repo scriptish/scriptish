@@ -91,11 +91,14 @@ Script.prototype = {
   get blocked() (this.blocklistState === Ci.nsIBlocklistService.STATE_NOT_BLOCKED)
       ? false : true,
   set blocked(aVal) {
-    this.enabled = false;
-    this.blocklistState = aVal
-        ? Ci.nsIBlocklistService.STATE_BLOCKED
-        : Ci.nsIBlocklistService.STATE_NOT_BLOCKED;
-    return this.blocklistState;
+    if (aVal) {
+      this.blocklistState = Ci.nsIBlocklistService.STATE_BLOCKED;
+      return this.enabled = false;
+    }
+
+    if (this.blocked) this.enabled = false;
+    this.blocklistState = Ci.nsIBlocklistService.STATE_NOT_BLOCKED;
+    return false;
   },
   doBlockCheck: function() {
     let uri;
@@ -128,7 +131,8 @@ Script.prototype = {
   get userDisabled() !this.enabled,
   set userDisabled(val) {
     if (this.blocked) return true;
-    if (val == this.userDisabled) return val;
+    val = !!val;
+    if (val === this.userDisabled) return val;
 
     AddonManagerPrivate.callAddonListeners(
         val ? "onEnabling" : "onDisabling", this, false);
@@ -138,6 +142,8 @@ Script.prototype = {
 
     AddonManagerPrivate.callAddonListeners(
         val ? "onEnabled" : "onDisabled", this);
+
+    return val;
   },
 
   isCompatibleWith: function() true,
@@ -311,7 +317,7 @@ Script.prototype = {
   get icon() this._icon,
   get iconURL() this._icon.fileURL,
   get enabled() !this.blocked && this._enabled,
-  set enabled(enabled) { this.userDisabled = !enabled; },
+  set enabled(enabled) !(this.userDisabled = !enabled),
   get delay() this._delay,
   set delay(aNum) {
     let val = parseInt(aNum, 10);
