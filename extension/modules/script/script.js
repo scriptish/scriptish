@@ -180,6 +180,7 @@ Script.prototype = {
     if (!updateURL) return aCallback.call(this, false);
     var req = Instances.xhr;
     req.open("GET", updateURL, true);
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
     req.onload = this.checkRemoteVersion.bind(this, req, aCallback);
     req.onerror = this.checkRemoteVersionErr.bind(this, aCallback);
     req.send(null);	
