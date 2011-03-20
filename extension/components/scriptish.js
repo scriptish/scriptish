@@ -121,7 +121,7 @@ ScriptishService.prototype = {
         case "document-idle":
           if (2 > rdyStateIdx) {
             safeWin.addEventListener(
-                "DOMContentLoaded", function() timeout(inject, 0), true);
+                "DOMContentLoaded", function() timeout(inject), true);
             return;
           }
           break;
