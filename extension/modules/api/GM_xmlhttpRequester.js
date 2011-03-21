@@ -6,6 +6,8 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
   inc("resource://scriptish/api.js");
 })(Components.utils.import)
 
+const MIME_JSON = /^(application|text)\/(?:x-)?json/i
+
 function GM_xmlhttpRequester(unsafeContentWin, originUrl, aScript) {
   this.unsafeContentWin = unsafeContentWin;
   this.originUrl = originUrl;
@@ -104,6 +106,8 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
     function(unsafeContentWin, req, event, details) {
   Scriptish_log("> GM_xmlhttpRequester.setupRequestEvent");
 
+  var origMimeType = details.overrideMimeType;
+
   if (details[event]) {
     req[event] = function() {
       Scriptish_log("> GM_xmlhttpRequester -- callback for " + event);
@@ -122,6 +126,15 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
         responseState.responseHeaders = req.getAllResponseHeaders();
         responseState.status = req.status;
         responseState.statusText = req.statusText;
+        if (MIME_JSON.test(origMimeType)
+            || MIME_JSON.test(details.overrideMimeType)
+            || MIME_JSON.test(req.channel.contentType)) {
+          try {
+            responseState.responseJSON = Instances.json.decode(req.responseText);
+          } catch (e) {
+            responseState.responseJSON = {};
+          }
+        }
         responseState.finalUrl = req.channel.URI.spec;
       }
 
