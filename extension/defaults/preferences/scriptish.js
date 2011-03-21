@@ -8,5 +8,6 @@ pref("extensions.scriptish.blocklist.url", "https://github.com/erikvold/scriptis
 pref("extensions.scriptish.enableCopyDownloadURL", false);
 pref("extensions.scriptish.enableScriptRefreshing", true);
 pref("extensions.scriptish.uninstallPreferences", true);
+pref("extensions.scriptish.update.requireBuiltInCerts", true);
 pref("extensions.scriptish.useDefaultLocale", false);
 pref("extensions.scriptish.useDownloadURLForUpdateURL", false);

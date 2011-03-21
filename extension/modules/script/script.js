@@ -3,6 +3,7 @@ var EXPORTED_SYMBOLS = ["Script"];
 const valueSplitter = /(\S+)\s+([^\r\f\n]+)/;
 
 const Cu = Components.utils;
+Cu.import("resource://gre/modules/CertUtils.jsm");
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
@@ -27,16 +28,18 @@ const maxJSVer = JSVersions[2];
 const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
 const defaultRunAt = runAtValues[1];
 
-function noUpdateFound(aListener) {
+function noUpdateFound(aListener, aReason) {
   aListener.onNoUpdateAvailable(this);
-  if (aListener.onUpdateFinished) aListener.onUpdateFinished(this);
+  if (aListener.onUpdateFinished)
+    aListener.onUpdateFinished(this, aReason || AddonManager.UPDATE_STATUS_NO_ERROR);
 }
-function updateFound(aListener) {
+function updateFound(aListener, aReason) {
   var AddonInstall = new ScriptInstall(this);
   this.updateAvailable = true;
   AddonManagerPrivate.callAddonListeners("onNewInstall", AddonInstall);
   aListener.onUpdateAvailable(this, AddonInstall);
-  if (aListener.onUpdateFinished) aListener.onUpdateFinished(this);
+  if (aListener.onUpdateFinished)
+    aListener.onUpdateFinished(this, AddonManager.UPDATE_STATUS_NO_ERROR);
 }
 
 // Implements https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
@@ -170,29 +173,49 @@ Script.prototype = {
 
     if (this.updateAvailable) return updateFound.call(this, aListener);
 
-    this.checkForRemoteUpdate(function(aUpdate) {
-      if (!aUpdate) return noUpdateFound.call(this, aListener);
+    this.checkForRemoteUpdate(function(aUpdate, aReason) {
+      if (!aUpdate) return noUpdateFound.call(this, aListener, aReason);
       updateFound.call(this, aListener);
     });
   },
   checkForRemoteUpdate: function(aCallback) {
     var updateURL = this.updateURL;
-    if (!updateURL) return aCallback.call(this, false);
+    if (this.blocked || !updateURL) return aCallback.call(this, false);
     var req = Instances.xhr;
     req.open("GET", updateURL, true);
     req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+    // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
+    req.channel.notificationCallbacks = new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
     req.onload = this.checkRemoteVersion.bind(this, req, aCallback);
     req.onerror = this.checkRemoteVersionErr.bind(this, aCallback);
-    req.send(null);	
+    req.send(null);
   },
   checkRemoteVersion: function(req, aCallback) {
     if (4 > req.readyState) return;
-    if (req.status != 200 && req.status != 0) return aCallback.call(this, false);
-    if ("https" != req.channel.URI.scheme) return aCallback.call(this, false);
+    if (req.status != 200 && req.status != 0)
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR);
+
+    // make sure that the final URI is a https url
+    if ("https" != req.channel.URI.scheme)
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
+
+    // make sure that the final URI's certificate is valid
+    try {
+      checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+    }
+    catch (e) {
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);;
+    }
+
+    // parse the version
     var remoteVersion = Script.parseVersion(req.responseText);
-    aCallback.call(this, !!(remoteVersion && Services.vc.compare(this.version, remoteVersion) < 0));
+    if (!remoteVersion)
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_PARSE_ERROR);
+
+    aCallback.call(this, !!(Services.vc.compare(this.version, remoteVersion) < 0));
   },
-  checkRemoteVersionErr: function(aCallback) aCallback.call(this, false),
+  checkRemoteVersionErr: function(aCallback, aErr) (
+    aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR)),
 
   resetIcon: function() this._icon = new ScriptIcon(this),
 
