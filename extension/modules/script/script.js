@@ -204,7 +204,7 @@ Script.prototype = {
       checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
     }
     catch (e) {
-      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);;
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
     }
 
     // parse the version
