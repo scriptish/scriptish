@@ -180,6 +180,14 @@ Config.prototype = {
     // Load the blocklist
     if (this._useBlocklist) this._loadBlocklist();
 
+    // Fetch USO usage data
+    let scripts = this._scripts;
+    for (var i = scripts.length - 1; ~i; i--) {
+      let script = scripts[i];
+      if (!script.blocked && script.isUSOScript())
+        timeout(script.updateUSOData.bind(script), i * 100);
+    }
+
     // the delay b4 save here is very important now that config.xml is used when
     // scriptish-config.xml DNE
     if (fileModified) this._save();

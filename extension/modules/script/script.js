@@ -133,14 +133,13 @@ Script.prototype = {
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
-  get reviewURL() {
-    if (!usoURLChk.test(this._downloadURL)
-        && !usoURLChk.test(this._homepageURL)
-        && !usoURLChk.test(this._updateURL))
-      return "";
-
-    return "http://userscripts.org/scripts/reviews/" + RegExp.$1;
-  },
+  isUSOScript: function() (usoURLChk.test(this._downloadURL)
+      || usoURLChk.test(this._homepageURL)
+      || usoURLChk.test(this._updateURL)),
+  /*averageRating: undefined,
+  reviewCount: undefined,
+  totalDownloads: undefined,*/
+  get reviewURL() ((this.isUSOScript()) ? "http://userscripts.org/scripts/reviews/" + RegExp.$1 : ""),
   get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
   get userDisabled() !this.enabled,
   set userDisabled(val) {
@@ -169,6 +168,30 @@ Script.prototype = {
   },
 
   get updateDate () new Date(parseInt(this._modified)),
+
+  updateUSOData: function() {
+    if (this.blocked || !this.isUSOScript()) return;
+    var script = this;
+    var scriptID = RegExp.$1;
+    var metaURL = "http://userscripts.org/scripts/source/" + scriptID + ".meta.js";
+    var req = Instances.xhr;
+    req.overrideMimeType("text/plain");
+    req.open("GET", metaURL, true);
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+    req.onload = function() {
+      if (4 > req.readyState || (req.status != 200 && req.status != 0)
+          || !req.responseText)
+        return;
+      var data = Script.header_parse(req.responseText);
+      if (!data["uso:rating"] || !data["uso:script"] || data["uso:script"][0] != scriptID
+          || !data["uso:reviews"] || !data["uso:installs"])
+        return;
+      script.reviewCount = data["uso:reviews"][0] * 1;
+      script.averageRating = data["uso:rating"][0] * 1;
+      script.totalDownloads = data["uso:installs"][0] * 1;
+    }
+    req.send(null);
+  },
 
   findUpdates: function(aListener, aReason) {
     if (aListener.onNoCompatibilityUpdateAvailable)
@@ -749,6 +772,12 @@ Script.prototype = {
       scriptNode.setAttribute("downloadURL", this._downloadURL);
     if (this._updateURL)
       scriptNode.setAttribute("updateURL", this._updateURL);
+    if (this.averageRating)
+      scriptNode.setAttribute("averageRating", this.averageRating);
+    if (this.reviewCount)
+      scriptNode.setAttribute("reviewCount", this.reviewCount);
+    if (this.totalDownloads)
+      scriptNode.setAttribute("totalDownloads", this.totalDownloads);
 
     return scriptNode;
   },
@@ -1176,6 +1205,12 @@ Script.load = function load(aConfig, aNode) {
   script._enabled = aNode.getAttribute("enabled") == true.toString();
   script.delay = aNode.getAttribute("delay");
   script.priority = parseInt(aNode.getAttribute("priority"), 10) || 0;
+  if (aNode.getAttribute("averageRating"))
+    script.averageRating = aNode.getAttribute("averageRating") * 1;
+  if (aNode.getAttribute("reviewCount"))
+    script.reviewCount = aNode.getAttribute("reviewCount") * 1;
+  if (aNode.getAttribute("totalDownloads"))
+    script.totalDownloads = aNode.getAttribute("totalDownloads") * 1;
 
   aConfig.addScript(script);
   return fileModified;
