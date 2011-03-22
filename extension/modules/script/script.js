@@ -27,6 +27,7 @@ const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
 const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
 const defaultRunAt = runAtValues[1];
+const usoURLChk = /^https?:\/\/userscripts\.org\/scripts\/[^\d]+(\d+)/i;
 
 function noUpdateFound(aListener, aReason) {
   aListener.onNoUpdateAvailable(this);
@@ -132,6 +133,14 @@ Script.prototype = {
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
+  get reviewURL() {
+    if (!usoURLChk.test(this._downloadURL)
+        && !usoURLChk.test(this._homepageURL)
+        && !usoURLChk.test(this._updateURL))
+      return "";
+
+    return "http://userscripts.org/scripts/reviews/" + RegExp.$1;
+  },
   get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
   get userDisabled() !this.enabled,
   set userDisabled(val) {
