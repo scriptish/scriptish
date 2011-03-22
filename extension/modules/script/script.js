@@ -453,6 +453,7 @@ Script.prototype = {
     }
     return this._homepageURL = url;
   },
+  supportURL: "",
   get updateURL() {
     if (!this.version) return null;
     if (Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL"))
@@ -601,6 +602,7 @@ Script.prototype = {
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
+    this.supportURL = newScript.supportURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this.author = newScript._author;
@@ -772,6 +774,8 @@ Script.prototype = {
       scriptNode.setAttribute("downloadURL", this._downloadURL);
     if (this._updateURL)
       scriptNode.setAttribute("updateURL", this._updateURL);
+    if (this.supportURL)
+        scriptNode.setAttribute("supportURL", this.supportURL);
     if (this.averageRating)
       scriptNode.setAttribute("averageRating", this.averageRating);
     if (this.reviewCount)
@@ -956,6 +960,14 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "homepageurl":
           script._homepageURL = value;
           continue;
+        case "supporturl":
+          try {
+            var uri = NetUtil.newURI(value);
+          } catch (e) {
+            break;
+          }
+          script.supportURL = uri.spec;
+          break;
         case "jsversion":
           let jsVerIndx = JSVersions.indexOf(value);
           if (-1 === jsVerIndx) {
@@ -1114,6 +1126,8 @@ Script.load = function load(aConfig, aNode) {
   script._updateURL = aNode.getAttribute("updateURL") || null;
   script._homepageURL = aNode.getAttribute("homepageURL")
       || aNode.getAttribute("homepage") || null;
+  if (aNode.getAttribute("supportURL"))
+    script.supportURL = aNode.getAttribute("supportURL");
   script._jsversion = aNode.getAttribute("jsversion") || null;
   script["_run-at"] = aNode.getAttribute("run-at") || null;
   tmp = (aNode.getAttribute("includesDisabled") || "").toLowerCase();
