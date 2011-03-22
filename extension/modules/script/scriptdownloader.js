@@ -135,6 +135,8 @@ ScriptDownloader.prototype.fetchDependencies = function() {
   // if this.script.icon._filename exists then the icon is a data scheme
   if (this.script.icon.hasDownloadURL())
     deps.push(this.script.icon);
+  if (this.script.icon64.hasDownloadURL())
+    deps.push(this.script.icon64);
 
   for (let [, dep] in Iterator(deps)) {
     if (this.checkDependencyURL(dep.urlToDownload)) {
@@ -142,7 +144,7 @@ ScriptDownloader.prototype.fetchDependencies = function() {
     } else {
       let errMsg = Scriptish_stringBundle("error.dependency.local");
       if (dep instanceof ScriptIcon) {
-        dep._script.resetIcon();
+        dep.reset();
         Scriptish_logError(new Error(
             Scriptish_stringBundle("error.dependency.loading") + ": " +
             dep.urlToDownload + "\n" + errMsg));
@@ -231,7 +233,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
 
       if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType)) {
         file.remove(false);
-        dep._script.resetIcon();
+        dep.reset();
         Scriptish_logError(new Error(
             errMsgStart + Scriptish_stringBundle("error.icon.notImage")));
         this.downloadNextDependency();
@@ -246,7 +248,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
 
       if (dep instanceof ScriptIcon) {
         file.remove(false);
-        dep._script.resetIcon();
+        dep.reset();
         Scriptish_logError(new Error(errMsgStart + errMsg));
         this.downloadNextDependency();
       } else {

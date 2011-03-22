@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = ["Script"];
 
-const valueSplitter = /(\S+)\s+([^\r\f\n]+)/;
+const valueSplitter = /(\S+)(?:\s+([^\r\f\n]+))?/;
 
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/CertUtils.jsm");
@@ -65,6 +65,7 @@ function Script(config) {
   this._description = null;
   this._version = null;
   this._icon = new ScriptIcon(this);
+  this._icon64 = new ScriptIcon(this);
   this._enabled = true;
   this.needsUninstall = false;
   this.domains = [];
@@ -217,8 +218,6 @@ Script.prototype = {
   checkRemoteVersionErr: function(aCallback, aErr) (
     aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR)),
 
-  resetIcon: function() this._icon = new ScriptIcon(this),
-
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
     this.needsUninstall = true;
@@ -341,7 +340,16 @@ Script.prototype = {
   get version() this._version,
   get optionsURL() "chrome://scriptish/content/script-options.xul?id=" + this.id,
   get icon() this._icon,
+  set icon(aIcon) this._icon = aIcon,
+  get icon64() this._icon64,
+  set icon64(aIcon) this._icon64 = aIcon,
   get iconURL() this._icon.fileURL,
+  get icon64URL() {
+    let url = this._icon64.fileURL;
+    if (this.icon.DEFAULT_ICON_URL == url)
+      return this.iconURL;
+    return url;
+  },
   get enabled() !this.blocked && this._enabled,
   set enabled(enabled) !(this.userDisabled = !enabled),
   get delay() this._delay,
@@ -576,6 +584,7 @@ Script.prototype = {
       this._basedir = newScript._basedir;
       this._filename = newScript._filename;
       this._icon = newScript._icon;
+      this._icon64 = newScript._icon64;
       this._requires = newScript._requires;
       this._resources = newScript._resources;
       this._modified = newScript._modified;
@@ -586,6 +595,7 @@ Script.prototype = {
       if (dependhash != this._dependhash && !newScript._dependFail) {
         this._dependhash = dependhash;
         this._icon = newScript._icon;
+        this._icon64 = newScript._icon64;
         this._requires = newScript._requires;
         this._resources = newScript._resources;
 
@@ -715,6 +725,7 @@ Script.prototype = {
     scriptNode.setAttribute("delay", this._delay);
     scriptNode.setAttribute("priority", this.priority);
     scriptNode.setAttribute("icon", this.icon.filename);
+    scriptNode.setAttribute("icon64", this.icon64.filename);
     scriptNode.setAttribute("enabled", this._enabled);
     scriptNode.setAttribute("basedir", this._basedir);
     scriptNode.setAttribute("modified", this._modified);
@@ -733,12 +744,13 @@ Script.prototype = {
     return scriptNode;
   },
 
+  // TODO: DRY
   installProcess: function() {
     this._initFile(this._tempFile);
     this._tempFile = null;
 
-    if (this.icon.hasDownloadURL())
-      this.icon._initFile();
+    if (this.icon.hasDownloadURL()) this.icon._initFile();
+    if (this.icon64.hasDownloadURL()) this.icon64._initFile();
 
     for (var i = 0; i < this._requires.length; i++)
       this._requires[i]._initFile();
@@ -951,13 +963,39 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "defaulticon":
         case "icon":
         case "iconurl":
+          var splitValue = value.match(valueSplitter);
+          // icon
           try {
-            script.icon.setIcon(value, aURI);
+            script.icon.setIcon(splitValue[1], aURI);
           } catch (e) {
             if (aUpdateScript) script._dependFail = true;
             else Scriptish_logError(e);
             continue;
           }
+
+          script._rawMeta += header + '\0' + value + '\0';
+
+          // icon64
+          var icon64 = splitValue[2];
+          if (!icon64) continue;
+          try {
+             script.icon64.setIcon(icon64, aURI);
+           } catch (e) {
+             if (aUpdateScript) script._dependFail = true;
+             else Scriptish_logError(e);
+             continue;
+           }
+          continue;
+        case "icon64":
+        case "icon64url":
+          try {
+            script.icon64.setIcon(value, aURI);
+          } catch (e) {
+            if (aUpdateScript) script._dependFail = true;
+            else Scriptish_logError(e);
+            continue;
+          }
+
           script._rawMeta += header + '\0' + value + '\0';
           continue;
         case "require":
@@ -1123,6 +1161,7 @@ Script.load = function load(aConfig, aNode) {
   script.author = aNode.getAttribute("author");
   script._description = aNode.getAttribute("description");
   script.icon.fileURL = aNode.getAttribute("icon");
+  script.icon64.fileURL = aNode.getAttribute("icon64");
   let blocklistState = parseInt(aNode.getAttribute("blocklistState"), 10);
   if (blocklistState) script.blocklistState = blocklistState;
   script._enabled = aNode.getAttribute("enabled") == true.toString();
