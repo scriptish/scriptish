@@ -347,10 +347,17 @@ Script.prototype = {
     this._author = aVal.trim();
     if (AddonManagerPrivate.AddonAuthor) {
       let author = this._author.match(/((?:[^;<h]|h[^t]|ht[^t]|htt[^p]|http[^:]|http:[^\/]|http:\/[^\/])+)[;<]?(?:\s*<?([^<>@\s;]+@[^<>@\s;]+)(?:[>;];?)?)?(?:\s*(https?:\/\/[^\s;]*))?/i);
-      if (author && author[3])
-        this._creator = new AddonManagerPrivate.AddonAuthor((author[1] || this._author).trim(), author[3]);
-      else
+      if (author && author[3]) {
+        author = (author[1] || this._author).trim();
+        try {
+          var uri = NetUtil.newURI(RegExp.$3);
+          this._creator = new AddonManagerPrivate.AddonAuthor(author, uri.spec);
+        } catch (e) {
+          this._creator = new AddonManagerPrivate.AddonAuthor(author);
+        }
+      } else {
         this._creator = new AddonManagerPrivate.AddonAuthor(this._author);
+      }
     } else {
       this._creator = this._author;
     }
@@ -949,8 +956,13 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           script["_" + header] = value;
           continue;
         case "updateurl":
-          if (value.match(/^https?:\/\//)) script._updateURL = value;
-          continue;
+          try {
+            var uri = NetUtil.newURI(value);
+          } catch (e) {
+            break;
+          }
+          if (uri.scheme == "https") script._updateURL = uri.spec;
+          break;
         case "injectframes":
           if (value != "0") continue;
           script["_noframes"] = true;
@@ -958,8 +970,13 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "website":
         case "homepage":
         case "homepageurl":
-          script._homepageURL = value;
-          continue;
+          try {
+            var uri = NetUtil.newURI(value);
+          } catch (e) {
+            break;
+          }
+          script._homepageURL = uri.spec;
+          break;
         case "supporturl":
           try {
             var uri = NetUtil.newURI(value);
