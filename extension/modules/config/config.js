@@ -127,7 +127,7 @@ Config.prototype = {
       self._blocklist = blocklist;
       self._blocklistHash = hash;
 
-      this._blockScripts();
+      self._blockScripts();
     }; // if there is an error then just try again next time for now..
     req.send(null);
   },
