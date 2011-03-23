@@ -20,7 +20,7 @@
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
 
-    <em:version>0.1b9</em:version>
+    <em:version>0.1</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
@@ -71,7 +71,7 @@
       <Description>
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.1a3</em:minVersion>
-        <em:maxVersion>2.1b2</em:maxVersion>
+        <em:maxVersion>2.1b3pre</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>

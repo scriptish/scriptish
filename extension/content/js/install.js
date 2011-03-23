@@ -18,26 +18,25 @@ let on = addEventListener;
 
 function setupIncludes(type, items) {
   if (!items.length) return;
-  let [box, desc, list, str] = [$(type), $(type + "-desc"), $nHTML("ul"), ""];
+  let [list, str] = [$nHTML("ul"), ""];
   for (let [, i] in Iterator(items)) {
     switch(type) {
     case "matches":
-      str = i.pattern;
+      i = i.pattern;
       break
     case "resources":
-      str = i.match(valueSplitter)[2];
+      i = i.match(valueSplitter)[2];
       break;
-    default:
-      str = i;
     }
-    list.appendChild($nHTML("li", str));
+    list.appendChild($nHTML("li", i));
   }
-  desc.appendChild(list);
-  box.setAttribute("class", "display");
+  $(type + "-desc").appendChild(list);
+  $(type).setAttribute("class", "display");
+  $(type + "-label").setAttribute("value", Scriptish_stringBundle("install." + type)); // l10n
 }
 
 function cleanup() scriptDownloader.cleanupTempFiles();
-function delayedClose() setTimeout(close, 0);
+function delayedClose() timeout(close);
 
 
 /* Main */
@@ -49,9 +48,9 @@ on("load", function() {
   let headers = script.getScriptHeader();
 
   // setup lists
-  setupIncludes("matches", script.matches);
-  setupIncludes("includes", script.includes);
-  setupIncludes("excludes", script.excludes);
+  ["domains", "matches", "includes", "excludes"].forEach(function(i) {
+    setupIncludes(i, script[i]);
+  });
   setupIncludes("requires", headers.require || []);
   setupIncludes("resources", headers.resource || []);
 
@@ -62,16 +61,6 @@ on("load", function() {
   dialog.getButton("cancel").focus();
 
   // setup other l10n
-  $("matches-label").setAttribute("value",
-      Scriptish_stringBundle("install.matches"));
-  $("includes-label").setAttribute("value",
-      Scriptish_stringBundle("install.runsOn"));
-  $("excludes-label").setAttribute("value",
-      Scriptish_stringBundle("install.butNotOn"));
-  $("requires-label").setAttribute("value",
-      Scriptish_stringBundle("install.requires"));
-  $("resources-label").setAttribute("value",
-      Scriptish_stringBundle("install.resources"));
   $("warning1").appendChild($t(Scriptish_stringBundle("install.warning1")));
   $("warning2").appendChild($t(Scriptish_stringBundle("install.warning2")));
 

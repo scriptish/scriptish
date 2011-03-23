@@ -1,12 +1,9 @@
-
-(function($, tools){
+(function($, tools) {
 var Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js", tools);
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/addonprovider.js");
 Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_ExtendedStringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js");
@@ -69,6 +66,6 @@ window.addEventListener("load", function() {
 }, false);
 
 window.addEventListener(
-    "unload", Scriptish_hitch(Scriptish.config, "uninstallScripts"), false);
+    "unload", Scriptish.config.uninstallScripts.bind(Scriptish.config), false);
 
 })(function(aID) document.getElementById(aID), {});

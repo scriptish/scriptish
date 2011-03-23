@@ -23,6 +23,10 @@
       <description id="scriptDescription" flex="1"/>
     </hbox>
     <vbox id="itemBox" flex="1">
+      <vbox id="domains">
+        <label id="domains-label"/>
+        <description id="domains-desc"/>
+      </vbox>
       <vbox id="matches">
         <label id="matches-label"/>
         <description id="matches-desc"/>

@@ -26,6 +26,7 @@ var Instances = {
   get fos() Cc["@mozilla.org/network/file-output-stream;1"]
       .createInstance(Ci.nsIFileOutputStream),
   get fp() Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker),
+  get json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
   get lf() Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile),
   get process() Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess),
   get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
@@ -75,7 +76,15 @@ XPCOMUtils.defineLazyServiceGetter(
     Services, "suhtml", "@mozilla.org/feed-unescapehtml;1",
     "nsIScriptableUnescapeHTML");
 
+XPCOMUtils.defineLazyServiceGetter(
+    Services, "tld", "@mozilla.org/network/effective-tld-service;1",
+    "nsIEffectiveTLDService");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Services, "uuid", "@mozilla.org/uuid-generator;1",
+    "nsIUUIDGenerator");
+
 function timeout(cb, delay) {
   Instances.timer.initWithCallback(
-      { notify: function(){ cb.call(null) } }, delay, ONE_SHOT);
+      { notify: function(){ cb.call(null) } }, delay || 0, ONE_SHOT);
 }

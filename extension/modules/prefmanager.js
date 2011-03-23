@@ -112,14 +112,14 @@ function Scriptish_PrefManager(startPoint) {
     // store the observer in case we need to remove it later
     observers[watcher] = observer;
 
-    pref.QueryInterface(Ci.nsIPrefBranchInternal)
+    pref.QueryInterface(Ci.nsIPrefBranch2)
         .addObserver(prefName, observer, false);
   }
 
   // stop watching
   this.unwatch = function(prefName, watcher) {
     if (observers[watcher]) {
-      pref.QueryInterface(Ci.nsIPrefBranchInternal)
+      pref.QueryInterface(Ci.nsIPrefBranch2)
           .removeObserver(prefName, observers[watcher]);
     }
   }

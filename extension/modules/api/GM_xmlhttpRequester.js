@@ -2,15 +2,16 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 (function(inc){
   inc("resource://scriptish/constants.js");
   inc("resource://scriptish/logging.js");
-  inc("resource://scriptish/utils/Scriptish_hitch.js");
   inc("resource://scriptish/utils/Scriptish_stringBundle.js");
   inc("resource://scriptish/api.js");
 })(Components.utils.import)
 
-function GM_xmlhttpRequester(unsafeContentWin, chromeWindow, originUrl) {
+const MIME_JSON = /^(application|text)\/(?:x-)?json/i
+
+function GM_xmlhttpRequester(unsafeContentWin, originUrl, aScript) {
   this.unsafeContentWin = unsafeContentWin;
-  this.chromeWindow = chromeWindow;
   this.originUrl = originUrl;
+  this.script = aScript;
 }
 
 // this function gets called by user scripts in content security scope to
@@ -33,14 +34,20 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     throw new Error(Scriptish_stringBundle("error.api.reqURL") + ": " + details.url);
   }
 
+  // check if the script is allowed to access the url
+  if (!this.script.matchesDomain(url))
+    throw new Error(
+        "User script is attempting access to restricted domain '" + uri.host + "'",
+        this.script.fileURL);
+
   // This is important - without it, GM_xmlhttpRequest can be used to get
   // access to things like files and chrome. Careful.
   switch (uri.scheme) {
     case "http":
     case "https":
     case "ftp":
-      var req = new this.chromeWindow.XMLHttpRequest();
-      Scriptish_hitch(this, "chromeStartRequest", url, details, req)();
+      var req = Instances.xhr;
+      this.chromeStartRequest(url, details, req);
       break;
     default:
       throw new Error(Scriptish_stringBundle("error.api.reqURL.scheme") + ": " + details.url);
@@ -73,6 +80,9 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
 
   if (details.overrideMimeType) req.overrideMimeType(details.overrideMimeType);
 
+  if (details.ignoreCache)
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+
   if (details.headers) {
     var headers = details.headers;
 
@@ -96,6 +106,8 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
     function(unsafeContentWin, req, event, details) {
   Scriptish_log("> GM_xmlhttpRequester.setupRequestEvent");
 
+  var origMimeType = details.overrideMimeType;
+
   if (details[event]) {
     req[event] = function() {
       Scriptish_log("> GM_xmlhttpRequester -- callback for " + event);
@@ -114,6 +126,15 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
         responseState.responseHeaders = req.getAllResponseHeaders();
         responseState.status = req.status;
         responseState.statusText = req.statusText;
+        if (MIME_JSON.test(origMimeType)
+            || MIME_JSON.test(details.overrideMimeType)
+            || MIME_JSON.test(req.channel.contentType)) {
+          try {
+            responseState.responseJSON = Instances.json.decode(req.responseText);
+          } catch (e) {
+            responseState.responseJSON = {};
+          }
+        }
         responseState.finalUrl = req.channel.URI.spec;
       }
 

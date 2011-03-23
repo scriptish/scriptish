@@ -11,7 +11,6 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js");
 
@@ -80,7 +79,7 @@ ScriptishService.prototype = {
 
     let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
     let gBrowser = chromeWin.gBrowser;
-    let href = safeWin.location.href;
+    let href = safeWin.location.href || safeWin.frameElement.src;
     // Show the scriptish install banner if the user is navigating to a .user.js
     // file in a top-level tab.  If the file was previously cached it might have
     // been given a number after .user, like gmScript.user-12.js
@@ -122,7 +121,7 @@ ScriptishService.prototype = {
         case "document-idle":
           if (2 > rdyStateIdx) {
             safeWin.addEventListener(
-                "DOMContentLoaded", function() timeout(inject, 0), true);
+                "DOMContentLoaded", function() timeout(inject), true);
             return;
           }
           break;
@@ -136,7 +135,7 @@ ScriptishService.prototype = {
         inject();
       });
 
-    // if the focused tab's window is loading, then attach menuCommaander
+    // if the focused tab's window is loading, then attach menuCommander
     if (safeWin === gBrowser.selectedBrowser.contentWindow) {
       if (gmBrowserUI.currentMenuCommander)
         gmBrowserUI.currentMenuCommander.detach();
@@ -175,14 +174,25 @@ ScriptishService.prototype = {
     // inject @run-at document-start scripts
     self.injectScripts(scripts["document-start"], href, safeWin, chromeWin);
 
-    safeWin.addEventListener("pagehide", function(e) {
-      winClosed = true;
-      self.docUnload(safeWin, gmBrowserUI);
+    safeWin.addEventListener("pagehide", function(aEvt) {
+      if (safeWin.frameElement
+        && aEvt.target.location.href == "about:blank"
+        && safeWin.frameElement.src != "about:blank") return; // see bug 643181
+      winClosed = self.docUnload(aEvt, safeWin, gmBrowserUI);
     }, false);
   },
-  docUnload: function(aWin, aGMBrowserUI) {
+
+  docUnload: function(aEvt, aWin, aGMBrowserUI) {
+    // if persisted then the page/frame is bfcached, so unload will occur later
+    if (aEvt.persisted) return false;
+
+    // Ignore if we are inside a frame.
+    // This is okay since there will be no menuCommanders to remove.
+    if (aWin.frameElement) return true;
+
     let menuCmders = aGMBrowserUI.menuCommanders;
-    if (!menuCmders || 0 == menuCmders.length) return;
+    if (!menuCmders || 0 == menuCmders.length) return true;
+
     let curMenuCmder = this.currentMenuCommander;
     for (let [i, item] in Iterator(menuCmders)) {
       if (item.win !== aWin) continue;
@@ -190,6 +200,7 @@ ScriptishService.prototype = {
       menuCmders.splice(i, 1);
       break;
     }
+    return true;
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {

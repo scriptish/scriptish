@@ -31,11 +31,10 @@ function GM_apiLeakCheck(apiName) {
 
 function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
   // Pop back onto browser scope and call event handler.
-  // Have to use nested function here instead of Scriptish_hitch because
-  // otherwise aCallback.apply can point to window.setTimeout, which
-  // can be abused to get increased privileges.
+  // Have to use nested function here otherwise aCallback.apply can point to
+  // window.setTimeout, which can be abused to get increased privileges.
   new XPCNativeWrapper(aWin, "setTimeout()")
-      .setTimeout(function() { aCb.apply(aThis, aArgs); }, 0);
+      .setTimeout(function() aCb.apply(aThis, aArgs), 0);
 }
 
 function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
@@ -44,13 +43,15 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var _storage = null;
   var _resources = null;
   var _logger = null;
+  var menuCmdIDs = [];
+  var Scriptish_BrowserUI = aChromeWin.Scriptish_BrowserUI;
 
   function getXmlhttpRequester() {
     if (!_xmlhttpRequester) {
       var tools = {};
       Cu.import("resource://scriptish/api/GM_xmlhttpRequester.js", tools);
       _xmlhttpRequester = new tools.GM_xmlhttpRequester(
-          aUnsafeContentWin, aChromeWin, aURL);
+          aUnsafeContentWin, aURL, aScript);
     }
     return _xmlhttpRequester;
   }
@@ -146,8 +147,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   }
 
   this.GM_getMetadata = function(aKey, aLocalVal) {
+    let key = aKey.toLowerCase().trim();
     if (aLocalVal) {
-      let key = aKey.toLowerCase();
       switch (key) {
       case "id":
       case "name":
@@ -175,7 +176,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       }
     }
 
-    return aScript.getScriptHeader(aKey);
+    return aScript.getScriptHeader(key);
   }
 
   this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
@@ -214,18 +215,27 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   }
 
   if (aSafeWin !== aSafeWin.top) {
-    this.GM_registerMenuCommand = DOLITTLE;
+    this.GM_unregisterMenuCommand = this.GM_registerMenuCommand = DOLITTLE;
   } else {
     this.GM_registerMenuCommand = function GM_registerMenuCommand(
         aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
       if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
-      aChromeWin.Scriptish_BrowserUI.registerMenuCommand({
+      var uuid = Scriptish_BrowserUI.registerMenuCommand({
         name: aCmdName,
         accelKey: aAccelKey,
         accelModifiers: aAccelModifiers,
         accessKey: aAccessKey,
         doCommand: aCmdFunc,
         window: aSafeWin});
+      menuCmdIDs.push(uuid);
+      return uuid;
+    }
+
+    this.GM_unregisterMenuCommand = function GM_unregisterMenuCommand(aUUID) {
+      var i = menuCmdIDs.indexOf(aUUID);
+      if (!~i) return false; // check the uuid is for a cmd made by the same script
+      menuCmdIDs.splice(i, 1);
+      return Scriptish_BrowserUI.unregisterMenuCommand(aUUID, aSafeWin);
     }
   }
 
@@ -235,6 +245,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
     return tools.Scriptish_cryptoHash.apply(null, arguments);
   }
+
+  this.GM_generateUUID = function() Services.uuid.generateUUID().toString();
 
   this.GM_updatingEnabled = true;
 }

@@ -5,7 +5,6 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 
 const ICON_16_ON = "chrome://scriptish/skin/icon_16.png";
 const ICON_16_OFF = "chrome://scriptish/skin/icon_16_disabled.png";
@@ -30,7 +29,7 @@ Scriptish_BrowserUIM.prototype = {
         this.onToggleStatus();
         break;
       case 1:
-        Scriptish_openManager();
+        Scriptish.openManager();
         break;
       case 2:
         this.$("scriptish-tb-popup").openPopup(this.$("scriptish-button"), "before_end", 0, 0, false, false);
@@ -66,6 +65,6 @@ Scriptish_BrowserUIM.prototype = {
   },
   showUserscriptList: function() {
     Cu.import("resource://scriptish/addonprovider.js");
-    this._win.setTimeout(function() {Scriptish_openManager();}, 0);
+    timeout(Scriptish.openManager);
   }
 }

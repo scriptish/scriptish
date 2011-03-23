@@ -47,6 +47,7 @@ ScriptInstall.prototype = {
   get name() this._script.name,
   get version() this._script.version,
   get iconURL() this._script.iconURL,
+  get icon64URL() this._script.icon64URL,
   releaseNotesURI: null,
   type: "userscript",
   state: AddonManager.STATE_DOWNLOADING,

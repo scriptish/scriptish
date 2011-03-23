@@ -1,20 +1,19 @@
 var EXPORTED_SYMBOLS = ["Script"];
 
-const valueSplitter = /(\S+)\s+([^\r\f\n]+)/;
+const valueSplitter = /(\S+)(?:\s+([^\r\f\n]+))?/;
 
 const Cu = Components.utils;
+Cu.import("resource://gre/modules/CertUtils.jsm");
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
+Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-Cu.import("resource://scriptish/utils/Scriptish_parseScriptName.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Cu.import("resource://scriptish/utils/Scriptish_openManager.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
@@ -22,23 +21,26 @@ Cu.import("resource://scriptish/script/scriptresource.js");
 Cu.import("resource://scriptish/third-party/MatchPattern.js");
 Cu.import("resource://scriptish/config/configdownloader.js");
 
-const metaRegExp = /\/\/ (?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
+const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
 const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
 const defaultRunAt = runAtValues[1];
+const usoURLChk = /^https?:\/\/userscripts\.org\/scripts\/[^\d]+(\d+)/i;
 
-function noUpdateFound(aListener) {
+function noUpdateFound(aListener, aReason) {
   aListener.onNoUpdateAvailable(this);
-  if (aListener.onUpdateFinished) aListener.onUpdateFinished(this);
+  if (aListener.onUpdateFinished)
+    aListener.onUpdateFinished(this, aReason || AddonManager.UPDATE_STATUS_NO_ERROR);
 }
-function updateFound(aListener) {
+function updateFound(aListener, aReason) {
   var AddonInstall = new ScriptInstall(this);
   this.updateAvailable = true;
   AddonManagerPrivate.callAddonListeners("onNewInstall", AddonInstall);
   aListener.onUpdateAvailable(this, AddonInstall);
-  if (aListener.onUpdateFinished) aListener.onUpdateFinished(this);
+  if (aListener.onUpdateFinished)
+    aListener.onUpdateFinished(this, AddonManager.UPDATE_STATUS_NO_ERROR);
 }
 
 // Implements https://developer.mozilla.org/en/Addons/Add-on_Manager/Addon
@@ -64,8 +66,10 @@ function Script(config) {
   this._description = null;
   this._version = null;
   this._icon = new ScriptIcon(this);
+  this._icon64 = new ScriptIcon(this);
   this._enabled = true;
   this.needsUninstall = false;
+  this.domains = [];
   this._includes = [];
   this._excludes = [];
   this._matches = [];
@@ -74,6 +78,7 @@ function Script(config) {
   this.user_includes = [];
   this.user_excludes = [];
   this._delay = null;
+  this.priority = 0;
   this._requires = [];
   this._resources = [];
   this._screenshots = [];
@@ -86,8 +91,41 @@ function Script(config) {
   this["_run-at"] = null;
 }
 Script.prototype = {
+  includesDisabled: false,
   isCompatible: true,
-  blocklistState: 0,
+  blocklistState: Ci.nsIBlocklistService.STATE_NOT_BLOCKED,
+  get blocked() (this.blocklistState === Ci.nsIBlocklistService.STATE_NOT_BLOCKED)
+      ? false : true,
+  set blocked(aVal) {
+    if (aVal) {
+      this.blocklistState = Ci.nsIBlocklistService.STATE_BLOCKED;
+      return this.enabled = false;
+    }
+
+    if (this.blocked) this.enabled = false;
+    this.blocklistState = Ci.nsIBlocklistService.STATE_NOT_BLOCKED;
+    return false;
+  },
+  doBlockCheck: function() {
+    let uri;
+
+    // check homepage url
+    try {
+      uri = NetUtil.newURI(this.homepageURL);
+    } catch (e) {}
+    if (uri && this._config.isBlocked(uri))
+      return this.blocked = true;
+
+    // check update url
+    try {
+      uri = NetUtil.newURI(this.updateURL);
+    } catch (e) {}
+    if (uri && this._config.isBlocked(uri))
+        return this.blocked = true;
+
+    delete this["blocklistState"];
+    return false;
+  },
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
   applyBackgroundUpdates: AddonManager.AUTOUPDATE_DISABLE,
@@ -95,10 +133,19 @@ Script.prototype = {
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
+  isUSOScript: function() (usoURLChk.test(this._downloadURL)
+      || usoURLChk.test(this._homepageURL)
+      || usoURLChk.test(this._updateURL)),
+  /*averageRating: undefined,
+  reviewCount: undefined,
+  totalDownloads: undefined,*/
+  get reviewURL() ((this.isUSOScript()) ? "http://userscripts.org/scripts/reviews/" + RegExp.$1 : ""),
   get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
-  get userDisabled() !this._enabled,
+  get userDisabled() !this.enabled,
   set userDisabled(val) {
-    if (val == this.userDisabled) return val;
+    if (this.blocked) return true;
+    val = !!val;
+    if (val === this.userDisabled) return val;
 
     AddonManagerPrivate.callAddonListeners(
         val ? "onEnabling" : "onDisabling", this, false);
@@ -108,6 +155,8 @@ Script.prototype = {
 
     AddonManagerPrivate.callAddonListeners(
         val ? "onEnabled" : "onDisabled", this);
+
+    return val;
   },
 
   isCompatibleWith: function() true,
@@ -120,39 +169,86 @@ Script.prototype = {
 
   get updateDate () new Date(parseInt(this._modified)),
 
+  updateUSOData: function() {
+    if (this.blocked || !this.isUSOScript()) return;
+    var script = this;
+    var scriptID = RegExp.$1;
+    var metaURL = "http://userscripts.org/scripts/source/" + scriptID + ".meta.js";
+    var req = Instances.xhr;
+    req.overrideMimeType("text/plain");
+    req.open("GET", metaURL, true);
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+    req.onload = function() {
+      if (4 > req.readyState || (req.status != 200 && req.status != 0)
+          || !req.responseText)
+        return;
+      var data = Script.header_parse(req.responseText);
+      if (!data["uso:rating"] || !data["uso:script"] || data["uso:script"][0] != scriptID
+          || !data["uso:reviews"] || !data["uso:installs"])
+        return;
+      script.reviewCount = data["uso:reviews"][0] * 1;
+      script.averageRating = data["uso:rating"][0] * 1;
+      script.totalDownloads = data["uso:installs"][0] * 1;
+    }
+    req.send(null);
+  },
+
   findUpdates: function(aListener, aReason) {
     if (aListener.onNoCompatibilityUpdateAvailable)
       aListener.onNoCompatibilityUpdateAvailable(this);
+
     switch (aReason) {
       case AddonManager.UPDATE_WHEN_NEW_APP_DETECTED:
       case AddonManager.UPDATE_WHEN_NEW_APP_INSTALLED:
       case AddonManager.UPDATE_WHEN_ADDON_INSTALLED:
         return noUpdateFound.call(this, aListener);
     }
+
     if (this.updateAvailable) return updateFound.call(this, aListener);
-    this.checkForRemoteUpdate(function(aUpdate) {
-      if (!aUpdate) return noUpdateFound.call(this, aListener);
+
+    this.checkForRemoteUpdate(function(aUpdate, aReason) {
+      if (!aUpdate) return noUpdateFound.call(this, aListener, aReason);
       updateFound.call(this, aListener);
     });
   },
   checkForRemoteUpdate: function(aCallback) {
     var updateURL = this.updateURL;
-    if (!updateURL) return aCallback.call(this, false);
+    if (this.blocked || !updateURL) return aCallback.call(this, false);
     var req = Instances.xhr;
     req.open("GET", updateURL, true);
-    req.onload = Scriptish_hitch(this, "checkRemoteVersion", req, aCallback);
-    req.onerror = Scriptish_hitch(this, "checkRemoteVersionErr", aCallback);
-    req.send(null);	
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+    // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
+    req.channel.notificationCallbacks = new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+    req.onload = this.checkRemoteVersion.bind(this, req, aCallback);
+    req.onerror = this.checkRemoteVersionErr.bind(this, aCallback);
+    req.send(null);
   },
   checkRemoteVersion: function(req, aCallback) {
     if (4 > req.readyState) return;
-    if (req.status != 200 && req.status != 0) return aCallback(this, false);
-    var remoteVersion = Script.parseVersion(req.responseText);
-    aCallback.call(this, !!(remoteVersion && Services.vc.compare(this.version, remoteVersion) < 0));
-  },
-  checkRemoteVersionErr: function(aCallback) aCallback(this, false),
+    if (req.status != 200 && req.status != 0)
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR);
 
-  resetIcon: function() this._icon = new ScriptIcon(this),
+    // make sure that the final URI is a https url
+    if ("https" != req.channel.URI.scheme)
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
+
+    // make sure that the final URI's certificate is valid
+    try {
+      checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+    }
+    catch (e) {
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
+    }
+
+    // parse the version
+    var remoteVersion = Script.parseVersion(req.responseText);
+    if (!remoteVersion)
+      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_PARSE_ERROR);
+
+    aCallback.call(this, !!(Services.vc.compare(this.version, remoteVersion) < 0));
+  },
+  checkRemoteVersionErr: function(aCallback, aErr) (
+    aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR)),
 
   uninstall: function() {
     AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
@@ -190,9 +286,31 @@ Script.prototype = {
     AddonManagerPrivate.callAddonListeners("onOperationCancelled", this);
   },
 
-  matchesURL: function(aUrl) {
-    function testI(regExp) { return regExp.test(aUrl); }
-    function testII(aMatchPattern) { return aMatchPattern.doMatch(aUrl); }
+  matchesDomain: function(aURL) {
+    try {
+      var host = NetUtil.newURI(aURL).host;
+    } catch (e) {
+      return false;
+    }
+
+    var i = this.domains.length - 1;
+    if (!~i) return true; // when there are no @domains, then allow the host
+    for (; ~i; i--) if (host == this.domains[i]) return true;
+    return false;
+  },
+
+  matchesURL: function(aURL) {
+    function testI(regExp) (
+        (regExp.isTLD) ? regExp.test(Scriptish_getTLDURL(aURL)) : regExp.test(aURL));
+    function testII(aMatchPattern) aMatchPattern.doMatch(aURL);
+
+    // check if the doamin is ok 
+    if (!this.matchesDomain(aURL)) return false;
+
+    // check if script @includes/@excludes are disabled
+    if (this.includesDisabled)
+      return this._user_includeRegExps.some(testI)
+          && !this._user_excludeRegExps.some(testI);
 
     let includes = this._user_includeRegExps.concat(this._includeRegExps);
     let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
@@ -222,11 +340,27 @@ Script.prototype = {
   get creator() this._creator,
   get author() this._author,
   set author(aVal) {
-    this._author = aVal;
-    if (AddonManagerPrivate.AddonAuthor)
-      this._creator = new AddonManagerPrivate.AddonAuthor(aVal);
-    else
-      this._creator = aVal;
+    if (aVal == null) {
+      this._author = this._creator = null;
+      return;
+    }
+    this._author = aVal.trim();
+    if (AddonManagerPrivate.AddonAuthor) {
+      let author = this._author.match(/((?:[^;<h]|h[^t]|ht[^t]|htt[^p]|http[^:]|http:[^\/]|http:\/[^\/])+)[;<]?(?:\s*<?([^<>@\s;]+@[^<>@\s;]+)(?:[>;];?)?)?(?:\s*(https?:\/\/[^\s;]*))?/i);
+      if (author && author[3]) {
+        author = (author[1] || this._author).trim();
+        try {
+          var uri = NetUtil.newURI(RegExp.$3);
+          this._creator = new AddonManagerPrivate.AddonAuthor(author, uri.spec);
+        } catch (e) {
+          this._creator = new AddonManagerPrivate.AddonAuthor(author);
+        }
+      } else {
+        this._creator = new AddonManagerPrivate.AddonAuthor(this._author);
+      }
+    } else {
+      this._creator = this._author;
+    }
   },
   get contributors() {
     if (!AddonManagerPrivate.AddonAuthor) return this._contributors;
@@ -245,9 +379,18 @@ Script.prototype = {
   get version() this._version,
   get optionsURL() "chrome://scriptish/content/script-options.xul?id=" + this.id,
   get icon() this._icon,
+  set icon(aIcon) this._icon = aIcon,
+  get icon64() this._icon64,
+  set icon64(aIcon) this._icon64 = aIcon,
   get iconURL() this._icon.fileURL,
-  get enabled() this._enabled,
-  set enabled(enabled) { this.userDisabled = !enabled; },
+  get icon64URL() {
+    let url = this._icon64.fileURL;
+    if (this.icon.DEFAULT_ICON_URL == url)
+      return this.iconURL;
+    return url;
+  },
+  get enabled() !this.blocked && this._enabled,
+  set enabled(enabled) !(this.userDisabled = !enabled),
   get delay() this._delay,
   set delay(aNum) {
     let val = parseInt(aNum, 10);
@@ -317,6 +460,7 @@ Script.prototype = {
     }
     return this._homepageURL = url;
   },
+  supportURL: "",
   get updateURL() {
     if (!this.version) return null;
     if (Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL"))
@@ -441,25 +585,31 @@ Script.prototype = {
     var msg = "'" + this.name;
     if (this.version) msg += " " + this.version;
     msg += "' " + Scriptish_stringBundle("statusbar.updated");
-    Scriptish_notification(msg, null, null, function() Scriptish_openManager());
+    Scriptish_notification(msg, null, null, function() Scriptish.openManager());
     this.updateHelper();
     this._changed("update");
   },
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
+    var oldPriority = this.priority;
+    var newPriority = newScript.priority;
 
     // Copy new values.
+    this.blocked = newScript.blocked;
     this.updateAvailable = false;
+    this.domains = newScript.domains;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
     this._includeRegExps = newScript._includeRegExps;
     this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
     this._delay = newScript._delay;
+    this.priority = newPriority;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
+    this.supportURL = newScript.supportURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this.author = newScript._author;
@@ -475,6 +625,7 @@ Script.prototype = {
       this._basedir = newScript._basedir;
       this._filename = newScript._filename;
       this._icon = newScript._icon;
+      this._icon64 = newScript._icon64;
       this._requires = newScript._requires;
       this._resources = newScript._resources;
       this._modified = newScript._modified;
@@ -485,6 +636,7 @@ Script.prototype = {
       if (dependhash != this._dependhash && !newScript._dependFail) {
         this._dependhash = dependhash;
         this._icon = newScript._icon;
+        this._icon64 = newScript._icon64;
         this._requires = newScript._requires;
         this._resources = newScript._resources;
 
@@ -506,6 +658,7 @@ Script.prototype = {
       }
       this.modificationProcess();
     }
+    if (oldPriority != newPriority) this._config.sortScripts();
   },
 
   createXMLNode: function(doc) {
@@ -517,6 +670,13 @@ Script.prototype = {
       contributorNode.appendChild(doc.createTextNode(this.contributors[j]));
       scriptNode.appendChild(doc.createTextNode("\n\t\t"));
       scriptNode.appendChild(contributorNode);
+    }
+
+    for (var j = 0; j < this.domains.length; j++) {
+      var node = doc.createElement("Domain");
+      node.appendChild(doc.createTextNode(this.domains[j]));
+      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
+      scriptNode.appendChild(node);
     }
 
     for (var j = 0; j < this._includes.length; j++) {
@@ -600,16 +760,20 @@ Script.prototype = {
     scriptNode.setAttribute("name", this.name);
     scriptNode.setAttribute("namespace", this.namespace);
     scriptNode.setAttribute("author", this._author);
+    scriptNode.setAttribute("blocklistState", this.blocklistState);
     scriptNode.setAttribute("description", this._description);
     scriptNode.setAttribute("version", this._version);
     scriptNode.setAttribute("delay", this._delay);
+    scriptNode.setAttribute("priority", this.priority);
     scriptNode.setAttribute("icon", this.icon.filename);
+    scriptNode.setAttribute("icon64", this.icon64.filename);
     scriptNode.setAttribute("enabled", this._enabled);
     scriptNode.setAttribute("basedir", this._basedir);
     scriptNode.setAttribute("modified", this._modified);
     scriptNode.setAttribute("dependhash", this._dependhash);
     if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
     if (this["_run-at"]) scriptNode.setAttribute("run-at", this["_run-at"]);
+    if (this.includesDisabled) scriptNode.setAttribute("includesDisabled", true);
 
     if (this.homepageURL)
       scriptNode.setAttribute("homepageURL", this.homepageURL);
@@ -617,16 +781,25 @@ Script.prototype = {
       scriptNode.setAttribute("downloadURL", this._downloadURL);
     if (this._updateURL)
       scriptNode.setAttribute("updateURL", this._updateURL);
+    if (this.supportURL)
+        scriptNode.setAttribute("supportURL", this.supportURL);
+    if (this.averageRating)
+      scriptNode.setAttribute("averageRating", this.averageRating);
+    if (this.reviewCount)
+      scriptNode.setAttribute("reviewCount", this.reviewCount);
+    if (this.totalDownloads)
+      scriptNode.setAttribute("totalDownloads", this.totalDownloads);
 
     return scriptNode;
   },
 
+  // TODO: DRY
   installProcess: function() {
     this._initFile(this._tempFile);
     this._tempFile = null;
 
-    if (this.icon.hasDownloadURL())
-      this.icon._initFile();
+    if (this.icon.hasDownloadURL()) this.icon._initFile();
+    if (this.icon64.hasDownloadURL()) this.icon64._initFile();
 
     for (var i = 0; i < this._requires.length; i++)
       this._requires[i]._initFile();
@@ -649,14 +822,14 @@ Script.prototype = {
     AddonManagerPrivate.callInstallListeners(
         "onExternalInstall", null, this, null, false);
   },
-  modificationProcess: function() {
+  modificationProcess: function(noReload) {
     // notification that modification is complete
     var msg = "'" + this.name;
     if (this.version) msg += " " + this.version;
     msg += "' " + Scriptish_stringBundle("statusbar.modified");
-    Scriptish_notification(msg, null, null, function() Scriptish_openManager());
+    Scriptish_notification(msg, null, null, function() Scriptish.openManager());
 
-    this.updateHelper();
+    if (!noReload) this.updateHelper();
     this._changed("modified", null, true);
   }
 };
@@ -740,16 +913,14 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   if (!lines) lines = [""];
   while (result = lines[i++]) {
     if (!foundMeta) {
-      if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
+      if (result.match(/\/\/[ \t]*==UserScript==/i)) foundMeta = true;
       continue;
     }
 
-    if (result.indexOf("// ==/UserScript==") == 0) {
-      // done gathering up meta lines
-      break;
-    }
+    if (result.match(/\/\/[ \t]*==\/UserScript==/i))
+      break; // done gathering up meta lines
 
-    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
+    var match = result.match(/\/\/[ \t]*\@(\S+)(?:\s+([^\r\f\n]+))?/);
     if (match === null) continue;
     var header = match[1].toLowerCase();
     var value = match[2];
@@ -764,10 +935,19 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
       value = value.trimRight();
       switch (header) {
         case "id":
-          script.id = value;
+        case "delay":
+          script[header] = value;
+          continue;
+        case "priority":
+          !script.priority && (script.priority = parseInt(value, 10));
           continue;
         case "author":
-          !script.author && (script.author = value);
+          if (!script.author) {
+            script.author = value;
+            continue;
+          }
+        case "contributor":
+          script.addContributor(value);
           continue;
         case "name":
         case "namespace":
@@ -775,12 +955,14 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "version":
           script["_" + header] = value;
           continue;
-        case "delay":
-          script.delay = value;
-          continue;
         case "updateurl":
-          if (value.match(/^https?:\/\//)) script._updateURL = value;
-          continue;
+          try {
+            var uri = NetUtil.newURI(value);
+          } catch (e) {
+            break;
+          }
+          if (uri.scheme == "https") script._updateURL = uri.spec;
+          break;
         case "injectframes":
           if (value != "0") continue;
           script["_noframes"] = true;
@@ -788,8 +970,21 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "website":
         case "homepage":
         case "homepageurl":
-          script._homepageURL = value;
-          continue;
+          try {
+            var uri = NetUtil.newURI(value);
+          } catch (e) {
+            break;
+          }
+          script._homepageURL = uri.spec;
+          break;
+        case "supporturl":
+          try {
+            var uri = NetUtil.newURI(value);
+          } catch (e) {
+            break;
+          }
+          script.supportURL = uri.spec;
+          break;
         case "jsversion":
           let jsVerIndx = JSVersions.indexOf(value);
           if (-1 === jsVerIndx) {
@@ -809,8 +1004,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
                 Scriptish_stringBundle("error.isInvalidValue"));
           script["_run-at"] = runAtValues[runAtIndx];
           continue;
-        case "contributor":
-          script.addContributor(value);
+        case "domain":
+          script.domains.push(value);
           continue;
         case "include":
           script.addInclude(value);
@@ -835,13 +1030,39 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
         case "defaulticon":
         case "icon":
         case "iconurl":
+          var splitValue = value.match(valueSplitter);
+          // icon
           try {
-            script.icon.setIcon(value, aURI);
+            script.icon.setIcon(splitValue[1], aURI);
           } catch (e) {
             if (aUpdateScript) script._dependFail = true;
             else Scriptish_logError(e);
             continue;
           }
+
+          script._rawMeta += header + '\0' + value + '\0';
+
+          // icon64
+          var icon64 = splitValue[2];
+          if (!icon64) continue;
+          try {
+             script.icon64.setIcon(icon64, aURI);
+           } catch (e) {
+             if (aUpdateScript) script._dependFail = true;
+             else Scriptish_logError(e);
+             continue;
+           }
+          continue;
+        case "icon64":
+        case "icon64url":
+          try {
+            script.icon64.setIcon(value, aURI);
+          } catch (e) {
+            if (aUpdateScript) script._dependFail = true;
+            else Scriptish_logError(e);
+            continue;
+          }
+
           script._rawMeta += header + '\0' + value + '\0';
           continue;
         case "require":
@@ -897,7 +1118,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
 
   // if no meta info, default to reasonable values
   if (!script._name && aURI) {
-    script._name = Scriptish_parseScriptName(
+    script._name = Script.parseScriptName(
         (aUpdateScript && aUpdateScript.filename) || (aURI && aURI.spec));
   }
   if (!script._namespace && script._downloadURL)
@@ -905,12 +1126,15 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   if (!script._description) script._description = "";
   if (!script._version) script._version = "";
 
+  script.doBlockCheck();
+
   return script;
 };
 
 Script.load = function load(aConfig, aNode) {
   var script = new Script(aConfig);
   var fileModified = false;
+  let tmp;
 
   script._filename = aNode.getAttribute("filename");
   script._basedir = aNode.getAttribute("basedir") || ".";
@@ -919,8 +1143,12 @@ Script.load = function load(aConfig, aNode) {
   script._updateURL = aNode.getAttribute("updateURL") || null;
   script._homepageURL = aNode.getAttribute("homepageURL")
       || aNode.getAttribute("homepage") || null;
+  if (aNode.getAttribute("supportURL"))
+    script.supportURL = aNode.getAttribute("supportURL");
   script._jsversion = aNode.getAttribute("jsversion") || null;
   script["_run-at"] = aNode.getAttribute("run-at") || null;
+  tmp = (aNode.getAttribute("includesDisabled") || "").toLowerCase();
+  if (tmp) script.includesDisabled = ("false" == tmp) ? false : true;
 
   if (!script.fileExists()) {
     script.uninstallProcess();
@@ -952,6 +1180,9 @@ Script.load = function load(aConfig, aNode) {
       case "Contributor":
         script.addContributor(childNode.firstChild.nodeValue.trim());
         break;
+      case "Domain":
+          script.domains.push(childNode.firstChild.nodeValue.trim());
+          break;
       case "Include":
         script.addInclude(childNode.firstChild.nodeValue.trim());
         break;
@@ -999,9 +1230,22 @@ Script.load = function load(aConfig, aNode) {
   script.author = aNode.getAttribute("author");
   script._description = aNode.getAttribute("description");
   script.icon.fileURL = aNode.getAttribute("icon");
+  script.icon64.fileURL = aNode.getAttribute("icon64");
+  let blocklistState = parseInt(aNode.getAttribute("blocklistState"), 10);
+  if (blocklistState) script.blocklistState = blocklistState;
   script._enabled = aNode.getAttribute("enabled") == true.toString();
   script.delay = aNode.getAttribute("delay");
+  script.priority = parseInt(aNode.getAttribute("priority"), 10) || 0;
+  if (aNode.getAttribute("averageRating"))
+    script.averageRating = aNode.getAttribute("averageRating") * 1;
+  if (aNode.getAttribute("reviewCount"))
+    script.reviewCount = aNode.getAttribute("reviewCount") * 1;
+  if (aNode.getAttribute("totalDownloads"))
+    script.totalDownloads = aNode.getAttribute("totalDownloads") * 1;
 
   aConfig.addScript(script);
   return fileModified;
 };
+
+Script.parseScriptName = function(aURL) ((
+    /\/([^\/]+)\.user(?:-\d+)?\.js(?:[\?#].*)?$/.test(aURL || "")) ? RegExp.$1 : "")

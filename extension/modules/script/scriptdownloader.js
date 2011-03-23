@@ -1,16 +1,15 @@
 var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 
 const Cu = Components.utils;
+Cu.import("resource://gre/modules/CertUtils.jsm");
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/script/scripticon.js");
-Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
-Cu.import("resource://scriptish/utils/Scriptish_hitch.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-const gTimer = new Timer();
 
 function ScriptDownloader(uri, contentWin) {
   this.uri_ = uri || null;
@@ -33,19 +32,25 @@ ScriptDownloader.prototype.startViewScript = function() {
 }
 ScriptDownloader.prototype.startUpdateScript = function(aScriptInstaller) {
   this.type = "update";
+  this.secure = true;
   this.scriptInstaller = aScriptInstaller;
   this.startDownload();
   return this;
 }
 ScriptDownloader.prototype.startDownload = function() {
   Scriptish_log("Fetching Script");
-  this.req_ = Instances.xhr;
-  this.req_.overrideMimeType("text/plain");
-  this.req_.open("GET", this.uri_.spec, true);
-  this.req_.onerror = Scriptish_hitch(this, "handleErr");
-  this.req_.onreadystatechange = Scriptish_hitch(this, "chkContentTypeB4DL");
-  this.req_.onload = Scriptish_hitch(this, "handleScriptDownloadComplete");
-  this.req_.send(null);
+  let req = this.req_ = Instances.xhr;
+  req.overrideMimeType("text/plain");
+  req.open("GET", this.uri_.spec, true);
+  if (this.secure) {
+    // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
+    req.channel.notificationCallbacks =
+        new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+  }
+  req.onerror = this.handleErr.bind(this);
+  req.onreadystatechange = this.chkContentTypeB4DL.bind(this);
+  req.onload = this.handleScriptDownloadComplete.bind(this);
+  req.send(null);
 }
 ScriptDownloader.prototype.handleErr = function() {
   if (this.scriptInstaller) this.scriptInstaller.changed("DownloadFailed");
@@ -62,16 +67,30 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
   if (this.contentWin) this.contentWin.location.href = this.uri_.spec;
 }
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
+  let req = this.req_;
   try {
     // If loading from file, status might be zero on success
-    if (this.req_.status != 200 && this.req_.status != 0) {
+    if (req.status != 200 && req.status != 0) {
       Scriptish_alert(Scriptish_stringBundle("error.script.loading") + ":\n" +
-      this.req_.status + ": " +
-      this.req_.statusText);
+      req.status + ": " + req.statusText);
       return;
     }
 
-    var source = this.req_.responseText;
+    if (this.secure) {
+      // make sure that the final URI is a https url
+      if ("https" != req.channel.URI.scheme)
+        return this.handleErr();
+
+      // make sure that the final URI's certificate is valid
+      try {
+        checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+      }
+      catch (e) {
+        return this.handleErr();
+      }
+    }
+
+    var source = req.responseText;
     this.script = Scriptish.config.parse(source, this.uri_);
 
     var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
@@ -90,7 +109,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script.setDownloadedFile(file);
 
-    gTimer.setTimeout(Scriptish_hitch(this, "fetchDependencies"), 0);
+    timeout(this.fetchDependencies.bind(this));
 
     switch (this.type) {
       case "install":
@@ -116,6 +135,8 @@ ScriptDownloader.prototype.fetchDependencies = function() {
   // if this.script.icon._filename exists then the icon is a data scheme
   if (this.script.icon.hasDownloadURL())
     deps.push(this.script.icon);
+  if (this.script.icon64.hasDownloadURL())
+    deps.push(this.script.icon64);
 
   for (let [, dep] in Iterator(deps)) {
     if (this.checkDependencyURL(dep.urlToDownload)) {
@@ -123,7 +144,7 @@ ScriptDownloader.prototype.fetchDependencies = function() {
     } else {
       let errMsg = Scriptish_stringBundle("error.dependency.local");
       if (dep instanceof ScriptIcon) {
-        dep._script.resetIcon();
+        dep.reset();
         Scriptish_logError(new Error(
             Scriptish_stringBundle("error.dependency.loading") + ": " +
             dep.urlToDownload + "\n" + errMsg));
@@ -153,15 +174,24 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
         persist.PERSIST_FLAGS_REPLACE_EXISTING_FILES; //doesn't work?
 
     var sourceUri = NetUtil.newURI(dep.urlToDownload);
+
+    if (this.secure) {
+      // make sure that the dependency's URI is a https url
+      if ("https" != sourceUri.scheme)
+        return this.errorInstallDependency(dep, "Insecure dependency URI");
+    }
+
     var sourceChannel = Services.io.newChannelFromURI(sourceUri);
-    sourceChannel.notificationCallbacks = new NotificationCallbacks();
+    sourceChannel.notificationCallbacks = (this.secure)
+        ? new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"))
+        : new NotificationCallbacks();
 
     var file = tools.Scriptish_getTempFile();
     this.tempFiles_.push(file);
 
     var progressListener = new PersistProgressListener(persist);
-    progressListener.onFinish = Scriptish_hitch(
-        this, "handleDependencyDownloadComplete", dep, file, sourceChannel);
+    progressListener.onFinish =
+        this.handleDependencyDownloadComplete.bind(this, dep, file, sourceChannel);
     persist.progressListener = progressListener;
     persist.saveChannel(sourceChannel, file);
   } catch (e) {
@@ -178,6 +208,20 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
     var httpChannel = false;
   }
 
+  if (this.secure) {
+    // make sure that the final URI is a https url
+    if ("https" != channel.URI.scheme)
+      return this.errorInstallDependency(dep, "Insecure dependency URI");
+
+    // make sure that the final URI's certificate is valid
+    try {
+      checkCert(channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+    }
+    catch (e) {
+      return  this.errorInstallDependency(dep, "Invalid dependency SSL certificate");
+    }
+  }
+
   let errMsgStart = Scriptish_stringBundle("error.dependency.loading") + ": " +
       dep.urlToDownload + "\n";
   if (httpChannel) {
@@ -189,7 +233,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
 
       if (dep instanceof ScriptIcon && !dep.isImage(channel.contentType)) {
         file.remove(false);
-        dep._script.resetIcon();
+        dep.reset();
         Scriptish_logError(new Error(
             errMsgStart + Scriptish_stringBundle("error.icon.notImage")));
         this.downloadNextDependency();
@@ -204,7 +248,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
 
       if (dep instanceof ScriptIcon) {
         file.remove(false);
-        dep._script.resetIcon();
+        dep.reset();
         Scriptish_logError(new Error(errMsgStart + errMsg));
         this.downloadNextDependency();
       } else {
@@ -273,7 +317,7 @@ ScriptDownloader.prototype.cleanupTempFiles = function() {
 }
 ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
   if (!aTimer)
-    return gTimer.setTimeout(Scriptish_hitch(this, "showInstallDialog", 1), 0);
+    return timeout(this.showInstallDialog.bind(this, 1));
 
   Services.wm.getMostRecentWindow("navigator:browser").openDialog(
       "chrome://scriptish/content/install.xul", "",
@@ -292,7 +336,7 @@ NotificationCallbacks.prototype.QueryInterface = function(aIID) {
   throw Components.results.NS_NOINTERFACE;
 }
 NotificationCallbacks.prototype.getInterface = function(aIID) {
-  if (aIID.equals(Ci.nsIAuthPrompt ))
+  if (aIID.equals(Ci.nsIAuthPrompt))
     return Services.ww.getNewAuthPrompter(winWat.activeWindow);
   return undefined;
 }

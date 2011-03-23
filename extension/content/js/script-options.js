@@ -26,6 +26,10 @@ window.addEventListener("load", function() {
   $("includes").value = script.getUserIncStr();
   $("excludes").value = script.getUserIncStr("exclude");
 
+  let tmp = $("disableScriptIncludes");
+  tmp.setAttribute("label", Scriptish_stringBundle("scriptOptions.disableScriptIncludes"));
+  tmp.checked = script.includesDisabled;
+
   return true;
 }, false);
 
@@ -37,7 +41,12 @@ function doSave() {
     script.user_includes = postInc.match(/.+/g);
     script.user_excludes = postExc.match(/.+/g);
     Scriptish.config._save();
+
+    // display modified notification
+    script.modificationProcess(true);
   }
+
+  script.includesDisabled = $("disableScriptIncludes").checked;
 
   return true;
 }

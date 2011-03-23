@@ -1,5 +1,8 @@
 var EXPORTED_SYMBOLS = ["Scriptish_MenuCommander"];
-Components.utils.import("resource://scriptish/logging.js");
+
+const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/logging.js");
 
 function Scriptish_MenuCommander(aDoc) {
   this.doc = aDoc;
@@ -23,15 +26,24 @@ Scriptish_MenuCommander.prototype.registerMenuCommand =
     function(commandName, commandFunc, accelKey, accelModifiers, accessKey) {
   // Protection against item duplication
   for (var i = 0; i < this.tbMenuItems.length; i++)
-    if (this.tbMenuItems[i].getAttribute("label") == commandName) return;
+    if (this.tbMenuItems[i].getAttribute("label") == commandName)
+      return this.tbMenuItems[i].getAttribute("uuid");
 
-  var menuItem = this.createMenuItem(commandName, commandFunc, accessKey);
-  var menuItem2 = this.createMenuItem(commandName, commandFunc, accessKey);
+  var commandUUID = Services.uuid.generateUUID().toString();
+
+  // create toolbar button menu item
+  var menuItem =
+      this.createMenuItem(commandUUID, commandName, commandFunc, accessKey);
   this.tbMenuItems.push(menuItem);
+
+  // create tools menu menu item
+  var menuItem2 =
+      this.createMenuItem(commandUUID, commandName, commandFunc, accessKey);
   this.toolsMenuItems.push(menuItem2);
 
   if (accelKey) {
-    var key = this.createKey(commandFunc, accelKey, accelModifiers, menuItem);
+    var key =
+        this.createKey(commandUUID, commandFunc, accelKey, accelModifiers, menuItem);
     this.keys.push(key);
   }
 
@@ -44,6 +56,51 @@ Scriptish_MenuCommander.prototype.registerMenuCommand =
     if (accelKey) this.keyset.appendChild(key);
     this.setDisabled(false);
   }
+
+  return commandUUID;
+}
+
+Scriptish_MenuCommander.prototype.unregisterMenuCommand = function(commandUUID) {
+  var removedSomething = false;
+
+  // remove key
+  var keys = this.keys;
+  for (var i = keys.length - 1; ~i; i--) {
+    if (commandUUID == keys[i].getAttribute("uuid")) {
+      this.keyset.removeChild(keys[i]);
+      keys.splice(i, 1);
+      removedSomething = true;
+      break;
+    }
+  }
+
+  // remove tools menu menu item
+  var toolsMenuItems = this.toolsMenuItems;
+  for (var i = toolsMenuItems.length - 1; ~i; i--) {
+    if (commandUUID == toolsMenuItems[i].getAttribute("uuid")) {
+      this.toolsMenuPopup.removeChild(toolsMenuItems[i]);
+      toolsMenuItems.splice(i, 1);
+      removedSomething = true;
+      break;
+    }
+  }
+
+  // remove toolbar button menu item
+  var menuPopup = this.getTBMenu();
+  if (menuPopup) {
+    let tbMenuItems = this.tbMenuItems;
+    for (var i = tbMenuItems.length - 1; ~i; i--) {
+      if (commandUUID == tbMenuItems[i].getAttribute("uuid")) {
+        try {menuPopup.removeChild(tbMenuItems[i]);}
+        catch (e) {} // TB was added but not opened before the user changed pages
+        tbMenuItems.splice(i, 1);
+        removedSomething = true;
+        break;
+      }
+    }
+  }
+
+  return removedSomething;
 }
 
 Scriptish_MenuCommander.prototype.attach = function() {
@@ -76,8 +133,10 @@ Scriptish_MenuCommander.prototype.detach = function() {
 
   var menuPopup = this.getTBMenu();
   if (menuPopup)
-    for (var i = 0; i < this.tbMenuItems.length; i++)
-      try {menuPopup.removeChild(this.tbMenuItems[i]);} catch (e) {}
+    for (var i = 0; i < this.tbMenuItems.length; i++) {
+      try {menuPopup.removeChild(this.tbMenuItems[i]);}
+      catch (e) {} // TB was added but not opened before the user changed pages
+    }
 
   this.setDisabled(true);
   this.attached = false;
@@ -90,11 +149,12 @@ Scriptish_MenuCommander.prototype.detach = function() {
 
 
 Scriptish_MenuCommander.prototype.createMenuItem =
-    function(commandName, commandFunc, accessKey) {
+    function(commandUUID, commandName, commandFunc, accessKey) {
   Scriptish_log("> Scriptish_MenuCommander.createMenuItem");
 
   var menuItem = this.doc.createElement("menuitem");
   menuItem._commandFunc = commandFunc;
+  menuItem.setAttribute("uuid", commandUUID);
   menuItem.setAttribute("label", commandName);
   menuItem.setAttribute("oncommand", "this._commandFunc()");
 
@@ -109,8 +169,10 @@ Scriptish_MenuCommander.prototype.createMenuItem =
 }
 
 Scriptish_MenuCommander.prototype.createKey =
-    function(commandFunc, accelKey, modifiers, menuItem) {
+    function(commandUUID, commandFunc, accelKey, modifiers, menuItem) {
   var key = this.doc.createElement("key");
+
+  key.setAttribute("uuid", commandUUID);
 
   if ((typeof accelKey) == "number") {
     key.setAttribute("keycode", accelKey);
