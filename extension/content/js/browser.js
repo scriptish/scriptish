@@ -141,7 +141,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
       "popupshowing", this.contextMenuShowing.bind(this), false);
 
   // this gives us onLocationChange
-  gBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
+  gBrowser.addProgressListener(this);
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
