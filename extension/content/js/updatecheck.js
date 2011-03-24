@@ -19,7 +19,9 @@
     if (!addToBar || chromeWin.document.getElementById("scriptish-button"))
       return;
     var addonSet = (addToBar.getAttribute("currentset") || addToBar.getAttribute("defaultset")).split(",");
-    addonSet.push("scriptish-button");
+    var addonPos = addonSet.indexOf("status-bar");
+    if (addonPos == -1) addonPos = addonSet.length;
+    addonSet.splice(addonPos, 0, "scriptish-button");
     addonSet = addonSet.join(",");
     addToBar.setAttribute("currentset", addonSet);
     addToBar.currentSet = addonSet;
