@@ -8,10 +8,11 @@ var Scriptish_BrowserUIM;
 inc("resource://scriptish/content/browser.js");
 inc("resource://scriptish/prefmanager.js");
 inc("resource://scriptish/scriptish.js");
-inc("resource://scriptish/utils/Scriptish_stringBundle.js");
+inc("resource://scriptish/utils/Scriptish_installUri.js");
 inc("resource://scriptish/utils/Scriptish_openInEditor.js");
 inc("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
-inc("resource://scriptish/utils/Scriptish_installUri.js");
+inc("resource://scriptish/utils/Scriptish_getWindowIDs.js");
+inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/config/configdownloader.js");
 inc("resource://scriptish/menucommander.js");
 inc("resource://scriptish/logging.js");
@@ -150,14 +151,14 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
 }
 
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
-  var commander = this.getCommander(menuCommand.window);
+  var commander = this.getCommander(menuCommand.winID);
   return commander.registerMenuCommand(
       menuCommand.name, menuCommand.doCommand, menuCommand.accelKey,
       menuCommand.accelModifiers, menuCommand.accessKey);
 }
 
-Scriptish_BrowserUI.unregisterMenuCommand = function(commandUUID, aWin) {
-  var commander = this.getCommander(aWin);
+Scriptish_BrowserUI.unregisterMenuCommand = function(commandUUID, aWinID) {
+  var commander = this.getCommander(aWinID);
   return commander.unregisterMenuCommand(commandUUID);
 }
 
@@ -229,7 +230,8 @@ Scriptish_BrowserUI.reattachMenuCmds = function() {
     Scriptish_BrowserUI.currentMenuCommander.detach();
     Scriptish_BrowserUI.currentMenuCommander = null;
   }
-  var menuCommander = Scriptish_BrowserUI.getCommander(gBrowser.selectedBrowser.contentWindow);
+  var menuCommander = Scriptish_BrowserUI.getCommander(
+      Scriptish_getWindowIDs(gBrowser.selectedBrowser.contentWindow).innerID);
   if (menuCommander) (Scriptish_BrowserUI.currentMenuCommander = menuCommander).attach();
 }
 
@@ -276,14 +278,14 @@ Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
  * Helper method which gets the menuCommander corresponding to a given
  * document
  */
-Scriptish_BrowserUI.getCommander = function(aWin) {
+Scriptish_BrowserUI.getCommander = function(aWinID) {
   for (var i = 0; i < this.menuCommanders.length; i++)
-    if (this.menuCommanders[i].win === aWin)
+    if (this.menuCommanders[i].winID === aWinID)
       return this.menuCommanders[i].commander;
 
   // no commander found. create one and add it.
   var commander = new Scriptish_MenuCommander(document);
-  this.menuCommanders.push({win: aWin, commander: commander});
+  this.menuCommanders.push({winID: aWinID, commander: commander});
   return commander;
 }
 

@@ -10,9 +10,10 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
-Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js");
+Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
+Cu.import("resource://scriptish/utils/Scriptish_getWindowIDs.js");
 
 const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
@@ -30,6 +31,8 @@ function isScriptRunnable(script, url, topWin) {
   return chk;
 }
 
+let windows = {};
+
 function ScriptishService() {
   this.wrappedJSObject = this;
   this.timer = new Timer();
@@ -40,6 +43,7 @@ function ScriptishService() {
   }
 
   Services.obs.addObserver(this, "content-document-global-created", false);
+  Services.obs.addObserver(this, "inner-window-destroyed", false);
 }
 
 ScriptishService.prototype = {
@@ -58,6 +62,9 @@ ScriptishService.prototype = {
       case "content-document-global-created":
         this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject));
         break;
+      case "inner-window-destroyed":
+        this.innerWinDestoryed(aSubject.QueryInterface(Components.interfaces.nsISupportsPRUint64).data);
+        break;
     }
   },
 
@@ -74,9 +81,18 @@ ScriptishService.prototype = {
     return this._config;
   },
 
+  innerWinDestoryed: function(aWinID) {
+    let window = windows[aWinID];
+    if (!window || !window.unloaders || !window.unloaders.length) return;
+    for (var i = window.unloaders.length - 1; ~i; i--)
+      window.unloaders[i]();
+  },
+
   docReady: function(safeWin, chromeWin) {
     if (!Scriptish.enabled || !chromeWin) return;
 
+    let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
+    windows[currentInnerWindowID] = {unloaders: []};
     let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
     let gBrowser = chromeWin.gBrowser;
     let href = safeWin.location.href || safeWin.frameElement.src;
@@ -109,7 +125,7 @@ ScriptishService.prototype = {
         let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
         function inject() {
           if (shouldNotRun()) return;
-          self.injectScripts([script], href, safeWin, chromeWin);
+          self.injectScripts([script], href, currentInnerWindowID, safeWin, chromeWin);
         }
         switch (script.runAt) {
         case "document-end":
@@ -140,7 +156,7 @@ ScriptishService.prototype = {
       if (gmBrowserUI.currentMenuCommander)
         gmBrowserUI.currentMenuCommander.detach();
       gmBrowserUI.currentMenuCommander =
-          gmBrowserUI.getCommander(safeWin).attach();
+          gmBrowserUI.getCommander(currentInnerWindowID).attach();
     }
 
     // find matching scripts
@@ -155,11 +171,11 @@ ScriptishService.prototype = {
           self.timer.setTimeout(function() {
             if (shouldNotRun()) return;
             self.injectScripts(
-                scripts["document-idle"], href, safeWin, chromeWin);
+                scripts["document-idle"], href, currentInnerWindowID, safeWin, chromeWin);
           }, 0);
 
         // inject @run-at document-end scripts
-        self.injectScripts(scripts["document-end"], href, safeWin, chromeWin);
+        self.injectScripts(scripts["document-end"], href, currentInnerWindowID, safeWin, chromeWin);
       }, true);
     }
 
@@ -167,40 +183,32 @@ ScriptishService.prototype = {
       safeWin.addEventListener("load", function() {
         if (shouldNotRun()) return;
         // inject @run-at window-load scripts
-        self.injectScripts(scripts["window-load"], href, safeWin, chromeWin);
+        self.injectScripts(scripts["window-load"], href, currentInnerWindowID, safeWin, chromeWin);
       }, true);
     }
 
     // inject @run-at document-start scripts
-    self.injectScripts(scripts["document-start"], href, safeWin, chromeWin);
+    self.injectScripts(scripts["document-start"], href, currentInnerWindowID, safeWin, chromeWin);
 
-    safeWin.addEventListener("pagehide", function(aEvt) {
-      if (safeWin.frameElement
-        && aEvt.target.location.href == "about:blank"
-        && safeWin.frameElement.src != "about:blank") return; // see bug 643181
-      winClosed = self.docUnload(aEvt, safeWin, gmBrowserUI);
-    }, false);
+    windows[currentInnerWindowID].unloaders.push(function() {
+      winClosed = true;
+      delete windows[currentInnerWindowID];
+      self.docUnload(currentInnerWindowID, gmBrowserUI);
+    });
   },
 
-  docUnload: function(aEvt, aWin, aGMBrowserUI) {
-    // if persisted then the page/frame is bfcached, so unload will occur later
-    if (aEvt.persisted) return false;
-
-    // Ignore if we are inside a frame.
-    // This is okay since there will be no menuCommanders to remove.
-    if (aWin.frameElement) return true;
-
+  docUnload: function(aWinID, aGMBrowserUI) {
     let menuCmders = aGMBrowserUI.menuCommanders;
-    if (!menuCmders || 0 == menuCmders.length) return true;
+    if (!menuCmders || 0 == menuCmders.length) return;
 
     let curMenuCmder = this.currentMenuCommander;
     for (let [i, item] in Iterator(menuCmders)) {
-      if (item.win !== aWin) continue;
+      if (item.winID !== aWinID) continue;
       if (item.commander === curMenuCmder) curMenuCmder = curMenuCmder.detach();
       menuCmders.splice(i, 1);
       break;
     }
-    return true;
+    return;
   },
 
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
@@ -266,7 +274,7 @@ ScriptishService.prototype = {
     return scripts;
   },
 
-  injectScripts: function(scripts, url, wrappedContentWin, chromeWin) {
+  injectScripts: function(scripts, url, winID, wrappedContentWin, chromeWin) {
     if (0 >= scripts.length) return;
     let self = this;
     let sandbox;
@@ -289,7 +297,7 @@ ScriptishService.prototype = {
       sandbox = new Cu.Sandbox(wrappedContentWin);
 
       let GM_API = new tools.GM_API(
-          script, url, wrappedContentWin, unsafeContentWin, chromeWin);
+          script, url, winID, wrappedContentWin, unsafeContentWin, chromeWin);
 
       // hack XPathResult since that is so commonly used
       sandbox.XPathResult = XPATH_RESULT;

@@ -37,7 +37,7 @@ function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
       .setTimeout(function() aCb.apply(aThis, aArgs), 0);
 }
 
-function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
+function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var document = aSafeWin.document;
   var _xmlhttpRequester = null;
   var _storage = null;
@@ -45,6 +45,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var _logger = null;
   var menuCmdIDs = [];
   var Scriptish_BrowserUI = aChromeWin.Scriptish_BrowserUI;
+  var windowID = aWinID;
 
   function getXmlhttpRequester() {
     if (!_xmlhttpRequester) {
@@ -226,7 +227,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
         accelModifiers: aAccelModifiers,
         accessKey: aAccessKey,
         doCommand: aCmdFunc,
-        window: aSafeWin});
+        winID: windowID});
       menuCmdIDs.push(uuid);
       return uuid;
     }
@@ -235,7 +236,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       var i = menuCmdIDs.indexOf(aUUID);
       if (!~i) return false; // check the uuid is for a cmd made by the same script
       menuCmdIDs.splice(i, 1);
-      return Scriptish_BrowserUI.unregisterMenuCommand(aUUID, aSafeWin);
+      return Scriptish_BrowserUI.unregisterMenuCommand(aUUID, windowID);
     }
   }
 
