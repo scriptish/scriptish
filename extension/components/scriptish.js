@@ -63,7 +63,7 @@ ScriptishService.prototype = {
         this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject));
         break;
       case "inner-window-destroyed":
-        this.innerWinDestoryed(aSubject.QueryInterface(Components.interfaces.nsISupportsPRUint64).data);
+        this.innerWinDestroyed(aSubject.QueryInterface(Components.interfaces.nsISupportsPRUint64).data);
         break;
     }
   },
@@ -81,7 +81,7 @@ ScriptishService.prototype = {
     return this._config;
   },
 
-  innerWinDestoryed: function(aWinID) {
+  innerWinDestroyed: function(aWinID) {
     let window = windows[aWinID];
     if (!window || !window.unloaders || !window.unloaders.length) return;
     for (var i = window.unloaders.length - 1; ~i; i--)
