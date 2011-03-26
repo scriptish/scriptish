@@ -163,6 +163,8 @@ Script.prototype = {
   get permissions() {
     var perms = AddonManager.PERM_CAN_UNINSTALL;
     perms |= this.userDisabled ? AddonManager.PERM_CAN_ENABLE : AddonManager.PERM_CAN_DISABLE;
+    // TODO: Find a way to refresh permissions if update.requireSecured
+    //       is toggled, to handle "Find Updates" visibility.
     if (this.updateURL) perms |= AddonManager.PERM_CAN_UPGRADE
     return perms;
   },
@@ -229,7 +231,7 @@ Script.prototype = {
       return aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR);
 
     // make sure that the final URI is a https url
-    if ("https" != req.channel.URI.scheme)
+    if (this._config.updateSecurely && "https" != req.channel.URI.scheme)
       return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
 
     // make sure that the final URI's certificate is valid
@@ -473,16 +475,18 @@ Script.prototype = {
       return null;
     // userscripts.org url?
     if (url.match(/^https?:\/\/userscripts\.org\/.*\.user\.js$/i))
-      return url.replace(/^http:/, "https:").replace(/\.user\.js$/i,".meta.js");
+      if (this._config.updateSecurely)
+        return url.replace(/^http:/, "https:").replace(/\.user\.js$/i,".meta.js");
+      else
+        return url.replace(/\.user\.js$/i,".meta.js");
     // is url https?
-    if (!url.match(/^https:\/\//)) return null;
+    if (this._config.updateSecurely && !url.match(/^https:\/\//)) return null;
     return url;
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
     let url = this.updateURL;
-    if (!url || url.match(/^https:\/\//)) return true;
-    return false;
+    return (!url || (this._config.updateSecurely && url.match(/^https:\/\//)));
   },
 
   get _file() {
@@ -774,7 +778,6 @@ Script.prototype = {
     if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
     if (this["_run-at"]) scriptNode.setAttribute("run-at", this["_run-at"]);
     if (this.includesDisabled) scriptNode.setAttribute("includesDisabled", true);
-
     if (this.homepageURL)
       scriptNode.setAttribute("homepageURL", this.homepageURL);
     if (this._downloadURL)
@@ -961,7 +964,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           } catch (e) {
             break;
           }
-          if (uri.scheme == "https") script._updateURL = uri.spec;
+          if (uri.scheme == "https" || uri.scheme == "http")
+            script._updateURL = uri.spec;
           break;
         case "injectframes":
           if (value != "0") continue;

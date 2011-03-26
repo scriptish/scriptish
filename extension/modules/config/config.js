@@ -38,6 +38,8 @@ function Config(aBaseDir) {
 
   this._configFile = configFile;
 
+  this._updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
+
   this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
   this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
   this._blocklist = {};
@@ -164,6 +166,11 @@ Config.prototype = {
       }
     }
     this.addExclude(excludes);
+
+    // Watch for the required secure updates pref being modified
+    Scriptish_prefRoot.watch("update.requireSecured", function() {
+      this._updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
+    });
 
     // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
@@ -304,6 +311,8 @@ Config.prototype = {
       this._fetchBlocklist();
     }
   },
+
+  get updateSecurely() this._updateSecurely,
 
   get excludes() this._excludes.concat(),
   set excludes(excludes) {

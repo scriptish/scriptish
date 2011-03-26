@@ -32,7 +32,7 @@ ScriptDownloader.prototype.startViewScript = function() {
 }
 ScriptDownloader.prototype.startUpdateScript = function(aScriptInstaller) {
   this.type = "update";
-  this.secure = true;
+  this.secure = Scriptish.config.updateSecurely;
   this.scriptInstaller = aScriptInstaller;
   this.startDownload();
   return this;
