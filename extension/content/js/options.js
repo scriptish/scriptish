@@ -31,6 +31,9 @@ window.addEventListener("load", function() {
   tmp = $("check-downloadURL");
   tmp.setAttribute("label", Scriptish_stringBundle("options.useDownloadURL"));
   tmp.checked = Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL");
+  tmp = $("check-requireSecured");
+  tmp.setAttribute("label", Scriptish_stringBundle("options.requireSecured"));
+  tmp.checked = Scriptish_prefRoot.getValue("update.requireSecured");
 
   $("caption-addonmanager")
       .setAttribute("label", Scriptish_stringBundle("options.addonManager"));
@@ -55,6 +58,8 @@ function doSave() {
       !!$("check-uninstall").checked);
   Scriptish_prefRoot.setValue("useDownloadURLForUpdateURL",
       !!$("check-downloadURL").checked);
+  Scriptish_prefRoot.setValue("update.requireSecured",
+      !!$("check-requireSecured").checked);
   Scriptish_prefRoot.setValue("enableCopyDownloadURL",
       !!$("check-copydownloadURL").checked);
 

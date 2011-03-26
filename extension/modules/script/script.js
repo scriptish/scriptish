@@ -778,6 +778,7 @@ Script.prototype = {
     if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
     if (this["_run-at"]) scriptNode.setAttribute("run-at", this["_run-at"]);
     if (this.includesDisabled) scriptNode.setAttribute("includesDisabled", true);
+
     if (this.homepageURL)
       scriptNode.setAttribute("homepageURL", this.homepageURL);
     if (this._downloadURL)

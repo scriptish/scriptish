@@ -29,6 +29,7 @@
     <groupbox>
       <caption id="caption-update"/>
       <checkbox id="check-downloadURL"/>
+      <checkbox id="check-requireSecured"/>
     </groupbox>
 
     <groupbox>
