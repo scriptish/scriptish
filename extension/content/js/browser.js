@@ -294,13 +294,6 @@ Scriptish_BrowserUI.viewContextItemClicked = function() {
       Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
 }
 
-// necessary for webProgressListener implementation
-Scriptish_BrowserUI.onProgressChange = function(webProgress,b,c,d,e,f){};
-Scriptish_BrowserUI.onStateChange = function(a,b,c,d){};
-Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
-Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
-Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
-
 window.addEventListener("load", Scriptish_BrowserUI.chromeLoad.bind(Scriptish_BrowserUI), false);
 window.addEventListener("unload", Scriptish_BrowserUI.chromeUnload.bind(Scriptish_BrowserUI), false);
 })(Components.utils.import, {})
