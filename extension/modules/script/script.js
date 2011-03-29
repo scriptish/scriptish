@@ -163,9 +163,7 @@ Script.prototype = {
   get permissions() {
     var perms = AddonManager.PERM_CAN_UNINSTALL;
     perms |= this.userDisabled ? AddonManager.PERM_CAN_ENABLE : AddonManager.PERM_CAN_DISABLE;
-    // TODO: Find a way to refresh permissions if update.requireSecured
-    //       is toggled, to handle "Find Updates" visibility.
-    if (this.updateURL) perms |= AddonManager.PERM_CAN_UPGRADE
+    if (this.updateURL) perms |= AddonManager.PERM_CAN_UPGRADE;
     return perms;
   },
 
@@ -471,7 +469,8 @@ Script.prototype = {
       var url = (this._updateURL || "");
     url = url.replace(/[\?#].*$/, "");
     // valid updateURL?
-    if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i))
+    if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i)
+        || (this._config.updateSecurely && !url.match(/^https:\/\//)))
       return null;
     // userscripts.org url?
     if (url.match(/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i))
@@ -479,8 +478,6 @@ Script.prototype = {
         return url.replace(/^http:/, "https:").replace(/\.user\.js$/i, ".meta.js");
       else
         return url.replace(/\.user\.js$/i, ".meta.js");
-    // is url https?
-    if (this._config.updateSecurely && !url.match(/^https:\/\//)) return null;
     return url;
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
