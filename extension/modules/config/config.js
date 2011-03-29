@@ -169,7 +169,7 @@ Config.prototype = {
 
     // Watch for the required secure updates pref being modified
     Scriptish_prefRoot.watch("update.requireSecured", function() {
-      this._updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
+      self._updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
     });
 
     // Listen for the blocklist pref being modified
