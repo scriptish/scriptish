@@ -472,10 +472,10 @@ Script.prototype = {
       var url = (this._updateURL || "");
     url = url.replace(/[\?#].*$/, "");
     // valid updateURL?
-    if (!url || !url.match(/^https?:\/\//i) || !/\.(?:user|meta)\.js$/i.test(url))
+    if (!url || !/^https?:\/\//i.test(url) || !/\.(?:user|meta)\.js$/i.test(url))
       return null;
     // userscripts.org url?
-    if (url.match(/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i)) {
+    if (/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i.test(url)) {
       if (this._config.updateSecurely) url = url.replace(/^http:/i, "https:");
       return url.replace(/\.user\.js$/i, ".meta.js");
     }
