@@ -476,7 +476,7 @@ Script.prototype = {
       return null;
     // userscripts.org url?
     if (url.match(/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i)) {
-      if (this._config.updateSecurely) url.replace(/^http:/i, "https:");
+      if (this._config.updateSecurely) url = url.replace(/^http:/i, "https:");
       return url.replace(/\.user\.js$/i, ".meta.js");
     }
     return (!this._config.updateSecurely || /^https:/i.test(url)) ? url : null;
