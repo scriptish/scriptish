@@ -218,7 +218,8 @@ Script.prototype = {
     req.open("GET", updateURL, true);
     req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
     // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
-    req.channel.notificationCallbacks = new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+    req.channel.notificationCallbacks =
+        new BadCertHandler(!this._config.updateSecurely || !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
     req.onload = this.checkRemoteVersion.bind(this, req, aCallback);
     req.onerror = this.checkRemoteVersionErr.bind(this, aCallback);
     req.send(null);
@@ -233,11 +234,13 @@ Script.prototype = {
       return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
 
     // make sure that the final URI's certificate is valid
-    try {
-      checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
-    }
-    catch (e) {
-      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
+    if (this._config.updateSecurely) {
+      try {
+        checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+      }
+      catch (e) {
+        return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
+      }
     }
 
     // parse the version
@@ -469,21 +472,25 @@ Script.prototype = {
       var url = (this._updateURL || "");
     url = url.replace(/[\?#].*$/, "");
     // valid updateURL?
-    if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i)
-        || (this._config.updateSecurely && !url.match(/^https:\/\//)))
+    if (!url || !/^https?:\/\//i.test(url) || !/\.(?:user|meta)\.js$/i.test(url))
       return null;
     // userscripts.org url?
-    if (url.match(/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i))
-      if (this._config.updateSecurely)
-        return url.replace(/^http:/, "https:").replace(/\.user\.js$/i, ".meta.js");
-      else
-        return url.replace(/\.user\.js$/i, ".meta.js");
-    return url;
+    if (/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i.test(url)) {
+      if (this._config.updateSecurely) url = url.replace(/^http:/i, "https:");
+      return url.replace(/\.user\.js$/i, ".meta.js");
+    }
+    return (!this._config.updateSecurely || /^https:/i.test(url)) ? url : null;
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
     let url = this.updateURL;
-    return (!url || (this._config.updateSecurely && url.match(/^https:\/\//)));
+    if (!url) return false;
+    try {
+      var uri = NetUtil.newURI(url);
+    } catch (e) {
+      return false;
+    }
+    return !this._config.updateSecurely || "https" == uri.scheme;
   },
 
   get _file() {
