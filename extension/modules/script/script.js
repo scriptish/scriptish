@@ -476,7 +476,7 @@ Script.prototype = {
       if (this._config.updateSecurely) url.replace(/^http:/i, "https:")
       return url.replace(/\.user\.js$/i, ".meta.js");
     }
-    return (this._config.updateSecurely && !/^https:\/\//i.test(url)) ? url : null;
+    return (!this._config.updateSecurely || /^https:/i.test(url)) ? url : null;
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
