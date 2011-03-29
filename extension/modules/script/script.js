@@ -474,11 +474,11 @@ Script.prototype = {
     if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i))
       return null;
     // userscripts.org url?
-    if (url.match(/^https?:\/\/userscripts\.org\/.*\.user\.js$/i))
+    if (url.match(/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i))
       if (this._config.updateSecurely)
-        return url.replace(/^http:/, "https:").replace(/\.user\.js$/i,".meta.js");
+        return url.replace(/^http:/, "https:").replace(/\.user\.js$/i, ".meta.js");
       else
-        return url.replace(/\.user\.js$/i,".meta.js");
+        return url.replace(/\.user\.js$/i, ".meta.js");
     // is url https?
     if (this._config.updateSecurely && !url.match(/^https:\/\//)) return null;
     return url;
