@@ -469,16 +469,14 @@ Script.prototype = {
       var url = (this._updateURL || "");
     url = url.replace(/[\?#].*$/, "");
     // valid updateURL?
-    if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i)
-        || (this._config.updateSecurely && !url.match(/^https:\/\//)))
+    if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i))
       return null;
     // userscripts.org url?
-    if (url.match(/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i))
-      if (this._config.updateSecurely)
-        return url.replace(/^http:/, "https:").replace(/\.user\.js$/i, ".meta.js");
-      else
-        return url.replace(/\.user\.js$/i, ".meta.js");
-    return url;
+    if (url.match(/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i)) {
+      if (this._config.updateSecurely) url.replace(/^http:/i, "https:")
+      return url.replace(/\.user\.js$/i, ".meta.js");
+    }
+    return (this._config.updateSecurely && !/^https:\/\//i.test(url)) ? url : null;
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
