@@ -483,7 +483,7 @@ Script.prototype = {
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
     let url = this.updateURL;
-    return (!url || (this._config.updateSecurely && url.match(/^https:\/\//)));
+    return (!url || (this._config.updateSecurely && /^https:\/\//i.test(url)));
   },
 
   get _file() {
