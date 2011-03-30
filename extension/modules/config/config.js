@@ -343,17 +343,19 @@ Config.prototype = {
   },
 
   updateModifiedScripts: function(scriptInjector) {
+    let hasChanged = false;
     for (let [, script] in Iterator(this._scripts)) {
       if (script.delayInjection) {
         script.delayedInjectors.push(scriptInjector);
         continue;
       }
       if (!script.isModified()) continue;
+      hasChanged = true;
       let parsedScript = this.parse(
           script.textContent,
           script._downloadURL && NetUtil.newURI(script._downloadURL), script);
       script.updateFromNewScript(parsedScript, scriptInjector);
     }
-    this._save();
+    if (hasChanged) this._save();
   }
 }
