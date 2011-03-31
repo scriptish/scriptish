@@ -6,6 +6,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/scriptish.js");
+Cu.import("resource://scriptish/script/script.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
@@ -88,6 +89,13 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
       catch (e) {
         return this.handleErr();
       }
+    }
+
+    if (this.scriptInstaller) {
+      // make sure that the new version is greater than the old version
+      var remoteVersion = Script.parseVersion(req.responseText);
+      if (!remoteVersion || Services.vc.compare(this.scriptInstaller._script.version, remoteVersion) >= 0)
+        return this.handleErr();
     }
 
     var source = req.responseText;
