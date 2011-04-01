@@ -557,7 +557,8 @@ Script.prototype = {
     file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
     this._filename = file.leafName;
 
-    Scriptish_log("Moving script file from " + tempFile.path + " to " + file.path, true);
+    Scriptish_log(Scriptish_stringBundle("moving.script") + " "
+        + tempFile.path + " --> " + file.path, true);
 
     file.remove(true);
     tempFile.moveTo(file.parent, file.leafName);

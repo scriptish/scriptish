@@ -244,7 +244,7 @@ Config.prototype = {
 
     addNode("\n");
 
-    Scriptish_log("Saving " + SCRIPTISH_CONFIG, true);
+    Scriptish_log(Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG, true);
     var configStream = Scriptish_getWriteStream(this._configFile);
     Instances.ds.serializeToStream(doc, configStream, "utf-8");
     configStream.close();

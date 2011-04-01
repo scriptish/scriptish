@@ -4,6 +4,7 @@ inc("resource://scriptish/constants.js");
 inc("resource://scriptish/logging.js");
 inc("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 inc("resource://scriptish/utils/Scriptish_getContents.js");
+inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 })(Components.utils.import)
 
 function ScriptDependency(aScript) {
@@ -49,7 +50,8 @@ ScriptDependency.prototype = {
     file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
     this._filename = file.leafName;
 
-    Scriptish_log("Moving dependency file from " + this._tempFile.path + " to " + file.path, true);
+    Scriptish_log(Scriptish_stringBundle("moving.dependency") + " "
+        + this._tempFile.path + " --> " + file.path, true);
 
     file.remove(true);
     this._tempFile.moveTo(file.parent, file.leafName);
