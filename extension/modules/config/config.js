@@ -124,7 +124,7 @@ Config.prototype = {
       var BLStream = Scriptish_getWriteStream(file);
       BLStream.write(json, json.length);
       BLStream.close();
-      Scriptish_log("Updated Scriptish blocklist");
+      Scriptish_log("Updated Scriptish blocklist " + SCRIPTISH_BLOCKLIST, true);
 
       self._blocklist = blocklist;
       self._blocklistHash = hash;
@@ -244,6 +244,7 @@ Config.prototype = {
 
     addNode("\n");
 
+    Scriptish_log(Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG, true);
     var configStream = Scriptish_getWriteStream(this._configFile);
     Instances.ds.serializeToStream(doc, configStream, "utf-8");
     configStream.close();
