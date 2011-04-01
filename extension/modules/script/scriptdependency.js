@@ -49,7 +49,7 @@ ScriptDependency.prototype = {
     file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
     this._filename = file.leafName;
 
-    Scriptish_log("Moving dependency file from " + this._tempFile.path + " to " + file.path);
+    Scriptish_log("Moving dependency file from " + this._tempFile.path + " to " + file.path, true);
 
     file.remove(true);
     this._tempFile.moveTo(file.parent, file.leafName);
