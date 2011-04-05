@@ -233,7 +233,13 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
   let errMsgStart = Scriptish_stringBundle("error.dependency.loading") + ": " +
       dep.urlToDownload + "\n";
   if (httpChannel) {
-    if (httpChannel.requestSucceeded) {
+    try {
+      var reqSucceeded = httpChannel.requestSucceeded
+          && (httpChannel.responseStatus == 200 || httpChannel.responseStatus == 0);
+    } catch(e) {
+      var reqSucceeded = false;
+    }
+    if (reqSucceeded) {
       if (this.updateScript) {
         dep._script = this.script;
         dep.updateScript = true;
@@ -251,8 +257,14 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
+      try {
+        var responseStatus = httpChannel.responseStatus + ": "
+            + httpChannel.responseStatusText;
+      } catch(e) {
+        var responseStatus = Scriptish_stringBundle("nothing.timedOut");
+      }
       let errMsg = Scriptish_stringBundle("error.dependency.serverReturned") + ": "
-          + httpChannel.responseStatus + ": " + httpChannel.responseStatusText;
+          + responseStatus;
 
       if (dep instanceof ScriptIcon) {
         file.remove(false);
