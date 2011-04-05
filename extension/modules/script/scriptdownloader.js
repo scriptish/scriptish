@@ -226,7 +226,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       checkCert(channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
     }
     catch (e) {
-      return  this.errorInstallDependency(dep, "Invalid dependency SSL certificate");
+      return this.errorInstallDependency(dep, "Invalid dependency SSL certificate");
     }
   }
 
@@ -234,8 +234,7 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       dep.urlToDownload + "\n";
   if (httpChannel) {
     try {
-      var reqSucceeded = httpChannel.requestSucceeded
-          && (httpChannel.responseStatus == 200 || httpChannel.responseStatus == 0);
+      var reqSucceeded = httpChannel.requestSucceeded;
     } catch(e) {
       var reqSucceeded = false;
     }
