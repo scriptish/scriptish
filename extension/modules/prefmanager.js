@@ -95,6 +95,7 @@ function Scriptish_PrefManager(startPoint) {
         pref.setIntPref(prefName, Math.floor(value));
         break;
     }
+    return value;
   }
 
   // deletes the named preference or subtree
