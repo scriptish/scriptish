@@ -147,7 +147,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   Scriptish_BrowserUIM.refreshStatus();
 
   // register for notifications from scriptish-service about ui type things
-  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 100);
+  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 1000);
 }
 
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
