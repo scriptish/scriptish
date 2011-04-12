@@ -63,6 +63,24 @@ window.addEventListener("load", function() {
 
   $("category-userscripts").setAttribute(
       "name", Scriptish_stringBundle("userscripts"));
+
+  $("scriptish-get-scripts-btn").addEventListener("command", function() {
+    var gBrowser = Services.wm.getMostRecentWindow("navigator:browser").gBrowser;
+    gBrowser.selectedTab = gBrowser.addTab("http://userscripts.org");
+  }, false)
+
+  function onViewChanged() {
+    let de = document.documentElement;
+    if ("addons://list/userscript" == gViewController.currentViewId) {
+      de.className += ' scriptish';
+      $("scriptish-list-empty").collapsed = !!Scriptish.config.scripts.length;
+    } else {
+      de.className = de.className.replace(/ scriptish/g, '');
+      $("scriptish-list-empty").collapsed = true;
+    }
+  }
+  window.addEventListener('ViewChanged', onViewChanged, false);
+  onViewChanged(); // initialize on load as well as when it changes later
 }, false);
 
 window.addEventListener(
