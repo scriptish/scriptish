@@ -228,7 +228,8 @@ ScriptishService.prototype = {
     // don't interrupt the view-source: scheme
     if ("view-source" == cl.scheme) return ret;
 
-    if (ct == CP.TYPE_DOCUMENT && cl.spec.match(/\.user\.js$/)
+    if ((ct == CP.TYPE_DOCUMENT || CP.TYPE_SUBDOCUMENT)
+        && cl.spec.match(/\.user\.js$/)
         && !this.ignoreNextScript_ && !this.isTempScript(cl)) {
       tools.Scriptish_installUri(cl, ctx.contentWindow);
       ret = CP.REJECT_REQUEST;
