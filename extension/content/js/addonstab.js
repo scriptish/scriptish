@@ -67,7 +67,7 @@ window.addEventListener("load", function() {
   $("scriptish-get-scripts-btn").addEventListener("command", function() {
     var gBrowser = Services.wm.getMostRecentWindow("navigator:browser").gBrowser;
     gBrowser.selectedTab = gBrowser.addTab("http://userscripts.org");
-  }, false)
+  }, false);
 
   function onViewChanged() {
     let de = document.documentElement;
@@ -81,9 +81,21 @@ window.addEventListener("load", function() {
   }
   window.addEventListener('ViewChanged', onViewChanged, false);
   onViewChanged(); // initialize on load as well as when it changes later
-}, false);
 
-window.addEventListener(
-    "unload", Scriptish.config.uninstallScripts.bind(Scriptish.config), false);
+  var installObserver = {
+    observe: function(aSubject, aTopic, aData) {
+      if ("scriptish-script-installed" != aTopic) return;
+      $("scriptish-list-empty").collapsed = true;
+      Services.obs.removeObserver(installObserver, "scriptish-script-installed");
+    },
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
+  };
+  Services.obs.addObserver(installObserver, "scriptish-script-installed", false);
+
+  window.addEventListener("unload", function() {
+    Services.obs.removeObserver(installObserver, "scriptish-script-installed");
+    Scriptish.config.uninstallScripts();
+  }, false);
+}, false);
 
 })(function(aID) document.getElementById(aID), {});
