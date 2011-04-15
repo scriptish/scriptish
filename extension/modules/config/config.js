@@ -270,6 +270,8 @@ Config.prototype = {
       if (aNewScript.version) msg += " " + aNewScript.version;
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
       Scriptish_notification(msg, null, null, function() Scriptish.openManager());
+
+      Services.obs.notifyObservers(null, "scriptish-script-installed", aNewScript.id);
     }
     this.sortScripts();
   },
