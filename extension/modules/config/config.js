@@ -261,7 +261,6 @@ Config.prototype = {
     } else {
       aNewScript.installProcess();
       this.addScript(aNewScript);
-      this._changed(aNewScript, "install", null);
       AddonManagerPrivate.callInstallListeners(
           "onExternalInstall", null, aNewScript, null, false);
 
@@ -271,7 +270,7 @@ Config.prototype = {
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
       Scriptish_notification(msg, null, null, function() Scriptish.openManager());
 
-      Services.obs.notifyObservers(null, "scriptish-script-installed", aNewScript.id);
+      Services.obs.notifyObservers(aNewScript, "scriptish-script-installed", null);
     }
     this.sortScripts();
   },
