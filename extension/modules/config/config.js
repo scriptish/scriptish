@@ -20,6 +20,7 @@ inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
 
 function Config(aBaseDir) {
+  var self = this;
   this.timer = new Timer();
   this._observers = [];
   this._saveTimer = null;
@@ -50,32 +51,28 @@ function Config(aBaseDir) {
   this._load();
   (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
 
+  [
+    "scriptish-script-installed",
+    "scriptish-script-modified",
+    "scriptish-script-edit-enabled",
+    "scriptish-script-updated",
+    "scriptish-script-uninstalled"
+  ].forEach(function(i) Services.obs.addObserver(self, i, false));
+
   Components.utils.import("resource://scriptish/addonprovider.js");
 }
 Config.prototype = {
-  addObserver: function(observer, script) {
-    var observers = script ? script._observers : this._observers;
-    observers.push(observer);
-  },
-
-  removeObserver: function(observer, script) {
-    var observers = script ? script._observers : this._observers;
-    var index = observers.indexOf(observer);
-    if (index == -1)
-      throw new Error(Scriptish_stringBundle("error.observerNotFound"));
-    observers.splice(index, 1);
-  },
-
-  _notifyObservers: function(script, event, data) {
-    var observers = this._observers.concat(script._observers);
-    for (var i = 0, observer; observer = observers[i]; i++) {
-      observer.notifyEvent(script, event, data);
+  observe: function(aSubject, aTopic, aData) {
+    var data = aData || {};
+    switch(aTopic) {
+    case "scriptish-script-installed":
+    case "scriptish-script-modified":
+    case "scriptish-script-edit-enabled":
+    case "scriptish-script-updated":
+    case "scriptish-script-uninstalled":
+      //if (data.saved) this._save();
+      this._save(); // save no matter what atm.. TODO: improve
     }
-  },
-
-  _changed: function(script, event, data, dontSave) {
-    if (!dontSave) this._save();
-    this._notifyObservers(script, event, data);
   },
 
   installIsUpdate: function(script) this._find(script.id) > -1,
@@ -359,5 +356,6 @@ Config.prototype = {
       script.updateFromNewScript(parsedScript, scriptInjector);
     }
     if (hasChanged) this._save();
-  }
+  },
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
 }
