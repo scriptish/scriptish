@@ -8,7 +8,7 @@ function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
     // if Growl is not installed or disabled on OSX, then this will error
     try {
       Services.as.showAlertNotification(
-        aIconURL || "chrome://scriptish/skin/icon_medium.png",
+        aIconURL || "chrome://scriptish/skin/scriptish32.png",
         aTitle || "Scriptish", aMsg+"", !!callback, "", callback || null);
     } catch (e) {}
   }, 0);

@@ -24,7 +24,7 @@
   </menupopup>
   <menu id="scriptish_general_menu"
       class="menu-iconic"
-      image="chrome://scriptish/skin/icon_16.png">
+      image="chrome://scriptish/skin/scriptish16.png">
     <menupopup id="scriptish-tools-menupop">
       <menuitem id="scriptish-tools-enabled-item" type="checkbox"/>
       <menuseparator/>
@@ -58,11 +58,11 @@
   <popup id="contentAreaContextMenu">
     <menuitem id="scriptish-context-menu-install"
         class="menuitem-iconic"
-        image="chrome://scriptish/skin/icon_16.png"
+        image="chrome://scriptish/skin/scriptish16.png"
         insertbefore="context-openlink"/>
     <menuitem id="scriptish-context-menu-viewsource"
         class="menuitem-iconic"
-        image="chrome://scriptish/skin/icon_16.png"
+        image="chrome://scriptish/skin/scriptish16.png"
         insertbefore="context-openlink"/>
     <menuseparator id="scriptish-context-menu-viewsource-sep"
         insertbefore="context-openlink"/>

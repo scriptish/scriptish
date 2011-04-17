@@ -1,20 +1,16 @@
 #scriptish-button {
 	-moz-box-orient: horizontal;
-	list-style-image: url("chrome://scriptish/skin/icon_24.png");
-	-moz-image-region: rect(0, 24px, 24px, 0);
+	list-style-image: url("chrome://scriptish/skin/scriptish24.png");
 }
 
 toolbar[iconsize="small"] #scriptish-button {
-	list-style-image: url("chrome://scriptish/skin/icon_16.png");
-	-moz-image-region: rect(0, 16px, 16px, 0);
+	list-style-image: url("chrome://scriptish/skin/scriptish16.png");
 }
 
 #scriptish-button[scriptish-disabled] {
-	list-style-image: url("chrome://scriptish/skin/icon_24_disabled.png");
+	list-style-image: url("chrome://scriptish/skin/scriptish24_disabled.png");
 }
 
 toolbar[iconsize="small"] #scriptish-button[scriptish-disabled] {
-	list-style-image: url("chrome://scriptish/skin/icon_16_disabled.png");
+	list-style-image: url("chrome://scriptish/skin/scriptish16_disabled.png");
 }
-
-#gm-status {width: 16px;}
