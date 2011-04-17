@@ -289,7 +289,7 @@ ScriptDownloader.prototype.finishInstall = function() {
     this.script.useDelayedInjectors();
 
     // Save new values to config.xml
-    this.script._config._save();
+    Scriptish.notify(null, "scriptish-config-saved", null);
   } else if (this.installOnCompletion_) {
     this.installScript();
   } else if (this.scriptInstaller) {

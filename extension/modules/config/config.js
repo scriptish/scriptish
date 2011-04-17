@@ -55,23 +55,31 @@ function Config(aBaseDir) {
     "scriptish-script-installed",
     "scriptish-script-modified",
     "scriptish-script-edit-enabled",
+    "scriptish-script-user-prefs-change",
     "scriptish-script-updated",
-    "scriptish-script-uninstalled"
+    "scriptish-script-uninstalled",
+    "scriptish-preferences-change",
+    "scriptish-config-saved"
   ].forEach(function(i) Services.obs.addObserver(self, i, false));
 
   Components.utils.import("resource://scriptish/addonprovider.js");
 }
 Config.prototype = {
   observe: function(aSubject, aTopic, aData) {
-    var data = aData || {};
+    var data = JSON.parse(aData || "{}");
     switch(aTopic) {
     case "scriptish-script-installed":
     case "scriptish-script-modified":
     case "scriptish-script-edit-enabled":
     case "scriptish-script-updated":
     case "scriptish-script-uninstalled":
-      //if (data.saved) this._save();
-      this._save(); // save no matter what atm.. TODO: improve
+    case "scriptish-preferences-change":
+    case "scriptish-script-user-prefs-change":
+      if (data.saved) Scriptish.notify(null, "scriptish-config-saved", null);
+      break;
+    case "scriptish-config-saved":
+      this._save();
+      break;
     }
   },
 
@@ -267,7 +275,8 @@ Config.prototype = {
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
       Scriptish_notification(msg, null, null, function() Scriptish.openManager());
 
-      Services.obs.notifyObservers(aNewScript, "scriptish-script-installed", null);
+      Scriptish.notify(
+          aNewScript, "scriptish-script-installed", {saved:true});
     }
     this.sortScripts();
   },

@@ -1,7 +1,11 @@
 var EXPORTED_SYMBOLS = ["Scriptish"];
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/prefmanager.js");
+
 const Scriptish = {
+  notify: function(aSubject, aTopic, aData) {
+    Services.obs.notifyObservers(aSubject, aTopic, JSON.stringify(aData));
+  },
   get config() Services.scriptish.config,
   get enabled() Scriptish_prefRoot.getValue("enabled", true),
   set enabled(aVal) Scriptish_prefRoot.setValue("enabled", !!aVal),

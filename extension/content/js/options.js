@@ -64,5 +64,5 @@ function doSave() {
       !!$("check-copydownloadURL").checked);
 
   Scriptish.config.excludes = $("excludes").value.match(/.+/g);
-  Scriptish.config._save();
+  Scriptish.notify(null, "scriptish-preferences-change", {saved: true});
 }
