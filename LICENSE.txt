@@ -14,9 +14,7 @@ see the LICENSE.mpl file.  All such code is located in the content/third-party/
 directory, and all such files contain the appropriate licensing disclaimers
 and notifications.
 
-The icon used is taken from the PICOL icon library http://www.picol.org/icon_library.php
-This library is released under the Creative Commons-License BY-SA
-http://creativecommons.org/licenses/by-sa/3.0/
+The icon used was created by Slowpoke for Scriptish.
 
 The uso_medium.png icon contained within Scriptish is the property of
 UserScripts.org http://userscripts.org and is being used with their consent
