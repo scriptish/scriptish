@@ -24,7 +24,8 @@
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
-    <em:iconURL>chrome://scriptish/skin/icon_medium.png</em:iconURL>
+    <em:iconURL>chrome://scriptish/skin/scriptish32.png</em:iconURL>
+    <em:icon64URL>chrome://scriptish/skin/scriptish64.png</em:icon64URL>
 
     <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
     <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>
@@ -48,6 +49,7 @@
     <em:contributor>Ori Avtallon</em:contributor>
     <em:contributor>Pak Kei (logo); http://arkidect.com/</em:contributor>
     <em:contributor>Sergio Abreu; http://sitedosergio.sitesbr.net/</em:contributor>
+    <em:contributor>Slowpoke</em:contributor>
     <em:contributor>Tommi Rautava/</em:contributor>
     <em:contributor>Nils Maier</em:contributor>
     <em:contributor>Melih Bilgil; http://picol.org</em:contributor>

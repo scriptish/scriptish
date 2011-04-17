@@ -181,7 +181,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
   var notification = notificationBox.appendNotification(
     greeting,
     "install-userscript",
-    "chrome://scriptish/skin/icon_16.png",
+    "chrome://scriptish/skin/scriptish16.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
     [{label: Scriptish_stringBundle("greeting.btn"),
       accessKey: Scriptish_stringBundle("greeting.btn.ak"),

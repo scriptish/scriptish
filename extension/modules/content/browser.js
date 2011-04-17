@@ -6,12 +6,10 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-const ICON_16_ON = "chrome://scriptish/skin/icon_16.png";
-const ICON_16_OFF = "chrome://scriptish/skin/icon_16_disabled.png";
-const ICON_24_ON = "chrome://scriptish/skin/icon_24.png";
-const ICON_24_OFF = "chrome://scriptish/skin/icon_24_disabled.png";
-const ICON_32_ON = "chrome://scriptish/skin/icon_medium.png";
-const ICON_32_OFF = "chrome://scriptish/skin/icon_32_disabled.png";
+const ICON_16_ON = "chrome://scriptish/skin/scriptish16.png";
+const ICON_16_OFF = "chrome://scriptish/skin/scriptish16_disabled.png";
+const ICON_24_ON = "chrome://scriptish/skin/scriptish24.png";
+const ICON_24_OFF = "chrome://scriptish/skin/scriptish24_disabled.png";
 
 function Scriptish_BrowserUIM(aWin, aBrowserUI) {
   this.$ = function(aID) aWin.document.getElementById(aID);
