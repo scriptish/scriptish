@@ -46,4 +46,17 @@
               command="cmd_scriptish_userscript_show"
               insertbefore="detail-prefs-btn" />
   </hbox>
+
+  <vbox id="list-view">
+  <vbox id="scriptish-list-empty" insertbefore="addon-list-empty"
+      class="alert-container" flex="1">
+    <spacer class="alert-spacer-before"/>
+    <vbox class="alert">
+      <label value="You don't have any user scripts installed"/>
+      <button id="scriptish-get-scripts-btn" label="Get user scripts"
+          class="addon-control"/>
+    </vbox>
+    <spacer class="alert-spacer-after"/>
+  </vbox>
+  </vbox>
 </overlay>

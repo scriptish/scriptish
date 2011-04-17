@@ -63,9 +63,42 @@ window.addEventListener("load", function() {
 
   $("category-userscripts").setAttribute(
       "name", Scriptish_stringBundle("userscripts"));
-}, false);
 
-window.addEventListener(
-    "unload", Scriptish.config.uninstallScripts.bind(Scriptish.config), false);
+  $("scriptish-get-scripts-btn").addEventListener("command", function() {
+    var gBrowser = Services.wm.getMostRecentWindow("navigator:browser").gBrowser;
+    gBrowser.selectedTab = gBrowser.addTab("http://userscripts.org");
+  }, false);
+
+  function onViewChanged() {
+    let de = document.documentElement;
+    if ("addons://list/userscript" == gViewController.currentViewId) {
+      de.className += ' scriptish';
+      $("scriptish-list-empty").collapsed = !!Scriptish.config.scripts.length;
+    } else {
+      de.className = de.className.replace(/ scriptish/g, '');
+      $("scriptish-list-empty").collapsed = true;
+    }
+  }
+  window.addEventListener('ViewChanged', onViewChanged, false);
+  onViewChanged(); // initialize on load as well as when it changes later
+
+  var needToRemoveObserver = true;
+  var installObserver = {
+    observe: function(aSubject, aTopic, aData) {
+      if ("scriptish-script-installed" != aTopic) return;
+      $("scriptish-list-empty").collapsed = true;
+      Services.obs.removeObserver(installObserver, "scriptish-script-installed");
+      needToRemoveObserver = false;
+    },
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
+  };
+  Services.obs.addObserver(installObserver, "scriptish-script-installed", false);
+
+  window.addEventListener("unload", function() {
+    if (needToRemoveObserver)
+      Services.obs.removeObserver(installObserver, "scriptish-script-installed");
+    Scriptish.config.uninstallScripts();
+  }, false);
+}, false);
 
 })(function(aID) document.getElementById(aID), {});

@@ -150,8 +150,10 @@ Script.prototype = {
     AddonManagerPrivate.callAddonListeners(
         val ? "onEnabling" : "onDisabling", this, false);
 
-    this._enabled = !val;
-    this._changed("edit-enabled", this._enabled);
+    Scriptish.notify(this, "scriptish-script-edit-enabled", {
+      enabled: (this._enabled = !val),
+      saved: true
+    });
 
     AddonManagerPrivate.callAddonListeners(
         val ? "onEnabled" : "onDisabled", this);
@@ -262,7 +264,7 @@ Script.prototype = {
   uninstallProcess: function() {
     this.removeSettings();
     this.removeFiles();
-    this._changed("uninstall", null);
+    Scriptish.notify(this, "scriptish-script-uninstalled", {saved: false});
   },
   removeSettings: function() {
     if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
@@ -321,10 +323,6 @@ Script.prototype = {
 
     return (includes.some(testI) || this._matches.some(testII))
         && !excludes.some(testI);
-  },
-
-  _changed: function(aEvt, aData, aDontChg) {
-    this._config._changed(this, aEvt, aData, aDontChg);
   },
 
   get id() {
@@ -596,7 +594,7 @@ Script.prototype = {
     msg += "' " + Scriptish_stringBundle("statusbar.updated");
     Scriptish_notification(msg, null, null, function() Scriptish.openManager());
     this.updateHelper();
-    this._changed("update");
+    Scriptish.notify(this, "scriptish-script-updated", {saved: true});
   },
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
@@ -839,7 +837,7 @@ Script.prototype = {
     Scriptish_notification(msg, null, null, function() Scriptish.openManager());
 
     if (!noReload) this.updateHelper();
-    this._changed("modified", null, true);
+    Scriptish.notify(this, "scriptish-script-modified", {saved: false});
   }
 };
 

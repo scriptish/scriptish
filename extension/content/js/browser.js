@@ -147,7 +147,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   Scriptish_BrowserUIM.refreshStatus();
 
   // register for notifications from scriptish-service about ui type things
-  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 100);
+  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 1000);
 }
 
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
@@ -174,10 +174,9 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
   // them ourselves in the case of reload, or they stack up.
-  for (var i = 0, child; child = notificationBox.childNodes[i]; i++) {
+  for (var i = 0, child; child = notificationBox.childNodes[i]; i++)
     if (child.getAttribute("value") == "install-userscript")
       notificationBox.removeNotification(child);
-  }
 
   var notification = notificationBox.appendNotification(
     greeting,

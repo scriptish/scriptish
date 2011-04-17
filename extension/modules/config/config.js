@@ -20,6 +20,7 @@ inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
 
 function Config(aBaseDir) {
+  var self = this;
   this.timer = new Timer();
   this._observers = [];
   this._saveTimer = null;
@@ -50,32 +51,36 @@ function Config(aBaseDir) {
   this._load();
   (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
 
+  [
+    "scriptish-script-installed",
+    "scriptish-script-modified",
+    "scriptish-script-edit-enabled",
+    "scriptish-script-user-prefs-change",
+    "scriptish-script-updated",
+    "scriptish-script-uninstalled",
+    "scriptish-preferences-change",
+    "scriptish-config-saved"
+  ].forEach(function(i) Services.obs.addObserver(self, i, false));
+
   Components.utils.import("resource://scriptish/addonprovider.js");
 }
 Config.prototype = {
-  addObserver: function(observer, script) {
-    var observers = script ? script._observers : this._observers;
-    observers.push(observer);
-  },
-
-  removeObserver: function(observer, script) {
-    var observers = script ? script._observers : this._observers;
-    var index = observers.indexOf(observer);
-    if (index == -1)
-      throw new Error(Scriptish_stringBundle("error.observerNotFound"));
-    observers.splice(index, 1);
-  },
-
-  _notifyObservers: function(script, event, data) {
-    var observers = this._observers.concat(script._observers);
-    for (var i = 0, observer; observer = observers[i]; i++) {
-      observer.notifyEvent(script, event, data);
+  observe: function(aSubject, aTopic, aData) {
+    var data = JSON.parse(aData || "{}");
+    switch(aTopic) {
+    case "scriptish-script-installed":
+    case "scriptish-script-modified":
+    case "scriptish-script-edit-enabled":
+    case "scriptish-script-updated":
+    case "scriptish-script-uninstalled":
+    case "scriptish-preferences-change":
+    case "scriptish-script-user-prefs-change":
+      if (data.saved) Scriptish.notify(null, "scriptish-config-saved", null);
+      break;
+    case "scriptish-config-saved":
+      this._save();
+      break;
     }
-  },
-
-  _changed: function(script, event, data, dontSave) {
-    if (!dontSave) this._save();
-    this._notifyObservers(script, event, data);
   },
 
   installIsUpdate: function(script) this._find(script.id) > -1,
@@ -190,7 +195,7 @@ Config.prototype = {
     // Try to fetch uso usage data if some time has passed
     let interval = Scriptish_prefRoot.getValue("update.uso.interval");
     let lastFetch = Scriptish_prefRoot.getValue("update.uso.lastFetch");
-    let now = Math.ceil((new Date()).getTime() / 1E3);
+    let now = Math.ceil(Date.now() / 1E3);
     if (now - lastFetch >= interval) {
       Scriptish_prefRoot.setValue("update.uso.lastFetch", now);
 
@@ -261,7 +266,6 @@ Config.prototype = {
     } else {
       aNewScript.installProcess();
       this.addScript(aNewScript);
-      this._changed(aNewScript, "install", null);
       AddonManagerPrivate.callInstallListeners(
           "onExternalInstall", null, aNewScript, null, false);
 
@@ -270,6 +274,9 @@ Config.prototype = {
       if (aNewScript.version) msg += " " + aNewScript.version;
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
       Scriptish_notification(msg, null, null, function() Scriptish.openManager());
+
+      Scriptish.notify(
+          aNewScript, "scriptish-script-installed", {saved:true});
     }
     this.sortScripts();
   },
@@ -306,7 +313,7 @@ Config.prototype = {
     // Try to fetch a new list if blocklist is enabled and some time has passed
     let interval = Scriptish_prefRoot.getValue("blocklist.interval");
     let lastFetch = Scriptish_prefRoot.getValue("blocklist.lastFetch");
-    let now = Math.ceil((new Date()).getTime() / 1E3);
+    let now = Math.ceil(Date.now() / 1E3);
     if (now - lastFetch >= interval) {
       Scriptish_prefRoot.setValue("blocklist.lastFetch", now);
       this._fetchBlocklist();
@@ -358,5 +365,6 @@ Config.prototype = {
       script.updateFromNewScript(parsedScript, scriptInjector);
     }
     if (hasChanged) this._save();
-  }
+  },
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
 }

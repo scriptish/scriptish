@@ -13,7 +13,7 @@ GM_ScriptStorage.prototype.setValue = function(name, val) {
     throw new Error(Scriptish_stringBundle("error.api.noSecondArgValue"));
   }
 
-  this.prefMan.setValue(name, val);
+  return this.prefMan.setValue(name, val);
 };
 
 GM_ScriptStorage.prototype.getValue = function(name, defVal) {
