@@ -26,16 +26,8 @@ Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
 Scriptish_BrowserUI.tbBtnSetup = function() {
-  var statusEnabledItem = $("scriptish-tb-enabled-brd");
   $("scriptish-button-brd").setAttribute(
       "onclick", "Scriptish_BrowserUIM.onIconClick(event)");
-
-  statusEnabledItem.setAttribute("label",
-      Scriptish_stringBundle("statusbar.enabled"));
-  statusEnabledItem.setAttribute("accesskey",
-      Scriptish_stringBundle("statusbar.enabled.ak"));
-  statusEnabledItem.setAttribute("oncommand",
-      "Scriptish_BrowserUIM.onToggleStatus()");
 
   $("scriptish-tb-no-scripts-brd").setAttribute(
       "label", Scriptish_stringBundle("statusbar.noScripts"));
@@ -85,7 +77,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.tbBtnSetup();
 
   // get all required DOM elements
-  this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
   this.contextItemInstall = $("scriptish-context-menu-install");
   this.contextItemVS = $("scriptish-context-menu-viewsource");
 
@@ -93,17 +84,14 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   tmEle.setAttribute("label", Scriptish_stringBundle("menu.title"));
   tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.title.ak"));
 
-  var tmStatusEle = $('scriptish-tools-enabled-item');
-  tmStatusEle.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
-  tmStatusEle.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.ak"));
-
-  $("scriptish-tools-menupop").addEventListener("popupshowing", function(aEvt) {
-    // set the enabled/disabled state
-    Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
-        "checked", Scriptish.enabled);
-  }, false);
-
-  this.toolsMenuEnabledItem.addEventListener("command", function() { Scriptish_BrowserUIM.onToggleStatus() }, false);
+  var statusEnabledItem = this.statusCasterEle = $("scriptish-tb-enabled-brd");
+  statusEnabledItem.setAttribute("label",
+      Scriptish_stringBundle("statusbar.enabled"));
+  statusEnabledItem.setAttribute("accesskey",
+      Scriptish_stringBundle("statusbar.enabled.ak"));
+  statusEnabledItem.setAttribute("oncommand",
+      "Scriptish_BrowserUIM.onToggleStatus()");
+  statusEnabledItem.setAttribute("checked", Scriptish.enabled);
 
   var tmCmdsEle = $("scriptish-tools-commands");
   tmCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
@@ -199,17 +187,6 @@ Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
   this.scriptDownloader_ = aSD;
   gBrowser.selectedTab = gBrowser.addTab(aURL);
 }
-
-/**
- * Implements nsIObserve.observe. Right now we're only observing our own
- * install-userscript, which happens when the install bar is clicked.
- */
-Scriptish_BrowserUI.observe = function(subject, topic, data) {
-  if (topic == "install-userscript")
-    if (window == Services.ww.activeWindow) this.installCurrentScript();
-  else
-    throw new Error("Unexpected topic received: {" + topic + "}");
-};
 
 // Handles the install button getting clicked.
 Scriptish_BrowserUI.installCurrentScript = function() {
@@ -341,11 +318,6 @@ function Scriptish_showPopup(aEvent) {
 
   var popup = aEvent.target;
   var tail = $("scriptish-tb-no-scripts-sep");
-
-  // set the enabled/disabled state
-  var statusEnabledItem = $("scriptish-tb-enabled-item");
-  statusEnabledItem && statusEnabledItem.setAttribute(
-      "checked", Scriptish.enabled);
 
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; i >= 0; i--) {

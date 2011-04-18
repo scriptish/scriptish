@@ -15,9 +15,6 @@ function Scriptish_BrowserUIM(aWin, aBrowserUI) {
   this.$ = function(aID) aWin.document.getElementById(aID);
   this._win = aWin;
   this._browserUI = aBrowserUI;
-
-  // listen for clicks on the install bar
-  Services.obs.addObserver(aBrowserUI, "install-userscript", true);
 }
 Scriptish_BrowserUIM.prototype = {
   onIconClick: function(aEvt) {
@@ -34,9 +31,7 @@ Scriptish_BrowserUIM.prototype = {
         break;
     }
   },
-  onToggleStatus: function() {
-    Scriptish.enabled = !Scriptish.enabled;
-  },
+  onToggleStatus: function() Scriptish.enabled = !Scriptish.enabled,
   refreshStatus: function() {
     var tbImg = this.$("scriptish-button-brd");
     var menu = this.$("scriptish_general_menu");
@@ -55,12 +50,10 @@ Scriptish_BrowserUIM.prototype = {
         this._win, aURL, null, "chrome,dependent,centerscreen,resizable,dialog",
         null);
   },
-  newUserScript: function() {
-    this.openChromeWindow("chrome://scriptish/content/newscript.xul");
-  },
-  openOptionsWin: function() {
-    this.openChromeWindow("chrome://scriptish/content/options.xul");
-  },
+  newUserScript: function() (
+    this.openChromeWindow("chrome://scriptish/content/newscript.xul")),
+  openOptionsWin: function() (
+    this.openChromeWindow("chrome://scriptish/content/options.xul")),
   showUserscriptList: function() {
     Cu.import("resource://scriptish/addonprovider.js");
     timeout(Scriptish.openManager);

@@ -26,7 +26,8 @@
       class="menu-iconic"
       image="chrome://scriptish/skin/scriptish16.png">
     <menupopup id="scriptish-tools-menupop">
-      <menuitem id="scriptish-tools-enabled-item" type="checkbox"/>
+      <menuitem id="scriptish-tools-enabled-item"
+          observes="scriptish-tb-enabled-brd" type="checkbox"/>
       <menuseparator/>
       <menuitem id="scriptish-tools-show-us"/>
       <menuitem id="scriptish-tools-new"/>

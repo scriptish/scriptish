@@ -12,7 +12,6 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
 Cu.import("resource://scriptish/script/scripticon.js");
@@ -147,16 +146,13 @@ Script.prototype = {
     val = !!val;
     if (val === this.userDisabled) return val;
 
-    AddonManagerPrivate.callAddonListeners(
-        val ? "onEnabling" : "onDisabling", this, false);
+    var enabling = !val;
+    Scriptish.notify(this, "scriptish-script-edit-enabling", {enabling: enabling});
 
     Scriptish.notify(this, "scriptish-script-edit-enabled", {
-      enabled: (this._enabled = !val),
+      enabling: (this._enabled = enabling),
       saved: true
     });
-
-    AddonManagerPrivate.callAddonListeners(
-        val ? "onEnabled" : "onDisabled", this);
 
     return val;
   },
@@ -256,15 +252,15 @@ Script.prototype = {
     aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR)),
 
   uninstall: function() {
-    AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
+    Scriptish.notify(this, "scriptish-script-uninstalling");
     this.needsUninstall = true;
     this.pendingOperations = AddonManager.PENDING_UNINSTALL;
-    AddonManagerPrivate.callAddonListeners("onUninstalled", this);
+    Scriptish.notify(this, "scriptish-script-uninstalled");
   },
   uninstallProcess: function() {
     this.removeSettings();
     this.removeFiles();
-    Scriptish.notify(this, "scriptish-script-uninstalled", {saved: false});
+    Scriptish.notify(this, "scriptish-script-removed");
   },
   removeSettings: function() {
     if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
@@ -434,7 +430,7 @@ Script.prototype = {
   get runAt() this["_run-at"] || defaultRunAt,
   useDelayedInjectors: function() {
     this.delayInjection = false;
-    this.updateHelper();
+    Scriptish.notify(this, "scriptish-script-modified", {saved: false, reloadUI: true});
     for (let [, injector] in Iterator(this.delayedInjectors)) injector(this);
     this.delayedInjectors = [];
   },
@@ -587,14 +583,8 @@ Script.prototype = {
   replaceScriptWith: function(aNewScript) {
     this.removeFiles();
     this.updateFromNewScript(aNewScript.installProcess());
-
-    // notification that update is complete
-    var msg = "'" + this.name;
-    if (this.version) msg += " " + this.version;
-    msg += "' " + Scriptish_stringBundle("statusbar.updated");
-    Scriptish_notification(msg, null, null, function() Scriptish.openManager());
-    this.updateHelper();
-    Scriptish.notify(this, "scriptish-script-updated", {saved: true});
+    Scriptish.notify(
+        this, "scriptish-script-updated", {saved: true, reloadUI: true});
   },
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
@@ -662,8 +652,9 @@ Script.prototype = {
         Cu.import("resource://scriptish/config/configdownloader.js", tools);
         // Redownload dependencies.
         tools.Scriptish_configDownloader.refetchDependencies(this);
+      } else {
+        Scriptish.notify(this, "scriptish-script-modified", {saved: false, reloadUI: true});
       }
-      this.modificationProcess();
     }
     if (oldPriority != newPriority) this._config.sortScripts();
   },
@@ -822,22 +813,6 @@ Script.prototype = {
     this._modified = this._file.lastModifiedTime;
     this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
-  },
-
-  updateHelper: function () {
-    AddonManagerPrivate.callAddonListeners("onUninstalled", this);
-    AddonManagerPrivate.callInstallListeners(
-        "onExternalInstall", null, this, null, false);
-  },
-  modificationProcess: function(noReload) {
-    // notification that modification is complete
-    var msg = "'" + this.name;
-    if (this.version) msg += " " + this.version;
-    msg += "' " + Scriptish_stringBundle("statusbar.modified");
-    Scriptish_notification(msg, null, null, function() Scriptish.openManager());
-
-    if (!noReload) this.updateHelper();
-    Scriptish.notify(this, "scriptish-script-modified", {saved: false});
   }
 };
 

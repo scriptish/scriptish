@@ -44,6 +44,8 @@ function ScriptishService() {
 
   Services.obs.addObserver(this, "content-document-global-created", false);
   Services.obs.addObserver(this, "inner-window-destroyed", false);
+  Services.obs.addObserver(this, "install-userscript", false);
+  Services.obs.addObserver(this, "scriptish-enabled", false);
 }
 
 ScriptishService.prototype = {
@@ -64,6 +66,19 @@ ScriptishService.prototype = {
         break;
       case "inner-window-destroyed":
         this.innerWinDestroyed(aSubject.QueryInterface(Components.interfaces.nsISupportsPRUint64).data);
+        break;
+      case "install-userscript":
+        let win = Scriptish.getMostRecentWindow();
+        if (win) win.Scriptish_BrowserUI.installCurrentScript();
+        break;
+      case "scriptish-enabled":
+        aData = Instances.json.decode(aData);
+        let bWins = Scriptish.getWindows();
+        let on = aData.enabling;
+        while (bWins.hasMoreElements()) {
+          let bWin = bWins.getNext();
+          bWin.Scriptish_BrowserUI.statusCasterEle.setAttribute("checked", on.toString());
+        }
         break;
     }
   },

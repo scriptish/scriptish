@@ -58,6 +58,8 @@ function Config(aBaseDir) {
     "scriptish-script-user-prefs-change",
     "scriptish-script-updated",
     "scriptish-script-uninstalled",
+    "scriptish-script-uninstall-canceled",
+    "scriptish-script-removed",
     "scriptish-preferences-change",
     "scriptish-config-saved"
   ].forEach(function(i) Services.obs.addObserver(self, i, false));
@@ -68,13 +70,17 @@ Config.prototype = {
   observe: function(aSubject, aTopic, aData) {
     var data = JSON.parse(aData || "{}");
     switch(aTopic) {
+    case "scriptish-script-user-prefs-change":
+      Scriptish.notify(
+          aSubject, "scriptish-script-modified", {saved:false, reloadUI:false});
     case "scriptish-script-installed":
     case "scriptish-script-modified":
     case "scriptish-script-edit-enabled":
     case "scriptish-script-updated":
     case "scriptish-script-uninstalled":
+    case "scriptish-script-uninstall-canceled":
+    case "scriptish-script-removed":
     case "scriptish-preferences-change":
-    case "scriptish-script-user-prefs-change":
       if (data.saved) Scriptish.notify(null, "scriptish-config-saved", null);
       break;
     case "scriptish-config-saved":
@@ -266,17 +272,8 @@ Config.prototype = {
     } else {
       aNewScript.installProcess();
       this.addScript(aNewScript);
-      AddonManagerPrivate.callInstallListeners(
-          "onExternalInstall", null, aNewScript, null, false);
 
-      // notification that install is complete
-      var msg = "'" + aNewScript.name;
-      if (aNewScript.version) msg += " " + aNewScript.version;
-      msg += "' " + Scriptish_stringBundle("statusbar.installed");
-      Scriptish_notification(msg, null, null, function() Scriptish.openManager());
-
-      Scriptish.notify(
-          aNewScript, "scriptish-script-installed", {saved:true});
+      Scriptish.notify(aNewScript, "scriptish-script-installed", true);
     }
     this.sortScripts();
   },

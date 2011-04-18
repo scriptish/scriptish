@@ -40,10 +40,7 @@ function doSave() {
   if (script.getUserIncStr() != postInc || script.getUserIncStr("exclude") != postExc) {
     script.user_includes = postInc.match(/.+/g);
     script.user_excludes = postExc.match(/.+/g);
-    Scriptish.notify(script, "scriptish-script-user-prefs-change", {saved: true});
-
-    // display modified notification
-    script.modificationProcess(true);
+    Scriptish.notify(script, "scriptish-script-user-prefs-change", true);
   }
 
   script.includesDisabled = $("disableScriptIncludes").checked;

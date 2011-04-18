@@ -4,11 +4,25 @@ Components.utils.import("resource://scriptish/prefmanager.js");
 
 const Scriptish = {
   notify: function(aSubject, aTopic, aData) {
-    Services.obs.notifyObservers(aSubject, aTopic, JSON.stringify(aData));
+    if (true === aData) {
+      aData = {saved: true};
+    } else if (null !== aData) {
+      if (!aData) {
+        aData = {saved: false};
+      } else if (!aData.saved) {
+        aData.saved = false;
+      }
+    }
+    if (aData && aSubject) aData.id = aSubject.id;
+    Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
   get config() Services.scriptish.config,
   get enabled() Scriptish_prefRoot.getValue("enabled", true),
-  set enabled(aVal) Scriptish_prefRoot.setValue("enabled", !!aVal),
+  set enabled(aVal) {
+    let val = !!aVal;
+    this.notify(null, "scriptish-enabled", {enabling: val});
+    Scriptish_prefRoot.setValue("enabled", val)
+  },
   openManager: function Scriptish_openManager() {
     var browserWin = Services.wm.getMostRecentWindow("navigator:browser");
     if (browserWin.BrowserOpenAddonsMgr)
@@ -41,5 +55,7 @@ const Scriptish = {
         return Scriptish_prefRoot.getValue('unmhtIsGreaseable');
     }
     return false;
-  }
+  },
+  getMostRecentWindow: function() Service.wm.getMostRecentWindow("navigator:browser"),
+  getWindows: function() Services.wm.getEnumerator("navigator:browser")
 }
