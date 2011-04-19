@@ -26,6 +26,7 @@ const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
 const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
 const defaultRunAt = runAtValues[1];
+const defaultAutoUpdateState = AddonManager.AUTOUPDATE_DISABLE;
 const usoURLChk = /^https?:\/\/userscripts\.org\/scripts\/[^\d]+(\d+)/i;
 
 function noUpdateFound(aListener, aReason) {
@@ -61,6 +62,7 @@ function Script(config) {
   this._namespace = "";
   this._prefroot = null;
   this._author = null;
+  this._applyBackgroundUpdates = defaultAutoUpdateState;
   this._contributors = [];
   this._description = null;
   this._version = null;
@@ -127,7 +129,13 @@ Script.prototype = {
   },
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
-  applyBackgroundUpdates: AddonManager.AUTOUPDATE_DISABLE,
+  get applyBackgroundUpdates() this._applyBackgroundUpdates,
+  set applyBackgroundUpdates(aVal) {
+    this._applyBackgroundUpdates = aVal;
+    Scriptish.notify(null, "scriptish-script-user-prefs-change", {
+      saved: true
+    });
+  },
   operationsRequiringRestart: AddonManager.OP_NEEDS_RESTART_NONE,
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
@@ -606,6 +614,7 @@ Script.prototype = {
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
+    this._applyBackgroundUpdates = newScript._applyBackgroundUpdates;
     this.supportURL = newScript.supportURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
@@ -779,6 +788,8 @@ Script.prototype = {
       scriptNode.setAttribute("downloadURL", this._downloadURL);
     if (this._updateURL)
       scriptNode.setAttribute("updateURL", this._updateURL);
+    if (this._applyBackgroundUpdates != defaultAutoUpdateState)
+      scriptNode.setAttribute("applyBackgroundUpdates", this._applyBackgroundUpdates);
     if (this.supportURL)
         scriptNode.setAttribute("supportURL", this.supportURL);
     if (this.averageRating)
@@ -946,6 +957,10 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           if (uri.scheme == "https" || uri.scheme == "http")
             script._updateURL = uri.spec;
           break;
+        case "applybackgroundupdates":
+          script._applyBackgroundUpdates =
+              parseInt(value, 10) || defaultAutoUpdateState;
+          continue;
         case "injectframes":
           if (value != "0") continue;
           script["_noframes"] = true;
@@ -1124,6 +1139,9 @@ Script.load = function load(aConfig, aNode) {
   script._downloadURL = aNode.getAttribute("downloadURL")
       || aNode.getAttribute("installurl") || null;
   script._updateURL = aNode.getAttribute("updateURL") || null;
+  script._applyBackgroundUpdates =
+      parseInt(aNode.getAttribute("applyBackgroundUpdates"), 10)
+      || defaultAutoUpdateState;
   script._homepageURL = aNode.getAttribute("homepageURL")
       || aNode.getAttribute("homepage") || null;
   if (aNode.getAttribute("supportURL"))
