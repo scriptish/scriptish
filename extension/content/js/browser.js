@@ -118,11 +118,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.contextItemVS.setAttribute("accesskey", Scriptish_stringBundle("menu.show.ak"));
   this.contextItemVS.addEventListener("command", function(aEvt) {
     Scriptish_BrowserUI.viewContextItemClicked(aEvt);
-  }, false)
-
-  // update visual status when enabled state changes
-  this.statusWatcher = Scriptish_BrowserUIM.refreshStatus.bind(Scriptish_BrowserUIM);
-  Scriptish_prefRoot.watch("enabled", this.statusWatcher);
+  }, false);
 
   // hook on to context menu popup event
   $("contentAreaContextMenu").addEventListener(

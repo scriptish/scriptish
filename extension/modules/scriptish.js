@@ -2,6 +2,15 @@ var EXPORTED_SYMBOLS = ["Scriptish"];
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/prefmanager.js");
 
+function setStatus() (enabled = Scriptish_prefRoot.getValue("enabled", true));
+function notifyStatusChg(aVal) (
+    Scriptish.notify(null, "scriptish-enabled", {enabling: aVal}));
+var ignoreEnable = false, enabled = setStatus();
+Scriptish_prefRoot.watch("enabled", function() {
+  if (ignoreEnable) return ignoreEnable = false;
+  notifyStatusChg(setStatus());
+});
+
 const Scriptish = {
   notify: function(aSubject, aTopic, aData) {
     if (true === aData) {
@@ -17,11 +26,12 @@ const Scriptish = {
     Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
   get config() Services.scriptish.config,
-  get enabled() Scriptish_prefRoot.getValue("enabled", true),
+  get enabled() enabled,
   set enabled(aVal) {
-    let val = !!aVal;
-    this.notify(null, "scriptish-enabled", {enabling: val});
-    Scriptish_prefRoot.setValue("enabled", val)
+    ignoreEnable = true;
+    enabled = !!aVal;
+    notifyStatusChg(enabled);
+    Scriptish_prefRoot.setValue("enabled", enabled);
   },
   openManager: function Scriptish_openManager() {
     var browserWin = Services.wm.getMostRecentWindow("navigator:browser");
@@ -59,3 +69,4 @@ const Scriptish = {
   getMostRecentWindow: function() Service.wm.getMostRecentWindow("navigator:browser"),
   getWindows: function() Services.wm.getEnumerator("navigator:browser")
 }
+

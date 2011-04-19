@@ -78,6 +78,7 @@ ScriptishService.prototype = {
         while (bWins.hasMoreElements()) {
           let bWin = bWins.getNext();
           bWin.Scriptish_BrowserUI.statusCasterEle.setAttribute("checked", on.toString());
+          bWin.Scriptish_BrowserUIM.refreshStatus();
         }
         break;
     }
