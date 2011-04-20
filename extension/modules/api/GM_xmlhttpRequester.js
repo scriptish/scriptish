@@ -23,8 +23,6 @@ function GM_xmlhttpRequester(unsafeContentWin, originUrl, aScript) {
 // can't support mimetype because i think it's only used for forcing
 // text/xml and we can't support that
 GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
-  Scriptish_log("> GM_xmlhttpRequest.contentStartRequest");
-
   try {
     // Validate and parse the (possibly relative) given URL.
     var uri = NetUtil.newURI(details.url, null, NetUtil.newURI(this.originUrl));
@@ -53,8 +51,6 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
       throw new Error(Scriptish_stringBundle("error.api.reqURL.scheme") + ": " + details.url);
   }
 
-  Scriptish_log("< GM_xmlhttpRequest.contentStartRequest");
-
   return {
     abort: function() {
       req.abort();
@@ -66,8 +62,6 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
 // that it can access other domains without security warning
 GM_xmlhttpRequester.prototype.chromeStartRequest =
     function(safeUrl, details, req) {
-  Scriptish_log("> GM_xmlhttpRequest.chromeStartRequest");
-
   this.setupRequestEvent(this.unsafeContentWin, req, "onload", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onerror", details);
   this.setupRequestEvent(
@@ -95,8 +89,6 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
   var body = details.data ? details.data : null;
   if (details.binary) req.sendAsBinary(body);
   else req.send(body);
-
-  Scriptish_log("< GM_xmlhttpRequest.chromeStartRequest");
 }
 
 // arranges for the specified 'event' on xmlhttprequest 'req' to call the
@@ -104,14 +96,10 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
 // window's security context.
 GM_xmlhttpRequester.prototype.setupRequestEvent =
     function(unsafeContentWin, req, event, details) {
-  Scriptish_log("> GM_xmlhttpRequester.setupRequestEvent");
-
   var origMimeType = details.overrideMimeType;
 
   if (details[event]) {
     req[event] = function() {
-      Scriptish_log("> GM_xmlhttpRequester -- callback for " + event);
-
       var responseState = {
         // can't support responseXML because security won't
         // let the browser call properties on it
@@ -140,10 +128,6 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
 
       GM_apiSafeCallback(
           unsafeContentWin, details, details[event], [responseState]);
-
-      Scriptish_log("< GM_xmlhttpRequester -- callback for " + event);
     }
   }
-
-  Scriptish_log("< GM_xmlhttpRequester.setupRequestEvent");
 }
