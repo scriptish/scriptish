@@ -132,7 +132,7 @@ Script.prototype = {
   get applyBackgroundUpdates() this._applyBackgroundUpdates,
   set applyBackgroundUpdates(aVal) {
     this._applyBackgroundUpdates = aVal;
-    Scriptish.notify(null, "scriptish-script-user-prefs-change", {
+    Scriptish.notify(null, "scriptish-script-prefs-change", {
       saved: true
     });
   },
