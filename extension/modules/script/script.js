@@ -504,6 +504,7 @@ Script.prototype = {
 
   get fileURL() Scriptish_getUriFromFile(this._file).spec,
   get textContent() Scriptish_getContents(this._file),
+  getTextContent: function(aCallback) Scriptish_getContents(this._file, 0, aCallback),
 
   get size() {
     var size = this._file.fileSize;

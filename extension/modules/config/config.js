@@ -354,6 +354,7 @@ Config.prototype = {
   },
 
   updateModifiedScripts: function(scriptInjector) {
+    var self = this;
     let hasChanged = false;
     for (let [, script] in Iterator(this._scripts)) {
       if (script.delayInjection) {
@@ -361,12 +362,17 @@ Config.prototype = {
         continue;
       }
       if (!script.isModified()) continue;
+
       hasChanged = true;
-      let parsedScript = this.parse(
-          script.textContent,
-          script._downloadURL && NetUtil.newURI(script._downloadURL), script);
-      script.updateFromNewScript(parsedScript, scriptInjector);
+
+      script.getTextContent(function(content) {
+        let parsedScript = self.parse(
+            content,
+            script._downloadURL && NetUtil.newURI(script._downloadURL), script);
+        script.updateFromNewScript(parsedScript, scriptInjector);
+      });
     }
+
     if (hasChanged) this._save();
   },
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])

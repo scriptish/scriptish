@@ -27,6 +27,7 @@ ScriptDependency.prototype = {
   get tempFile() this._tempFile,
   get fileURL() Scriptish_getUriFromFile(this._file).spec,
   get textContent() Scriptish_getContents(this._file),
+  getTextContent: function(aCallback) Scriptish_getContents(this._file, 0, aCallback),
 
   get downloadURL() this._downloadURL,
   get downloadURLFilename() {
