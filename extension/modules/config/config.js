@@ -116,9 +116,12 @@ Config.prototype = {
       let file = self._blocklistFile;
 
       // write blocklist
-      var BLStream = Scriptish_getWriteStream(file);
-      BLStream.write(json, json.length);
-      BLStream.close();
+      let converter = Instances.suc;
+      converter.charset = "UTF-8";
+      NetUtil.asyncCopy(
+          converter.convertToInputStream(json),
+          Scriptish_getWriteStream(file, true));
+
       Scriptish_log("Updated Scriptish blocklist " + SCRIPTISH_BLOCKLIST, true);
 
       self._blocklist = blocklist;
