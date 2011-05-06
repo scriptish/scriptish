@@ -290,7 +290,7 @@ function Scriptish_popupClicked(aEvt) {
   }
 }
 
-function Scriptish_showPopup(aEvent) {
+function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   var $ = function(aID) document.getElementById(aID);
   Scriptish_BrowserUI.reattachMenuCmds();
 
@@ -298,7 +298,7 @@ function Scriptish_showPopup(aEvent) {
     function testMatchURLs(script) {
       return urls.some(function(url) script.matchesURL(url));
     }
-    return Scriptish.config.getMatchingScripts(testMatchURLs);
+    return config.getMatchingScripts(testMatchURLs);
   }
 
   function appendScriptToPopup(script) {
@@ -348,4 +348,4 @@ function Scriptish_showPopup(aEvent) {
 
   $("scriptish-tb-no-scripts").collapsed =
       !!(runsFramed.length + runsOnTop.length);
-}
+})

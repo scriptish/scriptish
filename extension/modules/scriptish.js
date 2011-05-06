@@ -1,6 +1,8 @@
 var EXPORTED_SYMBOLS = ["Scriptish"];
-Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/prefmanager.js");
+const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/prefmanager.js");
+Cu.import("resource://scriptish/logging.js");
 
 function setStatus() (enabled = Scriptish_prefRoot.getValue("enabled", true));
 function notifyStatusChg(aVal) (
@@ -11,7 +13,10 @@ Scriptish_prefRoot.watch("enabled", function() {
   notifyStatusChg(setStatus());
 });
 
+var global = this;
+
 const Scriptish = {
+  updateSecurely: Scriptish_prefRoot.getValue("update.requireSecured"),
   notify: function(aSubject, aTopic, aData) {
     if (true === aData) {
       aData = {saved: true};
@@ -25,7 +30,28 @@ const Scriptish = {
     if (aData && aSubject) aData.id = aSubject.id;
     Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
-  get config() Services.scriptish.config,
+  getConfig: function(aCallback) {
+    Scriptish_log("Scriptish.getConfig");
+    if (global.config) {
+      Scriptish_log("Scriptish.getConfig 1");
+      aCallback(global.config);
+    } else if (!global.configQueue) {
+      Scriptish_log("Scriptish.getConfig 2");
+      global.configQueue = [aCallback];
+      var tools = {};
+      Cu.import("resource://scriptish/config/config.js", tools);
+      let cf = new tools.Config("scriptish_scripts");
+      cf.load(function() {
+        Scriptish_log("Scriptish config loaded");
+        global.config = cf;
+        global.configQueue.forEach(function(f) f(cf));
+        delete global["configQueue"];
+      });
+    } else {
+      Scriptish_log("Scriptish.getConfig 3");
+      global.configQueue.push(aCallback);
+    }
+  },
   get enabled() enabled,
   set enabled(aVal) {
     ignoreEnable = true;
@@ -70,3 +96,7 @@ const Scriptish = {
   getWindows: function() Services.wm.getEnumerator("navigator:browser")
 }
 
+// Watch for the required secure updates pref being modified
+Scriptish_prefRoot.watch("update.requireSecured", function() {
+  Scriptish.updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
+});

@@ -1,9 +1,11 @@
 var EXPORTED_SYMBOLS = ["Config"];
 
-const SCRIPTISH_CONFIG = "scriptish-config.xml";
+const SCRIPTISH_CONFIG_XML = "scriptish-config.xml";
+const SCRIPTISH_CONFIG_JSON = "scriptish-config.json";
 const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 
 (function(inc) {
+inc("resource:///modules/NetworkHelper.jsm");
 inc("resource://scriptish/constants.js");
 inc("resource://scriptish/logging.js");
 inc("resource://scriptish/prefmanager.js");
@@ -15,31 +17,16 @@ inc("resource://scriptish/utils/Scriptish_notification.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
-inc("resource://scriptish/third-party/Timer.js");
 inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
 
 function Config(aBaseDir) {
   var self = this;
-  this.timer = new Timer();
   this._observers = [];
-  this._saveTimer = null;
   this._excludes = [];
   this._excludeRegExps = [];
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
-
-  let configFile = this._scriptDir;
-  configFile.append(SCRIPTISH_CONFIG);
-  if (!configFile.exists()) {
-    (configFile = this._scriptDir).append("config.xml");
-    if (!configFile.exists())
-        (configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
-  }
-
-  this._configFile = configFile;
-
-  this._updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
 
   this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
   this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
@@ -48,8 +35,6 @@ function Config(aBaseDir) {
   (this._blocklistFile = this._scriptDir).append(SCRIPTISH_BLOCKLIST);
 
   this._initScriptDir();
-  this._load();
-  (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
 
   [
     "scriptish-script-installed",
@@ -157,31 +142,82 @@ Config.prototype = {
     }
   },
 
-  _load: function() {
-    // load config
+  _loadXML: function(aFile, aCallback) {
+    Scriptish_log("Scriptish Config._loadXML");
     var self = this;
-    var configContents = Scriptish_getContents(this._configFile);
-    var doc = Instances.dp.parseFromString(configContents, "text/xml");
-    var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
-    var fileModified = false;
-    let excludes = [];
+    NetUtil.asyncFetch(aFile, function(aInputStream, aStatusCode) {
+      if (!Components.isSuccessCode(aStatusCode)) {
+        Scriptish_logError(
+            new Error(Scriptish_stringBundle("error.openingFile") + ": " + aFile.path));
+        return;
+      }
 
-    for (var node; node = nodes.iterateNext();) {
-      switch (node.nodeName) {
-      case "Script":
-        fileModified = Script.load(this, node) || fileModified;
-        break;
-      case "Exclude":
-        excludes.push(node.firstChild.nodeValue.trim());
-        break;
+      var configContents = NetworkHelper.readAndConvertFromStream(aInputStream, "UTF-8");
+      var doc = Instances.dp.parseFromString(configContents, "text/xml");
+      var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
+      var fileModified = false;
+      let excludes = [];
+
+      for (var node; node = nodes.iterateNext();) {
+        switch (node.nodeName) {
+        case "Script":
+          fileModified = Script.loadFromXML(self, node) || fileModified;
+          break;
+        case "Exclude":
+          excludes.push(node.firstChild.nodeValue.trim());
+          break;
+        }
+      }
+      self.addExclude(excludes);
+
+      aCallback(fileModified);
+    });
+  },
+
+  _loadJSON: function(aFile, aCallback) {
+    Scriptish_log("Scriptish Config._loadJSON");
+    var self = this;
+    NetUtil.asyncFetch(aFile, function(aInputStream, aStatusCode) {
+        if (!Components.isSuccessCode(aStatusCode)) {
+          Scriptish_logError(
+              new Error(Scriptish_stringBundle("error.openingFile") + ": " + aFile.path));
+          return;
+        }
+
+        var config = JSON.parse(NetworkHelper.readAndConvertFromStream(aInputStream, "UTF-8"));
+
+        config.scripts.forEach(function(i) Script.loadFromJSON(self, i));
+        config.excludes.forEach(function(i) self.addExclude(i));
+
+        aCallback(false);
+      });
+  },
+
+  load: function(aCallback) {
+    Scriptish_log("Scriptish Config.load");
+    var self = this;
+
+    function callback(fileModified) {
+      if (fileModified) this._save();
+      aCallback();
+    }
+
+    let (configFile = this._scriptDir) {
+      configFile.append(SCRIPTISH_CONFIG_JSON);
+
+      if (configFile.exists()) {
+        this._loadJSON(configFile, callback);
+      } else {
+        (configFile = this._scriptDir).append(SCRIPTISH_CONFIG_XML);
+
+        if (!configFile.exists())
+          (configFile = this._scriptDir).append("config.xml");
+
+        // load xml config
+        if (configFile.exists()) this._loadXML(configFile, callback);
+        else aCallback();
       }
     }
-    this.addExclude(excludes);
-
-    // Watch for the required secure updates pref being modified
-    Scriptish_prefRoot.watch("update.requireSecured", function() {
-      self._updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
-    });
 
     // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
@@ -213,52 +249,29 @@ Config.prototype = {
           timeout(script.updateUSOData.bind(script), i * 100);
       }
     }
-
-    // the delay b4 save here is very important now that config.xml is used when
-    // scriptish-config.xml DNE
-    if (fileModified) this._save();
   },
+
+  toJSON: function() ({
+    excludes: this.excludes,
+    scripts: this.scripts.map(function(script) script.toJSON())
+  }),
 
   _blockScripts: function() {
     var scripts = this._scripts;
     for (var i = scripts.length - 1; ~i; i--) scripts[i].doBlockCheck();
   },
 
-  _save: function(saveNow) {
-    // If we have not explicitly been told to save now, then defer execution
-    // via a timer, to avoid locking up the UI.
-    if (!saveNow) {
-      // Reduce work in the case of many changes near to each other in time.
-      if (this._saveTimer) this.timer.clearTimeout(this._saveTimer);
-      this._saveTimer =
-          this.timer.setTimeout(this._save.bind(this, true), 250);
-      return;
-    }
-    delete this["_saveTimer"];
+  _save: function() {
+    // make sure that the configFile is SCRIPTISH_CONFIG_JSON
+    (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON);
 
-    var doc = Instances.dp.parseFromString("<UserScriptConfig/>", "text/xml");
-    var scripts = this._scripts;
-    var len = scripts.length;
-    var firstChild = doc.firstChild;
-    let nt = "\n\t";
-    function addNode(str, node) firstChild.appendChild(doc.createTextNode(str))
-        && node && firstChild.appendChild(node);
+    Scriptish_log(Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG_JSON, true);
 
-    // add script info
-    for (var i = 0, script; script = scripts[i]; i++)
-      addNode(nt, script.createXMLNode(doc));
-
-    // add global excludes info
-    for (let [, exclude] in Iterator(this.excludes))
-      addNode(nt, doc.createElement("Exclude"))
-          .appendChild(doc.createTextNode(exclude));
-
-    addNode("\n");
-
-    Scriptish_log(Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG, true);
-    var configStream = Scriptish_getWriteStream(this._configFile);
-    Instances.ds.serializeToStream(doc, configStream, "utf-8");
-    configStream.close();
+    let converter = Instances.suc;
+    converter.charset = "UTF-8";
+    NetUtil.asyncCopy(
+        converter.convertToInputStream(JSON.stringify(this.toJSON())),
+        Scriptish_getWriteStream(this._configFile, true));
   },
 
   parse: function(source, uri, aUpdateScript) (
@@ -316,8 +329,6 @@ Config.prototype = {
       this._fetchBlocklist();
     }
   },
-
-  get updateSecurely() this._updateSecurely,
 
   get excludes() this._excludes.concat(),
   set excludes(excludes) {

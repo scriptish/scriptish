@@ -217,7 +217,7 @@ Script.prototype = {
     req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
     // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
     req.channel.notificationCallbacks =
-        new BadCertHandler(!this._config.updateSecurely || !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+        new BadCertHandler(!Scriptish.updateSecurely || !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
     req.onload = this.checkRemoteVersion.bind(this, req, aCallback);
     req.onerror = this.checkRemoteVersionErr.bind(this, aCallback);
     req.send(null);
@@ -228,11 +228,11 @@ Script.prototype = {
       return aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR);
 
     // make sure that the final URI is a https url
-    if (this._config.updateSecurely && "https" != req.channel.URI.scheme)
+    if (Scriptish.updateSecurely && "https" != req.channel.URI.scheme)
       return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
 
     // make sure that the final URI's certificate is valid
-    if (this._config.updateSecurely) {
+    if (Scriptish.updateSecurely) {
       try {
         checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
       }
@@ -315,7 +315,7 @@ Script.prototype = {
 
     let includes = this._user_includeRegExps.concat(this._includeRegExps);
     let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
-        .concat(Scriptish.config.excludeRegExps);
+        .concat(this._config.excludeRegExps);
 
     return (includes.some(testI) || this._matches.some(testII))
         && !excludes.some(testI);
@@ -470,10 +470,10 @@ Script.prototype = {
       return null;
     // userscripts.org url?
     if (/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i.test(url)) {
-      if (this._config.updateSecurely) url = url.replace(/^http:/i, "https:");
+      if (Scriptish.updateSecurely) url = url.replace(/^http:/i, "https:");
       return url.replace(/\.user\.js$/i, ".meta.js");
     }
-    return (!this._config.updateSecurely || /^https:/i.test(url)) ? url : null;
+    return (!Scriptish.updateSecurely || /^https:/i.test(url)) ? url : null;
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
@@ -484,7 +484,7 @@ Script.prototype = {
     } catch (e) {
       return false;
     }
-    return !this._config.updateSecurely || "https" == uri.scheme;
+    return !Scriptish.updateSecurely || "https" == uri.scheme;
   },
 
   get _file() {
@@ -659,137 +659,53 @@ Script.prototype = {
     if (oldPriority != newPriority) this._config.sortScripts();
   },
 
-  createXMLNode: function(doc) {
-    var scriptNode = doc.createElement("Script");
-    var len;
-
-    for (var j = 0; j < this.contributors.length; j++) {
-      var contributorNode = doc.createElement("Contributor");
-      contributorNode.appendChild(doc.createTextNode(this.contributors[j]));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(contributorNode);
-    }
-
-    for (var j = 0; j < this.domains.length; j++) {
-      var node = doc.createElement("Domain");
-      node.appendChild(doc.createTextNode(this.domains[j]));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(node);
-    }
-
-    for (var j = 0; j < this._includes.length; j++) {
-      var includeNode = doc.createElement("Include");
-      includeNode.appendChild(doc.createTextNode(this._includes[j]));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(includeNode);
-    }
-
-    for (var j = 0; j < this._excludes.length; j++) {
-      var excludeNode = doc.createElement("Exclude");
-      excludeNode.appendChild(doc.createTextNode(this._excludes[j]));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(excludeNode);
-    }
-
-    for (var j = 0; j < this._matches.length; j++) {
-      var matchNode = doc.createElement("Match");
-      matchNode.appendChild(doc.createTextNode(this._matches[j].pattern));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(matchNode);
-    }
-
-    for (let [, include] in Iterator(this._user_includes)) {
-      let node = doc.createElement("UserInclude");
-      node.appendChild(doc.createTextNode(include));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(node);
-    }
-
-    for (let [, exclude] in Iterator(this._user_excludes)) {
-      let node = doc.createElement("UserExclude");
-      node.appendChild(doc.createTextNode(exclude));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(node);
-    }
-
-    len = this._screenshots.length;
-    for (var j = 0; j < len; j++) {
-      var screenshotNode = doc.createElement("Screenshot");
-      var screenshot = this._screenshots[j];
-      screenshotNode.appendChild(doc.createTextNode(screenshot.url));
-      if (screenshot.thumbnailURL)
-        screenshotNode.setAttribute("thumb", screenshot.thumbnailURL);
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(screenshotNode);
-    }
-
-    for (var j = 0; j < this._requires.length; j++) {
-      var req = this._requires[j];
-      var resourceNode = doc.createElement("Require");
-      resourceNode.setAttribute("filename", req._filename);
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(resourceNode);
-    }
-
-    for (var j = 0; j < this._resources.length; j++) {
-      var imp = this._resources[j];
-      var resourceNode = doc.createElement("Resource");
-
-      resourceNode.setAttribute("name", imp._name);
-      resourceNode.setAttribute("filename", imp._filename);
-      resourceNode.setAttribute("mimetype", imp._mimetype);
-      if (imp._charset) {
-        resourceNode.setAttribute("charset", imp._charset);
-      }
-
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(resourceNode);
-    }
-
-    if (this._noframes) {
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(doc.createElement("Noframes"));
-    }
-
-    scriptNode.appendChild(doc.createTextNode("\n\t"));
-
-    scriptNode.setAttribute("filename", this._filename);
-    scriptNode.setAttribute("id", this.id);
-    scriptNode.setAttribute("name", this.name);
-    scriptNode.setAttribute("namespace", this.namespace);
-    scriptNode.setAttribute("author", this._author);
-    scriptNode.setAttribute("blocklistState", this.blocklistState);
-    scriptNode.setAttribute("description", this._description);
-    scriptNode.setAttribute("version", this._version);
-    scriptNode.setAttribute("delay", this._delay);
-    scriptNode.setAttribute("priority", this.priority);
-    scriptNode.setAttribute("icon", this.icon.filename);
-    scriptNode.setAttribute("icon64", this.icon64.filename);
-    scriptNode.setAttribute("enabled", this._enabled);
-    scriptNode.setAttribute("basedir", this._basedir);
-    scriptNode.setAttribute("modified", this._modified);
-    scriptNode.setAttribute("dependhash", this._dependhash);
-    if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
-    if (this["_run-at"]) scriptNode.setAttribute("run-at", this["_run-at"]);
-    if (this.includesDisabled) scriptNode.setAttribute("includesDisabled", true);
-
-    if (this.homepageURL)
-      scriptNode.setAttribute("homepageURL", this.homepageURL);
-    if (this._downloadURL)
-      scriptNode.setAttribute("downloadURL", this._downloadURL);
-    if (this._updateURL)
-      scriptNode.setAttribute("updateURL", this._updateURL);
-    if (this.supportURL)
-        scriptNode.setAttribute("supportURL", this.supportURL);
-    if (this.averageRating)
-      scriptNode.setAttribute("averageRating", this.averageRating);
-    if (this.reviewCount)
-      scriptNode.setAttribute("reviewCount", this.reviewCount);
-    if (this.totalDownloads)
-      scriptNode.setAttribute("totalDownloads", this.totalDownloads);
-
-    return scriptNode;
-  },
+  toJSON: function() ({
+    contributors: this._contributors,
+    domains: this.domains,
+    includes: this._includes,
+    excludes: this._excludes,
+    matches: this._matches.map(function(match) match.pattern),
+    user_includes: this._user_includes,
+    user_excludes: this._user_excludes,
+    screenshots: this._screenshots.map(function(screenshot) ({
+      url: screenshot.url,
+      thumbnailURL: screenshot.thumbnailURL
+    })),
+    requires: this._requires.map(function(req) req._filename),
+    resources: this._resources.map(function(res) ({
+      name: res._name,
+      filename: res._filename,
+      mimetype: res._mimetype,
+      charset: res._charset
+    })),
+    noframes: this._noframes,
+    filename: this._filename,
+    id: this.id,
+    name: this.name,
+    namespace: this.namespace,
+    author: this._author,
+    blocklistState: this.blocklistState,
+    description: this._description,
+    version: this._version,
+    delay: this._delay,
+    priority: this.priority,
+    icon: this.icon.filename,
+    icon64: this.icon64.filename,
+    enabled: this._enabled,
+    basedir: this._basedir,
+    modified: this._modified,
+    dependhash: this._dependhash,
+    jsversion: this._jsversion,
+    "run-at": this["_run-at"],
+    includesDisabled: this.includesDisabled,
+    homepageURL: this.homepageURL,
+    downloadURL: this._downloadURL,
+    updateURL: this._updateURL,
+    supportURL: this.supportURL,
+    averageRating: this.averageRating,
+    reviewCount: this.reviewCount,
+    totalDownloads: this.totalDownloads
+  }),
 
   // TODO: DRY
   installProcess: function() {
@@ -1114,7 +1030,74 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   return script;
 };
 
-Script.load = function load(aConfig, aNode) {
+Script.loadFromJSON = function(aConfig, aSkeleton) {
+  var script = new Script(aConfig);
+
+  script._filename = aSkeleton.filename;
+  script._basedir = aSkeleton.basedir;
+  script._downloadURL = aSkeleton.downloadURL;
+  script._updateURL = aSkeleton.updateURL;
+  script._homepageURL = aSkeleton.homepageURL;
+  script.supportURL = aSkeleton.supportURL;
+  script.jsversion = aSkeleton.jsversion;
+  script["_run-at"] = aSkeleton["run-at"];
+  script.includesDisabled = aSkeleton.includesDisabled;
+
+  if (!script.fileExists()) {
+    script.uninstallProcess();
+    return true;
+  }
+
+  script._modified = aSkeleton.modified;
+  script._dependhash = aSkeleton.dependhash;
+  script._version = aSkeleton.version;
+  script._noframes = aSkeleton.noframes;
+
+  script.domains = aSkeleton.domains;
+  aSkeleton.contributors.forEach(script.addContributor.bind(script));
+  aSkeleton.includes.forEach(script.addInclude.bind(script));
+  aSkeleton.excludes.forEach(script.addExclude.bind(script));
+  aSkeleton.user_includes.forEach(script.addInclude.bind(script, true));
+  aSkeleton.user_excludes.forEach(script.addExclude.bind(script, true));
+  aSkeleton.matches.forEach(function(i) script._matches.push(new MatchPattern(i)));
+  aSkeleton.requires.forEach(function(i) {
+    var scriptRequire = new ScriptRequire(script);
+    scriptRequire._filename = i;
+    script._requires.push(scriptRequire);
+  });
+  aSkeleton.resources.forEach(function(i) {
+    var scriptResource = new ScriptResource(script);
+    scriptResource._name = i.name;
+    scriptResource._filename = i.filename;
+    scriptResource._mimetype = i.mimetype;
+    scriptResource._charset = i.charset;
+    script._resources.push(scriptResource);
+  });
+  aSkeleton.screenshots.forEach(function(i) {
+    script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+        i.url, i.thumbnailURL));
+  });
+
+  script.id = aSkeleton.id;
+  script._name = aSkeleton.name;
+  script._namespace = aSkeleton.namespace;
+  script.author = aSkeleton.author;
+  script._description = aSkeleton.description;
+  script.icon.fileURL = aSkeleton.icon;
+  script.icon64.fileURL = aSkeleton.icon64;
+  script.blocklistState = aSkeleton.blocklistState;
+  script.enabled = aSkeleton.enabled;
+  script.delay = aSkeleton.delay;
+  script.priority = aSkeleton.priority;
+  script.averageRating = aSkeleton.averageRating;
+  script.reviewCount = aSkeleton.reviewCount;
+  script.totalDownloads = aSkeleton.totalDownloads;
+
+  aConfig.addScript(script);
+  return false;
+}
+
+Script.loadFromXML = function(aConfig, aNode) {
   var script = new Script(aConfig);
   var fileModified = false;
   let tmp;

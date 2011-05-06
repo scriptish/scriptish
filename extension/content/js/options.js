@@ -44,7 +44,8 @@ window.addEventListener("load", function() {
 
   // Setup global excludes
   $("excludes-caption").setAttribute("label", Scriptish_stringBundle("options.excludes"));
-  $("excludes").value = Scriptish.config.excludes.join("\n");
+  Scriptish.getConfig(function(config) (
+      $("excludes").value = config.excludes.join("\n")));
 }, false);
 
 function Scriptish_getEditor() {
@@ -63,6 +64,7 @@ function doSave() {
   Scriptish_prefRoot.setValue("enableCopyDownloadURL",
       !!$("check-copydownloadURL").checked);
 
-  Scriptish.config.excludes = $("excludes").value.match(/.+/g);
+  Scriptish.getConfig(function(config) (
+      config.excludes = $("excludes").value.match(/.+/g)));
   Scriptish.notify(null, "scriptish-preferences-change", true);
 }
