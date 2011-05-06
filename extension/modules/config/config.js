@@ -5,7 +5,6 @@ const SCRIPTISH_CONFIG_JSON = "scriptish-config.json";
 const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 
 (function(inc) {
-inc("resource:///modules/NetworkHelper.jsm");
 inc("resource://scriptish/constants.js");
 inc("resource://scriptish/logging.js");
 inc("resource://scriptish/prefmanager.js");
@@ -131,29 +130,26 @@ Config.prototype = {
   },
 
   _loadBlocklist: function() {
-    if (this._blocklistFile.exists()) {
-      let blockListContents = Scriptish_getContents(this._blocklistFile);
-      let blocklist = Instances.json.decode(blockListContents);
-      this._blocklist = blocklist;
-      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
+    var file = this._blocklistFile;
+    if (file.exists()) {
+      let self = this;
+      Scriptish_getContents(file, 0, function(str) {
+        self._blocklist = Instances.json.decode(str);
+        self._blocklistHash = Scriptish_cryptoHash(str);
 
-      // block scripts
-      this._blockScripts();
+        // block scripts
+        self._blockScripts();
+      });
     }
   },
 
   _loadXML: function(aFile, aCallback) {
     Scriptish_log("Scriptish Config._loadXML");
     var self = this;
-    NetUtil.asyncFetch(aFile, function(aInputStream, aStatusCode) {
-      if (!Components.isSuccessCode(aStatusCode)) {
-        Scriptish_logError(
-            new Error(Scriptish_stringBundle("error.openingFile") + ": " + aFile.path));
-        return;
-      }
 
-      var configContents = NetworkHelper.readAndConvertFromStream(aInputStream, "UTF-8");
-      var doc = Instances.dp.parseFromString(configContents, "text/xml");
+    Scriptish_getContents(aFile, 0, function(str) {
+      if (!str) return;
+      var doc = Instances.dp.parseFromString(str, "text/xml");
       var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
       var fileModified = false;
       let excludes = [];
@@ -177,20 +173,16 @@ Config.prototype = {
   _loadJSON: function(aFile, aCallback) {
     Scriptish_log("Scriptish Config._loadJSON");
     var self = this;
-    NetUtil.asyncFetch(aFile, function(aInputStream, aStatusCode) {
-        if (!Components.isSuccessCode(aStatusCode)) {
-          Scriptish_logError(
-              new Error(Scriptish_stringBundle("error.openingFile") + ": " + aFile.path));
-          return;
-        }
 
-        var config = JSON.parse(NetworkHelper.readAndConvertFromStream(aInputStream, "UTF-8"));
+    Scriptish_getContents(aFile, 0, function(str) {
+      if (!str) return;
+      var config = JSON.parse(str);
 
-        config.scripts.forEach(function(i) Script.loadFromJSON(self, i));
-        config.excludes.forEach(function(i) self.addExclude(i));
+      config.scripts.forEach(function(i) Script.loadFromJSON(self, i));
+      config.excludes.forEach(function(i) self.addExclude(i));
 
-        aCallback(false);
-      });
+      aCallback(false);
+    });
   },
 
   load: function(aCallback) {
