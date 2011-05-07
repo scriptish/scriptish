@@ -40,6 +40,7 @@ function Config(aBaseDir) {
     "scriptish-script-modified",
     "scriptish-script-edit-enabled",
     "scriptish-script-user-prefs-change",
+    "scriptish-script-prefs-change",
     "scriptish-script-updated",
     "scriptish-script-uninstalled",
     "scriptish-script-uninstall-canceled",
@@ -57,6 +58,7 @@ Config.prototype = {
     case "scriptish-script-user-prefs-change":
       Scriptish.notify(
           aSubject, "scriptish-script-modified", {saved:false, reloadUI:false});
+    case "scriptish-script-prefs-change":
     case "scriptish-script-installed":
     case "scriptish-script-modified":
     case "scriptish-script-edit-enabled":

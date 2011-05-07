@@ -232,14 +232,19 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       checkCert(channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
     }
     catch (e) {
-      return  this.errorInstallDependency(dep, "Invalid dependency SSL certificate");
+      return this.errorInstallDependency(dep, "Invalid dependency SSL certificate");
     }
   }
 
   let errMsgStart = Scriptish_stringBundle("error.dependency.loading") + ": " +
       dep.urlToDownload + "\n";
   if (httpChannel) {
-    if (httpChannel.requestSucceeded) {
+    try {
+      var reqSucceeded = httpChannel.requestSucceeded;
+    } catch(e) {
+      var reqSucceeded = false;
+    }
+    if (reqSucceeded) {
       if (this.updateScript) {
         dep._script = this.script;
         dep.updateScript = true;
@@ -257,8 +262,14 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
     } else {
+      try {
+        var responseStatus = httpChannel.responseStatus + ": "
+            + httpChannel.responseStatusText;
+      } catch(e) {
+        var responseStatus = Scriptish_stringBundle("nothing.timedOut");
+      }
       let errMsg = Scriptish_stringBundle("error.dependency.serverReturned") + ": "
-          + httpChannel.responseStatus + ": " + httpChannel.responseStatusText;
+          + responseStatus;
 
       if (dep instanceof ScriptIcon) {
         file.remove(false);
