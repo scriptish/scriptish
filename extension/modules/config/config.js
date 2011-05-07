@@ -171,7 +171,8 @@ Config.prototype = {
       }
       self.addExclude(excludes);
 
-      aCallback(fileModified);
+      // Return true so we create SCRIPTISH_CONFIG_JSON
+      aCallback(true);
     });
   },
 
