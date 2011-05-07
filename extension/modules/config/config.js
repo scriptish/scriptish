@@ -196,7 +196,7 @@ Config.prototype = {
     var self = this;
 
     function callback(fileModified) {
-      if (fileModified) this._save();
+      if (fileModified) self._save();
       aCallback();
     }
 
