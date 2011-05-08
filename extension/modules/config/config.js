@@ -260,6 +260,13 @@ Config.prototype = {
   },
 
   _save: function() {
+    var self = this;
+
+    if (this._isSaving)
+      return (this._pendingSave = true);
+
+    this._isSaving = true;
+
     // make sure that the configFile is SCRIPTISH_CONFIG_JSON
     (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON);
 
@@ -269,7 +276,14 @@ Config.prototype = {
     converter.charset = "UTF-8";
     NetUtil.asyncCopy(
         converter.convertToInputStream(JSON.stringify(this.toJSON())),
-        Scriptish_getWriteStream(this._configFile, true));
+        Scriptish_getWriteStream(this._configFile, true),
+        function() {
+          delete self["_isSaving"];
+          if (self._pendingSave) {
+            delete self["_pendingSave"];
+            self._save();
+          }
+        });
   },
 
   parse: function(source, uri, aUpdateScript) (
