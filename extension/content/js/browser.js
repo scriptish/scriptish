@@ -298,7 +298,11 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
     function testMatchURLs(script) {
       return urls.some(function(url) script.matchesURL(url));
     }
-    return config.getMatchingScripts(testMatchURLs);
+
+    return config.getMatchingScripts(testMatchURLs).sort(function(a,b) {
+      a = a.name.toLocaleLowerCase(), b = b.name.toLocaleLowerCase();
+      return a.localeCompare(b);
+    });
   }
 
   function appendScriptToPopup(script) {
