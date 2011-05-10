@@ -8,8 +8,8 @@ var script;
 window.addEventListener("load", function() {
   var scriptID = window.location.search.match(/[\?&]id=([^&,]+)/i);
   if (!scriptID) {
-    window.close();
-    throw new Error("Script ID is not defined!");
+    //window.close();
+    //throw new Error("Script ID is not defined!");
   }
 
   scriptID = scriptID[1];
