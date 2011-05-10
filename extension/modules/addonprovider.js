@@ -6,9 +6,9 @@ Components.utils.import("resource://scriptish/utils/Scriptish_notification.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const Scriptish_ScriptProvider = {
-  observe: function(aSubject, aTopic, aData) {
+  observe: function(aSubject, aTopic, aData) Scriptish.getConfig(function(config) {
     aData = JSON.parse(aData);
-    let script = Scriptish.config.getScriptById(aData.id);
+    let script = config.getScriptById(aData.id);
     switch(aTopic){
     case "scriptish-script-installed":
       AddonManagerPrivate.callInstallListeners(
@@ -51,7 +51,7 @@ const Scriptish_ScriptProvider = {
       AddonManagerPrivate.callAddonListeners("onUninstalled", script);
       break;
     }
-  },
+  }),
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
 };
 
@@ -59,11 +59,15 @@ const Scriptish_ScriptProvider = {
 
 AddonManagerPrivate.registerProvider({
   getAddonByID: function(aId, aCallback) {
-    aCallback(Scriptish.config.getScriptById(aId));
+    Scriptish.getConfig(function(config) {
+      aCallback(config.getScriptById(aId));
+    });
   },
   getAddonsByTypes: function(aTypes, aCallback) {
     if (aTypes && aTypes.indexOf("userscript") < 0) aCallback([]);
-    else aCallback(Scriptish.config.scripts);
+    else Scriptish.getConfig(function(config) {
+      aCallback(config.scripts);
+    });
   }
 });
 [

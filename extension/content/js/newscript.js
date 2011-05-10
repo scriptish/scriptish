@@ -41,28 +41,28 @@ function doInstall() {
   foStream.write(script, script.length);
   foStream.close();
 
-  var config = Scriptish.config;
+  Scriptish.getConfig(function(config) {
+    // create a script object with parsed metadata,
+    script = config.parse(script);
 
-  // create a script object with parsed metadata,
-  script = config.parse(script);
+    // make sure entered details will not ruin an existing file
+    if (config.installIsUpdate(script)) {
+      var overwrite = confirm(Scriptish_stringBundle("newscript.exists"));
+      if (!overwrite) return false;
+    }
 
-  // make sure entered details will not ruin an existing file
-  if (config.installIsUpdate(script)) {
-    var overwrite = confirm(Scriptish_stringBundle("newscript.exists"));
-    if (!overwrite) return false;
-  }
+    // finish making the script object ready to install
+    script.setDownloadedFile(tempFile);
 
-  // finish making the script object ready to install
-  script.setDownloadedFile(tempFile);
+    // install this script
+    config.install(script);
 
-  // install this script
-  config.install(script);
+    // and fire up the editor!
+    tools.Scriptish_openInEditor(script, window);
 
-  // and fire up the editor!
-  tools.Scriptish_openInEditor(script, window);
-
-  // persist namespace value
-  Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
+    // persist namespace value
+    Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
+  })
 
   return true;
 }

@@ -85,17 +85,6 @@ ScriptishService.prototype = {
   },
 
   get filename() filename,
-  _scriptFoldername: "scriptish_scripts",
-
-  _config: null,
-  get config() {
-    if (!this._config) {
-      var tools = {};
-      Cu.import("resource://scriptish/config/config.js", tools);
-      this._config = new tools.Config(this._scriptFoldername);
-    }
-    return this._config;
-  },
 
   innerWinDestroyed: function(aWinID) {
     let window = windows[aWinID];
@@ -133,7 +122,7 @@ ScriptishService.prototype = {
 
     // check if there are any modified scripts
     if (tools.Scriptish_prefRoot.getValue("enableScriptRefreshing"))
-      this.config.updateModifiedScripts(function(script) {
+      Scriptish.getConfig(function(config) config.updateModifiedScripts(function(script) {
         if (shouldNotRun()
             || !isScriptRunnable(script, href, safeWin === safeWin.top))
           return;
@@ -165,7 +154,7 @@ ScriptishService.prototype = {
           break;
         }
         inject();
-      });
+      }));
 
     // if the focused tab's window is loading, then attach menuCommander
     if (safeWin === gBrowser.selectedBrowser.contentWindow) {
@@ -176,40 +165,40 @@ ScriptishService.prototype = {
     }
 
     // find matching scripts
-    let scripts = this.initScripts(href, safeWin);
+    this.initScripts(href, safeWin, function(scripts) {
+      if (scripts["document-end"].length || scripts["document-idle"].length) {
+        safeWin.addEventListener("DOMContentLoaded", function() {
+          if (shouldNotRun()) return;
 
-    if (scripts["document-end"].length || scripts["document-idle"].length) {
-      safeWin.addEventListener("DOMContentLoaded", function() {
-        if (shouldNotRun()) return;
+          // inject @run-at document-idle scripts
+          if (scripts["document-idle"].length)
+            self.timer.setTimeout(function() {
+              if (shouldNotRun()) return;
+              self.injectScripts(
+                  scripts["document-idle"], href, currentInnerWindowID, safeWin, chromeWin);
+            }, 0);
 
-        // inject @run-at document-idle scripts
-        if (scripts["document-idle"].length)
-          self.timer.setTimeout(function() {
-            if (shouldNotRun()) return;
-            self.injectScripts(
-                scripts["document-idle"], href, currentInnerWindowID, safeWin, chromeWin);
-          }, 0);
+          // inject @run-at document-end scripts
+          self.injectScripts(scripts["document-end"], href, currentInnerWindowID, safeWin, chromeWin);
+        }, true);
+      }
 
-        // inject @run-at document-end scripts
-        self.injectScripts(scripts["document-end"], href, currentInnerWindowID, safeWin, chromeWin);
-      }, true);
-    }
+      if (scripts["window-load"].length) {
+        safeWin.addEventListener("load", function() {
+          if (shouldNotRun()) return;
+          // inject @run-at window-load scripts
+          self.injectScripts(scripts["window-load"], href, currentInnerWindowID, safeWin, chromeWin);
+        }, true);
+      }
 
-    if (scripts["window-load"].length) {
-      safeWin.addEventListener("load", function() {
-        if (shouldNotRun()) return;
-        // inject @run-at window-load scripts
-        self.injectScripts(scripts["window-load"], href, currentInnerWindowID, safeWin, chromeWin);
-      }, true);
-    }
+      // inject @run-at document-start scripts
+      self.injectScripts(scripts["document-start"], href, currentInnerWindowID, safeWin, chromeWin);
 
-    // inject @run-at document-start scripts
-    self.injectScripts(scripts["document-start"], href, currentInnerWindowID, safeWin, chromeWin);
-
-    windows[currentInnerWindowID].unloaders.push(function() {
-      winClosed = true;
-      delete windows[currentInnerWindowID];
-      self.docUnload(currentInnerWindowID, gmBrowserUI);
+      windows[currentInnerWindowID].unloaders.push(function() {
+        winClosed = true;
+        delete windows[currentInnerWindowID];
+        self.docUnload(currentInnerWindowID, gmBrowserUI);
+      });
     });
   },
 
@@ -274,7 +263,7 @@ ScriptishService.prototype = {
     return file.parent.equals(tmpDir) && file.leafName != "newscript.user.js";
   },
 
-  initScripts: function(url, wrappedContentWin) {
+  initScripts: function(url, wrappedContentWin, aCallback) {
     let scripts = {
       "document-start": [],
       "document-end": [],
@@ -283,12 +272,15 @@ ScriptishService.prototype = {
     };
 
     let isTopWin = wrappedContentWin === wrappedContentWin.top;
-    this.config.getMatchingScripts(function(script) {
-      let chk = isScriptRunnable(script, url, isTopWin);
-      if (chk) scripts[script.runAt].push(script);
-      return chk;
+    Scriptish.getConfig(function(config) {
+      config.getMatchingScripts(function(script) {
+        let chk = isScriptRunnable(script, url, isTopWin);
+        if (chk) scripts[script.runAt].push(script);
+        return chk;
+      });
+
+      aCallback(scripts);
     });
-    return scripts;
   },
 
   injectScripts: function(scripts, url, winID, wrappedContentWin, chromeWin) {

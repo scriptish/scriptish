@@ -13,22 +13,24 @@ window.addEventListener("load", function() {
   }
 
   scriptID = scriptID[1];
-  script = Scriptish.config.getScriptById(scriptID);
+  Scriptish.getConfig(function(config) {
+    script = config.getScriptById(scriptID);
 
-  let options = Scriptish_stringBundle("options");
-  let dialog = $("scriptish-script-options-dialog");
-  dialog.setAttribute("title", script.name + " - " + options);
-  dialog.setAttribute("ondialogaccept", "return doSave();");
-  $("header").setAttribute("description", options);
+    let options = Scriptish_stringBundle("options");
+    let dialog = $("scriptish-script-options-dialog");
+    dialog.setAttribute("title", script.name + " - " + options);
+    dialog.setAttribute("ondialogaccept", "return doSave();");
+    $("header").setAttribute("description", options);
 
-  $("includes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.includes"));
-  $("excludes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.excludes"));
-  $("includes").value = script.getUserIncStr();
-  $("excludes").value = script.getUserIncStr("exclude");
+    $("includes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.includes"));
+    $("excludes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.excludes"));
+    $("includes").value = script.getUserIncStr();
+    $("excludes").value = script.getUserIncStr("exclude");
 
-  let tmp = $("disableScriptIncludes");
-  tmp.setAttribute("label", Scriptish_stringBundle("scriptOptions.disableScriptIncludes"));
-  tmp.checked = script.includesDisabled;
+    let tmp = $("disableScriptIncludes");
+    tmp.setAttribute("label", Scriptish_stringBundle("scriptOptions.disableScriptIncludes"));
+    tmp.checked = script.includesDisabled;
+  });
 
   return true;
 }, false);

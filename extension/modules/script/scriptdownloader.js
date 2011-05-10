@@ -33,7 +33,7 @@ ScriptDownloader.prototype.startViewScript = function() {
 }
 ScriptDownloader.prototype.startUpdateScript = function(aScriptInstaller) {
   this.type = "update";
-  this.secure = Scriptish.config.updateSecurely;
+  this.secure = Scriptish.updateSecurely;
   this.scriptInstaller = aScriptInstaller;
   this.startDownload();
   return this;
@@ -68,74 +68,80 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
   if (this.contentWin) this.contentWin.location.href = this.uri_.spec;
 }
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
+  Scriptish_log("Scriptish ScriptDownloader.handleScriptDownloadComplete");
   let req = this.req_;
-  try {
-    // If loading from file, status might be zero on success
-    if (req.status != 200 && req.status != 0) {
-      Scriptish_alert(Scriptish_stringBundle("error.script.loading") + ":\n" +
-      req.status + ": " + req.statusText);
-      return;
-    }
+  let self = this;
 
-    if (this.secure) {
-      // make sure that the final URI is a https url
-      if ("https" != req.channel.URI.scheme)
-        return this.handleErr();
-
-      // make sure that the final URI's certificate is valid
-      try {
-        checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+  Scriptish.getConfig(function(config) {
+    try {
+      // If loading from file, status might be zero on success
+      if (req.status != 200 && req.status != 0) {
+        Scriptish_alert(Scriptish_stringBundle("error.script.loading") + ":\n" +
+        req.status + ": " + req.statusText);
+        return;
       }
-      catch (e) {
-        return this.handleErr();
-      }
-    }
 
-    if (this.scriptInstaller) {
-      // make sure that the new version is greater than the old version
-      var remoteVersion = Script.parseVersion(req.responseText);
-      if (!remoteVersion || Services.vc.compare(this.scriptInstaller._script.version, remoteVersion) >= 0)
-        return this.handleErr();
-    }
+      if (self.secure) {
+        // make sure that the final URI is a https url
+        if ("https" != req.channel.URI.scheme)
+          return self.handleErr();
 
-    var source = req.responseText;
-    this.script = Scriptish.config.parse(source, this.uri_);
-
-    var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
-    var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
-    file.append(base + ".user.js");
-    file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
-    this.tempFiles_.push(file);
-
-    var converter = Instances.suc;
-    converter.charset = "UTF-8";
-    source = converter.ConvertFromUnicode(source);
-
-    var ws = Scriptish_getWriteStream(file);
-    ws.write(source, source.length);
-    ws.close();
-
-    this.script.setDownloadedFile(file);
-
-    timeout(this.fetchDependencies.bind(this));
-
-    switch (this.type) {
-      case "install":
-        this._callback = function() {
-          this.showInstallDialog();
-          delete this._callback;
+        // make sure that the final URI's certificate is valid
+        try {
+          checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
         }
-        break;
-      case "view":
-        this.showScriptView();
-        break;
-    }
+        catch (e) {
+          return self.handleErr();
+        }
+      }
 
-  } catch (e) {
-    Scriptish_alert(Scriptish_stringBundle("error.script.installing") + ": " + e);
-    throw e;
-  }
+      if (self.scriptInstaller) {
+        // make sure that the new version is greater than the old version
+        var remoteVersion = Script.parseVersion(req.responseText);
+        if (!remoteVersion || Services.vc.compare(self.scriptInstaller._script.version, remoteVersion) >= 0)
+          return self.handleErr();
+      }
+
+      var source = req.responseText;
+      self.script = config.parse(source, self.uri_);
+
+      var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
+      var base = self.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
+      file.append(base + ".user.js");
+      file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
+      self.tempFiles_.push(file);
+
+      var converter = Instances.suc;
+      converter.charset = "UTF-8";
+      source = converter.ConvertFromUnicode(source);
+
+      var ws = Scriptish_getWriteStream(file);
+      ws.write(source, source.length);
+      ws.close();
+
+      self.script.setDownloadedFile(file);
+
+      timeout(self.fetchDependencies.bind(self));
+
+      switch (self.type) {
+        case "install":
+          self._callback = function() {
+            self.showInstallDialog();
+            delete self._callback;
+          }
+          break;
+        case "view":
+          self.showScriptView();
+          break;
+      }
+
+    } catch (e) {
+      Scriptish_alert(Scriptish_stringBundle("error.script.installing") + ": " + e);
+      throw e;
+    }
+  });
 }
+
 ScriptDownloader.prototype.fetchDependencies = function() {
   Scriptish_log("Fetching Dependencies");
 
@@ -324,7 +330,7 @@ ScriptDownloader.prototype.installScript = function() {
     this.scriptInstaller.changed("InstallEnded");
   } else if (this.dependenciesLoaded_) {
     var script = this.script;
-    Scriptish.config.install(script);
+    Scriptish.getConfig(function(config) config.install(script));
   } else {
     this.installOnCompletion_ = true;
   }

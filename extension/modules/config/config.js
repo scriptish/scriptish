@@ -1,6 +1,7 @@
 var EXPORTED_SYMBOLS = ["Config"];
 
-const SCRIPTISH_CONFIG = "scriptish-config.xml";
+const SCRIPTISH_CONFIG_XML = "scriptish-config.xml";
+const SCRIPTISH_CONFIG_JSON = "scriptish-config.json";
 const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 
 (function(inc) {
@@ -15,31 +16,16 @@ inc("resource://scriptish/utils/Scriptish_notification.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
-inc("resource://scriptish/third-party/Timer.js");
 inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
 
 function Config(aBaseDir) {
   var self = this;
-  this.timer = new Timer();
   this._observers = [];
-  this._saveTimer = null;
   this._excludes = [];
   this._excludeRegExps = [];
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
-
-  let configFile = this._scriptDir;
-  configFile.append(SCRIPTISH_CONFIG);
-  if (!configFile.exists()) {
-    (configFile = this._scriptDir).append("config.xml");
-    if (!configFile.exists())
-        (configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
-  }
-
-  this._configFile = configFile;
-
-  this._updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
 
   this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
   this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
@@ -48,8 +34,6 @@ function Config(aBaseDir) {
   (this._blocklistFile = this._scriptDir).append(SCRIPTISH_BLOCKLIST);
 
   this._initScriptDir();
-  this._load();
-  (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG);
 
   [
     "scriptish-script-installed",
@@ -134,9 +118,12 @@ Config.prototype = {
       let file = self._blocklistFile;
 
       // write blocklist
-      var BLStream = Scriptish_getWriteStream(file);
-      BLStream.write(json, json.length);
-      BLStream.close();
+      let converter = Instances.suc;
+      converter.charset = "UTF-8";
+      NetUtil.asyncCopy(
+          converter.convertToInputStream(json),
+          Scriptish_getWriteStream(file, true));
+
       Scriptish_log("Updated Scriptish blocklist " + SCRIPTISH_BLOCKLIST, true);
 
       self._blocklist = blocklist;
@@ -148,42 +135,87 @@ Config.prototype = {
   },
 
   _loadBlocklist: function() {
-    if (this._blocklistFile.exists()) {
-      let blockListContents = Scriptish_getContents(this._blocklistFile);
-      let blocklist = Instances.json.decode(blockListContents);
-      this._blocklist = blocklist;
-      this._blocklistHash = Scriptish_cryptoHash(blockListContents);
+    var file = this._blocklistFile;
+    if (file.exists()) {
+      let self = this;
+      Scriptish_getContents(file, 0, function(str) {
+        self._blocklist = Instances.json.decode(str);
+        self._blocklistHash = Scriptish_cryptoHash(str);
 
-      // block scripts
-      this._blockScripts();
+        // block scripts
+        self._blockScripts();
+      });
     }
   },
 
-  _load: function() {
-    // load config
+  _loadXML: function(aFile, aCallback) {
+    Scriptish_log("Scriptish Config._loadXML");
     var self = this;
-    var configContents = Scriptish_getContents(this._configFile);
-    var doc = Instances.dp.parseFromString(configContents, "text/xml");
-    var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
-    var fileModified = false;
-    let excludes = [];
 
-    for (var node; node = nodes.iterateNext();) {
-      switch (node.nodeName) {
-      case "Script":
-        fileModified = Script.load(this, node) || fileModified;
-        break;
-      case "Exclude":
-        excludes.push(node.firstChild.nodeValue.trim());
-        break;
+    Scriptish_getContents(aFile, 0, function(str) {
+      if (!str) return;
+      var doc = Instances.dp.parseFromString(str, "text/xml");
+      var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
+      var fileModified = false;
+      let excludes = [];
+
+      for (var node; node = nodes.iterateNext();) {
+        switch (node.nodeName) {
+        case "Script":
+          fileModified = Script.loadFromXML(self, node) || fileModified;
+          break;
+        case "Exclude":
+          excludes.push(node.firstChild.nodeValue.trim());
+          break;
+        }
+      }
+      self.addExclude(excludes);
+
+      // Return true so we create SCRIPTISH_CONFIG_JSON
+      aCallback(true);
+    });
+  },
+
+  _loadJSON: function(aFile, aCallback) {
+    Scriptish_log("Scriptish Config._loadJSON");
+    var self = this;
+
+    Scriptish_getContents(aFile, 0, function(str) {
+      if (!str) return;
+      var config = JSON.parse(str);
+
+      config.scripts.forEach(function(i) Script.loadFromJSON(self, i));
+      config.excludes.forEach(function(i) self.addExclude(i));
+
+      aCallback(false);
+    });
+  },
+
+  load: function(aCallback) {
+    Scriptish_log("Scriptish Config.load");
+    var self = this;
+
+    function callback(fileModified) {
+      if (fileModified) self._save();
+      aCallback();
+    }
+
+    let (configFile = this._scriptDir) {
+      configFile.append(SCRIPTISH_CONFIG_JSON);
+
+      if (configFile.exists()) {
+        this._loadJSON(configFile, callback);
+      } else {
+        (configFile = this._scriptDir).append(SCRIPTISH_CONFIG_XML);
+
+        if (!configFile.exists())
+          (configFile = this._scriptDir).append("config.xml");
+
+        // load xml config
+        if (configFile.exists()) this._loadXML(configFile, callback);
+        else aCallback();
       }
     }
-    this.addExclude(excludes);
-
-    // Watch for the required secure updates pref being modified
-    Scriptish_prefRoot.watch("update.requireSecured", function() {
-      self._updateSecurely = Scriptish_prefRoot.getValue("update.requireSecured");
-    });
 
     // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
@@ -215,52 +247,43 @@ Config.prototype = {
           timeout(script.updateUSOData.bind(script), i * 100);
       }
     }
-
-    // the delay b4 save here is very important now that config.xml is used when
-    // scriptish-config.xml DNE
-    if (fileModified) this._save();
   },
+
+  toJSON: function() ({
+    excludes: this.excludes,
+    scripts: this.scripts.map(function(script) script.toJSON())
+  }),
 
   _blockScripts: function() {
     var scripts = this._scripts;
     for (var i = scripts.length - 1; ~i; i--) scripts[i].doBlockCheck();
   },
 
-  _save: function(saveNow) {
-    // If we have not explicitly been told to save now, then defer execution
-    // via a timer, to avoid locking up the UI.
-    if (!saveNow) {
-      // Reduce work in the case of many changes near to each other in time.
-      if (this._saveTimer) this.timer.clearTimeout(this._saveTimer);
-      this._saveTimer =
-          this.timer.setTimeout(this._save.bind(this, true), 250);
-      return;
-    }
-    delete this["_saveTimer"];
+  _save: function() {
+    var self = this;
 
-    var doc = Instances.dp.parseFromString("<UserScriptConfig/>", "text/xml");
-    var scripts = this._scripts;
-    var len = scripts.length;
-    var firstChild = doc.firstChild;
-    let nt = "\n\t";
-    function addNode(str, node) firstChild.appendChild(doc.createTextNode(str))
-        && node && firstChild.appendChild(node);
+    if (this._isSaving)
+      return (this._pendingSave = true);
 
-    // add script info
-    for (var i = 0, script; script = scripts[i]; i++)
-      addNode(nt, script.createXMLNode(doc));
+    this._isSaving = true;
 
-    // add global excludes info
-    for (let [, exclude] in Iterator(this.excludes))
-      addNode(nt, doc.createElement("Exclude"))
-          .appendChild(doc.createTextNode(exclude));
+    // make sure that the configFile is SCRIPTISH_CONFIG_JSON
+    (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON);
 
-    addNode("\n");
+    Scriptish_log(Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG_JSON, true);
 
-    Scriptish_log(Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG, true);
-    var configStream = Scriptish_getWriteStream(this._configFile);
-    Instances.ds.serializeToStream(doc, configStream, "utf-8");
-    configStream.close();
+    let converter = Instances.suc;
+    converter.charset = "UTF-8";
+    NetUtil.asyncCopy(
+        converter.convertToInputStream(JSON.stringify(this.toJSON())),
+        Scriptish_getWriteStream(this._configFile, true),
+        function() {
+          delete self["_isSaving"];
+          if (self._pendingSave) {
+            delete self["_pendingSave"];
+            self._save();
+          }
+        });
   },
 
   parse: function(source, uri, aUpdateScript) (
@@ -319,8 +342,6 @@ Config.prototype = {
     }
   },
 
-  get updateSecurely() this._updateSecurely,
-
   get excludes() this._excludes.concat(),
   set excludes(excludes) {
     this._excludes = [];
@@ -350,6 +371,7 @@ Config.prototype = {
   },
 
   updateModifiedScripts: function(scriptInjector) {
+    var self = this;
     let hasChanged = false;
     for (let [, script] in Iterator(this._scripts)) {
       if (script.delayInjection) {
@@ -357,12 +379,17 @@ Config.prototype = {
         continue;
       }
       if (!script.isModified()) continue;
+
       hasChanged = true;
-      let parsedScript = this.parse(
-          script.textContent,
-          script._downloadURL && NetUtil.newURI(script._downloadURL), script);
-      script.updateFromNewScript(parsedScript, scriptInjector);
+
+      script.getTextContent(function(content) {
+        let parsedScript = self.parse(
+            content,
+            script._downloadURL && NetUtil.newURI(script._downloadURL), script);
+        script.updateFromNewScript(parsedScript, scriptInjector);
+      });
     }
+
     if (hasChanged) this._save();
   },
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])

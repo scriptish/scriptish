@@ -74,7 +74,9 @@ window.addEventListener("load", function() {
     let de = document.documentElement;
     if ("addons://list/userscript" == gViewController.currentViewId) {
       de.className += ' scriptish';
-      $("scriptish-list-empty").collapsed = !!Scriptish.config.scripts.length;
+      Scriptish.getConfig(function(config) {
+        $("scriptish-list-empty").collapsed = !!config.scripts.length;
+      });
     } else {
       de.className = de.className.replace(/ scriptish/g, '');
       $("scriptish-list-empty").collapsed = true;
@@ -98,7 +100,7 @@ window.addEventListener("load", function() {
   window.addEventListener("unload", function() {
     if (needToRemoveObserver)
       Services.obs.removeObserver(installObserver, "scriptish-script-installed");
-    Scriptish.config.uninstallScripts();
+    Scriptish.getConfig(function(config) config.uninstallScripts());
   }, false);
 }, false);
 
