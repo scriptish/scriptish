@@ -14,7 +14,7 @@ overlay    chrome://mozapps/content/extensions/extensions.xul chrome://scriptish
 
 overlay    chrome://scriptish/content/install.xul chrome://scriptish/content/closewindow.xul
 overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/closewindow.xul
-overlay    chrome://scriptish/content/scripts-options.xul chrome://scriptish/content/closewindow.xul
+overlay    chrome://scriptish/content/script-options.xul chrome://scriptish/content/closewindow.xul
 overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/closewindow.xul
 
 locale     scriptish  en-US  locale/en-US/
