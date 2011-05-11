@@ -68,7 +68,7 @@ ScriptishService.prototype = {
         this.innerWinDestroyed(aSubject.QueryInterface(Components.interfaces.nsISupportsPRUint64).data);
         break;
       case "install-userscript":
-        let win = Scriptish.getMostRecentWindow();
+        let win = Scriptish.getMostRecentWindow("navigator:browser");
         if (win) win.Scriptish_BrowserUI.installCurrentScript();
         break;
       case "scriptish-enabled":
