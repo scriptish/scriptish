@@ -131,13 +131,6 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     return getStorage().listValues.apply(getStorage(), arguments);
   }
 
-  this.GM_setClipboard = function GM_setClipboard() {
-    if (!GM_apiLeakCheck("GM_setClipboard")) return;
-    var tools = {};
-    Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
-    tools.GM_setClipboard.apply(null, arguments);
-  }
-
   this.GM_getResourceURL = function GM_getResourceURL() {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
     return getResources().getResourceURL.apply(getResources(), arguments)
@@ -251,6 +244,14 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 
   this.GM_updatingEnabled = true;
 }
+
+GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
+  if (!GM_apiLeakCheck("GM_setClipboard")) return;
+  var tools = {};
+  Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
+  tools.GM_setClipboard.apply(null, arguments);
+}
+
 
 function getWindowForBrowser(browser) browser.docShell
     .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
