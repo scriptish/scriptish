@@ -382,11 +382,12 @@ Config.prototype = {
 
       hasChanged = true;
 
-      script.getTextContent(function(content) {
+      let theScript = script;
+      theScript.getTextContent(function(content) {
         let parsedScript = self.parse(
             content,
-            script._downloadURL && NetUtil.newURI(script._downloadURL), script);
-        script.updateFromNewScript(parsedScript, scriptInjector);
+            theScript._downloadURL && NetUtil.newURI(theScript._downloadURL), theScript);
+        theScript.updateFromNewScript(parsedScript, scriptInjector);
       });
     }
 
