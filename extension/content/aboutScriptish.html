@@ -34,6 +34,10 @@
       border-radius: 15px;
     }
 
+    #test {
+      display: none;
+    }
+
     .twoCol { -moz-column-count: 2; }
   </style>
 </head>
@@ -127,6 +131,23 @@
         </div>
       </section>
     </div>
+    <div id="test">
+      <section>
+        <header class="secondary">
+          <h2>Testing</h2>
+        </header>
+        <p>There are currently no tests to run.</p>
+      </section>
+    </div>
   </div> <!--! end of #container -->
+
+  <script type="text/javascript">
+    function $(aID) document.getElementById(aID);
+    var doTest = window.location.href.split("?")[1] == "test";
+    if (doTest) {
+      $("main").style.display = "none";
+      $("test").style.display = "inherit";
+    }
+  </script>
 </body>
 </html>
