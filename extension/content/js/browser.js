@@ -146,6 +146,16 @@ Scriptish_BrowserUI.unregisterMenuCommand = function(commandUUID, aWinID) {
   return commander.unregisterMenuCommand(commandUUID);
 }
 
+Scriptish_BrowserUI.enableMenuCommand = function(commandUUID, aWinID) {
+  var commander = this.getCommander(aWinID);
+  return commander.toggleMenuCommand(commandUUID, true);
+}
+
+Scriptish_BrowserUI.disableMenuCommand = function(commandUUID, aWinID) {
+  var commander = this.getCommander(aWinID);
+  return commander.toggleMenuCommand(commandUUID, false);
+}
+
 
 /**
  * Shows the install banner across the top of the tab that is displayed when

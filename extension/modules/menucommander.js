@@ -103,6 +103,45 @@ Scriptish_MenuCommander.prototype.unregisterMenuCommand = function(commandUUID) 
   return removedSomething;
 }
 
+Scriptish_MenuCommander.prototype.toggleMenuCommand =
+    function(commandUUID, aEnable) {
+  var found = false;
+
+  // enable/disable key
+  var keys = this.keys;
+  for (var i = keys.length - 1; ~i; i--) {
+    if (commandUUID == keys[i].getAttribute("uuid")) {
+      keys[i].setAttribute("disabled", !aEnable);
+      found = true;
+      break;
+    }
+  }
+
+  // enable/disable tools menu menu item
+  var toolsMenuItems = this.toolsMenuItems;
+  for (var i = toolsMenuItems.length - 1; ~i; i--) {
+    if (commandUUID == toolsMenuItems[i].getAttribute("uuid")) {
+      toolsMenuItems[i].setAttribute("disabled", !aEnable);
+      found = true;
+      break;
+    }
+  }
+
+  // enable/disable toolbar button menu item
+  var menuPopup = this.getTBMenu();
+  if (menuPopup) {
+    let tbMenuItems = this.tbMenuItems;
+    for (var i = tbMenuItems.length - 1; ~i; i--) {
+      if (commandUUID == tbMenuItems[i].getAttribute("uuid")) {
+        tbMenuItems[i].setAttribute("disabled", !aEnable);
+        found = true;
+        break;
+      }
+    }
+  }
+  return found;
+}
+
 Scriptish_MenuCommander.prototype.attach = function() {
   Scriptish_log("> Scriptish_MenuCommander.attach");
 
