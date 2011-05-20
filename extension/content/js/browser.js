@@ -143,17 +143,17 @@ Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
 
 Scriptish_BrowserUI.unregisterMenuCommand = function(commandUUID, aWinID) {
   var commander = this.getCommander(aWinID);
-  return commander.unregisterMenuCommand(commandUUID);
+  return commander.modifyMenuCommand(commandUUID, "unregister");
 }
 
 Scriptish_BrowserUI.enableMenuCommand = function(commandUUID, aWinID) {
   var commander = this.getCommander(aWinID);
-  return commander.toggleMenuCommand(commandUUID, true);
+  return commander.modifyMenuCommand(commandUUID, "enable");
 }
 
 Scriptish_BrowserUI.disableMenuCommand = function(commandUUID, aWinID) {
   var commander = this.getCommander(aWinID);
-  return commander.toggleMenuCommand(commandUUID, false);
+  return commander.modifyMenuCommand(commandUUID, "disable");
 }
 
 

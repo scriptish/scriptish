@@ -60,85 +60,77 @@ Scriptish_MenuCommander.prototype.registerMenuCommand =
   return commandUUID;
 }
 
-Scriptish_MenuCommander.prototype.unregisterMenuCommand = function(commandUUID) {
-  var removedSomething = false;
-
-  // remove key
-  var keys = this.keys;
-  for (var i = keys.length - 1; ~i; i--) {
-    if (commandUUID == keys[i].getAttribute("uuid")) {
-      this.keyset.removeChild(keys[i]);
-      keys.splice(i, 1);
-      removedSomething = true;
-      break;
-    }
-  }
-
-  // remove tools menu menu item
-  var toolsMenuItems = this.toolsMenuItems;
-  for (var i = toolsMenuItems.length - 1; ~i; i--) {
-    if (commandUUID == toolsMenuItems[i].getAttribute("uuid")) {
-      this.toolsMenuPopup.removeChild(toolsMenuItems[i]);
-      toolsMenuItems.splice(i, 1);
-      removedSomething = true;
-      break;
-    }
-  }
-
-  // remove toolbar button menu item
-  var menuPopup = this.getTBMenu();
-  if (menuPopup) {
-    let tbMenuItems = this.tbMenuItems;
-    for (var i = tbMenuItems.length - 1; ~i; i--) {
-      if (commandUUID == tbMenuItems[i].getAttribute("uuid")) {
-        try {menuPopup.removeChild(tbMenuItems[i]);}
-        catch (e) {} // TB was added but not opened before the user changed pages
-        tbMenuItems.splice(i, 1);
-        removedSomething = true;
-        break;
-      }
-    }
-  }
-
-  return removedSomething;
-}
-
-Scriptish_MenuCommander.prototype.toggleMenuCommand =
-    function(commandUUID, aEnable) {
+Scriptish_MenuCommander.prototype.modifyMenuCommand =
+    function(commandUUID, aAction) {
   var found = false;
 
-  // enable/disable key
+  // modify key
   var keys = this.keys;
   for (var i = keys.length - 1; ~i; i--) {
     if (commandUUID == keys[i].getAttribute("uuid")) {
-      keys[i].setAttribute("disabled", !aEnable);
+      switch (aAction) {
+        case "unregister":
+          this.keyset.removeChild(keys[i]);
+          keys.splice(i, 1);
+          break;
+        case "enable":
+        case "disable":
+          keys[i].setAttribute("disabled", aAction == "disable");
+          break;
+        default:
+          throw new Error("Invalid menu command action");
+      }
       found = true;
       break;
     }
   }
 
-  // enable/disable tools menu menu item
+  // modify tools menu menu item
   var toolsMenuItems = this.toolsMenuItems;
   for (var i = toolsMenuItems.length - 1; ~i; i--) {
     if (commandUUID == toolsMenuItems[i].getAttribute("uuid")) {
-      toolsMenuItems[i].setAttribute("disabled", !aEnable);
+      switch (aAction) {
+        case "unregister":
+          this.toolsMenuPopup.removeChild(toolsMenuItems[i]);
+          toolsMenuItems.splice(i, 1);
+          break;
+        case "enable":
+        case "disable":
+          toolsMenuItems[i].setAttribute("disabled", aAction == "disable");
+          break;
+        default:
+          throw new Error("Invalid menu command action");
+      }
       found = true;
       break;
     }
   }
 
-  // enable/disable toolbar button menu item
+  // modify toolbar button menu item
   var menuPopup = this.getTBMenu();
   if (menuPopup) {
     let tbMenuItems = this.tbMenuItems;
     for (var i = tbMenuItems.length - 1; ~i; i--) {
       if (commandUUID == tbMenuItems[i].getAttribute("uuid")) {
-        tbMenuItems[i].setAttribute("disabled", !aEnable);
+        switch (aAction) {
+          case "unregister":
+            try {menuPopup.removeChild(tbMenuItems[i]);}
+            catch (e) {} // TB was added but not opened before the user changed pages
+            tbMenuItems.splice(i, 1);
+            break;
+          case "enable":
+          case "disable":
+            tbMenuItems[i].setAttribute("disabled", aAction == "disable");
+            break;
+          default:
+            throw new Error("Invalid menu command action");
+        }
         found = true;
         break;
       }
     }
   }
+
   return found;
 }
 
