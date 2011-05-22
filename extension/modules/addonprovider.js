@@ -55,7 +55,15 @@ const Scriptish_ScriptProvider = {
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
 };
 
-
+var types = null;
+if (AddonManagerPrivate.AddonType) {
+  types = [new AddonManagerPrivate.AddonType(
+      "userscript",
+      "chrome://scriptish/locale/scriptish.properties",
+      "userscripts",
+      AddonManagerPrivate.VIEW_TYPE_LIST,
+      7000)];
+}
 
 AddonManagerPrivate.registerProvider({
   getAddonByID: function(aId, aCallback) {
@@ -69,7 +77,7 @@ AddonManagerPrivate.registerProvider({
       aCallback(config.scripts);
     });
   }
-});
+}, types);
 [
   "scriptish-script-installed",
   "scriptish-script-edit-enabling",
