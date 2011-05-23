@@ -61,7 +61,7 @@ if (AddonManagerPrivate.AddonType) {
       "userscript",
       "chrome://scriptish/locale/scriptish.properties",
       "userscripts",
-      AddonManagerPrivate.VIEW_TYPE_LIST,
+      AddonManager.VIEW_TYPE_LIST,
       7000)];
 }
 
