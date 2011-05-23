@@ -209,7 +209,8 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
   }
 
   if (aSafeWin !== aSafeWin.top) {
-    this.GM_unregisterMenuCommand = this.GM_registerMenuCommand = DOLITTLE;
+    this.GM_unregisterMenuCommand = this.GM_registerMenuCommand
+        = this.GM_disableMenuCommand = this.GM_enableMenuCommand = DOLITTLE;
   } else {
     this.GM_registerMenuCommand = function GM_registerMenuCommand(
         aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
@@ -230,6 +231,18 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
       if (!~i) return false; // check the uuid is for a cmd made by the same script
       menuCmdIDs.splice(i, 1);
       return Scriptish_BrowserUI.unregisterMenuCommand(aUUID, windowID);
+    }
+
+    this.GM_enableMenuCommand = function GM_enableMenuCommand(aUUID) {
+      var i = menuCmdIDs.indexOf(aUUID);
+      if (!~i) return false; // check the uuid is for a cmd made by the same script
+      return Scriptish_BrowserUI.enableMenuCommand(aUUID, windowID);
+    }
+
+    this.GM_disableMenuCommand = function GM_disableMenuCommand(aUUID) {
+      var i = menuCmdIDs.indexOf(aUUID);
+      if (!~i) return false; // check the uuid is for a cmd made by the same script
+      return Scriptish_BrowserUI.disableMenuCommand(aUUID, windowID);
     }
   }
 
