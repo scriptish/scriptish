@@ -40,6 +40,19 @@
 
     .twoCol { -moz-column-count: 2; }
   </style>
+  <link rel='stylesheet' href='chrome://scriptish/content/test/qunit.css' type='text/css' media='screen' />
+  <script type="text/javascript" src="chrome://scriptish/content/test/jquery-1.6.1.min.js"></script>
+  <script type="text/javascript" src="chrome://scriptish/content/test/qunit.js"></script>
+  <script type="text/javascript" src="chrome://scriptish/content/test/runTests.js"></script>
+  <script type="text/javascript">
+    $(function() {
+      var doTest = window.location.href.split("?")[1] == "test";
+      if (!doTest) return;
+      $("#main").hide();
+      $("#test").show();
+      runTests();
+    });
+  </script>
 </head>
 
 <body>
@@ -134,20 +147,13 @@
     <div id="test">
       <section>
         <header class="secondary">
-          <h2>Testing</h2>
+          <h2 id="qunit-header2">Testing Scriptish</h2>
+          <h3 id="qunit-banner"></h3>
+          <h4 id="qunit-userAgent"></h4>
         </header>
-        <p>There are currently no tests to run.</p>
+        <ol id="qunit-tests"></ol>
       </section>
     </div>
   </div> <!--! end of #container -->
-
-  <script type="text/javascript">
-    function $(aID) document.getElementById(aID);
-    var doTest = window.location.href.split("?")[1] == "test";
-    if (doTest) {
-      $("main").style.display = "none";
-      $("test").style.display = "inherit";
-    }
-  </script>
 </body>
 </html>
