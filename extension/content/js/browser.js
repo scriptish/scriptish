@@ -130,7 +130,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
 
-  // register for notifications from scriptish-service about ui type things
+  // Check if Scriptish has been updated/installed
   gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 1000);
 }
 
