@@ -2,6 +2,9 @@ component {ca39e060-88ab-11df-a4ee-0800200c9a66} components/scriptish.js
 contract  @scriptish.erikvold.com/scriptish-service;1 {ca39e060-88ab-11df-a4ee-0800200c9a66}
 category  content-policy @scriptish.erikvold.com/scriptish-service;1 @scriptish.erikvold.com/scriptish-service;1
 
+component {5f28a810-8094-11e0-b278-0800200c9a66} components/aboutScriptish.js
+contract @mozilla.org/network/protocol/about;1?what=scriptish {5f28a810-8094-11e0-b278-0800200c9a66}
+
 content    scriptish    content/
 resource   scriptish    modules/
 skin       scriptish    classic/1.0 skin/
