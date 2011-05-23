@@ -1,4 +1,4 @@
-#category-userscripts > .category-icon{
+#category-userscript > .category-icon {
   list-style-image: url("chrome://scriptish/skin/third-party/uso_medium.png");
 }
 .addon[type="userscript"] .control-container {

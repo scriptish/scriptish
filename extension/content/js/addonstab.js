@@ -62,8 +62,13 @@ window.addEventListener("load", function() {
     }
   })();
 
-  $("category-userscripts").setAttribute(
-      "name", Scriptish_stringBundle("userscripts"));
+  var category = $("category-scriptish");
+  if (AddonManagerPrivate.AddonType) {
+    category.parentNode.removeChild(category);
+  } else {
+    category.setAttribute("id", "category-userscript");
+    category.setAttribute("name", Scriptish_stringBundle("userscripts"));
+  }
 
   $("scriptish-get-scripts-btn").addEventListener("command", function() {
     var gBrowser = Services.wm.getMostRecentWindow("navigator:browser").gBrowser;
