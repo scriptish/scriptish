@@ -1,17 +1,22 @@
-$(function() {
+document.addEventListener("DOMContentLoaded", DOMContentLoaded, false);
+function DOMContentLoaded() {
+  document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+
+  function $(aID) document.getElementById(aID);
+
   if (window.location.href.split("?")[1] == "test") {
     // Run tests
     var include = function(aSrc, aCallback) {
       var script = document.createElement("script");
       script.src = aSrc;
       script.addEventListener("load", aCallback, false);
-      $("head")[0].appendChild(script);
+      document.getElementsByTagName("head")[0].appendChild(script);
     }
 
     include("test/qunit.js", function() {
       include("test/runTests.js", function() {
-        $("#main").hide();
-        $("#test").show();
+        $("main").style.display = "none";
+        $("test").style.display = "inherit";
         runTests();
       });
     });
@@ -23,20 +28,23 @@ $(function() {
   Components.utils.import("resource://gre/modules/AddonManager.jsm", tools);
 
   var addPerson = function(aTarget, aPerson) {
+    var li = document.createElement("li");
     var person = aPerson.name.split(/; +/);
+    li.innerHTML = person[0];
     if (person[1]) {
-      person = person[0] + " &mdash; "
-          + "<a href='" + person[1] + "'>"
-          + person[1].replace(/^mailto:/i, "") + "</a>";
+      var a = document.createElement("a");
+      a.innerHTML = person[1].replace(/^mailto:/i, "");
+      a.setAttribute("href", person[1]);
+      li.innerHTML += " &mdash; ";
+      li.appendChild(a);
     }
-    aTarget.append("<li>" + person + "</li>");
+    aTarget.appendChild(li);
   }
 
   tools.AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
-    var $contlist = $("#contlist");
-    var $translist = $("#translist");
-
-    $.each(aAddon.contributors, function(i, val) addPerson($contlist, val));
-    $.each(aAddon.translators, function(i, val) addPerson($translist, val));
+    var contlist = $("contlist");
+    var translist = $("translist");
+    aAddon.contributors.forEach(function(val) addPerson(contlist, val));
+    aAddon.translators.forEach(function(val) addPerson(translist, val));
   });
-});
+}
