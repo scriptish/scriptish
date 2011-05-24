@@ -7,15 +7,7 @@
   <script type="text/javascript" src="chrome://scriptish/content/test/jquery-1.6.1.min.js"></script>
   <script type="text/javascript" src="chrome://scriptish/content/test/qunit.js"></script>
   <script type="text/javascript" src="chrome://scriptish/content/test/runTests.js"></script>
-  <script type="text/javascript">
-    $(function() {
-      var doTest = window.location.href.split("?")[1] == "test";
-      if (!doTest) return;
-      $("#main").hide();
-      $("#test").show();
-      runTests();
-    });
-  </script>
+  <script src="chrome://scriptish/content/js/aboutScriptish.js"></script>
 </head>
 
 <body>
