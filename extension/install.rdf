@@ -35,7 +35,7 @@
     <em:contributor>Greg Parris; http://phob.net/</em:contributor>
     <em:contributor>Hisateru Tanaka</em:contributor>
     <em:contributor>Jeremy Dunck; http://dunck.us/anabasis/</em:contributor>
-    <em:contributor>Jesper Kristensen; &lt;mail&#64;jesperkristensen.dk&gt;</em:contributor>
+    <em:contributor>Jesper Kristensen; mailto:mail@jesperkristensen.dk</em:contributor>
     <em:contributor>Johan Sundström; http://ecmanaut.blogspot.com/</em:contributor>
     <em:contributor>JP Sugarbroad</em:contributor>
     <em:contributor>Juan Pablo Guereca Alonso</em:contributor>
@@ -50,12 +50,12 @@
     <em:contributor>Pak Kei (logo); http://arkidect.com/</em:contributor>
     <em:contributor>Sergio Abreu; http://sitedosergio.sitesbr.net/</em:contributor>
     <em:contributor>Slowpoke</em:contributor>
-    <em:contributor>Tommi Rautava/</em:contributor>
+    <em:contributor>Tommi Rautava</em:contributor>
     <em:contributor>Nils Maier</em:contributor>
-    <em:contributor>Melih Bilgil; http://picol.org</em:contributor>
+    <em:contributor>Melih Bilgil; http://picol.org/</em:contributor>
     <em:contributor>John J. Barton</em:contributor>
 
-    <em:translator>nishikawasasaki(kohsei yamamoto)</em:translator>
+    <em:translator>nishikawasasaki (kohsei yamamoto)</em:translator>
 
     <em:updateURL>http://github.com/downloads/erikvold/scriptish/update.rdf</em:updateURL>
     <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDjEA/hqcsMgPctoWvqJFfjtNcQbfBi1uP3zoWR3PPMRSXnpBJv/5Kb5lJD9HJ+963CFQ3oFvkgO9+oEWisiKBjxhx94Bynl0Ym2sZ1DdEzTsH9kV4HGFLjeYTix5WkQqdoswyM32ebtDSYrFbSqxpBrgHwVLELfFYM1qZsnWpJKwIDAQAB</em:updateKey>
