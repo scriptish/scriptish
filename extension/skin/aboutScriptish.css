@@ -1,4 +1,7 @@
-body { background-color: #333; font-family: Arial, Helvetica, sans-serif; }
+body {
+  background-color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+}
 
 h1, h2, h3 {
   margin: 0;
@@ -23,7 +26,7 @@ a { color: #00f; text-decoration: none; }
 a:hover { color: #09f; }
 
 #container {
-  margin: 0 auto;
+  margin: 2em auto 0;
   padding: 10px;
   width: 70%;
   background-color: #fff;
