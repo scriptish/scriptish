@@ -1,5 +1,4 @@
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/constants.js");
 
 function AboutScriptish() {}
 AboutScriptish.prototype = {
@@ -8,9 +7,7 @@ AboutScriptish.prototype = {
   classID: Components.ID("{5f28a810-8094-11e0-b278-0800200c9a66}"),
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIAboutModule]),
 
-  getURIFlags: function(aURI) {
-    return Ci.nsIAboutModule.ALLOW_SCRIPT;
-  },
+  getURIFlags: function() Ci.nsIAboutModule.ALLOW_SCRIPT,
 
   newChannel: function(aURI) {
     let channel = Services.io.newChannel(
