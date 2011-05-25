@@ -12,7 +12,6 @@ inc("resource://scriptish/scriptish.js");
 inc("resource://scriptish/utils/Scriptish_getContents.js");
 inc("resource://scriptish/utils/Scriptish_getWriteStream.js");
 inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
-inc("resource://scriptish/utils/Scriptish_notification.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
