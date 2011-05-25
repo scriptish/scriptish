@@ -13,7 +13,9 @@ fi
 XPI="scriptish-$VER.xpi"
 
 # Copy base structure to a temporary build directory and change to it
-echo "Creating working directory ..."
+if [ "test" != "$1" ]; then
+  echo "Creating working directory ..."
+fi
 rm -rf build
 mkdir build
 cp LICENSE.txt build/
@@ -35,14 +37,18 @@ fi
 (sed -e 's/<!--.*//g' install.rdf > install.rdf.$$ &&
  mv install.rdf.$$ install.rdf)
 
-echo "Cleaning up unwanted files ..."
-find . -depth -name '*~' -exec rm -rf "{}" \;
-find . -depth -name '#*' -exec rm -rf "{}" \;
-find . -depth -name '.DS_Store' -exec rm "{}" \;
+if [ "test" != "$1" ]; then
+  echo "Cleaning up unwanted files ..."
+  find . -depth -name '*~' -exec rm -rf "{}" \;
+  find . -depth -name '#*' -exec rm -rf "{}" \;
+  find . -depth -name '.DS_Store' -exec rm "{}" \;
+fi
 
 echo "Creating $XPI ..."
 zip -qr9XD "../$XPI" *
 
-echo "Cleaning up temporary files ..."
+if [ "test" != "$1" ]; then
+  echo "Cleaning up temporary files ..."
+fi
 cd ..
 rm -rf build
