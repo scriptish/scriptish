@@ -1,5 +1,3 @@
-Cu.import("resource://scriptish/constants.js");
-
 function runTests() {
   var tools = {};
 

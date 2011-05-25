@@ -1,7 +1,10 @@
-const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
+
 function $(aID) document.getElementById(aID);
 
 (function() {
+  // Show about:scriptish?test
   if (window.location.href.split("?")[1] == "test") {
     var head = document.documentElement.firstChild;
     var include = function(aSrc, aCallback) {
@@ -22,9 +25,6 @@ function $(aID) document.getElementById(aID);
   }
 
   // Show about:scriptish
-  var tools = {};
-  Components.utils.import("resource://gre/modules/AddonManager.jsm", tools);
-
   var addPerson = function(aTarget, aPerson) {
     var li = document.createElement("li");
     var person = aPerson.name.split(/; +/);
@@ -39,10 +39,9 @@ function $(aID) document.getElementById(aID);
     aTarget.appendChild(li);
   }
 
-  tools.AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
-    var contlist = $("contlist");
-    var translist = $("translist");
-    aAddon.contributors.forEach(function(val) addPerson(contlist, val));
-    aAddon.translators.forEach(function(val) addPerson(translist, val));
+  AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
+    function func(val) addPerson(this, val);
+    aAddon.contributors.forEach(func.bind($("contlist")));
+    aAddon.translators.forEach(func.bind($("translist")));
   });
 })();
