@@ -12,7 +12,7 @@ Requirements
 Links
 ----------
 
-* Addons.Mozilla.Org (AMO): https://addons.mozilla.org/en-US/firefox/addon/231203
+* Addons.Mozilla.Org (AMO): https://addons.mozilla.org/en-US/firefox/addon/scriptish
 * Userscripts:              http://userscripts.org
 * Wiki:                     http://github.com/erikvold/scriptish/wiki
 * Issues:                   http://github.com/erikvold/scriptish/issues
