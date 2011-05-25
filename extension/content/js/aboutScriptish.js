@@ -1,16 +1,14 @@
-document.addEventListener("DOMContentLoaded", DOMContentLoaded, false);
-function DOMContentLoaded() {
-  document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+function $(aID) document.getElementById(aID);
 
-  function $(aID) document.getElementById(aID);
-
+(function() {
   if (window.location.href.split("?")[1] == "test") {
-    // Run tests
+    var head = document.documentElement.firstChild;
     var include = function(aSrc, aCallback) {
       var script = document.createElement("script");
       script.src = aSrc;
       script.addEventListener("load", aCallback, false);
-      document.getElementsByTagName("head")[0].appendChild(script);
+      head.appendChild(script);
     }
 
     include("test/qunit.js", function() {
@@ -47,4 +45,4 @@ function DOMContentLoaded() {
     aAddon.contributors.forEach(function(val) addPerson(contlist, val));
     aAddon.translators.forEach(function(val) addPerson(translist, val));
   });
-}
+})();

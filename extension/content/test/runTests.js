@@ -1,17 +1,17 @@
+Cu.import("resource://scriptish/constants.js");
+
 function runTests() {
-  const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
   var tools = {};
 
   /**
    * MODULE: Scriptish Service
    */
   module("Scriptish Service");
-  Cu.import("resource://scriptish/constants.js", tools);
 
   test("Availability", function() {
     expect(2);
-    equals(typeof(tools.Services.scriptish), "object", "Scriptish service is available");
-    equals(typeof(tools.Services.scriptish.shouldLoad), "function", "shouldLoad is available");
+    equals(typeof(Services.scriptish), "object", "Scriptish service is available");
+    equals(typeof(Services.scriptish.shouldLoad), "function", "shouldLoad is available");
   });
 
   // TODO: generate fake requests to test
