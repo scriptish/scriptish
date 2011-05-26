@@ -33,6 +33,7 @@ function Config(aBaseDir) {
   (this._blocklistFile = this._scriptDir).append(SCRIPTISH_BLOCKLIST);
 
   this._initScriptDir();
+  this._initBlocklist();
 
   [
     "scriptish-script-installed",
@@ -320,7 +321,9 @@ Config.prototype = {
     var dir = this._scriptDir;
     if (!dir.exists())
       dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
+  },
 
+  _initBlocklist: function() {
     if (!this._useBlocklist) return;
 
     // Try to fetch a new list if blocklist is enabled and some time has passed
