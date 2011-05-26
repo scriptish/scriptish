@@ -318,16 +318,8 @@ Config.prototype = {
   _initScriptDir: function() {
     // create an empty configuration if none exist.
     var dir = this._scriptDir;
-    if (!dir.exists()) {
-      // create script folder
+    if (!dir.exists())
       dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
-
-      // create config.xml file
-      var configStream = Scriptish_getWriteStream(this._configFile);
-      var xml = "<UserScriptConfig/>";
-      configStream.write(xml, xml.length);
-      configStream.close();
-    }
 
     if (!this._useBlocklist) return;
 
