@@ -34,17 +34,42 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var tabs = require("../../../../../mozmill-tests/lib/tabs");
+Components.utils.import("resource://scriptish/constants.js");
 
 var setupModule = function(module) {
   module.controller = mozmill.getBrowserController();
 }
 
-// Test that the about:scriptish tab is opened on first run
-var testAboutScriptishOpened = function() {
-  var results = tabs.getTabsWithURL("about:scriptish");
+//Test that timeout works
+var testTimeoutExists = function() {
+  controller.assert(
+     function() { return !!timeout; },
+     "Test timeout exists",
+     50);
+}
 
-  controller.assert(function() {
-    return results.length === 1;
-  }, "Only one about:scriptish tab was opened");
+// Test that timeout works
+var testTimeoutDefault = function() {
+  var success = false;
+  timeout(function() {
+    success = true;
+  });
+
+  controller.waitFor(
+      function() { return success; },
+      "Test timeout works with default",
+      250, 10);
+}
+
+//Test that timeout works
+var testTimeoutWithParam = function() {
+  var success = false;
+  timeout(function() {
+   success = true;
+  }, 50);
+
+  controller.waitFor(
+     function() { return success; },
+     "Test timeout works with a param",
+     250, 10);
 }

@@ -115,4 +115,24 @@ function runTests() {
     ok(!!tools_menu, "Tools menu exists");
     equal(scriptish_menu.parentNode, tools_menu, "The Scriptish menu is a child of the Tools menu");
   });
+
+  test("Test timeout", function() {
+    expect(1);
+    stop();
+
+    try {
+      var success = false;
+      timeout(function() {
+        ok((success = true), "timeout success");
+        start();
+      });
+      setTimeout(function() {
+        ok(false, "timeout error: timeout");
+        start();
+      }, 500);
+    } catch (e) {
+      ok(false, "timeout error: " + e);
+      start();
+    }
+  });
 }
