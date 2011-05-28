@@ -1054,7 +1054,7 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script._updateURL = aSkeleton.updateURL;
   script._homepageURL = aSkeleton.homepageURL;
   script.supportURL = aSkeleton.supportURL;
-  script.jsversion = aSkeleton.jsversion;
+  script._jsversion = aSkeleton.jsversion;
   script["_run-at"] = aSkeleton["run-at"];
   script.includesDisabled = aSkeleton.includesDisabled;
 
