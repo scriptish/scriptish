@@ -438,7 +438,7 @@ Script.prototype = {
   get runAt() this["_run-at"] || defaultRunAt,
   useDelayedInjectors: function() {
     this.delayInjection = false;
-    Scriptish.notify(this, "scriptish-script-modified", {saved: false, reloadUI: true});
+    Scriptish.notify(this, "scriptish-script-modified", {saved: true, reloadUI: true});
     for (let [, injector] in Iterator(this.delayedInjectors)) injector(this);
     this.delayedInjectors = [];
   },
@@ -663,7 +663,7 @@ Script.prototype = {
         // Redownload dependencies.
         tools.Scriptish_configDownloader.refetchDependencies(this);
       } else {
-        Scriptish.notify(this, "scriptish-script-modified", {saved: false, reloadUI: true});
+        Scriptish.notify(this, "scriptish-script-modified", {saved: true, reloadUI: true});
       }
     }
     if (oldPriority != newPriority) this._config.sortScripts();

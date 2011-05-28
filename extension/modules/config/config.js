@@ -366,15 +366,14 @@ Config.prototype = {
 
   updateModifiedScripts: function(scriptInjector) {
     var self = this;
-    let hasChanged = false;
+
     for (let [, script] in Iterator(this._scripts)) {
       if (script.delayInjection) {
         script.delayedInjectors.push(scriptInjector);
         continue;
       }
-      if (!script.isModified()) continue;
 
-      hasChanged = true;
+      if (!script.isModified()) continue;
 
       let theScript = script;
       theScript.getTextContent(function(content) {
@@ -384,8 +383,6 @@ Config.prototype = {
         theScript.updateFromNewScript(parsedScript, scriptInjector);
       });
     }
-
-    if (hasChanged) this._save();
   },
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
 }

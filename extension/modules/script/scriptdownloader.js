@@ -304,9 +304,6 @@ ScriptDownloader.prototype.finishInstall = function() {
   if (this.updateScript) {
     // Inject the script now that we have the new dependencies
     this.script.useDelayedInjectors();
-
-    // Save new values to config.xml
-    Scriptish.notify(null, "scriptish-config-saved", null);
   } else if (this.installOnCompletion_) {
     this.installScript();
   } else if (this.scriptInstaller) {
