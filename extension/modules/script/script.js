@@ -195,6 +195,8 @@ Script.prototype = {
       script.reviewCount = data["uso:reviews"][0] * 1;
       script.averageRating = data["uso:rating"][0] * 1;
       script.totalDownloads = data["uso:installs"][0] * 1;
+
+      Scriptish.notify(null, "scriptish-config-saved", null);
     }
     req.send(null);
   },

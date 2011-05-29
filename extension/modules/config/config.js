@@ -196,6 +196,22 @@ Config.prototype = {
     var self = this;
 
     function callback(fileModified) {
+      // Try to fetch uso usage data if some time has passed
+      let interval = Scriptish_prefRoot.getValue("update.uso.interval");
+      let lastFetch = Scriptish_prefRoot.getValue("update.uso.lastFetch");
+      let now = Math.ceil(Date.now() / 1E3);
+      if (now - lastFetch >= interval) {
+        Scriptish_prefRoot.setValue("update.uso.lastFetch", now);
+
+        // Fetch uso data
+        let scripts = self._scripts;
+        for (var i = scripts.length - 1; ~i; i--) {
+          let script = scripts[i];
+          if (!script.blocked && script.isUSOScript())
+            timeout(script.updateUSOData.bind(script), i * 100);
+        }
+      }
+
       if (fileModified) self._save();
       aCallback();
     }
@@ -231,22 +247,6 @@ Config.prototype = {
 
     // Load the blocklist
     if (this._useBlocklist) this._loadBlocklist();
-
-    // Try to fetch uso usage data if some time has passed
-    let interval = Scriptish_prefRoot.getValue("update.uso.interval");
-    let lastFetch = Scriptish_prefRoot.getValue("update.uso.lastFetch");
-    let now = Math.ceil(Date.now() / 1E3);
-    if (now - lastFetch >= interval) {
-      Scriptish_prefRoot.setValue("update.uso.lastFetch", now);
-
-      // Fetch uso data
-      let scripts = this._scripts;
-      for (var i = scripts.length - 1; ~i; i--) {
-        let script = scripts[i];
-        if (!script.blocked && script.isUSOScript())
-          timeout(script.updateUSOData.bind(script), i * 100);
-      }
-    }
   },
 
   toJSON: function() ({
