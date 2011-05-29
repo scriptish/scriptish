@@ -52,6 +52,14 @@ function Config(aBaseDir) {
   Components.utils.import("resource://scriptish/addonprovider.js");
 }
 Config.prototype = {
+  get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),
+
+  get _tempFile() {
+    let tmp = this._scriptDir;
+    tmp.append(SCRIPTISH_CONFIG_JSON + ".tmp");
+    return tmp;
+  },
+
   observe: function(aSubject, aTopic, aData) {
     var data = JSON.parse(aData || "{}");
     switch(aTopic) {
@@ -336,14 +344,6 @@ Config.prototype = {
         script.uninstallProcess();
       }
     }
-  },
-
-  get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),
-
-  get _tempFile() {
-    let tmp = this._scriptDir;
-    tmp.append(SCRIPTISH_CONFIG_JSON + ".tmp");
-    return tmp;
   },
 
   _initScriptDir: function() {
