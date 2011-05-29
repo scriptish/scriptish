@@ -31,12 +31,9 @@ const Scriptish = {
     Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
   getConfig: function(aCallback) {
-    Scriptish_log("Scriptish.getConfig");
     if (global.config) {
-      Scriptish_log("Scriptish.getConfig 1");
       aCallback(global.config);
     } else if (!global.configQueue) {
-      Scriptish_log("Scriptish.getConfig 2");
       global.configQueue = [aCallback];
       var tools = {};
       Cu.import("resource://scriptish/config/config.js", tools);
@@ -48,7 +45,6 @@ const Scriptish = {
         delete global["configQueue"];
       });
     } else {
-      Scriptish_log("Scriptish.getConfig 3");
       global.configQueue.push(aCallback);
     }
   },
