@@ -42,6 +42,7 @@ function ScriptishService() {
     delete this.updateChk;
   }
 
+  Services.obs.addObserver(this, "chrome-document-global-created", false);
   Services.obs.addObserver(this, "content-document-global-created", false);
   Services.obs.addObserver(this, "inner-window-destroyed", false);
   Services.obs.addObserver(this, "install-userscript", false);
@@ -61,6 +62,7 @@ ScriptishService.prototype = {
 
   observe: function(aSubject, aTopic, aData) {
     switch (aTopic) {
+      case "chrome-document-global-created":
       case "content-document-global-created":
         this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject));
         break;

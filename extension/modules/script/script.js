@@ -299,7 +299,9 @@ Script.prototype = {
     try {
       var host = NetUtil.newURI(aURL).host;
     } catch (e) {
-      return false;
+      // If true, we're allowing a scheme that doesn't have a host.
+      // i.e. "about:scriptish"
+      return Scriptish.isGreasemonkeyable(aURL);
     }
 
     var i = this.domains.length - 1;
@@ -313,7 +315,7 @@ Script.prototype = {
         (regExp.isTLD) ? regExp.test(Scriptish_getTLDURL(aURL)) : regExp.test(aURL));
     function testII(aMatchPattern) aMatchPattern.doMatch(aURL);
 
-    // check if the doamin is ok 
+    // check if the domain is ok
     if (!this.matchesDomain(aURL)) return false;
 
     // check if script @includes/@excludes are disabled
