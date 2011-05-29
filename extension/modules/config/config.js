@@ -25,7 +25,6 @@ function Config(aBaseDir) {
   this._excludeRegExps = [];
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
-  (this._tempFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON + ".tmp");
 
   this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
   this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
@@ -189,8 +188,8 @@ Config.prototype = {
       if (!str) return aCallback(false);
       try {
         config = JSON.parse(str);
-        if (aFile == self._tempFile)
-          self._tempFile.moveTo(null, SCRIPTISH_CONFIG_JSON);
+        if (aFile.equals(self._tempFile))
+          aFile.moveTo(null, SCRIPTISH_CONFIG_JSON);
       } catch(e) {
         // Unable to parse the file.
         Scriptish_log("Unable to load JSON file: " + aFile.leafName);
@@ -289,22 +288,21 @@ Config.prototype = {
 
     this._isSaving = true;
 
-    // make sure that the configFile is SCRIPTISH_CONFIG_JSON
-    (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON);
+    let tempFile = self._tempFile;
 
     Scriptish_log(
-        Scriptish_stringBundle("saving") + " " + self._tempFile.leafName, true);
+        Scriptish_stringBundle("saving") + " " + tempFile.leafName, true);
 
     let converter = Instances.suc;
     converter.charset = "UTF-8";
     NetUtil.asyncCopy(
         converter.convertToInputStream(JSON.stringify(this.toJSON())),
-        Scriptish_getWriteStream(this._tempFile, true),
+        Scriptish_getWriteStream(tempFile, true),
         function() {
           delete self["_isSaving"];
-          Scriptish_log("Moving " + self._tempFile.leafName
+          Scriptish_log("Moving " + tempFile.leafName
               + " to " + SCRIPTISH_CONFIG_JSON);
-          self._tempFile.moveTo(null, SCRIPTISH_CONFIG_JSON);
+          tempFile.moveTo(null, SCRIPTISH_CONFIG_JSON);
           if (self._pendingSave) {
             delete self["_pendingSave"];
             self._save();
@@ -341,6 +339,12 @@ Config.prototype = {
   },
 
   get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),
+
+  get _tempFile() {
+    let tmp = this._scriptDir;
+    tmp.append(SCRIPTISH_CONFIG_JSON + ".tmp");
+    return tmp;
+  },
 
   _initScriptDir: function() {
     // create an empty configuration if none exist.
