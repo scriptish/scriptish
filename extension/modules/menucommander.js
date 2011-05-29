@@ -135,8 +135,6 @@ Scriptish_MenuCommander.prototype.modifyMenuCommand =
 }
 
 Scriptish_MenuCommander.prototype.attach = function() {
-  Scriptish_log("> Scriptish_MenuCommander.attach");
-
   for (var i = 0; i < this.keys.length; i++)
     this.keyset.appendChild(this.keys[i]);
 
@@ -154,8 +152,6 @@ Scriptish_MenuCommander.prototype.attach = function() {
 }
 
 Scriptish_MenuCommander.prototype.detach = function() {
-  Scriptish_log("> Scriptish_MenuCommander.detach");
-
   for (var i = 0; i < this.keys.length; i++)
     this.keyset.removeChild(this.keys[i]);
 
@@ -181,8 +177,6 @@ Scriptish_MenuCommander.prototype.detach = function() {
 
 Scriptish_MenuCommander.prototype.createMenuItem =
     function(commandUUID, commandName, commandFunc, accessKey) {
-  Scriptish_log("> Scriptish_MenuCommander.createMenuItem");
-
   var menuItem = this.doc.createElement("menuitem");
   menuItem._commandFunc = commandFunc;
   menuItem.setAttribute("uuid", commandUUID);
