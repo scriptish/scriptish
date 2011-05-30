@@ -253,6 +253,9 @@ Config.prototype = {
         }
       }
 
+      // Load the blocklist
+      if (self._useBlocklist) self._loadBlocklist();
+
       if (fileModified) self._save();
       aCallback();
     }
@@ -293,9 +296,6 @@ Config.prototype = {
         self._blocklist = {};
       }
     });
-
-    // Load the blocklist
-    if (this._useBlocklist) this._loadBlocklist();
   },
 
   toJSON: function() ({
