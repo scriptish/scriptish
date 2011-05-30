@@ -15,6 +15,7 @@ inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
+inc("resource://scriptish/utils/q.js");
 inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
 
@@ -156,77 +157,99 @@ Config.prototype = {
     }
   },
 
-  _loadXML: function(aFile, aCallback) {
+  _loadXML: function(aFile) {
     Scriptish_log("Scriptish Config._loadXML");
     var self = this;
+    var deferred = Q.defer();
 
-    if (!aFile.exists()) return aCallback(false);
+    if (aFile.exists()) {
+      Scriptish_getContents(aFile, 0, function(str) {
+        if (!str) return timeout(function() deferred.reject(false));
 
-    Scriptish_getContents(aFile, 0, function(str) {
-      if (!str) return aCallback(false);
-      var doc = Instances.dp.parseFromString(str, "text/xml");
-      var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
-      let excludes = [];
+        var doc = Instances.dp.parseFromString(str, "text/xml");
+        // TODO: deal with unparsable xml
+        var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
+        let excludes = [];
 
-      for (var node; node = nodes.iterateNext();) {
-        switch (node.nodeName) {
-        case "Script":
-          Script.loadFromXML(self, node);
-          break;
-        case "Exclude":
-          excludes.push(node.firstChild.nodeValue.trim());
-          break;
+        for (var node; node = nodes.iterateNext();) {
+          switch (node.nodeName) {
+          case "Script":
+            Script.loadFromXML(self, node);
+            break;
+          case "Exclude":
+            excludes.push(node.firstChild.nodeValue.trim());
+            break;
+          }
         }
-      }
-      self.addExclude(excludes);
+        self.addExclude(excludes);
 
-      // load() will force a JSON save
-      aCallback(true);
-    });
+        deferred.resolve(true); // force a save
+      });
+    } else {
+      timeout(function() deferred.reject(false));
+    }
+
+    return deferred.promise;
   },
 
-  _loadJSON: function(aFile, aCallback) {
+  _loadJSON: function(aFile) {
     Scriptish_log("Scriptish Config._loadJSON");
     var self = this;
     var config = {};
+    var deferred = Q.defer();
 
-    if (!aFile.exists()) return aCallback(false);
+    if (aFile.exists()) {
+      Scriptish_getContents(aFile, 0, function(str) {
+        if (!str) return timeout(function() deferred.reject(false));
 
-    Scriptish_getContents(aFile, 0, function(str) {
-      if (!str) return aCallback(false);
-      try {
-        config = JSON.parse(str);
-        if (aFile.equals(self._tempFile))
-          aFile.moveTo(null, SCRIPTISH_CONFIG_JSON);
-      } catch(e) {
-        // Unable to parse the file.
-        Scriptish_log("Unable to load JSON file: " + aFile.leafName);
-        return aCallback(false);
-      }
-      config.scripts.forEach(function(i) Script.loadFromJSON(self, i));
-      config.excludes.forEach(function(i) self.addExclude(i));
-      aCallback(true);
-    });
+        try {
+          config = JSON.parse(str);
+        } catch(e) {
+          // Unable to parse the file.
+          return deferred.reject(e);
+        }
+
+        // load scripts
+        var fileModified = false, scripts = config.scripts;
+        for (var i = scripts.length - 1; ~i; i--)
+          fileModified = Script.loadFromJSON(self, scripts[i]) || fileModified;
+
+        // load global excludes
+        config.excludes.forEach(function(i) self.addExclude(i));
+
+        deferred.resolve(fileModified);
+      });
+    } else {
+      timeout(function() deferred.reject(false));
+    }
+
+    return deferred.promise;
   },
 
   load: function(aCallback) {
     Scriptish_log("Scriptish Config.load");
     var self = this;
 
+    // called after the config has been loaded
     function callback(fileModified) {
-      // Try to fetch uso usage data if some time has passed
-      let interval = Scriptish_prefRoot.getValue("update.uso.interval");
-      let lastFetch = Scriptish_prefRoot.getValue("update.uso.lastFetch");
-      let now = Math.ceil(Date.now() / 1E3);
-      if (now - lastFetch >= interval) {
-        Scriptish_prefRoot.setValue("update.uso.lastFetch", now);
+      let scripts = self._scripts;
+      let len = scripts.length;
 
-        // Fetch uso data
-        let scripts = self._scripts;
-        for (var i = scripts.length - 1; ~i; i--) {
-          let script = scripts[i];
-          if (!script.blocked && script.isUSOScript())
-            timeout(script.updateUSOData.bind(script), i * 100);
+      // Improves first-run startup time to punt this until a script is installed
+      if (len) {
+        // Try to fetch uso usage data if some time has passed
+        let interval = Scriptish_prefRoot.getValue("update.uso.interval");
+        let lastFetch = Scriptish_prefRoot.getValue("update.uso.lastFetch");
+        let now = Math.ceil(Date.now() / 1E3);
+        if (now - lastFetch >= interval) {
+          Scriptish_prefRoot.setValue("update.uso.lastFetch", now);
+
+          // Fetch uso data
+          for (var i = len - 1; ~i; i--) {
+            let script = scripts[i];
+            if (!script.blocked && script.isUSOScript())
+              timeout(script.updateUSOData.bind(script), i * 100);
+          }
         }
       }
 
@@ -234,33 +257,30 @@ Config.prototype = {
       aCallback();
     }
 
-    let (configFile = this._scriptDir) {
-      // Scriptish JSON
-      configFile.append(SCRIPTISH_CONFIG_JSON);
-      this._loadJSON(configFile, function(aSuccess) {
-        if (aSuccess) return callback();
+    // Load the config (trying from various sources)
+    var configFile;
+    // source: Scriptish JSON tmp
+    self._loadJSON(self._tempFile).then(function() {
+      callback(true);  // need to force save here
+    }, function(aErr) {
+      if ("boolean" != typeof aErr) {
+        // the tmp file exists but is corrupt, so force save
+        callback = callback.bind(null, true);
+      }
 
-        // Scriptish JSON tmp
-        self._loadJSON(self._tempFile, function(aSuccess) {
-          if (aSuccess) return callback();
-
-          // Scriptish XML
-          (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_XML);
-          self._loadXML(configFile, function(aSuccess) {
-            // If valid XML, always save to create SCRIPTISH_CONFIG_JSON
-            if (aSuccess) return callback(true);
-
-            // Older XML
-            (configFile = self._scriptDir).append("config.xml");
-            self._loadXML(configFile, function(aSuccess) {
-              // If valid XML, always save to create SCRIPTISH_CONFIG_JSON
-              if (aSuccess) return callback(true);
-              return aCallback();
-            });
-          });
+      // source: Scriptish JSON
+      (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_JSON);
+      self._loadJSON(configFile).then(callback, function() {
+        // source: Scriptish XML
+        (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_XML);
+        self._loadXML(configFile).then(callback, function() {
+          // source: Older GM Style XML
+          (configFile = self._scriptDir).append("config.xml");
+          self._loadXML(configFile).then(
+              callback, (function() callback(true)));
         });
       });
-    }
+    });
 
     // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
@@ -298,23 +318,30 @@ Config.prototype = {
 
     let tempFile = self._tempFile;
 
+    // make sure that the configFile is SCRIPTISH_CONFIG_JSON
+    (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON);
+
     Scriptish_log(
-        Scriptish_stringBundle("saving") + " " + tempFile.leafName, true);
+        Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG_JSON, true);
 
     let converter = Instances.suc;
     converter.charset = "UTF-8";
+    let json = JSON.stringify(this.toJSON());
     NetUtil.asyncCopy(
-        converter.convertToInputStream(JSON.stringify(this.toJSON())),
+        converter.convertToInputStream(json),
         Scriptish_getWriteStream(tempFile, true),
         function() {
-          delete self["_isSaving"];
-          Scriptish_log("Moving " + tempFile.leafName
-              + " to " + SCRIPTISH_CONFIG_JSON);
-          tempFile.moveTo(null, SCRIPTISH_CONFIG_JSON);
-          if (self._pendingSave) {
-            delete self["_pendingSave"];
-            self._save();
-          }
+          NetUtil.asyncCopy(
+                converter.convertToInputStream(json),
+                Scriptish_getWriteStream(self._configFile, true),
+                function() {
+                  tempFile.remove(true);
+                  delete self["_isSaving"];
+                  if (self._pendingSave) {
+                    delete self["_pendingSave"];
+                    self._save();
+                  }
+                });
         });
   },
 
