@@ -39,7 +39,7 @@ const Scriptish = {
       Cu.import("resource://scriptish/config/config.js", tools);
       let cf = new tools.Config("scriptish_scripts");
       cf.load(function() {
-        Scriptish_log("Scriptish config loaded");
+        Scriptish_log("Scriptish config loaded"); // TODO: force & l10n
         global.config = cf;
         global.configQueue.forEach(function(f) f(cf));
         delete global["configQueue"];
