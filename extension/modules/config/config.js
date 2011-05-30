@@ -167,7 +167,11 @@ Config.prototype = {
         if (!str) return timeout(function() deferred.reject(false));
 
         var doc = Instances.dp.parseFromString(str, "text/xml");
-        // TODO: deal with unparsable xml
+
+        // Stop if there was a parsing error
+        if (doc.documentElement.nodeName == "parsererror")
+          return timeout(function() deferred.reject(false));
+
         var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
         let excludes = [];
 
