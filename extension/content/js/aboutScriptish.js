@@ -14,8 +14,8 @@ function $(aID) document.getElementById(aID);
       head.appendChild(script);
     }
 
-    include("test/qunit.js", function() {
-      include("test/runTests.js", function() {
+    include("js/third-party/qunit/qunit.js", function() {
+      include("tests/runTests.js", function() {
         $("main").style.display = "none";
         $("test").style.display = "inherit";
         runTests();
