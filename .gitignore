@@ -7,4 +7,5 @@ BASE.*
 LOCAL.*
 REMOTE.*
 build
+*.DS_Store
 
