@@ -4,4 +4,5 @@ function runTests() {
   include("tests/testCryptoHash.js");
   include("tests/testToolsMenuItem.js");
   include("tests/testTimeout.js");
+  include("tests/endTests.js");
 }

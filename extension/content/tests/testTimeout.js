@@ -3,9 +3,8 @@ Components.utils.import("resource://scriptish/constants.js");
 
 module("Timeout");
 
-test("Default Works", function() {
+asyncTest("Default Works", function() {
   expect(1);
-  stop();
 
   try {
     var success = false;
