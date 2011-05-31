@@ -2,18 +2,16 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
 function $(aID) document.getElementById(aID);
+function include(aSrc, aCallback) {
+    var script = document.createElement("script");
+    script.src = aSrc;
+    script.addEventListener("load", aCallback, false);
+    document.documentElement.firstChild.appendChild(script);
+  }
 
 (function() {
   // Show about:scriptish?test
   if (window.location.href.split("?")[1] == "test") {
-    var head = document.documentElement.firstChild;
-    var include = function(aSrc, aCallback) {
-      var script = document.createElement("script");
-      script.src = aSrc;
-      script.addEventListener("load", aCallback, false);
-      head.appendChild(script);
-    }
-
     include("js/third-party/qunit/qunit.js", function() {
       include("tests/runTests.js", function() {
         $("main").style.display = "none";
