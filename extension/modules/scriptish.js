@@ -63,6 +63,8 @@ const Scriptish = {
       browserWin.toEM("addons://list/userscript");
   },
   isGreasemonkeyable: function Scriptish_isGreasemonkeyable(aURL) {
+    if (!aURL) return false;
+
     // if the url provide is not a valid url, then an error could be thrown
     try {
       var scheme = Services.io.extractScheme(aURL);

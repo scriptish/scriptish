@@ -102,7 +102,10 @@ ScriptishService.prototype = {
     windows[currentInnerWindowID] = {unloaders: []};
     let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
     let gBrowser = chromeWin.gBrowser;
-    let href = safeWin.location.href || safeWin.frameElement.src;
+    let href = (safeWin.location.href
+        || (safeWin.frameElement && safeWin.frameElement.src))
+        || "";
+
     // Show the scriptish install banner if the user is navigating to a .user.js
     // file in a top-level tab.  If the file was previously cached it might have
     // been given a number after .user, like gmScript.user-12.js
@@ -111,6 +114,7 @@ ScriptishService.prototype = {
       gmBrowserUI.showInstallBanner(
           gBrowser.getBrowserForDocument(safeWin.document));
     }
+
     if (!Scriptish.isGreasemonkeyable(href)) return;
 
     let unsafeWin = safeWin.wrappedJSObject;
