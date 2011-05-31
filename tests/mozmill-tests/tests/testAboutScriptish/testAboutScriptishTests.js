@@ -34,8 +34,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var tabs = require("../../../../../mozmill-tests/lib/tabs");
-
 var setupModule = function(module) {
   module.controller = mozmill.getBrowserController();
 }
