@@ -1,6 +1,18 @@
-#category-userscripts > .category-icon{
+#category-userscript > .category-icon {
   list-style-image: url("chrome://scriptish/skin/third-party/uso_medium.png");
 }
 .addon[type="userscript"] .control-container {
   -moz-binding: url("chrome://scriptish/content/addonstab.xml#control-container");
+}
+
+page.scriptish #addon-list-empty, #user-scripts-list-empty{
+  display: none;
+}
+page.scriptish #user-script-list-empty {
+  display: -moz-box;
+}
+
+/* Hide the 'restart now' link for user scripts. */
+page.scriptish #addon-list button[command=cmd_restartApp] {
+  display: none;
 }

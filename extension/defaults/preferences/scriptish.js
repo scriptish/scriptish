@@ -9,6 +9,7 @@ pref("extensions.scriptish.enableCopyDownloadURL", false);
 pref("extensions.scriptish.enableScriptRefreshing", true);
 pref("extensions.scriptish.uninstallPreferences", true);
 pref("extensions.scriptish.update.requireBuiltInCerts", true);
+pref("extensions.scriptish.update.requireSecured", true);
 pref("extensions.scriptish.update.uso.interval", 86400);
 pref("extensions.scriptish.update.uso.lastFetch", 0);
 pref("extensions.scriptish.useDefaultLocale", false);

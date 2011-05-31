@@ -1,0 +1,41 @@
+body {
+  background-color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3 {
+  margin: 0;
+  padding: 0;
+  font-family: "Consolas","Bitstream Vera Sans Mono","Courier New",Courier,monospace!important;
+}
+
+section { margin-bottom: 40px; }
+
+header { margin-bottom: 20px; }
+header.primary { border-bottom: 2px solid #bada55; }
+header.primary img { margin-bottom: -5px; }
+header.primary h1 { display:inline; }
+header.secondary { border-bottom: 1px dotted #ccc; }
+#test header { margin-bottom: 0; border: none; }
+
+ul { margin-top: 5px; padding-left: 15px; }
+
+p { margin: 0; padding: 0; }
+
+a { color: #00f; text-decoration: none; }
+a:hover { color: #09f; }
+
+#container {
+  margin: 2em auto 0;
+  padding: 10px;
+  width: 70%;
+  background-color: #fff;
+  border: 2px solid #000;
+  border-radius: 15px;
+}
+
+#test {
+  display: none;
+}
+
+.twoCol { -moz-column-count: 2; }

@@ -8,10 +8,11 @@ var Scriptish_BrowserUIM;
 inc("resource://scriptish/content/browser.js");
 inc("resource://scriptish/prefmanager.js");
 inc("resource://scriptish/scriptish.js");
-inc("resource://scriptish/utils/Scriptish_stringBundle.js");
+inc("resource://scriptish/utils/Scriptish_installUri.js");
 inc("resource://scriptish/utils/Scriptish_openInEditor.js");
 inc("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
-inc("resource://scriptish/utils/Scriptish_installUri.js");
+inc("resource://scriptish/utils/Scriptish_getWindowIDs.js");
+inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/config/configdownloader.js");
 inc("resource://scriptish/menucommander.js");
 inc("resource://scriptish/logging.js");
@@ -25,16 +26,8 @@ Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
 Scriptish_BrowserUI.tbBtnSetup = function() {
-  var statusEnabledItem = $("scriptish-tb-enabled-brd");
   $("scriptish-button-brd").setAttribute(
       "onclick", "Scriptish_BrowserUIM.onIconClick(event)");
-
-  statusEnabledItem.setAttribute("label",
-      Scriptish_stringBundle("statusbar.enabled"));
-  statusEnabledItem.setAttribute("accesskey",
-      Scriptish_stringBundle("statusbar.enabled.ak"));
-  statusEnabledItem.setAttribute("oncommand",
-      "Scriptish_BrowserUIM.onToggleStatus()");
 
   $("scriptish-tb-no-scripts-brd").setAttribute(
       "label", Scriptish_stringBundle("statusbar.noScripts"));
@@ -84,7 +77,6 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.tbBtnSetup();
 
   // get all required DOM elements
-  this.toolsMenuEnabledItem = $("scriptish-tools-enabled-item");
   this.contextItemInstall = $("scriptish-context-menu-install");
   this.contextItemVS = $("scriptish-context-menu-viewsource");
 
@@ -92,17 +84,14 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   tmEle.setAttribute("label", Scriptish_stringBundle("menu.title"));
   tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.title.ak"));
 
-  var tmStatusEle = $('scriptish-tools-enabled-item');
-  tmStatusEle.setAttribute("label", Scriptish_stringBundle("statusbar.enabled"));
-  tmStatusEle.setAttribute("accesskey", Scriptish_stringBundle("statusbar.enabled.ak"));
-
-  $("scriptish-tools-menupop").addEventListener("popupshowing", function(aEvt) {
-    // set the enabled/disabled state
-    Scriptish_BrowserUI.toolsMenuEnabledItem.setAttribute(
-        "checked", Scriptish.enabled);
-  }, false);
-
-  this.toolsMenuEnabledItem.addEventListener("command", function() { Scriptish_BrowserUIM.onToggleStatus() }, false);
+  var statusEnabledItem = this.statusCasterEle = $("scriptish-tb-enabled-brd");
+  statusEnabledItem.setAttribute("label",
+      Scriptish_stringBundle("statusbar.enabled"));
+  statusEnabledItem.setAttribute("accesskey",
+      Scriptish_stringBundle("statusbar.enabled.ak"));
+  statusEnabledItem.setAttribute("oncommand",
+      "Scriptish_BrowserUIM.onToggleStatus()");
+  statusEnabledItem.setAttribute("checked", Scriptish.enabled);
 
   var tmCmdsEle = $("scriptish-tools-commands");
   tmCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
@@ -129,36 +118,42 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.contextItemVS.setAttribute("accesskey", Scriptish_stringBundle("menu.show.ak"));
   this.contextItemVS.addEventListener("command", function(aEvt) {
     Scriptish_BrowserUI.viewContextItemClicked(aEvt);
-  }, false)
-
-  // update visual status when enabled state changes
-  this.statusWatcher = Scriptish_BrowserUIM.refreshStatus.bind(Scriptish_BrowserUIM);
-  Scriptish_prefRoot.watch("enabled", this.statusWatcher);
+  }, false);
 
   // hook on to context menu popup event
   $("contentAreaContextMenu").addEventListener(
       "popupshowing", this.contextMenuShowing.bind(this), false);
 
   // this gives us onLocationChange
-  gBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
+  gBrowser.addProgressListener(this);
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
 
-  // register for notifications from scriptish-service about ui type things
-  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 100);
+  // Check if Scriptish has been updated/installed
+  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 1000);
 }
 
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
-  var commander = this.getCommander(menuCommand.window);
+  var commander = this.getCommander(menuCommand.winID);
   return commander.registerMenuCommand(
       menuCommand.name, menuCommand.doCommand, menuCommand.accelKey,
       menuCommand.accelModifiers, menuCommand.accessKey);
 }
 
-Scriptish_BrowserUI.unregisterMenuCommand = function(commandUUID, aWin) {
-  var commander = this.getCommander(aWin);
-  return commander.unregisterMenuCommand(commandUUID);
+Scriptish_BrowserUI.unregisterMenuCommand = function(commandUUID, aWinID) {
+  var commander = this.getCommander(aWinID);
+  return commander.modifyMenuCommand(commandUUID, "unregister");
+}
+
+Scriptish_BrowserUI.enableMenuCommand = function(commandUUID, aWinID) {
+  var commander = this.getCommander(aWinID);
+  return commander.modifyMenuCommand(commandUUID, "enable");
+}
+
+Scriptish_BrowserUI.disableMenuCommand = function(commandUUID, aWinID) {
+  var commander = this.getCommander(aWinID);
+  return commander.modifyMenuCommand(commandUUID, "disable");
 }
 
 
@@ -173,15 +168,14 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
   // them ourselves in the case of reload, or they stack up.
-  for (var i = 0, child; child = notificationBox.childNodes[i]; i++) {
+  for (var i = 0, child; child = notificationBox.childNodes[i]; i++)
     if (child.getAttribute("value") == "install-userscript")
       notificationBox.removeNotification(child);
-  }
 
   var notification = notificationBox.appendNotification(
     greeting,
     "install-userscript",
-    "chrome://scriptish/skin/icon_16.png",
+    "chrome://scriptish/skin/scriptish16.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
     [{label: Scriptish_stringBundle("greeting.btn"),
       accessKey: Scriptish_stringBundle("greeting.btn.ak"),
@@ -199,17 +193,6 @@ Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
   this.scriptDownloader_ = aSD;
   gBrowser.selectedTab = gBrowser.addTab(aURL);
 }
-
-/**
- * Implements nsIObserve.observe. Right now we're only observing our own
- * install-userscript, which happens when the install bar is clicked.
- */
-Scriptish_BrowserUI.observe = function(subject, topic, data) {
-  if (topic == "install-userscript")
-    if (window == Services.ww.activeWindow) this.installCurrentScript();
-  else
-    throw new Error("Unexpected topic received: {" + topic + "}");
-};
 
 // Handles the install button getting clicked.
 Scriptish_BrowserUI.installCurrentScript = function() {
@@ -229,7 +212,8 @@ Scriptish_BrowserUI.reattachMenuCmds = function() {
     Scriptish_BrowserUI.currentMenuCommander.detach();
     Scriptish_BrowserUI.currentMenuCommander = null;
   }
-  var menuCommander = Scriptish_BrowserUI.getCommander(gBrowser.selectedBrowser.contentWindow);
+  var menuCommander = Scriptish_BrowserUI.getCommander(
+      Scriptish_getWindowIDs(gBrowser.selectedBrowser.contentWindow).innerID);
   if (menuCommander) (Scriptish_BrowserUI.currentMenuCommander = menuCommander).attach();
 }
 
@@ -276,14 +260,14 @@ Scriptish_BrowserUI.getUserScriptLinkUnderPointer = function() {
  * Helper method which gets the menuCommander corresponding to a given
  * document
  */
-Scriptish_BrowserUI.getCommander = function(aWin) {
+Scriptish_BrowserUI.getCommander = function(aWinID) {
   for (var i = 0; i < this.menuCommanders.length; i++)
-    if (this.menuCommanders[i].win === aWin)
+    if (this.menuCommanders[i].winID === aWinID)
       return this.menuCommanders[i].commander;
 
   // no commander found. create one and add it.
   var commander = new Scriptish_MenuCommander(document);
-  this.menuCommanders.push({win: aWin, commander: commander});
+  this.menuCommanders.push({winID: aWinID, commander: commander});
   return commander;
 }
 
@@ -291,13 +275,6 @@ Scriptish_BrowserUI.viewContextItemClicked = function() {
   Scriptish_configDownloader.startViewScript(
       Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
 }
-
-// necessary for webProgressListener implementation
-Scriptish_BrowserUI.onProgressChange = function(webProgress,b,c,d,e,f){};
-Scriptish_BrowserUI.onStateChange = function(a,b,c,d){};
-Scriptish_BrowserUI.onStatusChange = function(a,b,c,d){};
-Scriptish_BrowserUI.onSecurityChange = function(a,b,c){};
-Scriptish_BrowserUI.onLinkIconAvailable = function(a){};
 
 window.addEventListener("load", Scriptish_BrowserUI.chromeLoad.bind(Scriptish_BrowserUI), false);
 window.addEventListener("unload", Scriptish_BrowserUI.chromeUnload.bind(Scriptish_BrowserUI), false);
@@ -323,7 +300,7 @@ function Scriptish_popupClicked(aEvt) {
   }
 }
 
-function Scriptish_showPopup(aEvent) {
+function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   var $ = function(aID) document.getElementById(aID);
   Scriptish_BrowserUI.reattachMenuCmds();
 
@@ -331,7 +308,11 @@ function Scriptish_showPopup(aEvent) {
     function testMatchURLs(script) {
       return urls.some(function(url) script.matchesURL(url));
     }
-    return Scriptish.config.getMatchingScripts(testMatchURLs);
+
+    return config.getMatchingScripts(testMatchURLs).sort(function(a,b) {
+      a = a.name.toLocaleLowerCase(), b = b.name.toLocaleLowerCase();
+      return a.localeCompare(b);
+    });
   }
 
   function appendScriptToPopup(script) {
@@ -347,11 +328,6 @@ function Scriptish_showPopup(aEvent) {
 
   var popup = aEvent.target;
   var tail = $("scriptish-tb-no-scripts-sep");
-
-  // set the enabled/disabled state
-  var statusEnabledItem = $("scriptish-tb-enabled-item");
-  statusEnabledItem && statusEnabledItem.setAttribute(
-      "checked", Scriptish.enabled);
 
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; i >= 0; i--) {
@@ -386,4 +362,4 @@ function Scriptish_showPopup(aEvent) {
 
   $("scriptish-tb-no-scripts").collapsed =
       !!(runsFramed.length + runsOnTop.length);
-}
+})

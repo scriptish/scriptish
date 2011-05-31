@@ -8,27 +8,29 @@ var script;
 window.addEventListener("load", function() {
   var scriptID = window.location.search.match(/[\?&]id=([^&,]+)/i);
   if (!scriptID) {
-    window.close();
-    throw new Error("Script ID is not defined!");
+    //window.close();
+    //throw new Error("Script ID is not defined!");
   }
 
   scriptID = scriptID[1];
-  script = Scriptish.config.getScriptById(scriptID);
+  Scriptish.getConfig(function(config) {
+    script = config.getScriptById(scriptID);
 
-  let options = Scriptish_stringBundle("options");
-  let dialog = $("scriptish-script-options-dialog");
-  dialog.setAttribute("title", script.name + " - " + options);
-  dialog.setAttribute("ondialogaccept", "return doSave();");
-  $("header").setAttribute("description", options);
+    let options = Scriptish_stringBundle("options");
+    let dialog = $("scriptish-script-options-dialog");
+    dialog.setAttribute("title", script.name + " - " + options);
+    dialog.setAttribute("ondialogaccept", "return doSave();");
+    $("header").setAttribute("description", options);
 
-  $("includes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.includes"));
-  $("excludes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.excludes"));
-  $("includes").value = script.getUserIncStr();
-  $("excludes").value = script.getUserIncStr("exclude");
+    $("includes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.includes"));
+    $("excludes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.excludes"));
+    $("includes").value = script.getUserIncStr();
+    $("excludes").value = script.getUserIncStr("exclude");
 
-  let tmp = $("disableScriptIncludes");
-  tmp.setAttribute("label", Scriptish_stringBundle("scriptOptions.disableScriptIncludes"));
-  tmp.checked = script.includesDisabled;
+    let tmp = $("disableScriptIncludes");
+    tmp.setAttribute("label", Scriptish_stringBundle("scriptOptions.disableScriptIncludes"));
+    tmp.checked = script.includesDisabled;
+  });
 
   return true;
 }, false);
@@ -40,10 +42,7 @@ function doSave() {
   if (script.getUserIncStr() != postInc || script.getUserIncStr("exclude") != postExc) {
     script.user_includes = postInc.match(/.+/g);
     script.user_excludes = postExc.match(/.+/g);
-    Scriptish.config._save();
-
-    // display modified notification
-    script.modificationProcess(true);
+    Scriptish.notify(script, "scriptish-script-user-prefs-change", true);
   }
 
   script.includesDisabled = $("disableScriptIncludes").checked;

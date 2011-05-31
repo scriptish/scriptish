@@ -12,7 +12,6 @@ Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
 Cu.import("resource://scriptish/script/scripticon.js");
@@ -27,6 +26,7 @@ const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
 const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
 const defaultRunAt = runAtValues[1];
+const defaultAutoUpdateState = AddonManager.AUTOUPDATE_DISABLE;
 const usoURLChk = /^https?:\/\/userscripts\.org\/scripts\/[^\d]+(\d+)/i;
 
 function noUpdateFound(aListener, aReason) {
@@ -62,6 +62,7 @@ function Script(config) {
   this._namespace = "";
   this._prefroot = null;
   this._author = null;
+  this._applyBackgroundUpdates = defaultAutoUpdateState;
   this._contributors = [];
   this._description = null;
   this._version = null;
@@ -128,7 +129,13 @@ Script.prototype = {
   },
   appDisabled: false,
   scope: AddonManager.SCOPE_PROFILE,
-  applyBackgroundUpdates: AddonManager.AUTOUPDATE_DISABLE,
+  get applyBackgroundUpdates() this._applyBackgroundUpdates,
+  set applyBackgroundUpdates(aVal) {
+    this._applyBackgroundUpdates = aVal;
+    Scriptish.notify(null, "scriptish-script-prefs-change", {
+      saved: true
+    });
+  },
   operationsRequiringRestart: AddonManager.OP_NEEDS_RESTART_NONE,
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
@@ -147,14 +154,13 @@ Script.prototype = {
     val = !!val;
     if (val === this.userDisabled) return val;
 
-    AddonManagerPrivate.callAddonListeners(
-        val ? "onEnabling" : "onDisabling", this, false);
+    var enabling = !val;
+    Scriptish.notify(this, "scriptish-script-edit-enabling", {enabling: enabling});
 
-    this._enabled = !val;
-    this._changed("edit-enabled", this._enabled);
-
-    AddonManagerPrivate.callAddonListeners(
-        val ? "onEnabled" : "onDisabled", this);
+    Scriptish.notify(this, "scriptish-script-edit-enabled", {
+      enabling: (this._enabled = enabling),
+      saved: true
+    });
 
     return val;
   },
@@ -163,7 +169,7 @@ Script.prototype = {
   get permissions() {
     var perms = AddonManager.PERM_CAN_UNINSTALL;
     perms |= this.userDisabled ? AddonManager.PERM_CAN_ENABLE : AddonManager.PERM_CAN_DISABLE;
-    if (this.updateURL) perms |= AddonManager.PERM_CAN_UPGRADE
+    if (this.updateURL) perms |= AddonManager.PERM_CAN_UPGRADE;
     return perms;
   },
 
@@ -189,6 +195,8 @@ Script.prototype = {
       script.reviewCount = data["uso:reviews"][0] * 1;
       script.averageRating = data["uso:rating"][0] * 1;
       script.totalDownloads = data["uso:installs"][0] * 1;
+
+      Scriptish.notify(null, "scriptish-config-saved", null);
     }
     req.send(null);
   },
@@ -218,7 +226,8 @@ Script.prototype = {
     req.open("GET", updateURL, true);
     req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
     // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
-    req.channel.notificationCallbacks = new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+    req.channel.notificationCallbacks =
+        new BadCertHandler(!Scriptish.updateSecurely || !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
     req.onload = this.checkRemoteVersion.bind(this, req, aCallback);
     req.onerror = this.checkRemoteVersionErr.bind(this, aCallback);
     req.send(null);
@@ -229,15 +238,17 @@ Script.prototype = {
       return aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR);
 
     // make sure that the final URI is a https url
-    if ("https" != req.channel.URI.scheme)
+    if (Scriptish.updateSecurely && "https" != req.channel.URI.scheme)
       return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
 
     // make sure that the final URI's certificate is valid
-    try {
-      checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
-    }
-    catch (e) {
-      return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
+    if (Scriptish.updateSecurely) {
+      try {
+        checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+      }
+      catch (e) {
+        return aCallback.call(this, false, AddonManager.UPDATE_STATUS_SECURITY_ERROR);
+      }
     }
 
     // parse the version
@@ -251,15 +262,15 @@ Script.prototype = {
     aCallback.call(this, false, AddonManager.UPDATE_STATUS_DOWNLOAD_ERROR)),
 
   uninstall: function() {
-    AddonManagerPrivate.callAddonListeners("onUninstalling", this, false);
+    Scriptish.notify(this, "scriptish-script-uninstalling");
     this.needsUninstall = true;
     this.pendingOperations = AddonManager.PENDING_UNINSTALL;
-    AddonManagerPrivate.callAddonListeners("onUninstalled", this);
+    Scriptish.notify(this, "scriptish-script-uninstalled");
   },
   uninstallProcess: function() {
     this.removeSettings();
     this.removeFiles();
-    this._changed("uninstall", null);
+    Scriptish.notify(this, "scriptish-script-removed");
   },
   removeSettings: function() {
     if (Scriptish_prefRoot.getValue("uninstallPreferences")) {
@@ -290,7 +301,9 @@ Script.prototype = {
     try {
       var host = NetUtil.newURI(aURL).host;
     } catch (e) {
-      return false;
+      // If true, we're allowing a scheme that doesn't have a host.
+      // i.e. "about:scriptish"
+      return Scriptish.isGreasemonkeyable(aURL);
     }
 
     var i = this.domains.length - 1;
@@ -304,7 +317,7 @@ Script.prototype = {
         (regExp.isTLD) ? regExp.test(Scriptish_getTLDURL(aURL)) : regExp.test(aURL));
     function testII(aMatchPattern) aMatchPattern.doMatch(aURL);
 
-    // check if the doamin is ok 
+    // check if the domain is ok
     if (!this.matchesDomain(aURL)) return false;
 
     // check if script @includes/@excludes are disabled
@@ -314,14 +327,10 @@ Script.prototype = {
 
     let includes = this._user_includeRegExps.concat(this._includeRegExps);
     let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
-        .concat(Scriptish.config.excludeRegExps);
+        .concat(this._config.excludeRegExps);
 
     return (includes.some(testI) || this._matches.some(testII))
         && !excludes.some(testI);
-  },
-
-  _changed: function(aEvt, aData, aDontChg) {
-    this._config._changed(this, aEvt, aData, aDontChg);
   },
 
   get id() {
@@ -433,7 +442,7 @@ Script.prototype = {
   get runAt() this["_run-at"] || defaultRunAt,
   useDelayedInjectors: function() {
     this.delayInjection = false;
-    this.updateHelper();
+    Scriptish.notify(this, "scriptish-script-modified", {saved: true, reloadUI: true});
     for (let [, injector] in Iterator(this.delayedInjectors)) injector(this);
     this.delayedInjectors = [];
   },
@@ -469,20 +478,25 @@ Script.prototype = {
       var url = (this._updateURL || "");
     url = url.replace(/[\?#].*$/, "");
     // valid updateURL?
-    if (!url || !url.match(/^https?:\/\//) || !url.match(/\.(?:user|meta)\.js$/i))
+    if (!url || !/^https?:\/\//i.test(url) || !/\.(?:user|meta)\.js$/i.test(url))
       return null;
     // userscripts.org url?
-    if (url.match(/^https?:\/\/userscripts\.org\/.*\.user\.js$/i))
-      return url.replace(/^http:/, "https:").replace(/\.user\.js$/i,".meta.js");
-    // is url https?
-    if (!url.match(/^https:\/\//)) return null;
-    return url;
+    if (/^https?:\/\/userscripts\.org\/.*?\.(?:user|meta)\.js$/i.test(url)) {
+      if (Scriptish.updateSecurely) url = url.replace(/^http:/i, "https:");
+      return url.replace(/\.user\.js$/i, ".meta.js");
+    }
+    return (!Scriptish.updateSecurely || /^https:/i.test(url)) ? url : null;
   },
   get cleanUpdateURL() (this.updateURL+"").replace(/\.meta\.js$/i, ".user.js"),
   get providesUpdatesSecurely() {
     let url = this.updateURL;
-    if (!url || url.match(/^https:\/\//)) return true;
-    return false;
+    if (!url) return false;
+    try {
+      var uri = NetUtil.newURI(url);
+    } catch (e) {
+      return false;
+    }
+    return !Scriptish.updateSecurely || "https" == uri.scheme;
   },
 
   get _file() {
@@ -502,6 +516,7 @@ Script.prototype = {
 
   get fileURL() Scriptish_getUriFromFile(this._file).spec,
   get textContent() Scriptish_getContents(this._file),
+  getTextContent: function(aCallback) Scriptish_getContents(this._file, 0, aCallback),
 
   get size() {
     var size = this._file.fileSize;
@@ -549,7 +564,8 @@ Script.prototype = {
     file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
     this._filename = file.leafName;
 
-    Scriptish_log("Moving script file from " + tempFile.path + " to " + file.path);
+    Scriptish_log(Scriptish_stringBundle("moving.script") + " "
+        + tempFile.path + " --> " + file.path, true);
 
     file.remove(true);
     tempFile.moveTo(file.parent, file.leafName);
@@ -580,14 +596,8 @@ Script.prototype = {
   replaceScriptWith: function(aNewScript) {
     this.removeFiles();
     this.updateFromNewScript(aNewScript.installProcess());
-
-    // notification that update is complete
-    var msg = "'" + this.name;
-    if (this.version) msg += " " + this.version;
-    msg += "' " + Scriptish_stringBundle("statusbar.updated");
-    Scriptish_notification(msg, null, null, function() Scriptish.openManager());
-    this.updateHelper();
-    this._changed("update");
+    Scriptish.notify(
+        this, "scriptish-script-updated", {saved: true, reloadUI: true});
   },
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
@@ -609,6 +619,7 @@ Script.prototype = {
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
+    this._applyBackgroundUpdates = newScript._applyBackgroundUpdates;
     this.supportURL = newScript.supportURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
@@ -655,143 +666,61 @@ Script.prototype = {
         Cu.import("resource://scriptish/config/configdownloader.js", tools);
         // Redownload dependencies.
         tools.Scriptish_configDownloader.refetchDependencies(this);
+      } else {
+        Scriptish.notify(this, "scriptish-script-modified", {saved: true, reloadUI: true});
       }
-      this.modificationProcess();
     }
     if (oldPriority != newPriority) this._config.sortScripts();
   },
 
-  createXMLNode: function(doc) {
-    var scriptNode = doc.createElement("Script");
-    var len;
-
-    for (var j = 0; j < this.contributors.length; j++) {
-      var contributorNode = doc.createElement("Contributor");
-      contributorNode.appendChild(doc.createTextNode(this.contributors[j]));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(contributorNode);
-    }
-
-    for (var j = 0; j < this.domains.length; j++) {
-      var node = doc.createElement("Domain");
-      node.appendChild(doc.createTextNode(this.domains[j]));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(node);
-    }
-
-    for (var j = 0; j < this._includes.length; j++) {
-      var includeNode = doc.createElement("Include");
-      includeNode.appendChild(doc.createTextNode(this._includes[j]));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(includeNode);
-    }
-
-    for (var j = 0; j < this._excludes.length; j++) {
-      var excludeNode = doc.createElement("Exclude");
-      excludeNode.appendChild(doc.createTextNode(this._excludes[j]));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(excludeNode);
-    }
-
-    for (var j = 0; j < this._matches.length; j++) {
-      var matchNode = doc.createElement("Match");
-      matchNode.appendChild(doc.createTextNode(this._matches[j].pattern));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(matchNode);
-    }
-
-    for (let [, include] in Iterator(this._user_includes)) {
-      let node = doc.createElement("UserInclude");
-      node.appendChild(doc.createTextNode(include));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(node);
-    }
-
-    for (let [, exclude] in Iterator(this._user_excludes)) {
-      let node = doc.createElement("UserExclude");
-      node.appendChild(doc.createTextNode(exclude));
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(node);
-    }
-
-    len = this._screenshots.length;
-    for (var j = 0; j < len; j++) {
-      var screenshotNode = doc.createElement("Screenshot");
-      var screenshot = this._screenshots[j];
-      screenshotNode.appendChild(doc.createTextNode(screenshot.url));
-      if (screenshot.thumbnailURL)
-        screenshotNode.setAttribute("thumb", screenshot.thumbnailURL);
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(screenshotNode);
-    }
-
-    for (var j = 0; j < this._requires.length; j++) {
-      var req = this._requires[j];
-      var resourceNode = doc.createElement("Require");
-      resourceNode.setAttribute("filename", req._filename);
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(resourceNode);
-    }
-
-    for (var j = 0; j < this._resources.length; j++) {
-      var imp = this._resources[j];
-      var resourceNode = doc.createElement("Resource");
-
-      resourceNode.setAttribute("name", imp._name);
-      resourceNode.setAttribute("filename", imp._filename);
-      resourceNode.setAttribute("mimetype", imp._mimetype);
-      if (imp._charset) {
-        resourceNode.setAttribute("charset", imp._charset);
-      }
-
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(resourceNode);
-    }
-
-    if (this._noframes) {
-      scriptNode.appendChild(doc.createTextNode("\n\t\t"));
-      scriptNode.appendChild(doc.createElement("Noframes"));
-    }
-
-    scriptNode.appendChild(doc.createTextNode("\n\t"));
-
-    scriptNode.setAttribute("filename", this._filename);
-    scriptNode.setAttribute("id", this.id);
-    scriptNode.setAttribute("name", this.name);
-    scriptNode.setAttribute("namespace", this.namespace);
-    scriptNode.setAttribute("author", this._author);
-    scriptNode.setAttribute("blocklistState", this.blocklistState);
-    scriptNode.setAttribute("description", this._description);
-    scriptNode.setAttribute("version", this._version);
-    scriptNode.setAttribute("delay", this._delay);
-    scriptNode.setAttribute("priority", this.priority);
-    scriptNode.setAttribute("icon", this.icon.filename);
-    scriptNode.setAttribute("icon64", this.icon64.filename);
-    scriptNode.setAttribute("enabled", this._enabled);
-    scriptNode.setAttribute("basedir", this._basedir);
-    scriptNode.setAttribute("modified", this._modified);
-    scriptNode.setAttribute("dependhash", this._dependhash);
-    if (this._jsversion) scriptNode.setAttribute("jsversion", this._jsversion);
-    if (this["_run-at"]) scriptNode.setAttribute("run-at", this["_run-at"]);
-    if (this.includesDisabled) scriptNode.setAttribute("includesDisabled", true);
-
-    if (this.homepageURL)
-      scriptNode.setAttribute("homepageURL", this.homepageURL);
-    if (this._downloadURL)
-      scriptNode.setAttribute("downloadURL", this._downloadURL);
-    if (this._updateURL)
-      scriptNode.setAttribute("updateURL", this._updateURL);
-    if (this.supportURL)
-        scriptNode.setAttribute("supportURL", this.supportURL);
-    if (this.averageRating)
-      scriptNode.setAttribute("averageRating", this.averageRating);
-    if (this.reviewCount)
-      scriptNode.setAttribute("reviewCount", this.reviewCount);
-    if (this.totalDownloads)
-      scriptNode.setAttribute("totalDownloads", this.totalDownloads);
-
-    return scriptNode;
-  },
+  toJSON: function() ({
+    contributors: this._contributors,
+    domains: this.domains,
+    includes: this._includes,
+    excludes: this._excludes,
+    matches: this._matches.map(function(match) match.pattern),
+    user_includes: this._user_includes,
+    user_excludes: this._user_excludes,
+    screenshots: this._screenshots.map(function(screenshot) ({
+      url: screenshot.url,
+      thumbnailURL: screenshot.thumbnailURL
+    })),
+    requires: this._requires.map(function(req) req._filename),
+    resources: this._resources.map(function(res) ({
+      name: res._name,
+      filename: res._filename,
+      mimetype: res._mimetype,
+      charset: res._charset
+    })),
+    noframes: this._noframes,
+    filename: this._filename,
+    id: this.id,
+    name: this.name,
+    namespace: this.namespace,
+    author: this._author,
+    blocklistState: this.blocklistState,
+    description: this._description,
+    version: this._version,
+    delay: this._delay,
+    priority: this.priority,
+    icon: this.icon.filename,
+    icon64: this.icon64.filename,
+    enabled: this._enabled,
+    basedir: this._basedir,
+    modified: this._modified,
+    dependhash: this._dependhash,
+    jsversion: this._jsversion,
+    "run-at": this["_run-at"],
+    includesDisabled: this.includesDisabled,
+    homepageURL: this.homepageURL,
+    downloadURL: this._downloadURL,
+    updateURL: this._updateURL,
+    supportURL: this.supportURL,
+    averageRating: this.averageRating,
+    reviewCount: this.reviewCount,
+    totalDownloads: this.totalDownloads,
+    applyBackgroundUpdates: this._applyBackgroundUpdates
+  }),
 
   // TODO: DRY
   installProcess: function() {
@@ -815,22 +744,6 @@ Script.prototype = {
     this._modified = this._file.lastModifiedTime;
     this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
-  },
-
-  updateHelper: function () {
-    AddonManagerPrivate.callAddonListeners("onUninstalled", this);
-    AddonManagerPrivate.callInstallListeners(
-        "onExternalInstall", null, this, null, false);
-  },
-  modificationProcess: function(noReload) {
-    // notification that modification is complete
-    var msg = "'" + this.name;
-    if (this.version) msg += " " + this.version;
-    msg += "' " + Scriptish_stringBundle("statusbar.modified");
-    Scriptish_notification(msg, null, null, function() Scriptish.openManager());
-
-    if (!noReload) this.updateHelper();
-    this._changed("modified", null, true);
   }
 };
 
@@ -961,8 +874,13 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           } catch (e) {
             break;
           }
-          if (uri.scheme == "https") script._updateURL = uri.spec;
+          if (uri.scheme == "https" || uri.scheme == "http")
+            script._updateURL = uri.spec;
           break;
+        case "applybackgroundupdates":
+          script._applyBackgroundUpdates =
+              parseInt(value, 10) || defaultAutoUpdateState;
+          continue;
         case "injectframes":
           if (value != "0") continue;
           script["_noframes"] = true;
@@ -1131,7 +1049,75 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   return script;
 };
 
-Script.load = function load(aConfig, aNode) {
+Script.loadFromJSON = function(aConfig, aSkeleton) {
+  var script = new Script(aConfig);
+
+  script._filename = aSkeleton.filename;
+  script._basedir = aSkeleton.basedir;
+  script._downloadURL = aSkeleton.downloadURL;
+  script._updateURL = aSkeleton.updateURL;
+  script._homepageURL = aSkeleton.homepageURL;
+  script.supportURL = aSkeleton.supportURL;
+  script._jsversion = aSkeleton.jsversion;
+  script["_run-at"] = aSkeleton["run-at"];
+  script.includesDisabled = aSkeleton.includesDisabled;
+
+  if (!script.fileExists()) {
+    script.uninstallProcess();
+    return true;
+  }
+
+  script._modified = aSkeleton.modified;
+  script._dependhash = aSkeleton.dependhash;
+  script._version = aSkeleton.version;
+  script._noframes = aSkeleton.noframes;
+
+  script.domains = aSkeleton.domains;
+  aSkeleton.contributors.forEach(script.addContributor.bind(script));
+  aSkeleton.includes.forEach(function(i) script.addInclude(i));
+  aSkeleton.excludes.forEach(function(i) script.addExclude(i));
+  aSkeleton.user_includes.forEach(function(i) script.addInclude(i, true));
+  aSkeleton.user_excludes.forEach(function(i) script.addExclude(i, true));
+  aSkeleton.matches.forEach(function(i) script._matches.push(new MatchPattern(i)));
+  aSkeleton.requires.forEach(function(i) {
+    var scriptRequire = new ScriptRequire(script);
+    scriptRequire._filename = i;
+    script._requires.push(scriptRequire);
+  });
+  aSkeleton.resources.forEach(function(i) {
+    var scriptResource = new ScriptResource(script);
+    scriptResource._name = i.name;
+    scriptResource._filename = i.filename;
+    scriptResource._mimetype = i.mimetype;
+    scriptResource._charset = i.charset;
+    script._resources.push(scriptResource);
+  });
+  aSkeleton.screenshots.forEach(function(i) {
+    script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
+        i.url, i.thumbnailURL));
+  });
+
+  script.id = aSkeleton.id;
+  script._name = aSkeleton.name;
+  script._namespace = aSkeleton.namespace;
+  script.author = aSkeleton.author;
+  script._description = aSkeleton.description;
+  script.icon.fileURL = aSkeleton.icon;
+  script.icon64.fileURL = aSkeleton.icon64;
+  script.blocklistState = aSkeleton.blocklistState;
+  script._enabled = aSkeleton.enabled;
+  script.delay = aSkeleton.delay;
+  script.priority = aSkeleton.priority;
+  script.averageRating = aSkeleton.averageRating;
+  script.reviewCount = aSkeleton.reviewCount;
+  script.totalDownloads = aSkeleton.totalDownloads;
+  script._applyBackgroundUpdates = aSkeleton.applyBackgroundUpdates
+
+  aConfig.addScript(script);
+  return false;
+}
+
+Script.loadFromXML = function(aConfig, aNode) {
   var script = new Script(aConfig);
   var fileModified = false;
   let tmp;
@@ -1141,6 +1127,9 @@ Script.load = function load(aConfig, aNode) {
   script._downloadURL = aNode.getAttribute("downloadURL")
       || aNode.getAttribute("installurl") || null;
   script._updateURL = aNode.getAttribute("updateURL") || null;
+  script._applyBackgroundUpdates =
+      parseInt(aNode.getAttribute("applyBackgroundUpdates"), 10)
+      || defaultAutoUpdateState;
   script._homepageURL = aNode.getAttribute("homepageURL")
       || aNode.getAttribute("homepage") || null;
   if (aNode.getAttribute("supportURL"))

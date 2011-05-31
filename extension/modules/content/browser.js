@@ -6,20 +6,15 @@ Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-const ICON_16_ON = "chrome://scriptish/skin/icon_16.png";
-const ICON_16_OFF = "chrome://scriptish/skin/icon_16_disabled.png";
-const ICON_24_ON = "chrome://scriptish/skin/icon_24.png";
-const ICON_24_OFF = "chrome://scriptish/skin/icon_24_disabled.png";
-const ICON_32_ON = "chrome://scriptish/skin/icon_medium.png";
-const ICON_32_OFF = "chrome://scriptish/skin/icon_32_disabled.png";
+const ICON_16_ON = "chrome://scriptish/skin/scriptish16.png";
+const ICON_16_OFF = "chrome://scriptish/skin/scriptish16_disabled.png";
+const ICON_24_ON = "chrome://scriptish/skin/scriptish24.png";
+const ICON_24_OFF = "chrome://scriptish/skin/scriptish24_disabled.png";
 
 function Scriptish_BrowserUIM(aWin, aBrowserUI) {
   this.$ = function(aID) aWin.document.getElementById(aID);
   this._win = aWin;
   this._browserUI = aBrowserUI;
-
-  // listen for clicks on the install bar
-  Services.obs.addObserver(aBrowserUI, "install-userscript", true);
 }
 Scriptish_BrowserUIM.prototype = {
   onIconClick: function(aEvt) {
@@ -36,9 +31,7 @@ Scriptish_BrowserUIM.prototype = {
         break;
     }
   },
-  onToggleStatus: function() {
-    Scriptish.enabled = !Scriptish.enabled;
-  },
+  onToggleStatus: function() Scriptish.enabled = !Scriptish.enabled,
   refreshStatus: function() {
     var tbImg = this.$("scriptish-button-brd");
     var menu = this.$("scriptish_general_menu");
@@ -57,12 +50,10 @@ Scriptish_BrowserUIM.prototype = {
         this._win, aURL, null, "chrome,dependent,centerscreen,resizable,dialog",
         null);
   },
-  newUserScript: function() {
-    this.openChromeWindow("chrome://scriptish/content/newscript.xul");
-  },
-  openOptionsWin: function() {
-    this.openChromeWindow("chrome://scriptish/content/options.xul");
-  },
+  newUserScript: function() (
+    this.openChromeWindow("chrome://scriptish/content/newscript.xul")),
+  openOptionsWin: function() (
+    this.openChromeWindow("chrome://scriptish/content/options.xul")),
   showUserscriptList: function() {
     Cu.import("resource://scriptish/addonprovider.js");
     timeout(Scriptish.openManager);

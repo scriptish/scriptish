@@ -12,14 +12,16 @@
 
   if (0 >= tools.Services.vc.compare(currentVer, "0.1b5")) {
     var chromeWin = tools.Services.wm.getMostRecentWindow("navigator:browser");
-    chromeWin.gBrowser.addTab("https://github.com/erikvold/scriptish/wiki");
+    chromeWin.gBrowser.addTab("about:scriptish");
 
     // add toolbaritem to add-on bar
     var addToBar = chromeWin.document.getElementById("addon-bar");
     if (!addToBar || chromeWin.document.getElementById("scriptish-button"))
       return;
-    var addonSet = addToBar.getAttribute("currentset").split(",");
-    addonSet.push("scriptish-button");
+    var addonSet = (addToBar.getAttribute("currentset") || addToBar.getAttribute("defaultset")).split(",");
+    var addonPos = addonSet.indexOf("status-bar");
+    if (addonPos == -1) addonPos = addonSet.length;
+    addonSet.splice(addonPos, 0, "scriptish-button");
     addonSet = addonSet.join(",");
     addToBar.setAttribute("currentset", addonSet);
     addToBar.currentSet = addonSet;

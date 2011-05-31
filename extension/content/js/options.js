@@ -31,6 +31,9 @@ window.addEventListener("load", function() {
   tmp = $("check-downloadURL");
   tmp.setAttribute("label", Scriptish_stringBundle("options.useDownloadURL"));
   tmp.checked = Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL");
+  tmp = $("check-requireSecured");
+  tmp.setAttribute("label", Scriptish_stringBundle("options.requireSecured"));
+  tmp.checked = Scriptish_prefRoot.getValue("update.requireSecured");
 
   $("caption-addonmanager")
       .setAttribute("label", Scriptish_stringBundle("options.addonManager"));
@@ -41,7 +44,8 @@ window.addEventListener("load", function() {
 
   // Setup global excludes
   $("excludes-caption").setAttribute("label", Scriptish_stringBundle("options.excludes"));
-  $("excludes").value = Scriptish.config.excludes.join("\n");
+  Scriptish.getConfig(function(config) (
+      $("excludes").value = config.excludes.join("\n")));
 }, false);
 
 function Scriptish_getEditor() {
@@ -55,9 +59,12 @@ function doSave() {
       !!$("check-uninstall").checked);
   Scriptish_prefRoot.setValue("useDownloadURLForUpdateURL",
       !!$("check-downloadURL").checked);
+  Scriptish_prefRoot.setValue("update.requireSecured",
+      !!$("check-requireSecured").checked);
   Scriptish_prefRoot.setValue("enableCopyDownloadURL",
       !!$("check-copydownloadURL").checked);
 
-  Scriptish.config.excludes = $("excludes").value.match(/.+/g);
-  Scriptish.config._save();
+  Scriptish.getConfig(function(config) (
+      config.excludes = $("excludes").value.match(/.+/g)));
+  Scriptish.notify(null, "scriptish-preferences-change", true);
 }

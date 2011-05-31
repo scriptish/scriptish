@@ -37,7 +37,7 @@ function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
       .setTimeout(function() aCb.apply(aThis, aArgs), 0);
 }
 
-function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
+function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var document = aSafeWin.document;
   var _xmlhttpRequester = null;
   var _storage = null;
@@ -45,6 +45,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var _logger = null;
   var menuCmdIDs = [];
   var Scriptish_BrowserUI = aChromeWin.Scriptish_BrowserUI;
+  var windowID = aWinID;
 
   function getXmlhttpRequester() {
     if (!_xmlhttpRequester) {
@@ -130,13 +131,6 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
     return getStorage().listValues.apply(getStorage(), arguments);
   }
 
-  this.GM_setClipboard = function GM_setClipboard() {
-    if (!GM_apiLeakCheck("GM_setClipboard")) return;
-    var tools = {};
-    Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
-    tools.GM_setClipboard.apply(null, arguments);
-  }
-
   this.GM_getResourceURL = function GM_getResourceURL() {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
     return getResources().getResourceURL.apply(getResources(), arguments)
@@ -215,7 +209,8 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
   }
 
   if (aSafeWin !== aSafeWin.top) {
-    this.GM_unregisterMenuCommand = this.GM_registerMenuCommand = DOLITTLE;
+    this.GM_unregisterMenuCommand = this.GM_registerMenuCommand
+        = this.GM_disableMenuCommand = this.GM_enableMenuCommand = DOLITTLE;
   } else {
     this.GM_registerMenuCommand = function GM_registerMenuCommand(
         aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
@@ -226,7 +221,7 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
         accelModifiers: aAccelModifiers,
         accessKey: aAccessKey,
         doCommand: aCmdFunc,
-        window: aSafeWin});
+        winID: windowID});
       menuCmdIDs.push(uuid);
       return uuid;
     }
@@ -235,7 +230,19 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
       var i = menuCmdIDs.indexOf(aUUID);
       if (!~i) return false; // check the uuid is for a cmd made by the same script
       menuCmdIDs.splice(i, 1);
-      return Scriptish_BrowserUI.unregisterMenuCommand(aUUID, aSafeWin);
+      return Scriptish_BrowserUI.unregisterMenuCommand(aUUID, windowID);
+    }
+
+    this.GM_enableMenuCommand = function GM_enableMenuCommand(aUUID) {
+      var i = menuCmdIDs.indexOf(aUUID);
+      if (!~i) return false; // check the uuid is for a cmd made by the same script
+      return Scriptish_BrowserUI.enableMenuCommand(aUUID, windowID);
+    }
+
+    this.GM_disableMenuCommand = function GM_disableMenuCommand(aUUID) {
+      var i = menuCmdIDs.indexOf(aUUID);
+      if (!~i) return false; // check the uuid is for a cmd made by the same script
+      return Scriptish_BrowserUI.disableMenuCommand(aUUID, windowID);
     }
   }
 
@@ -250,6 +257,14 @@ function GM_API(aScript, aURL, aSafeWin, aUnsafeContentWin, aChromeWin) {
 
   this.GM_updatingEnabled = true;
 }
+
+GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
+  if (!GM_apiLeakCheck("GM_setClipboard")) return;
+  var tools = {};
+  Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
+  tools.GM_setClipboard.apply(null, arguments);
+}
+
 
 function getWindowForBrowser(browser) browser.docShell
     .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);

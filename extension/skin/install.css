@@ -12,7 +12,7 @@
   -moz-appearance:textfield;
   margin:2px 4px;
 }
-#itemBox {
+#itemBox{
   padding-top: 1ex;
   overflow:auto;
 }
@@ -34,9 +34,7 @@
 
 #scriptDescription strong{font-size: 1.25em;}
 
-#showSource-box {
-  margin: 1ex;
-}
+#showSource-box{margin: 1ex;}
 
 #itemBox vbox:not(#script-desc-vbox){
   margin:0 0 1em 1em;

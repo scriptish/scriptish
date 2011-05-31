@@ -8,6 +8,7 @@ Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_ExtendedStringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js");
 Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js");
+Cu.import("resource://scriptish/addonprovider.js");
 
 var Scriptish_bundle = new Scriptish_ExtendedStringBundle(gStrings.ext);
 Scriptish_bundle.strings["header-userscript"] = Scriptish_stringBundle("userscripts");
@@ -61,11 +62,51 @@ window.addEventListener("load", function() {
     }
   })();
 
-  $("category-userscripts").setAttribute(
-      "name", Scriptish_stringBundle("userscripts"));
-}, false);
+  var category = $("category-scriptish");
+  if (AddonManagerPrivate.AddonType) {
+    category.parentNode.removeChild(category);
+  } else {
+    category.setAttribute("id", "category-userscript");
+    category.setAttribute("name", Scriptish_stringBundle("userscripts"));
+  }
 
-window.addEventListener(
-    "unload", Scriptish.config.uninstallScripts.bind(Scriptish.config), false);
+  $("scriptish-get-scripts-btn").addEventListener("command", function() {
+    var gBrowser = Services.wm.getMostRecentWindow("navigator:browser").gBrowser;
+    gBrowser.selectedTab = gBrowser.addTab("http://userscripts.org");
+  }, false);
+
+  function onViewChanged() {
+    let de = document.documentElement;
+    if ("addons://list/userscript" == gViewController.currentViewId) {
+      de.className += ' scriptish';
+      Scriptish.getConfig(function(config) {
+        $("scriptish-list-empty").collapsed = !!config.scripts.length;
+      });
+    } else {
+      de.className = de.className.replace(/ scriptish/g, '');
+      $("scriptish-list-empty").collapsed = true;
+    }
+  }
+  window.addEventListener('ViewChanged', onViewChanged, false);
+  onViewChanged(); // initialize on load as well as when it changes later
+
+  var needToRemoveObserver = true;
+  var installObserver = {
+    observe: function(aSubject, aTopic, aData) {
+      if ("scriptish-script-installed" != aTopic) return;
+      $("scriptish-list-empty").collapsed = true;
+      Services.obs.removeObserver(installObserver, "scriptish-script-installed");
+      needToRemoveObserver = false;
+    },
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
+  };
+  Services.obs.addObserver(installObserver, "scriptish-script-installed", false);
+
+  window.addEventListener("unload", function() {
+    if (needToRemoveObserver)
+      Services.obs.removeObserver(installObserver, "scriptish-script-installed");
+    Scriptish.getConfig(function(config) config.uninstallScripts());
+  }, false);
+}, false);
 
 })(function(aID) document.getElementById(aID), {});
