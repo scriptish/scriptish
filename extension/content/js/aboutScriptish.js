@@ -1,23 +1,26 @@
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils/q.js");
 
 function $(aID) document.getElementById(aID);
-function include(aSrc, aCallback) {
+function include(aSrc) {
+	var deferred = Q.defer();
     var script = document.createElement("script");
     script.src = aSrc;
-    script.addEventListener("load", aCallback, false);
+    script.addEventListener("load", deferred.resolve, false);
     document.documentElement.firstChild.appendChild(script);
+    return deferred.promise;
   }
 
 (function() {
   // Show about:scriptish?test
   if (window.location.href.split("?")[1] == "test") {
-    include("js/third-party/qunit/qunit.js", function() {
-      include("tests/runTests.js", function() {
-        $("main").style.display = "none";
-        $("test").style.display = "inherit";
-        runTests();
-      });
+    Q.and(
+        include("js/third-party/qunit/qunit.js"),
+        include("tests/runTests.js")).then(function() {
+      $("main").style.display = "none";
+      $("test").style.display = "inherit";
+      runTests();
     });
     return;
   }

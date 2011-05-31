@@ -1,8 +1,9 @@
 function runTests() {
   var tools = {};
-  include("tests/testAvailability.js");
-  include("tests/testCryptoHash.js");
-  include("tests/testToolsMenuItem.js");
-  include("tests/testTimeout.js");
-  include("tests/endTests.js");
+  Q.chain(
+    function() include("tests/testAvailability.js"),
+    function() include("tests/testCryptoHash.js"),
+    function() include("tests/testToolsMenuItem.js"),
+    function() include("tests/testTimeout.js"),
+    function() include("tests/endTests.js"));
 }
