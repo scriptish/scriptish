@@ -140,9 +140,15 @@ Script.prototype = {
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
-  isUSOScript: function() (usoURLChk.test(this._downloadURL)
-      || usoURLChk.test(this._homepageURL)
-      || usoURLChk.test(this._updateURL)),
+  isUSOScript: function() {
+    try {
+      return usoURLChk.test(this._downloadURL)
+          || usoURLChk.test(this._homepageURL)
+          || usoURLChk.test(this._updateURL);
+    } catch (e) {
+      return false;
+    }
+  },
   /*averageRating: undefined,
   reviewCount: undefined,
   totalDownloads: undefined,*/
