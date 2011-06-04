@@ -236,9 +236,6 @@ Config.prototype = {
 
     // called after the config has been loaded
     function callback(fileModified) timeout(function() {
-      // Flag config as loaded
-      self.loaded = true;
-
       let scripts = self._scripts;
       let len = scripts.length;
 
@@ -262,6 +259,9 @@ Config.prototype = {
 
       // Load the blocklist
       if (self._useBlocklist) self._loadBlocklist();
+
+      // Flag config as loaded
+      self.loaded = true;
 
       if (fileModified) self._save();
       aCallback();
