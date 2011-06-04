@@ -15,6 +15,8 @@ Scriptish_prefRoot.watch("enabled", function() {
 
 var global = this;
 
+function getConfig(aCallback) timeout(function() aCallback(global.config));
+
 const Scriptish = {
   updateSecurely: Scriptish_prefRoot.getValue("update.requireSecured"),
   notify: function(aSubject, aTopic, aData) {
@@ -31,9 +33,7 @@ const Scriptish = {
     Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
   getConfig: function(aCallback) {
-    if (global.config) {
-      aCallback(global.config);
-    } else if (!global.configQueue) {
+    if (!global.configQueue) {
       global.configQueue = [aCallback];
       var tools = {};
       Cu.import("resource://scriptish/config/config.js", tools);
@@ -41,6 +41,7 @@ const Scriptish = {
       cf.load(function() {
         Scriptish_log("Scriptish config loaded"); // TODO: force & l10n
         global.config = cf;
+        Scriptish.getConfig = getConfig;
         global.configQueue.forEach(function(f) f(cf));
         delete global["configQueue"];
       });
