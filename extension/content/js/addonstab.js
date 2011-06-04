@@ -80,11 +80,12 @@ window.addEventListener("load", function() {
     if ("addons://list/userscript" == gViewController.currentViewId) {
       de.classList.add("scriptish");
       Scriptish.getConfig(function(config) {
-        $("scriptish-list-empty").collapsed = !!config.scripts.length;
+        if (!config.scripts.length)
+          $("scriptish-list-empty").style.display = "-moz-box";
       });
     } else {
       de.classList.remove("scriptish");
-      $("scriptish-list-empty").collapsed = true;
+      $("scriptish-list-empty").style.display = "none";
     }
   }
   window.addEventListener('ViewChanged', onViewChanged, false);
@@ -94,7 +95,7 @@ window.addEventListener("load", function() {
   var installObserver = {
     observe: function(aSubject, aTopic, aData) {
       if ("scriptish-script-installed" != aTopic) return;
-      $("scriptish-list-empty").collapsed = true;
+      $("scriptish-list-empty").style.display = "none";
       Services.obs.removeObserver(installObserver, "scriptish-script-installed");
       needToRemoveObserver = false;
     },

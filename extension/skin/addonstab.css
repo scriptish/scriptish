@@ -5,11 +5,8 @@
   -moz-binding: url("chrome://scriptish/content/addonstab.xml#control-container");
 }
 
-page.scriptish #addon-list-empty, #user-scripts-list-empty{
+page.scriptish #addon-list-empty, #scriptish-list-empty {
   display: none;
-}
-page.scriptish #user-script-list-empty {
-  display: -moz-box;
 }
 
 /* Hide the 'restart now' link for user scripts. */
