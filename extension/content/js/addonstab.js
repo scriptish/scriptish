@@ -78,12 +78,12 @@ window.addEventListener("load", function() {
   function onViewChanged() {
     let de = document.documentElement;
     if ("addons://list/userscript" == gViewController.currentViewId) {
-      de.className += ' scriptish';
+      de.classList.add("scriptish");
       Scriptish.getConfig(function(config) {
         $("scriptish-list-empty").collapsed = !!config.scripts.length;
       });
     } else {
-      de.className = de.className.replace(/ scriptish/g, '');
+      de.classList.remove("scriptish");
       $("scriptish-list-empty").collapsed = true;
     }
   }
