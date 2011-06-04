@@ -235,7 +235,7 @@ Config.prototype = {
     var self = this;
 
     // called after the config has been loaded
-    function callback(fileModified) {
+    function callback(fileModified) timeout(function() {
       let scripts = self._scripts;
       let len = scripts.length;
 
@@ -260,9 +260,12 @@ Config.prototype = {
       // Load the blocklist
       if (self._useBlocklist) self._loadBlocklist();
 
+      // Flag config as loaded
+      self.loaded = true;
+
       if (fileModified) self._save();
       aCallback();
-    }
+    });
 
     // Load the config (trying from various sources)
     var configFile;
@@ -289,6 +292,8 @@ Config.prototype = {
       });
     });
 
+    loaded: false,
+
     // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
       self._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
@@ -313,6 +318,8 @@ Config.prototype = {
   },
 
   _save: function() {
+    if (!this.loaded) return; // a safety check that should not be relied on
+
     var self = this;
 
     if (this._isSaving)
