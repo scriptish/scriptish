@@ -144,17 +144,19 @@ Config.prototype = {
   },
 
   _loadBlocklist: function() {
-    var file = this._blocklistFile;
-    if (file.exists()) {
-      let self = this;
-      Scriptish_getContents(file, 0, function(str) {
-        self._blocklist = Instances.json.decode(str);
-        self._blocklistHash = Scriptish_cryptoHash(str);
-
-        // block scripts
-        self._blockScripts();
-      });
-    }
+    let self = this;
+    timeout(function() {
+      var file = self._blocklistFile;
+      if (file.exists()) {
+        Scriptish_getContents(file, 0, function(str) {
+          self._blocklist = Instances.json.decode(str);
+          self._blocklistHash = Scriptish_cryptoHash(str);
+      
+          // block scripts
+          self._blockScripts();
+        });
+      }
+    });
   },
 
   _loadXML: function(aFile) {
