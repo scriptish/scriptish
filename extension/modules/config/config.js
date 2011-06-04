@@ -22,6 +22,7 @@ inc("resource://scriptish/script/script.js");
 
 function Config(aBaseDir) {
   var self = this;
+  this.loaded = false;
   this.timer = new Timer();
   this._observers = [];
   this._saveTimer = null;
@@ -296,8 +297,6 @@ Config.prototype = {
         });
       });
     });
-
-    loaded: false,
 
     // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
