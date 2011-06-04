@@ -15,13 +15,16 @@ inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
+inc("resource://scriptish/third-party/Timer.js");
 inc("resource://scriptish/utils/q.js");
 inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
 
 function Config(aBaseDir) {
   var self = this;
+  this.timer = new Timer();
   this._observers = [];
+  this._saveTimer = null;
   this._excludes = [];
   this._excludeRegExps = [];
   this._scripts = [];
@@ -319,8 +322,19 @@ Config.prototype = {
     for (var i = scripts.length - 1; ~i; i--) scripts[i].doBlockCheck();
   },
 
-  _save: function() {
+  _save: function(aSaveNow) {
     if (!this.loaded) return; // a safety check that should not be relied on
+
+    // If we have not explicitly been told to save now, then defer execution
+    // via a timer, to avoid locking up the UI.
+    if (!aSaveNow) {
+      // Reduce work in the case of many changes near to each other in time.
+      if (this._saveTimer) this.timer.clearTimeout(this._saveTimer);
+      this._saveTimer =
+          this.timer.setTimeout(this._save.bind(this, true), 250);
+      return;
+    }
+    delete this["_saveTimer"];
 
     var self = this;
 
