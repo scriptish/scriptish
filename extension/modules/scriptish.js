@@ -91,7 +91,7 @@ const Scriptish = {
     }
     return false;
   },
-  getMostRecentWindow: function() Service.wm.getMostRecentWindow("navigator:browser"),
+  getMostRecentWindow: function() Services.wm.getMostRecentWindow("navigator:browser"),
   getWindows: function() Services.wm.getEnumerator("navigator:browser")
 }
 
