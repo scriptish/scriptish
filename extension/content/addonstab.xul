@@ -52,9 +52,8 @@
       class="alert-container" flex="1">
     <spacer class="alert-spacer-before"/>
     <vbox class="alert">
-      <label value="You don't have any user scripts installed"/>
-      <button id="scriptish-get-scripts-btn" label="Get user scripts"
-          class="addon-control"/>
+      <label id="scriptish-list-empty-label"/>
+      <button id="scriptish-get-scripts-btn" class="addon-control"/>
     </vbox>
     <spacer class="alert-spacer-after"/>
   </vbox>

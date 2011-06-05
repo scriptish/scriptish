@@ -75,6 +75,11 @@ window.addEventListener("load", function() {
     gBrowser.selectedTab = gBrowser.addTab("http://userscripts.org");
   }, false);
 
+  $("scriptish-list-empty-label").setAttribute(
+      "value", Scriptish_stringBundle("userscripts.noneInstalled"));
+  $("scriptish-get-scripts-btn").setAttribute(
+      "label", Scriptish_stringBundle("userscripts.get"));
+
   function onViewChanged() {
     let de = document.documentElement;
     if ("addons://list/userscript" == gViewController.currentViewId) {
