@@ -22,3 +22,4 @@ overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/c
 locale     scriptish  en-US  locale/en-US/
 locale     scriptish  ja-JP  locale/ja-JP/
 locale     scriptish  ru-RU  locale/ru-RU/
+locale     scriptish  sv-SE  locale/sv-SE/
