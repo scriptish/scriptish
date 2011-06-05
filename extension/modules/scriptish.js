@@ -89,8 +89,10 @@ const Scriptish = {
         return Scriptish_prefRoot.getValue('fileIsGreaseable');
       case "unmht":
         return Scriptish_prefRoot.getValue('unmhtIsGreaseable');
+      default:
+        let schemes = Scriptish_prefRoot.getValue('customIsGreaseableSchemes');
+        return schemes.split(",").some(function(s) s.trim() == scheme);
     }
-    return false;
   },
   getMostRecentWindow: function() Services.wm.getMostRecentWindow("navigator:browser"),
   getWindows: function() Services.wm.getEnumerator("navigator:browser")
