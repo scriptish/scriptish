@@ -84,13 +84,13 @@ const Scriptish = {
         // Always allow "about:blank".
         if (/^about:blank/.test(aURL)) return true;
         // Conditionally allow the rest of "about:".
-        return Scriptish_prefRoot.getValue('aboutIsGreaseable');
+        return Scriptish_prefRoot.getValue("aboutIsGreaseable");
       case "file":
-        return Scriptish_prefRoot.getValue('fileIsGreaseable');
+        return Scriptish_prefRoot.getValue("fileIsGreaseable");
       case "unmht":
-        return Scriptish_prefRoot.getValue('unmhtIsGreaseable');
+        return Scriptish_prefRoot.getValue("unmhtIsGreaseable");
       default:
-        let schemes = Scriptish_prefRoot.getValue('customIsGreaseableSchemes');
+        let schemes = Scriptish_prefRoot.getValue("customIsGreaseableSchemes");
         return schemes.split(",").some(function(s) s.trim() == scheme);
     }
   },
