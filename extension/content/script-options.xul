@@ -4,6 +4,8 @@
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     buttons="accept"
     id="scriptish-script-options-dialog"
+    width="500"
+    height="400"
     persist="screenX screenY">
   <script type="application/x-javascript" src="chrome://scriptish/content/js/script-options.js"/>
 
