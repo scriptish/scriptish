@@ -27,12 +27,12 @@
     <em:iconURL>chrome://scriptish/skin/scriptish32.png</em:iconURL>
     <em:icon64URL>chrome://scriptish/skin/scriptish64.png</em:icon64URL>
 
+    <em:developer>Greg Parris; http://phob.net/</em:developer>
     <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
     <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>
     <em:contributor>Chris Feldmann; http://axlotl.net/</em:contributor>
     <em:contributor>David Schontzler; http://stilleye.com/</em:contributor>
     <em:contributor>Gareth Andrew; http://freegarethandrew.org/</em:contributor>
-    <em:contributor>Greg Parris; http://phob.net/</em:contributor>
     <em:contributor>Hisateru Tanaka</em:contributor>
     <em:contributor>Jeremy Dunck; http://dunck.us/anabasis/</em:contributor>
     <em:contributor>Jesper Kristensen; mailto:mail@jesperkristensen.dk</em:contributor>
