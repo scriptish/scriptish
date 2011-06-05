@@ -15,7 +15,8 @@ Scriptish_prefRoot.watch("enabled", function() {
 
 var global = this;
 
-function getConfig(aCallback) timeout(function() aCallback(global.config));
+// don't delay calling aCallback; keep script injection time consistent post load
+function getConfig(aCallback) aCallback(global.config);
 
 const Scriptish = {
   updateSecurely: Scriptish_prefRoot.getValue("update.requireSecured"),
