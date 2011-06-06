@@ -179,11 +179,11 @@ ScriptishService.prototype = {
 
           // inject @run-at document-idle scripts
           if (scripts["document-idle"].length)
-            self.timer.setTimeout(function() {
+            timeout(function() {
               if (shouldNotRun()) return;
               self.injectScripts(
                   scripts["document-idle"], href, currentInnerWindowID, safeWin, chromeWin);
-            }, 0);
+            });
 
           // inject @run-at document-end scripts
           self.injectScripts(scripts["document-end"], href, currentInnerWindowID, safeWin, chromeWin);
