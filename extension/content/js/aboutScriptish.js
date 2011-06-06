@@ -42,6 +42,7 @@ Cu.import("resource://scriptish/utils/q.js");
   }
 
   AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
+    aAddon.developers.forEach(addPerson.bind($("devlist")));
     aAddon.contributors.forEach(addPerson.bind($("contlist")));
     aAddon.translators.forEach(addPerson.bind($("translist")));
   });
