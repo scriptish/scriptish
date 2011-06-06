@@ -93,6 +93,7 @@ ScriptishService.prototype = {
     if (!window || !window.unloaders || !window.unloaders.length) return;
     for (var i = window.unloaders.length - 1; ~i; i--)
       window.unloaders[i]();
+    delete windows[aWinID];
   },
 
   docReady: function(safeWin, chromeWin) {
@@ -202,7 +203,6 @@ ScriptishService.prototype = {
 
       windows[currentInnerWindowID].unloaders.push(function() {
         winClosed = true;
-        delete windows[currentInnerWindowID];
         self.docUnload(currentInnerWindowID, gmBrowserUI);
       });
     });
@@ -300,10 +300,10 @@ ScriptishService.prototype = {
     Cu.import("resource://scriptish/api.js", tools);
 
     let delays = [];
-    wrappedContentWin.addEventListener("unload", function() {
-      for (let [, timerID] in Iterator(delays))
-        self.timer.clearTimeout(timerID);
-    }, true);
+    let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
+    windows[winID].unloaders.push(function() {
+      for (let [, id] in Iterator(delays)) self.timer.clearTimeout(id);
+    });
 
     // detect and grab reference to firebug console and context, if it exists
     let fbConsole = Scriptish_getFirebugConsole(wrappedContentWin, chromeWin);
