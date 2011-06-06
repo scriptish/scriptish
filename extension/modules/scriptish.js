@@ -83,15 +83,9 @@ const Scriptish = {
       case "about":
         // Always allow "about:blank".
         if (/^about:blank/.test(aURL)) return true;
-        // Conditionally allow the rest of "about:".
-        return Scriptish_prefRoot.getValue("aboutIsGreaseable");
-      case "file":
-        return Scriptish_prefRoot.getValue("fileIsGreaseable");
-      case "unmht":
-        return Scriptish_prefRoot.getValue("unmhtIsGreaseable");
+        // no break
       default:
-        let schemes = Scriptish_prefRoot.getValue("customIsGreaseableSchemes");
-        return schemes.split(",").some(function(s) s.trim() == scheme);
+        return !!Scriptish_prefRoot.getValue(scheme+"IsGreaseable", false);
     }
   },
   getMostRecentWindow: function() Services.wm.getMostRecentWindow("navigator:browser"),

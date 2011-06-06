@@ -1,7 +1,4 @@
 pref("extensions.scriptish.aboutIsGreaseable", false);
-pref("extensions.scriptish.fileIsGreaseable", false);
-pref("extensions.scriptish.unmhtIsGreaseable", false);
-pref("extensions.scriptish.customIsGreaseableSchemes", "");
 pref("extensions.scriptish.blocklist.enabled", true);
 pref("extensions.scriptish.blocklist.interval", 86400);
 pref("extensions.scriptish.blocklist.lastFetch", 0);
