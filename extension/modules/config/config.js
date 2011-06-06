@@ -162,19 +162,19 @@ Config.prototype = {
     });
   },
 
-  _loadXML: function(aFile) {
+  _loadXML: function(aFile, aCallback) {
     Scriptish_log("Scriptish Config._loadXML");
     var self = this;
 
     if (aFile.exists()) {
       var str = Scriptish_getContents(aFile);
-      if (!str) return new Error("File not found");
+      if (!str) return aCallback(false);
 
       var doc = Instances.dp.parseFromString(str, "text/xml");
 
       // Stop if there was a parsing error
       if (doc.documentElement.nodeName == "parsererror")
-        return new Error("Parse error");
+        return aCallback(false);
 
       var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
       let excludes = [];
@@ -191,26 +191,26 @@ Config.prototype = {
       }
       self.addExclude(excludes);
 
-      return true;// force a save
+      return aCallback(true);
     }
 
-    return new Error("File not found");
+    aCallback(false);
   },
 
-  _loadJSON: function(aFile) {
+  _loadJSON: function(aFile, aCallback) {
     Scriptish_log("Scriptish Config._loadJSON");
     var self = this;
     var config = {};
 
     if (aFile.exists()) {
       var str = Scriptish_getContents(aFile);
-      if (!str) return new Error("File not found");
+      if (!str) return aCallback(false);
 
       try {
         config = JSON.parse(str);
       } catch(e) {
         // Unable to parse the file.
-        return new Error("Parse error");
+        return aCallback(false);
       }
 
       // load scripts
@@ -221,10 +221,10 @@ Config.prototype = {
       // load global excludes
       config.excludes.forEach(function(i) self.addExclude(i));
 
-      return fileModified;
+      return aCallback(true, fileModified);
     }
 
-    return new Error("File not found");
+    aCallback(false);
   },
 
   load: function(aCallback) {
@@ -267,25 +267,26 @@ Config.prototype = {
     // Load the config (trying from various sources)
     var configFile;
     // source: Scriptish JSON tmp
-    var fileModified = self._loadJSON(self._tempFile);
-    if (fileModified instanceof Error) {
+    self._loadJSON(self._tempFile, function(aSuccess) {
+      if (aSuccess) return callback(true);
+
       // source: Scriptish JSON
+      // NOTE: this is the only case where we care if the file was modified
       (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_JSON);
-      fileModified = self._loadJSON(configFile);
-      if (fileModified instanceof Error) {
+      self._loadJSON(configFile, function(aSuccess, aModified) {
+        if (aSuccess) return callback(aModified);
+
         // source: Scriptish XML
         (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_XML);
-        fileModified = self._loadXML(configFile);
-        if (fileModified instanceof Error) {
+        self._loadXML(configFile, function(aSuccess) {
+          if (aSuccess) return callback(true);
+
           // source: Older GM Style XML
           (configFile = self._scriptDir).append("config.xml");
-          fileModified = self._loadXML(configFile);
-          if (fileModified instanceof Error)
-            fileModified = true;
-        }
-      }
-    }
-    callback(fileModified);
+          self._loadXML(configFile, function() callback(true));
+        });
+      });
+    });
 
     // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
