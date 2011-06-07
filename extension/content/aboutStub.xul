@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE window>
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="text/javascript"><![CDATA[
+    try {
+      Components.utils.import("resource://gre/modules/Services.jsm");
+      let browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
+      (browserWindow.delayedOpenTab || browserWindow.addTab)("about:scriptish");
+    }
+    catch (ex) {
+      // Shouldn't happen, obviously :p
+      Components.utils.reportError(ex);
+    }
+    close();
+  ]]></script>
+</window>
