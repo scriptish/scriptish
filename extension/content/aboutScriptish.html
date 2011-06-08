@@ -11,24 +11,22 @@
 </head>
 
 <body>
-  <div id="container">
-    <header class="primary">
-      <img src="../skin/scriptish32.png" />
-      <h1>About:Scriptish</h1>
-    </header>
-
+  <article>
     <div id="main" role="main">
       <section id="about">
-        <header class="secondary">
-          <h2>About</h2>
+        <header class="primary">
+          <img src="../skin/scriptish32.png" />
+          <h1>About:Scriptish</h1>
         </header>
-        <p>Welcome to Scriptish!  Scriptish is a fork of Greasemonkey, the popular Firefox extension
-        for running user scripts. Greasemonkey has long supported Firefox 1.5, and only recently
+        <p>Welcome to Scriptish! Scriptish is a fork of Greasemonkey, the popular Firefox extension
+        for running user scripts.</p>
+        <p>Greasemonkey has long supported Firefox 1.5, and only recently
         decided to raise the minimum supported version of Firefox to 3.0. Plenty of legacy code
         still exists, however, and it has reached the point where Greasemonkey needs a complete
         reorganization. But unfortunately, development of Greasemonkey is incredibly slow for bug
-        fixes, let alone code base refactoring or the addition of features. This is why I decided to
-        fork Greasemonkey and start something new. &mdash; <a href="https://github.com/erikvold">@erikvold</a></p>
+        fixes, let alone code base refactoring or the addition of features.</p>
+        <p>This is why I decided to fork Greasemonkey and start something new. &mdash;
+        <a href="https://github.com/erikvold">@erikvold</a></p>
       </section>
 
       <section id="learn">
@@ -37,6 +35,8 @@
         </header>
         <p>Check out the <a href="https://github.com/erikvold/scriptish/wiki">Scriptish wiki</a>
         to learn about Scriptish and how to use it.</p>
+        <p>There are a lot of resources you can obtain third-party users scripts from, most notable <a href="http://userscripts.org/">userscripts.org</a>.<br>
+        But please <strong>be careful</strong> when installing third-party scripts, as there can be security and privacy issues. Hence, only install scripts from sources you trust.</p>
       </section>
 
       <section id="helpout">
@@ -53,36 +53,40 @@
 
       <section id="contributors">
         <header class="secondary">
-          <h2>Contributors</h2>
+          <h2>Credits</h2>
+          <p>In alphabetical order</p>
         </header>
-        <div class="twoCol">
-          <h3>Creator:</h3>
-          <ul>
-            <li>Erik Vold &mdash; <a href="http://erikvold.com/">http://erikvold.com/</a></li>
-          </ul>
+        <table><tr>
+          <td>
+            <h3>Creator:</h3>
+            <ul>
+              <li><a class="homepage" href="http://erikvold.com/" title="http://erikvold.com/">Erik Vold</a></li>
+            </ul>
 
-          <h3>Developers:</h3>
-          <ul id="devlist"></ul>
+            <h3>Developers:</h3>
+            <ul id="devlist"></ul>
 
-          <h3>Contributors:</h3>
-          <ul id="contlist"></ul>
-
-          <h3>Translators:</h3>
-          <ul id="translist"></ul>
-        </div>
+            <h3>Translators:</h3>
+            <ul id="translist"></ul>
+          </td>
+          <td>
+            <h3>Contributors:</h3>
+            <ul id="contlist"></ul>
+          </td>
+        </tr></table>
       </section>
     </div>
+  </article>
 
-    <div id="test">
-      <section>
-        <header>
-          <h2 id="qunit-header2">Testing Scriptish</h2>
-          <h3 id="qunit-banner"></h3>
-          <h4 id="qunit-userAgent"></h4>
-        </header>
-        <ol id="qunit-tests"></ol>
-      </section>
-    </div>
-  </div>
+   <div id="test">
+     <section>
+       <header>
+         <h2 id="qunit-header2">Testing Scriptish</h2>
+         <h3 id="qunit-banner"></h3>
+         <h4 id="qunit-userAgent"></h4>
+       </header>
+       <ol id="qunit-tests"></ol>
+     </section>
+   </div>
 </body>
 </html>
