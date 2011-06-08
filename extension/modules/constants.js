@@ -1,8 +1,8 @@
 var EXPORTED_SYMBOLS = [
-    "Cc", "Ci", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
+    "Cc", "Ci", "Cr", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
     "Services", "Instances", "timeout"];
 
-const {classes: Cc, interfaces: Ci} = Components;
+const {classes: Cc, interfaces: Ci, results: Cr} = Components;
 const ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
 var Services = {};
 (function(inc, tools){

@@ -6,7 +6,76 @@ var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
   inc("resource://scriptish/api.js");
 })(Components.utils.import)
 
-const MIME_JSON = /^(application|text)\/(?:x-)?json/i
+const MIME_JSON = /^(application|text)\/(?:x-)?json/i;
+
+/**
+ * Abstract base class for (chained) request notification callback overrides
+ *
+ * Use such overrides sparely, as the individual request performance might
+ * degrade quite a bit.
+ *
+ * @param req XMLHttpRequest (chrome)
+ * @author Nils Maier
+ */
+function NotificationCallbacks(req) {
+  throw new Error("trying to initiate an abstract NotificationCallbacks");
+}
+NotificationCallbacks.prototype = {
+  init: function(req) {
+    // rewrite notification callbacks
+    this._channel = req.channel;
+    this._notificationCallbacks = this._channel.notificationCallbacks;
+    this._channel.notificationCallbacks = this;
+  },
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIInterfaceRequestor]),
+  getInterface: function(iid) {
+    try {
+      return this.query(iid);
+    }
+    catch (ex) {
+      return this.queryOriginal(iid);
+    }
+  },
+  queryOriginal: function(iid) {
+    if (this._notificationCallbacks) {
+      return this._notificationCallbacks.getInterface(iid);
+    }
+    throw Cr.NS_ERROR_NO_INTERFACE;
+  }
+}
+
+/**
+ * Ignore (specific) redirects
+ * @param req XMLHttpRequest (chrome)
+ * @author Nils Maier
+ */
+function IgnoreRedirect(req, ignoreFlags) {
+  this.init(req);
+  this.ignoreFlags = ignoreFlags;
+}
+IgnoreRedirect.prototype = {
+  __proto__: NotificationCallbacks.prototype,
+  query: XPCOMUtils.generateQI([Ci.nsIChannelEventSink]),
+  asyncOnChannelRedirect: function(oldChannel, newChannel, flags, callback) {
+    if (this.ignoreFlags & flags) {
+      // must throw here, not call callback.onRedirectVerifyCallback,
+      // or else it will completely cancel the request
+      throw Cr.NS_ERROR_UNEXPECTED;
+    }
+
+    try {
+      let ces = this.queryOriginal(Ci.nsIChannelEventSink);
+      if (ces) {
+        ces.asyncOnChannelRedirect(oldChannel, newChannel, flags, callback);
+        return;
+      }
+    }
+    catch (ex) {}
+
+    callback.onRedirectVerifyCallback(Cr.NS_OK);
+  }
+};
+
 
 function GM_xmlhttpRequester(unsafeContentWin, originUrl, aScript) {
   this.unsafeContentWin = unsafeContentWin;
@@ -76,6 +145,14 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
 
   if (details.ignoreCache)
     req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+
+  if (details.ignoreRedirect)
+    new IgnoreRedirect(req,
+      Ci.nsIChannelEventSink.REDIRECT_TEMPORARY | Ci.nsIChannelEventSink.REDIRECT_PERMANENT);
+  if (details.ignoreTempRedirect)
+    new IgnoreRedirect(req, Ci.nsIChannelEventSink.REDIRECT_TEMPORARY);
+  if (details.ignorePermanentRedirect)
+    new IgnoreRedirect(req, Ci.nsIChannelEventSink.REDIRECT_PERMANENT);
 
   if (details.headers) {
     var headers = details.headers;
