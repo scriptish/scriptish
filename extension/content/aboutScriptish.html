@@ -11,82 +11,80 @@
 </head>
 
 <body>
-  <article>
-    <div id="main" role="main">
-      <section id="about">
-        <header class="primary">
-          <img src="../skin/scriptish32.png" />
-          <h1>About:Scriptish</h1>
-        </header>
-        <p>Welcome to Scriptish! Scriptish is a fork of Greasemonkey, the popular Firefox extension
-        for running user scripts.</p>
-        <p>Greasemonkey has long supported Firefox 1.5, and only recently
-        decided to raise the minimum supported version of Firefox to 3.0. Plenty of legacy code
-        still exists, however, and it has reached the point where Greasemonkey needs a complete
-        reorganization. But unfortunately, development of Greasemonkey is incredibly slow for bug
-        fixes, let alone code base refactoring or the addition of features.</p>
-        <p>This is why I decided to fork Greasemonkey and start something new. &mdash;
-        <a href="https://github.com/erikvold">@erikvold</a></p>
-      </section>
+  <article id="main">
+     <section id="about">
+       <header class="primary">
+         <img src="../skin/scriptish32.png" />
+         <h1>About:Scriptish</h1>
+       </header>
+       <p>Welcome to Scriptish! Scriptish is a fork of Greasemonkey, the popular Firefox extension
+       for running user scripts.</p>
+       <p>Greasemonkey has long supported Firefox 1.5, and only recently
+       decided to raise the minimum supported version of Firefox to 3.0. Plenty of legacy code
+       still exists, however, and it has reached the point where Greasemonkey needs a complete
+       reorganization. But unfortunately, development of Greasemonkey is incredibly slow for bug
+       fixes, let alone code base refactoring or the addition of features.</p>
+       <p>This is why I decided to fork Greasemonkey and start something new. &mdash;
+       <a href="https://github.com/erikvold">@erikvold</a></p>
+     </section>
 
-      <section id="learn">
-        <header class="secondary">
-          <h2>Learn</h2>
-        </header>
-        <p>Check out the <a href="https://github.com/erikvold/scriptish/wiki">Scriptish wiki</a>
-        to learn about Scriptish and how to use it.</p>
-        <p>There are a lot of resources you can obtain third-party users scripts from, most notable <a href="http://userscripts.org/">userscripts.org</a>.<br>
-        But please <strong>be careful</strong> when installing third-party scripts, as there can be security and privacy issues. Hence, only install scripts from sources you trust.</p>
-      </section>
+     <section id="learn">
+       <header class="secondary">
+         <h2>Learn</h2>
+       </header>
+       <p>Check out the <a href="https://github.com/erikvold/scriptish/wiki">Scriptish wiki</a>
+       to learn about Scriptish and how to use it.</p>
+       <p>There are a lot of resources you can obtain third-party users scripts from, most notable <a href="http://userscripts.org/">userscripts.org</a>.<br>
+       But please <strong>be careful</strong> when installing third-party scripts, as there can be security and privacy issues. Hence, only install scripts from sources you trust.</p>
+     </section>
 
-      <section id="helpout">
-        <header class="secondary">
-          <h2>Help Out</h2>
-        </header>
-        <p>There are many ways you can help out with Scriptish:</p>
-        <ul>
-          <li><a href="https://github.com/erikvold/scriptish/issues">Report a bug</a></li>
-          <li><a href="https://github.com/erikvold/scriptish/issues">Request a feature</a></li>
-          <li>Like coding?  <a href="https://github.com/erikvold/scriptish">Fork us!</a></li>
-        </ul>
-      </section>
+     <section id="helpout">
+       <header class="secondary">
+         <h2>Help Out</h2>
+       </header>
+       <p>There are many ways you can help out with Scriptish:</p>
+       <ul>
+         <li><a href="https://github.com/erikvold/scriptish/issues">Report a bug</a></li>
+         <li><a href="https://github.com/erikvold/scriptish/issues">Request a feature</a></li>
+         <li>Like coding?  <a href="https://github.com/erikvold/scriptish">Fork us!</a></li>
+       </ul>
+     </section>
 
-      <section id="contributors">
-        <header class="secondary">
-          <h2>Credits</h2>
-          <p>In alphabetical order</p>
-        </header>
-        <table><tr>
-          <td>
-            <h3>Creator:</h3>
-            <ul>
-              <li><a class="homepage" href="http://erikvold.com/" title="http://erikvold.com/">Erik Vold</a></li>
-            </ul>
+     <section id="contributors">
+       <header class="secondary">
+         <h2>Credits</h2>
+         <p>In alphabetical order</p>
+       </header>
+       <table><tr>
+         <td>
+           <h3>Creator:</h3>
+           <ul>
+             <li><a class="homepage" href="http://erikvold.com/" title="http://erikvold.com/">Erik Vold</a></li>
+           </ul>
 
-            <h3>Developers:</h3>
-            <ul id="devlist"></ul>
+           <h3>Developers:</h3>
+           <ul id="devlist"></ul>
 
-            <h3>Translators:</h3>
-            <ul id="translist"></ul>
-          </td>
-          <td>
-            <h3>Contributors:</h3>
-            <ul id="contlist"></ul>
-          </td>
-        </tr></table>
-      </section>
-    </div>
+           <h3>Translators:</h3>
+           <ul id="translist"></ul>
+         </td>
+         <td>
+           <h3>Contributors:</h3>
+           <ul id="contlist"></ul>
+         </td>
+       </tr></table>
+     </section>
+  </article>
 
-    <div id="test">
-      <section>
-        <header>
-          <h2 id="qunit-header2">Testing Scriptish</h2>
-          <h3 id="qunit-banner"></h3>
-          <h4 id="qunit-userAgent"></h4>
-        </header>
-        <ol id="qunit-tests"></ol>
-      </section>
-    </div>
+  <article id="test">
+    <section>
+      <header>
+        <h2 id="qunit-header2">Testing Scriptish</h2>
+        <h3 id="qunit-banner"></h3>
+        <h4 id="qunit-userAgent"></h4>
+      </header>
+      <ol id="qunit-tests"></ol>
+    </section>
   </article>
 </body>
 </html>

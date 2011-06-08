@@ -48,6 +48,12 @@ article {
   border: 1px solid ThreeDShadow;
   border-radius: 15px;
 }
+#test {
+  padding: 0;
+}
+#test > section {
+  margin: 0;
+}
 
 table {
   width: 100%;
