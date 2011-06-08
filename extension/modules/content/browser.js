@@ -52,8 +52,19 @@ Scriptish_BrowserUIM.prototype = {
   },
   newUserScript: function() (
     this.openChromeWindow("chrome://scriptish/content/newscript.xul")),
-  openOptionsWin: function() (
-    this.openChromeWindow("chrome://scriptish/content/options.xul")),
+  openOptionsWin: function() {
+    var instantApply = false;
+    try {
+      instantApply = Services.prefs.getBoolPref("browser.preferences.instantApply");
+    }
+    catch (ex) {};
+
+    this._win.openDialog(
+      "chrome://scriptish/content/options.xul",
+      "scriptish-options-dialog",
+      "chrome,titlebar,toolbar,resizable,centerscreen" + (instantApply ? ",dialog=no" : "")
+    );
+  },
   showUserscriptList: function() {
     Cu.import("resource://scriptish/addonprovider.js");
     timeout(Scriptish.openManager);

@@ -1,0 +1,15 @@
+@import "chrome://global/skin/";
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+radio[pane] {
+  list-style-image: url(options.png);
+}
+radio[pane="pane-main"] {
+  -moz-image-region: rect(0px, 32px, 32px, 0px);
+}
+radio[pane="pane-excludes"] {
+  -moz-image-region: rect(0px, 64px, 32px, 32px);
+}
+radio[pane="pane-advanced"] {
+  -moz-image-region: rect(0px, 96px, 32px, 64px);
+}
