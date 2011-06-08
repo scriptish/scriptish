@@ -85,7 +85,7 @@ const Scriptish = {
         if (/^about:blank/.test(aURL)) return true;
         // no break
       default:
-        return !!Scriptish_prefRoot.getValue(scheme+"IsGreaseable", false);
+        return Scriptish_prefRoot.getBoolValue(scheme+"IsGreaseable");
     }
   },
   getMostRecentWindow: function() Services.wm.getMostRecentWindow("navigator:browser"),

@@ -48,7 +48,13 @@ function Scriptish_PrefManager(startPoint) {
       return defaultValue != undefined ? defaultValue : null;
     }
     return null;
-  }
+  };
+
+  this.getBoolValue = function(aName, aDefault) {
+    if (pref.PREF_BOOL == pref.getPrefType(aName))
+      return pref.getBoolPref(aName);
+    return aDefault || false;
+  };
 
   /**
    * sets the named preference to the specified value. values must be strings,
