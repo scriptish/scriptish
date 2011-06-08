@@ -23,7 +23,7 @@ Cu.import("resource://scriptish/utils/q.js");
         include("js/third-party/qunit/qunit.js"),
         include("tests/runTests.js")).then(function() {
       $("main").style.display = "none";
-      $("test").style.display = "inherit";
+      $("test").style.display = "block";
       runTests();
     });
     return;
