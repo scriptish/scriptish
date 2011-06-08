@@ -5,6 +5,7 @@ function runTests() {
     function() include("tests/testCryptoHash.js"),
     function() include("tests/testToolsMenuItem.js"),
     function() include("tests/testIsGMable.js"),
+    function() include("tests/testGetConfig.js"),
     function() include("tests/testScriptishEnabled.js"),
     function() include("tests/testScriptishUpdateSecurely.js"),
     function() include("tests/testTimeout.js"),
