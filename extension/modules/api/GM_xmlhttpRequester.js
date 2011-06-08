@@ -154,6 +154,20 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
   if (details.ignorePermanentRedirect)
     new IgnoreRedirect(req, Ci.nsIChannelEventSink.REDIRECT_PERMANENT);
 
+  let redirectionLimit = null;
+  if (details.failOnRedirect) {
+    redirectionLimit = 0;
+  }
+  if ("redirectionLimit" in details) {
+    if (details.redirectionLimit < 0 || details.redirectionLimit > 10) {
+      throw new Error("redirectionLimit must be within (0, 10), but it is " + details.redirectionLimit);
+    }
+    redirectionLimit = details.redirectionLimit;
+  }
+  if (redirectionLimit !== null && req.channel instanceof Ci.nsIHttpChannel) {
+    req.channel.redirectionLimit = redirectionLimit;
+  }
+
   if (details.headers) {
     var headers = details.headers;
 
