@@ -19,7 +19,7 @@ var global = this;
 function getConfig(aCallback) aCallback(global.config);
 
 const Scriptish = {
-  updateSecurely: Scriptish_prefRoot.getValue("update.requireSecured"),
+  updateSecurely: Scriptish_prefRoot.getBoolValue("update.requireSecured"),
   notify: function(aSubject, aTopic, aData) {
     if (true === aData) {
       aData = {saved: true};
