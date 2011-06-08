@@ -84,3 +84,11 @@ td {
   border-bottom: 1px dotted lightgray;
 }
 
+#qunit-testresult {
+  max-width: 100% !important;
+}
+
+#qunit-tests li {
+  margin: 0 !important;
+}
+
