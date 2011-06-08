@@ -15,6 +15,8 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/q.js");
 
 (function() {
+  "use strict";
+
   // Show about:scriptish?test
   if (window.location.href.split("?")[1] == "test") {
     Q.and(
@@ -28,22 +30,32 @@ Cu.import("resource://scriptish/utils/q.js");
   }
 
   // Show about:scriptish
-  var addPerson = function(aPerson) {
-    var person = aPerson.name.split(/; +/);
-    var li = html("li", person[0]);
-    if (person[1]) {
-      var a = html("a", {
-        href: person[1]
-      }, person[1].replace(/^mailto:/i, ""));
-      li.innerHTML += " &mdash; ";
-      li.appendChild(a);
+  var addPersons = function(aList, aPersons) {
+    aPersons = aPersons.slice().sort(function(a, b) {
+      [a,b] = [a.name, b.name].map(function(p) {;
+        return p.split(/; +/)[0].toLowerCase();
+      });
+      return a < b ? -1 : (a > b ? 1 : 0);
+    });
+    for each (var person in aPersons) {
+      person = person.name.split(/; +/);
+      if (!person[1]) {
+        person = person[0];
+      }
+      else {
+        person = html("a", {
+          "class": "homepage",
+          title: person[1].replace(/^mailto:/i, ""),
+          href: person[1]
+        }, person[0]);
+      }
+      aList.appendChild(html("li", person));
     }
-    this.appendChild(li);
   }
 
   AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
-    aAddon.developers.forEach(addPerson.bind($("devlist")));
-    aAddon.contributors.forEach(addPerson.bind($("contlist")));
-    aAddon.translators.forEach(addPerson.bind($("translist")));
+    addPersons($("devlist"), aAddon.developers);
+    addPersons($("contlist"), aAddon.contributors);
+    addPersons($("translist"), aAddon.translators);
   });
 })();
