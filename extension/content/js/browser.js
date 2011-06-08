@@ -49,13 +49,6 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   sbShowUSEle.setAttribute("oncommand",
       "Scriptish_BrowserUIM.showUserscriptList()");
 
-  var showOptionsEle = $("scriptish-tb-options-brd");
-  showOptionsEle.setAttribute("label", Scriptish_stringBundle("options")+"...");
-  showOptionsEle.setAttribute("accesskey",
-      Scriptish_stringBundle("menu.options.ak"));
-  showOptionsEle.setAttribute("oncommand",
-      "Scriptish_BrowserUIM.openOptionsWin()");
-
   var sbPopUp = $("scriptish-tb-popup-brd");
   sbPopUp.setAttribute("onclick",
       "Scriptish_popupClicked(event);event.stopPropagation();");
@@ -83,6 +76,11 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   var tmEle = $('scriptish_general_menu');
   tmEle.setAttribute("label", Scriptish_stringBundle("menu.title"));
   tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.title.ak"));
+
+  tmEle = $('scriptish-options-brd');
+  tmEle.setAttribute("label", Scriptish_stringBundle("options"));
+  tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.options.ak"));
+  tmEle.setAttribute("oncommand", "Scriptish_BrowserUIM.openOptionsWin()");
 
   var statusEnabledItem = this.statusCasterEle = $("scriptish-tb-enabled-brd");
   statusEnabledItem.setAttribute("label",
