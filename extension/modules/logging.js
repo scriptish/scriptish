@@ -18,7 +18,7 @@ function Scriptish_logError(aErr, opt_warn, fileName, lineNumber) {
 }
 
 function Scriptish_log(aMsg, aForce) {
-  if (!aForce && !Scriptish_prefRoot.getValue("logChrome", false)) return;
+  if (!aForce && !Scriptish_prefRoot.getBoolValue("logChrome")) return;
   // make sure msg is a string, and remove NULL bytes which truncate it
   Services.console.logStringMessage(("[Scriptish] " + aMsg).replace("\0","","g"));
 }

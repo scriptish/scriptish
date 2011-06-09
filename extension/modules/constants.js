@@ -57,6 +57,9 @@ XPCOMUtils.defineLazyServiceGetter(
     "nsIClipboardHelper");
 
 XPCOMUtils.defineLazyServiceGetter(
+    Services, "cs", "@mozilla.org/consoleservice;1", "nsIConsoleService");
+
+XPCOMUtils.defineLazyServiceGetter(
     Services, "eps", "@mozilla.org/uriloader/external-protocol-service;1",
     "nsIExternalProtocolService");
 
