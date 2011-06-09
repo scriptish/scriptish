@@ -14,6 +14,7 @@ radio[pane="pane-advanced"] {
   -moz-image-region: rect(0px, 96px, 32px, 64px);
 }
 
+caption,
 description {
   font-weight: bold;
 }
