@@ -19,8 +19,8 @@ Cu.import("resource://scriptish/constants.js");
   "use strict";
 
   // Show about:scriptish?test
-  var param = window.location.href.split("?")[1];
-  if (param) {
+  var params = window.location.href.split("?")[1];
+  if (/(?:^|&)test(?:&|=|$)/i.test(params)) {
     Cu.import("resource://scriptish/utils/q.js");
     include("tests/runTests.js").then(function() {
       $("main").style.display = "none";
