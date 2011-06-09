@@ -449,8 +449,8 @@ var config = {
 
 // Load paramaters
 (function() {
-	var location = window.location || { search: "", protocol: "file:" },
-		params = location.search.slice( 1 ).split( "&" ),
+	var location = window.location || { href: "", protocol: "file:" },
+		params = ( location.href.split( "?" )[ 1 ] || "" ).split( "&" ),
 		length = params.length,
 		urlParams = {},
 		current;
