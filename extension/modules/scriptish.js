@@ -70,22 +70,27 @@ const Scriptish = {
     // if the url provide is not a valid url, then an error could be thrown
     try {
       var scheme = Services.io.extractScheme(aURL);
+      if (!scheme) {
+        return false;
+      }
     } catch (e) {
       return false;
     }
-
     switch (scheme) {
       case "http":
       case "https":
+        return Scriptish_prefRoot.getBoolValue("enabledSchemes.http", true);
+
       case "ftp":
       case "data":
-        return true;
+        return Scriptish_prefRoot.getBoolValue("enabledSchemes." + scheme, true);
+
       case "about":
         // Always allow "about:blank".
-        if (/^about:blank/.test(aURL)) return true;
+        if (/^about:blank(?:[#?].*)?$/.test(aURL)) return true;
         // no break
       default:
-        return Scriptish_prefRoot.getBoolValue(scheme+"IsGreaseable");
+        return Scriptish_prefRoot.getBoolValue("enabledSchemes." + scheme, false);
     }
   },
   getMostRecentWindow: function() Services.wm.getMostRecentWindow("navigator:browser"),

@@ -49,7 +49,7 @@ test("HTTPS", function() {
 test("ABOUT", function() {
   expect(6);
   try {
-    var aboutIsGMable = PREF_BRANCH.getBoolPref("aboutIsGreaseable");
+    var aboutIsGMable = PREF_BRANCH.getBoolPref("enabledSchemes.about");
   } catch (e) {
     var aboutIsGMable = false; // default
   }
@@ -61,7 +61,7 @@ test("ABOUT", function() {
   equal(
       Scriptish.isGreasemonkeyable("about:blank?test"),
       true,
-      "about:blank?test is " + (aboutIsGMable ? "ok" : "not ok"));
+      "about:blank?test is always ok");
   equal(
       Scriptish.isGreasemonkeyable("about:home"),
       aboutIsGMable,
@@ -83,7 +83,7 @@ test("ABOUT", function() {
 test("FILE", function() {
   expect(5);
   try {
-    var fileIsGMable = PREF_BRANCH.getBoolPref("fileIsGreaseable");
+    var fileIsGMable = PREF_BRANCH.getBoolPref("enabledSchemes.file");
   } catch (e) {
     var fileIsGMable = false; // default
   }
@@ -113,7 +113,7 @@ test("FILE", function() {
 test("UNMHT", function() {
   expect(5);
   try {
-    var unmhtIsGMable = PREF_BRANCH.getBoolPref("unmhtIsGreaseable");
+    var unmhtIsGMable = PREF_BRANCH.getBoolPref("enabledSchemes.unmht");
   } catch (e) {
     var unmhtIsGMable = false; // default
   }
