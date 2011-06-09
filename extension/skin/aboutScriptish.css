@@ -27,12 +27,11 @@ header.primary img {
 }
 header.primary h1 { display:inline; }
 header.secondary h2 { border-bottom: 1px dotted #ccc; }
-#test header { margin-bottom: 0; border: none; }
 
 ul { margin-top: 5px; padding-left: 15px; }
+li { margin-bottom: 0.2em; }
 
 p { margin: 0; padding: 0; margin-bottom: 0.5em; }
-li { margin-bottom: 0.2em; }
 
 a { color: #00f; text-decoration: none; }
 a:hover { color: #09f; }
@@ -47,12 +46,6 @@ article {
   background-color: #fff;
   border: 1px solid ThreeDShadow;
   border-radius: 15px;
-}
-#test {
-  padding: 0;
-}
-#test > section {
-  margin: 0;
 }
 
 table {
@@ -75,14 +68,20 @@ td {
   }
 }
 
-#test {
-  display: none;
-}
-
 .homepage {
   color: black;
   border-bottom: 1px dotted lightgray;
 }
+
+#test {
+  display: none;
+  padding: 0;
+}
+#test > section {
+  margin: 0;
+}
+
+#test header { margin-bottom: 0; border: none; }
 
 #qunit-testresult {
   max-width: 100% !important;
