@@ -83,6 +83,8 @@ td {
 
 #test header { margin-bottom: 0; border: none; }
 
+#qunit-header2 { margin-bottom: 0; }
+
 #qunit-testresult {
   max-width: 100% !important;
 }
