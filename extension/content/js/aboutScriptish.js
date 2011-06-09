@@ -20,7 +20,7 @@ Cu.import("resource://scriptish/constants.js");
 
   // Show about:scriptish?test
   var params = window.location.href.split("?")[1];
-  if (/(?:^|&)test(?:&|=|$)/i.test(params)) {
+  if (/(?:^|&)(?:test|filter)(?:&|=|$)/i.test(params)) {
     Cu.import("resource://scriptish/utils/q.js");
     include("tests/runTests.js").then(function() {
       $("main").style.display = "none";
