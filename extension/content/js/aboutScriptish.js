@@ -1,5 +1,7 @@
 const Cu = Components.utils;
 
+QUnit.config.autostart = false; // prevents QUnit from auto starting onload
+
 function $(aID) document.getElementById(aID);
 function include(aSrc) {
   var deferred = Q.defer();
@@ -19,9 +21,7 @@ Cu.import("resource://scriptish/utils/q.js");
 
   // Show about:scriptish?test
   if (window.location.href.split("?")[1] == "test") {
-    Q.and(
-        include("js/third-party/qunit/qunit.js"),
-        include("tests/runTests.js")).then(function() {
+    include("tests/runTests.js").then(function() {
       $("main").style.display = "none";
       $("test").style.display = "block";
       runTests();
