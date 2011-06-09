@@ -32,6 +32,13 @@
   </preferences>
 
   <prefpane id="pane-main" label="options.pane.main" localize="label">
+    <groupbox>
+      <caption label="options.enabledSchemes.main" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-http" label="options.enabledSchemes.http" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-ftp" label="options.enabledSchemes.ftp" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-data" label="options.enabledSchemes.data" localize="label"/>
+    </groupbox>
+
     <groupbox orient="horizontal">
       <caption label="options.editor" localize="label"/>
       <textbox preference="pref-editor" flex="1" readonly="true" placeholder="options.editor.notset" localize="placeholder"/>
@@ -71,18 +78,26 @@
       <caption label="options.translation" localize="label"/>
       <checkbox preference="pref-useDefaultLocale" label="options.translation.useEnglish" localize="label"/>
     </groupbox>
-    <groupbox>
-      <caption label="options.enabledSchemes" localize="label"/>
-      <checkbox preference="pref-enabledSchemes-http" label="options.enabledSchemes.http" localize="label"/>
-      <checkbox preference="pref-enabledSchemes-ftp" label="options.enabledSchemes.ftp" localize="label"/>
-      <checkbox preference="pref-enabledSchemes-data" label="options.enabledSchemes.data" localize="label"/>
+    <groupbox id="enabledschemes-advanced">
+      <caption label="options.enabledSchemes.advanced" localize="label"/>
+      <grid>
+        <columns>
+          <column flex="1"/>
+          <column flex="1"/>
+        </columns>
+        <rows>
+          <row>
+            <checkbox preference="pref-enabledSchemes-file" label="options.enabledSchemes.file" localize="label"/>
+            <checkbox preference="pref-enabledSchemes-chrome" label="options.enabledSchemes.chrome" localize="label"/>
+          </row>
+          <row>
+            <checkbox preference="pref-enabledSchemes-unmht" label="options.enabledSchemes.unmht" localize="label"/>
+            <checkbox preference="pref-enabledSchemes-about" label="options.enabledSchemes.about" localize="label"/>
+          </row>
+        </rows>
+      </grid>
       <separator class="thin"/>
-      <checkbox preference="pref-enabledSchemes-file" label="options.enabledSchemes.file" localize="label"/>
-      <checkbox preference="pref-enabledSchemes-unmht" label="options.enabledSchemes.unmht" localize="label"/>
-      <separator class="thin"/>
-      <checkbox preference="pref-enabledSchemes-about" label="options.enabledSchemes.about" localize="label"/>
-      <checkbox preference="pref-enabledSchemes-chrome" label="options.enabledSchemes.chrome" localize="label"/>
-      <label class="remark" value="options.enabledSchemes.securityRemark" localize="value"/>
+      <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark" localize="value"/>
     </groupbox>
     <groupbox>
       <caption label="options.logging" localize="label"/>
