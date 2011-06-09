@@ -16,6 +16,13 @@
     <preference id="pref-disableNotifications" name="extensions.scriptish.disableNotifications" type="bool"/>
     <preference id="pref-editor" name="extensions.scriptish.editor" type="unichar"/>
     <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
+    <preference id="pref-enabledSchemes-about" name="extensions.scriptish.enabledSchemes.about" type="bool"/>
+    <preference id="pref-enabledSchemes-chrome" name="extensions.scriptish.enabledSchemes.chrome" type="bool"/>
+    <preference id="pref-enabledSchemes-data" name="extensions.scriptish.enabledSchemes.data" type="bool"/>
+    <preference id="pref-enabledSchemes-file" name="extensions.scriptish.enabledSchemes.file" type="bool"/>
+    <preference id="pref-enabledSchemes-ftp" name="extensions.scriptish.enabledSchemes.ftp" type="bool"/>
+    <preference id="pref-enabledSchemes-http" name="extensions.scriptish.enabledSchemes.http" type="bool"/>
+    <preference id="pref-enabledSchemes-unmht" name="extensions.scriptish.enabledSchemes.unmht" type="bool"/>
     <preference id="pref-logChrome" name="extensions.scriptish.logChrome" type="bool"/>
     <preference id="pref-uninstallPreferences" name="extensions.scriptish.uninstallPreferences" type="bool"/>
     <preference id="pref-update-requireBuiltInCerts" name="extensions.scriptish.update.requireBuiltInCerts" type="bool"/>
@@ -63,6 +70,19 @@
     <groupbox>
       <caption label="options.translation" localize="label"/>
       <checkbox preference="pref-useDefaultLocale" label="options.translation.useEnglish" localize="label"/>
+    </groupbox>
+    <groupbox>
+      <caption label="options.enabledSchemes" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-http" label="options.enabledSchemes.http" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-ftp" label="options.enabledSchemes.ftp" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-data" label="options.enabledSchemes.data" localize="label"/>
+      <separator class="thin"/>
+      <checkbox preference="pref-enabledSchemes-file" label="options.enabledSchemes.file" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-unmht" label="options.enabledSchemes.unmht" localize="label"/>
+      <separator class="thin"/>
+      <checkbox preference="pref-enabledSchemes-about" label="options.enabledSchemes.about" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-chrome" label="options.enabledSchemes.chrome" localize="label"/>
+      <label class="remark" value="options.enabledSchemes.securityRemark" localize="value"/>
     </groupbox>
     <groupbox>
       <caption label="options.logging" localize="label"/>
