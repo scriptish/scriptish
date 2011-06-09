@@ -1,5 +1,6 @@
 const Cu = Components.utils;
 
+QUnit.config.urlbase = "about:scriptish";
 QUnit.config.autostart = false; // prevents QUnit from auto starting onload
 
 function $(aID) document.getElementById(aID);
