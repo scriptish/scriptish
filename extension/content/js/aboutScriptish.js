@@ -14,13 +14,14 @@ function include(aSrc) {
 
 
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/q.js");
 
 (function() {
   "use strict";
 
   // Show about:scriptish?test
-  if (window.location.href.split("?")[1] == "test") {
+  var param = window.location.href.split("?")[1];
+  if (param) {
+    Cu.import("resource://scriptish/utils/q.js");
     include("tests/runTests.js").then(function() {
       $("main").style.display = "none";
       $("test").style.display = "block";
