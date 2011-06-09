@@ -98,6 +98,7 @@
       </grid>
       <separator class="thin"/>
       <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark" localize="value"/>
+      <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark2" localize="value"/>
     </groupbox>
     <groupbox>
       <caption label="options.logging" localize="label"/>
