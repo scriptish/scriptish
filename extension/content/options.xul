@@ -27,7 +27,7 @@
   <prefpane id="pane-main" label="options.pane.main" localize="label">
     <groupbox orient="horizontal">
       <caption label="options.editor" localize="label"/>
-      <textbox preference="pref-editor" flex="1" readonly="true"/>
+      <textbox preference="pref-editor" flex="1" readonly="true" placeholder="options.editor.notset" localize="placeholder"/>
       <button command="cmd-change-editor" label="options.changeEditor" localize="label"/>
     </groupbox>
 
@@ -48,7 +48,11 @@
   </prefpane>
 
   <prefpane id="pane-excludes" label="options.pane.excludes" localize="label">
-    <textbox id="excludes" multiline="true" rows="15"/>
+    <description control="excludes" value="options.excludes.desc" localize="value"/>
+    <textbox id="excludes" multiline="true" rows="15" placeholder="options.excludes.empty" localize="placeholder"/>
+    <hbox pack="end">
+      <label class="remark" control="excludes" value="options.excludes.remark" localize="value"/>
+    </hbox>
   </prefpane>
 
   <prefpane id="pane-advanced" label="options.pane.advanced" localize="label">

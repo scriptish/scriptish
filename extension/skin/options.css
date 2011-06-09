@@ -13,3 +13,12 @@ radio[pane="pane-excludes"] {
 radio[pane="pane-advanced"] {
   -moz-image-region: rect(0px, 96px, 32px, 64px);
 }
+
+description {
+  font-weight: bold;
+}
+
+.remark {
+  font-style: italic;
+  font-size: x-small;
+}
