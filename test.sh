@@ -2,4 +2,8 @@
 
 ./build.sh test
 echo "Running mozmill tests..."
-mozmill -t tests/mozmill-tests -a scriptish-test.xpi
+if [ "debug" == "$1" ]; then
+  mozmill -t tests/mozmill-tests -a scriptish-test.xpi --show-all
+else
+  mozmill -t tests/mozmill-tests -a scriptish-test.xpi
+fi
