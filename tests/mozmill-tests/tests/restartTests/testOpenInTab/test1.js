@@ -81,3 +81,29 @@ var testOpenInTabArgLoadInBackground = function() {
   window.close();
   controller.assert(function() (tabs.getTabsWithURL(URL).length == 0));
 }
+
+var testOpenInTabArgReuse = function() {
+  var win = controller.window;
+
+  tabs.closeAllTabs(controller);
+  controller.assert(function() (tabs.getTabsWithURL(URL).length == 0));
+
+  // Open about:scriptish and verify the page loaded
+  var window = Scriptish_openInTab(URL, false, true);
+  let tabBrowser = win.gBrowser;
+
+  // resuse should open a new tab when there is not one already, and focus on it
+  controller.waitFor(function() {
+    return controller.tabs.activeTab.defaultView.location.href == URL;
+  }, "wait for about:scriptish", 500, 100);
+
+  var window2 = Scriptish_openInTab(URL, false, true);
+  // resuse should not open a new tab when there is one already, and focus on it
+  controller.waitFor(function() {
+    var win = controller.tabs.activeTab.defaultView;
+    return window2 === win && window2 === window;
+  }, "wait for about:scriptish again w/ reuse = true", 500, 100);
+
+  window.close();
+  controller.assert(function() (tabs.getTabsWithURL(URL).length == 0));
+}
