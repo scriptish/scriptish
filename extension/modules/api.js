@@ -5,6 +5,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_openInTab.js");
 
 const moduleFilename = Components.stack.filename;
 const NS_XHTML = "http://www.w3.org/1999/xhtml";
@@ -175,31 +176,7 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 
   this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-
-    // Try to reuse an existing tab
-    if (aReuse) {
-      let browserEnumerator = Services.wm.getEnumerator("navigator:browser");
-
-      while (browserEnumerator.hasMoreElements()) {
-        let browserWin = browserEnumerator.getNext();
-        let tabBrowser = browserWin.gBrowser;
-        let i = tabBrowser.browsers.length - 1;
-
-        for (; ~i; i--) {
-          let browser = tabBrowser.getBrowserAtIndex(i);
-          // TODO: check rel=canonical too
-          if (aURL === browser.currentURI.spec) {
-            tabBrowser.selectedTab = tabBrowser.tabContainer.childNodes[i];
-            browserWin.focus();
-            return getWindowForBrowser(browser);
-          }
-        }
-      }
-    }
-
-    // Opening a new tab
-    return getWindowForBrowser(aChromeWin.gBrowser
-        .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)))
+    return Scriptish_openInTab(aURL, aReuse, aChromeWin);
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
