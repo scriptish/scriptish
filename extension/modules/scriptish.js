@@ -7,6 +7,7 @@ Cu.import("resource://scriptish/logging.js");
 function setStatus() (enabled = Scriptish_prefRoot.getValue("enabled", true));
 function notifyStatusChg(aVal) (
     Scriptish.notify(null, "scriptish-enabled", {enabling: aVal}));
+
 var ignoreEnable = false, enabled = setStatus();
 Scriptish_prefRoot.watch("enabled", function() {
   if (ignoreEnable) return ignoreEnable = false;

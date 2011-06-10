@@ -3,6 +3,7 @@ pref("extensions.scriptish.blocklist.interval", 86400);
 pref("extensions.scriptish.blocklist.lastFetch", 0);
 pref("extensions.scriptish.blocklist.url", "https://github.com/erikvold/scriptish/raw/master/blocklist.json");
 pref("extensions.scriptish.disableNotifications", false);
+pref("extensions.scriptish.enabled", true);
 pref("extensions.scriptish.enabledSchemes.about", false);
 pref("extensions.scriptish.enabledSchemes.chrome", false);
 pref("extensions.scriptish.enabledSchemes.data", true);
