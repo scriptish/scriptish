@@ -174,9 +174,9 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     return aScript.getScriptHeader(key);
   }
 
-  this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
+  this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-    return Scriptish_openInTab(aURL, aReuse, aChromeWin);
+    return Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {

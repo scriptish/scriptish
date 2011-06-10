@@ -4,7 +4,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/scriptish.js");
 
-function Scriptish_openInTab(aURL, aReuse, aChromeWin) {
+function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
   aChromeWin = aChromeWin || Scriptish.getMostRecentWindow();
 
   // Try to reuse an existing tab
@@ -20,8 +20,10 @@ function Scriptish_openInTab(aURL, aReuse, aChromeWin) {
         let browser = tabBrowser.getBrowserAtIndex(i);
         // TODO: check rel=canonical too
         if (aURL === browser.currentURI.spec) {
-          tabBrowser.selectedTab = tabBrowser.tabContainer.childNodes[i];
-          browserWin.focus();
+          if (!aLoadInBackground) {
+            tabBrowser.selectedTab = tabBrowser.tabContainer.childNodes[i];
+            browserWin.focus();
+          }
           return getWindowForBrowser(browser);
         }
       }
@@ -29,8 +31,10 @@ function Scriptish_openInTab(aURL, aReuse, aChromeWin) {
   }
 
   // Opening a new tab
-  return getWindowForBrowser(aChromeWin.gBrowser
-      .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)))
+  var browser = aChromeWin.gBrowser;
+  return getWindowForBrowser(browser.getBrowserForTab(browser.loadOneTab(aURL, {
+    "inBackground": !!aLoadInBackground
+  })));
 }
 
 function getWindowForBrowser(browser) browser.docShell

@@ -38,6 +38,8 @@ Components.utils.import("resource://scriptish/utils/Scriptish_openInTab.js");
 
 var tabs = require("../../../../../../mozmill-tests/lib/tabs");
 
+var URL = "about:scriptish";
+
 var setupModule = function(module) {
   module.controller = mozmill.getBrowserController();
 }
@@ -46,13 +48,36 @@ var testOpenInTabDefaults = function() {
   var win = controller.window;
 
   tabs.closeAllTabs(controller);
-  controller.assert(function() (tabs.getTabsWithURL("about:scriptish").length == 0));
+  controller.assert(function() (tabs.getTabsWithURL(URL).length == 0));
 
   // Open about:scriptish and verify the page loaded
-  Scriptish_openInTab("about:scriptish");
+  var window = Scriptish_openInTab(URL);
   let tabBrowser = win.gBrowser;
 
   controller.waitFor(function() {
-    return tabs.getTabsWithURL("about:scriptish").length == 1;
+    return controller.tabs.activeTab.defaultView.location.href == URL;
   }, "wait for about:scriptish", 500, 100);
+
+  window.close();
+  controller.assert(function() (tabs.getTabsWithURL(URL).length == 0));
+}
+
+var testOpenInTabArgLoadInBackground = function() {
+  var win = controller.window;
+
+  tabs.closeAllTabs(controller);
+  controller.assert(function() (tabs.getTabsWithURL(URL).length == 0));
+
+  // Open about:scriptish and verify the page loaded
+  var window = Scriptish_openInTab(URL, true);
+  let tabBrowser = win.gBrowser;
+
+  controller.waitFor(function() {
+    return tabs.getTabsWithURL(URL).length == 1;
+  }, "wait for about:scriptish", 500, 100);
+
+  controller.assert(function() controller.tabs.activeTab.defaultView.location.href != URL);
+
+  window.close();
+  controller.assert(function() (tabs.getTabsWithURL(URL).length == 0));
 }
