@@ -332,8 +332,7 @@ Script.prototype = {
           && !this._user_excludeRegExps.some(testI);
 
     let includes = this._user_includeRegExps.concat(this._includeRegExps);
-    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
-        .concat(this._config.excludeRegExps);
+    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps);
 
     return (includes.some(testI) || this._matches.some(testII))
         && !excludes.some(testI);
