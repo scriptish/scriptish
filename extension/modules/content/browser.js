@@ -45,13 +45,22 @@ Scriptish_BrowserUIM.prototype = {
       tbImg.setAttribute("scriptish-disabled", "scriptish-disabled");
     }
   },
-  openChromeWindow: function(aURL) {
+  openChromeWindow: function(aURL, aParams) {
+    aParams = aParams || null;
     Services.ww.openWindow(
         this._win, aURL, null, "chrome,dependent,centerscreen,resizable,dialog",
-        null);
+        aParams);
   },
-  newUserScript: function() (
-    this.openChromeWindow("chrome://scriptish/content/newscript.xul")),
+  newUserScript: function(aContent) {
+    var params = null;
+    aContent = aContent || null;
+    if (aContent) {
+      params = Cc["@mozilla.org/embedcomp/dialogparam;1"]
+          .createInstance(Ci.nsIDialogParamBlock);
+      params.SetString(0, aContent);
+    }
+    this.openChromeWindow("chrome://scriptish/content/newscript.xul", params);
+  },
   openOptionsWin: function() {
     var instantApply = false;
     try {

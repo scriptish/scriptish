@@ -2,7 +2,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_createUserScriptSource"];
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-function Scriptish_createUserScriptSource(aHeader) {
+function Scriptish_createUserScriptSource(aHeader, aContent) {
   var script = ["// ==UserScript=="];
   var tmpAry, val, i;
 
@@ -39,5 +39,9 @@ function Scriptish_createUserScriptSource(aHeader) {
       script.push("// @exclude        "+val);
 
   script.push("// ==/UserScript==");
+
+  if (aContent)
+    script.push(aContent);
+
   return script.join(Services.appinfo.OS == "WINNT" ? "\r\n" : "\n");
 }

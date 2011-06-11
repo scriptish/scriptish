@@ -5,6 +5,13 @@ Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 var $ = function(aID) document.getElementById(aID);
 
+var scriptContent = "";
+try {
+  scriptContent = window.arguments[0]
+      .QueryInterface(Components.interfaces.nsIDialogParamBlock)
+      .GetString(0);
+} catch(e) {}
+
 window.addEventListener("load", function() {
   $("scriptish").setAttribute("title", Scriptish_stringBundle("menu.new"));
   $("scriptish").setAttribute("ondialogaccept", "return doInstall();");
@@ -78,7 +85,7 @@ function createScriptSource() {
     excludes: $("excludes").value ? $("excludes").value.match(/.+/g) : []
   }
   try {
-    return Scriptish_createUserScriptSource(header);
+    return Scriptish_createUserScriptSource(header, scriptContent);
   } catch (e) {
     alert(e.message);
   }

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<overlay id="scriptish-scratchpad-overlay"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/x-javascript" src="chrome://scriptish/content/js/scratchpad.js"/>
+
+  <commandset id="sp-commandset">
+    <command id="sp-cmd-scriptish-savetouserscript"/>
+  </commandset>
+
+  <keyset id="sp-keyset">
+    <key id="sp-key-scriptish-savetouserscript"/>
+  </keyset>
+
+  <menupopup id="sp-menu-filepopup">
+    <menuitem id="sp-menu-scriptish-savetouserscript"/>
+  </menupopup>
+</overlay>
