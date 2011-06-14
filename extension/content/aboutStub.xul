@@ -2,15 +2,8 @@
 <!DOCTYPE window>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="text/javascript"><![CDATA[
-    try {
-      Components.utils.import("resource://gre/modules/Services.jsm");
-      let browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
-      (browserWindow.delayedOpenTab || browserWindow.addTab)("about:scriptish");
-    }
-    catch (ex) {
-      // Shouldn't happen, obviously :p
-      Components.utils.reportError(ex);
-    }
+    Components.utils.import("resource://scriptish/utils/Scriptish_openInTab.js");
+    Scriptish_openInTab("about:scriptish", false, true);
     close();
   ]]></script>
 </window>
