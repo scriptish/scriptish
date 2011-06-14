@@ -2,6 +2,7 @@
 QUnit.url = function(params) {
   var querystring = "";
   for (var key in params) {
+    if (!params[key]) continue;
     querystring += "&" + encodeURIComponent(key) + "=" +
         encodeURIComponent(params[key]);
   }
