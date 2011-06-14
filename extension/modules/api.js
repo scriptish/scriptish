@@ -229,11 +229,12 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
     return tools.Scriptish_cryptoHash.apply(null, arguments);
   }
-
-  this.GM_generateUUID = function() Services.uuid.generateUUID().toString();
-
-  this.GM_updatingEnabled = true;
 }
+
+GM_API.prototype.GM_generateUUID = function GM_generateUUID() (
+    Services.uuid.generateUUID().toString());
+
+GM_API.prototype.GM_updatingEnabled = true;
 
 GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
   if (!GM_apiLeakCheck("GM_setClipboard")) return;
@@ -241,7 +242,3 @@ GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
   Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
   tools.GM_setClipboard.apply(null, arguments);
 }
-
-
-function getWindowForBrowser(browser) browser.docShell
-    .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
