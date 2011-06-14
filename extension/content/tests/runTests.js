@@ -1,3 +1,13 @@
+
+QUnit.url = function(params) {
+  var querystring = "";
+  for (var key in params) {
+    querystring += "&" + encodeURIComponent(key) + "=" +
+        encodeURIComponent(params[key]);
+  }
+  return "about:scriptish?test" + querystring;
+}
+
 function runTests() {
   var tools = {};
   Q.chain(
