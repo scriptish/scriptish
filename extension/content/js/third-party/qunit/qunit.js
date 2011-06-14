@@ -444,9 +444,7 @@ var config = {
 	reorder: true,
 
 	noglobals: false,
-	notrycatch: false,
-
-	urlbase: ""
+	notrycatch: false
 };
 
 // Load paramaters
@@ -648,7 +646,7 @@ extend(QUnit, {
 			querystring += encodeURIComponent( key ) + "=" +
 				encodeURIComponent( params[ key ] ) + "&";
 		}
-		return config.urlbase + window.location.pathname + querystring.slice( 0, -1 );
+		return window.location.pathname + querystring.slice( 0, -1 );
 	},
 
 	// Logging callbacks; all receive a single argument with the listed properties
