@@ -444,13 +444,15 @@ var config = {
 	reorder: true,
 
 	noglobals: false,
-	notrycatch: false
+	notrycatch: false,
+
+	urlbase: ""
 };
 
 // Load paramaters
 (function() {
-	var location = window.location || { search: "", protocol: "file:" },
-		params = location.search.slice( 1 ).split( "&" ),
+	var location = window.location || { href: "", protocol: "file:" },
+		params = ( location.href.split( "?" )[ 1 ] || "" ).split( "&" ),
 		length = params.length,
 		urlParams = {},
 		current;
@@ -646,7 +648,7 @@ extend(QUnit, {
 			querystring += encodeURIComponent( key ) + "=" +
 				encodeURIComponent( params[ key ] ) + "&";
 		}
-		return window.location.pathname + querystring.slice( 0, -1 );
+		return config.urlbase + window.location.pathname + querystring.slice( 0, -1 );
 	},
 
 	// Logging callbacks; all receive a single argument with the listed properties
