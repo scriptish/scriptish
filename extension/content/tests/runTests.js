@@ -9,6 +9,7 @@ function runTests() {
     function() include("tests/testScriptishEnabled.js"),
     function() include("tests/testScriptishUpdateSecurely.js"),
     function() include("tests/testScriptishConvert2RegExp.js"),
+    function() include("tests/testScriptishMemoize.js"),
     function() include("tests/testScriptishLogger.js"),
     function() include("tests/testTimeout.js"),
     function() include("tests/endTests.js")).then(function() {
