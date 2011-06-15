@@ -4,6 +4,7 @@ const valueSplitter = /(\S+)\s+([^\r\f\n]+)/;
 
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/logging.js");
+Components.utils.import("resource://scriptish/scriptish.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 function $(id) document.getElementById(id);
@@ -56,8 +57,11 @@ on("load", function() {
 
   // setup buttons
   let dialog = document.documentElement;
-  dialog.getButton("accept").setAttribute("label",
-      Scriptish_stringBundle("install.installButton"));
+  Scriptish.getConfig(function(config) {
+    dialog.getButton("accept").setAttribute("label",
+        Scriptish_stringBundle(
+        (config.installIsUpdate(scriptDownloader.script) ? "re" : "") + "install"));
+  });
   dialog.getButton("cancel").focus();
 
   // setup other l10n

@@ -160,8 +160,15 @@ Scriptish_BrowserUI.disableMenuCommand = function(commandUUID, aWinID) {
  * a user selects "show script source" in the install dialog.
  */
 Scriptish_BrowserUI.showInstallBanner = function(browser) {
-  var greeting = Scriptish_stringBundle("greeting.msg");
+  var self = this;
   var notificationBox = gBrowser.getNotificationBox(browser);
+  var greeting = Scriptish_stringBundle("greeting.msg");
+  var btnLabel;
+  Scriptish.getConfig(function(config) {
+    btnLabel = Scriptish_stringBundle(
+        (config.installIsUpdate(self.scriptDownloader_.script) ? "re" : "")
+        + "install");
+  });
 
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
@@ -175,7 +182,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
     "install-userscript",
     "chrome://scriptish/skin/scriptish16.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
-    [{label: Scriptish_stringBundle("greeting.btn"),
+    [{label: btnLabel,
       accessKey: Scriptish_stringBundle("greeting.btn.ak"),
       popup: null,
       callback: this.installCurrentScript.bind(this)
