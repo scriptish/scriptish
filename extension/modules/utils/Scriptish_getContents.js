@@ -1,9 +1,36 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getContents"];
-Components.utils.import("resource:///modules/NetworkHelper.jsm");
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/logging.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+
+try {
+  // only available when the HUD console is shipped
+  // that excludes Seamonkey at the moment
+  Components.utils.import("resource:///modules/NetworkHelper.jsm");
+}
+catch (ex) {
+  // Minimal replacement
+  // XXX: Might want to keep this up-to-date?!
+  this.NetworkHelper = {
+    readAndConvertFromStream: function NH_readAndConvertFromStream(aStream, aCharset) {
+      let text = null;
+      try {
+        text = NetUtil.readInputStreamToString(aStream, aStream.available());
+        if (!aCharset) {
+          return text;
+        }
+        let conv = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+          .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+        conv.charset = aCharset;
+        return conv.ConvertToUnicode(text);
+      }
+      catch (ex) {
+        return text;
+      }
+    }
+  };
+}
 
 function Scriptish_getContents(aFile, aCharset, aCallback) {
   if (!aCharset) aCharset = "UTF-8";
