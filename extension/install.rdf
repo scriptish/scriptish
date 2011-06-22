@@ -17,6 +17,14 @@
         <em:description>Управление пользовательских скриптов для Firefox</em:description>
       </Description>
     </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>es-ES</em:locale>
+        <em:name>Scriptish</em:name>
+        <em:description>Un gestor de scripts de usuario para aplicaciones Mozilla</em:description>
+      </Description>
+    </em:localized>
+
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
 
@@ -59,6 +67,7 @@
     <em:translator>Mikael Hiort af Ornäs</em:translator>
     <em:translator>Nils Maier (de)</em:translator>
     <em:translator>nishikawasasaki (kohsei yamamoto)</em:translator>
+    <em:translator>Alfredo Fernández Díaz</em:translator>
 
     <em:updateURL>http://github.com/downloads/erikvold/scriptish/update.rdf</em:updateURL>
     <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDjEA/hqcsMgPctoWvqJFfjtNcQbfBi1uP3zoWR3PPMRSXnpBJv/5Kb5lJD9HJ+963CFQ3oFvkgO9+oEWisiKBjxhx94Bynl0Ym2sZ1DdEzTsH9kV4HGFLjeYTix5WkQqdoswyM32ebtDSYrFbSqxpBrgHwVLELfFYM1qZsnWpJKwIDAQAB</em:updateKey>
