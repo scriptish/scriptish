@@ -14,6 +14,7 @@ const ICON_24_OFF = "chrome://scriptish/skin/scriptish24_disabled.png";
 function Scriptish_BrowserUIM(aWin, aBrowserUI) {
   this.$ = function(aID) aWin.document.getElementById(aID);
   this._win = aWin;
+  this._optionsWin = null;
   this._browserUI = aBrowserUI;
 }
 Scriptish_BrowserUIM.prototype = {
@@ -68,11 +69,14 @@ Scriptish_BrowserUIM.prototype = {
     }
     catch (ex) {};
 
-    this._win.openDialog(
-      "chrome://scriptish/content/options.xul",
-      "scriptish-options-dialog",
-      "chrome,titlebar,toolbar,resizable,centerscreen" + (instantApply ? ",dialog=no" : "")
-    );
+    if (!this._optionsWin || this._optionsWin.closed) {
+      this._optionsWin = this._win.openDialog(
+        "chrome://scriptish/content/options.xul",
+        "scriptish-options-dialog",
+        "chrome,titlebar,toolbar,resizable,centerscreen" + (instantApply ? ",dialog=no" : ",modal")
+      );
+    }
+    this._optionsWin.focus();
   },
   showUserscriptList: function() {
     Cu.import("resource://scriptish/addonprovider.js");
