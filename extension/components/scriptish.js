@@ -283,7 +283,7 @@ ScriptishService.prototype = {
         let chk = isScriptRunnable(script, url, isTopWin);
         if (chk) scripts[script.runAt].push(script);
         return chk;
-      });
+      }, [url]);
 
       aCallback(scripts);
     });
