@@ -3,7 +3,7 @@ var EXPORTED_SYMBOLS = [
     "Services", "Instances", "timeout"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
-const ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
+const global = this;
 var Services = {};
 (function(inc, tools){
   inc("resource://gre/modules/XPCOMUtils.jsm");
@@ -88,6 +88,18 @@ XPCOMUtils.defineLazyServiceGetter(
     "nsIUUIDGenerator");
 
 function timeout(cb, delay) {
-  Instances.timer.initWithCallback(
-      { notify: function(){ cb.call(null) } }, delay || 0, ONE_SHOT);
+  var callback = function() cb.call(null);
+  delay = delay || 0;
+  if (0 >= delay) {
+    Services.tm.currentThread.dispatch(callback, Ci.nsIThread.DISPATCH_NORMAL);
+    return;
+  }
+
+  if (!global.setTimeout) {
+    let tools = {};
+    Components.utils.import("resource://scriptish/third-party/Timer.js", tools);
+    global.setTimeout = (new tools.Timer()).setTimeout;
+  }
+
+  setTimeout(callback, delay);
 }
