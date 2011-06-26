@@ -427,9 +427,12 @@ Config.prototype = {
 
   get scripts() this._scripts.concat(),
   getMatchingScripts: function(testFunc, urls) {
-    for (var i = 0; i < urls.length; i++)
-      if (this._excludeRegExps.some(function(reg) reg.test(urls[i])))
+    var globalExcludes = this._excludeRegExps;
+    for (var i = urls.length - 1; ~i; i--) {
+      let url = urls[i];
+      if (globalExcludes.some(function(reg) reg.test(url)))
         return [];
+    }
     return this.scripts.filter(testFunc);
   },
   sortScripts: function() this._scripts.sort(function(a, b) b.priority - a.priority),
