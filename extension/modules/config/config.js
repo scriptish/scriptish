@@ -16,7 +16,6 @@ inc("resource://scriptish/utils/Scriptish_stringBundle.js");
 inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
 inc("resource://scriptish/third-party/Timer.js");
-inc("resource://scriptish/utils/q.js");
 inc("resource://scriptish/script/script.js");
 })(Components.utils.import);
 
@@ -163,77 +162,69 @@ Config.prototype = {
     });
   },
 
-  _loadXML: function(aFile) {
+  _loadXML: function(aFile, aCallback) {
     Scriptish_log("Scriptish Config._loadXML");
     var self = this;
-    var deferred = Q.defer();
 
     if (aFile.exists()) {
-      Scriptish_getContents(aFile, 0, function(str) {
-        if (!str) return timeout(function() deferred.reject(false));
+      var str = Scriptish_getContents(aFile);
+      if (!str) return aCallback(false);
 
-        var doc = Instances.dp.parseFromString(str, "text/xml");
+      var doc = Instances.dp.parseFromString(str, "text/xml");
 
-        // Stop if there was a parsing error
-        if (doc.documentElement.nodeName == "parsererror")
-          return timeout(function() deferred.reject(false));
+      // Stop if there was a parsing error
+      if (doc.documentElement.nodeName == "parsererror")
+        return aCallback(false);
 
-        var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
-        let excludes = [];
+      var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
+      let excludes = [];
 
-        for (var node; node = nodes.iterateNext();) {
-          switch (node.nodeName) {
-          case "Script":
-            Script.loadFromXML(self, node);
-            break;
-          case "Exclude":
-            excludes.push(node.firstChild.nodeValue.trim());
-            break;
-          }
+      for (var node; node = nodes.iterateNext();) {
+        switch (node.nodeName) {
+        case "Script":
+          Script.loadFromXML(self, node);
+          break;
+        case "Exclude":
+          excludes.push(node.firstChild.nodeValue.trim());
+          break;
         }
-        self.addExclude(excludes);
+      }
+      self.addExclude(excludes);
 
-        deferred.resolve(true); // force a save
-      });
-    } else {
-      timeout(function() deferred.reject(false));
+      return aCallback(true);
     }
 
-    return deferred.promise;
+    aCallback(false);
   },
 
-  _loadJSON: function(aFile) {
+  _loadJSON: function(aFile, aCallback) {
     Scriptish_log("Scriptish Config._loadJSON");
     var self = this;
     var config = {};
-    var deferred = Q.defer();
 
     if (aFile.exists()) {
-      Scriptish_getContents(aFile, 0, function(str) {
-        if (!str) return timeout(function() deferred.reject(false));
+      var str = Scriptish_getContents(aFile);
+      if (!str) return aCallback(false);
 
-        try {
-          config = JSON.parse(str);
-        } catch(e) {
-          // Unable to parse the file.
-          return deferred.reject(e);
-        }
+      try {
+        config = JSON.parse(str);
+      } catch(e) {
+        // Unable to parse the file.
+        return aCallback(false);
+      }
 
-        // load scripts
-        var fileModified = false, scripts = config.scripts;
-        for (var i = scripts.length - 1; ~i; i--)
-          fileModified = Script.loadFromJSON(self, scripts[i]) || fileModified;
+      // load scripts
+      var fileModified = false, scripts = config.scripts;
+      for (var i = scripts.length - 1; ~i; i--)
+        fileModified = Script.loadFromJSON(self, scripts[i]) || fileModified;
 
-        // load global excludes
-        config.excludes.forEach(function(i) self.addExclude(i));
+      // load global excludes
+      config.excludes.forEach(function(i) self.addExclude(i));
 
-        deferred.resolve(fileModified);
-      });
-    } else {
-      timeout(function() deferred.reject(false));
+      return aCallback(true, fileModified);
     }
 
-    return deferred.promise;
+    aCallback(false);
   },
 
   load: function(aCallback) {
@@ -241,7 +232,7 @@ Config.prototype = {
     var self = this;
 
     // called after the config has been loaded
-    function callback(fileModified) timeout(function() {
+    function callback(fileModified) {
       let scripts = self._scripts;
       let len = scripts.length;
 
@@ -271,29 +262,28 @@ Config.prototype = {
 
       if (fileModified) self._save();
       aCallback();
-    });
+    };
 
     // Load the config (trying from various sources)
     var configFile;
     // source: Scriptish JSON tmp
-    self._loadJSON(self._tempFile).then(function() {
-      callback(true);  // need to force save here
-    }, function(aErr) {
-      if ("boolean" != typeof aErr) {
-        // the tmp file exists but is corrupt, so force save
-        callback = callback.bind(null, true);
-      }
+    self._loadJSON(self._tempFile, function(aSuccess) {
+      if (aSuccess) return callback(true);
 
       // source: Scriptish JSON
+      // NOTE: this is the only case where we care if the file was modified
       (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_JSON);
-      self._loadJSON(configFile).then(callback, function() {
+      self._loadJSON(configFile, function(aSuccess, aModified) {
+        if (aSuccess) return callback(aModified);
+
         // source: Scriptish XML
         (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_XML);
-        self._loadXML(configFile).then(callback, function() {
+        self._loadXML(configFile, function(aSuccess) {
+          if (aSuccess) return callback(true);
+
           // source: Older GM Style XML
           (configFile = self._scriptDir).append("config.xml");
-          self._loadXML(configFile).then(
-              callback, (function() callback(true)));
+          self._loadXML(configFile, function() callback(true));
         });
       });
     });
