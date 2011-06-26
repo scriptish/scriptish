@@ -45,7 +45,7 @@ var testAboutScriptishTestsRan = function() {
   controller.open("about:scriptish?test");
   controller.waitForPageLoad();
   controller.assertNode(
-      new elementslib.ID(controller.tabs.activeTab, "qunit-header2"));
+      new elementslib.ID(controller.tabs.activeTab, "test"));
   var config = controller.tabs.activeTab.defaultView.QUnit.config;
 
   controller.waitFor(function() {
