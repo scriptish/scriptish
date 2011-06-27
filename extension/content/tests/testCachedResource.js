@@ -1,20 +1,20 @@
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_getTempFile.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
-Components.utils.import("resource://scriptish/script/cachedresource.js");
 
 var PREF_BRANCH = Services.prefs.getBranch("extensions.scriptish.");
 
 function CachedResourceMock() {
-  this._file = Scriptish_getTempFile();
+  this._file = CachedResourceMock.Scriptish_getTempFile();
   this.write();
 }
+Components.utils.import("resource://scriptish/utils/Scriptish_getTempFile.js", CachedResourceMock);
+Components.utils.import("resource://scriptish/utils/Scriptish_getWriteStream.js", CachedResourceMock);
+Components.utils.import("resource://scriptish/script/cachedresource.js", CachedResourceMock);
 CachedResourceMock.prototype = {
-  __proto__: CachedResource.prototype,
+  __proto__: CachedResourceMock.CachedResource.prototype,
   _accesses: 0,
   write: function() {
     this._script = "accesses " + (++this._accesses);
-    var foStream = tools.Scriptish_getWriteStream(this._file);
+    var foStream = CachedResourceMock.Scriptish_getWriteStream(this._file);
     foStream.write(this._script, this._script.length);
     foStream.close();
   },
