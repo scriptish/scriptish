@@ -296,8 +296,21 @@ ScriptishService.prototype = {
     let script;
     let unsafeContentWin = wrappedContentWin.wrappedJSObject;
     let tools = {};
-    Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
+
+    tools.console = (function getConsole() {
+      let rv = Scriptish_getFirebugConsole(wrappedContentWin, chromeWin);
+      if (rv) {
+        return rv;
+      }
+      if (wrappedContentWin.console) {
+        return wrappedContentWin.console;
+      }
+      rv = {};
+      Cu.import("resource://scriptish/api/GM_console.js", rv);
+      return rv.GM_console(script);
+    })();
+
 
     let delays = [];
     let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
@@ -319,7 +332,7 @@ ScriptishService.prototype = {
 
       // add GM_* API to sandbox
       for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
-      sandbox.console = fbConsole || new tools.GM_console(script);
+      sandbox.console = tools.console;
 
       sandbox.unsafeWindow = unsafeContentWin;
       sandbox.__proto__ = wrappedContentWin;
