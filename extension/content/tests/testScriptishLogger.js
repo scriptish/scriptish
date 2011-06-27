@@ -36,7 +36,7 @@ asyncTest("extensions.scriptish.logChrome = false", 0, function() {
 
   var logChrome = null;
   try {
-    var logChrome = PREF_BRANCH.getBoolPref("logChrome");
+    logChrome = PREF_BRANCH.getBoolPref("logChrome");
   }
   catch (ex) {}
   PREF_BRANCH.setBoolPref("logChrome", false);
@@ -64,7 +64,7 @@ asyncTest("extensions.scriptish.logChrome = true", 1, function() {
 
   var logChrome = null;
   try {
-    var logChrome = PREF_BRANCH.getBoolPref("logChrome");
+    logChrome = PREF_BRANCH.getBoolPref("logChrome");
   }
   catch (ex) {}
   PREF_BRANCH.setBoolPref("logChrome", true);
@@ -89,7 +89,7 @@ asyncTest("null char removed", 1, function() {
 
   var logChrome = null;
   try {
-    var logChrome = PREF_BRANCH.getBoolPref("logChrome");
+    logChrome = PREF_BRANCH.getBoolPref("logChrome");
   }
   catch (ex) {}
   PREF_BRANCH.setBoolPref("logChrome", true);
