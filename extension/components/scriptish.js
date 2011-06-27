@@ -108,6 +108,11 @@ ScriptishService.prototype = {
         || (safeWin.frameElement && safeWin.frameElement.src))
         || "";
 
+    if (!href && safeWin.frameElement) {
+      this.waitForFrame(safeWin, chromeWin);
+      return;
+    }
+
     // Show the scriptish install banner if the user is navigating to a .user.js
     // file in a top-level tab.  If the file was previously cached it might have
     // been given a number after .user, like gmScript.user-12.js
@@ -222,6 +227,28 @@ ScriptishService.prototype = {
     }
     return;
   },
+
+  waitForFrame: function(safeWin, chromeWin) {
+    let self = this;
+    safeWin.addEventListener("DOMContentLoaded", function _frame_loader() {
+      // not perfect, but anyway
+      let href = (safeWin.location.href
+          || (safeWin.frameElement && safeWin.frameElement.src))
+          || "";
+
+      if (!href) {
+        return; // wait for it :p
+      }
+      safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
+      self.docReady(safeWin, chromeWin);
+
+      // fake DOMContentLoaded to get things rolling
+      var evt = safeWin.document.createEvent("Events");
+      evt.initEvent("DOMContentLoaded", true, true);
+      safeWin.dispatchEvent(evt);
+    }, false);
+  },
+
   _test_org: {
     "chrome": true,
     "about": true
