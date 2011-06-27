@@ -222,33 +222,42 @@ ScriptishService.prototype = {
     }
     return;
   },
-
+  _test_org: {
+    "chrome": true,
+    "about": true
+  },
+  _test_cl: {
+    "chrome": true,
+    "resource": true
+  },
+  _reg_userjs: /\.user\.js$/,
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_installUri.js", tools);
-
     // block content detection of scriptish by denying it chrome: & resource:
     // content, unless loaded from chrome: or about:
-    if (org && !/^(?:chrome|about)$/.test(org.scheme)
-        && /^(?:chrome|resource)$/.test(cl.scheme) && cl.host == "scriptish") {
+    if (org && !this._test_org[org.scheme]
+        && this._test_cl[cl.scheme]
+        && cl.host == "scriptish") {
       return CP.REJECT_SERVER;
     }
 
-    var ret = CP.ACCEPT;
     // don't intercept anything when Scriptish is not enabled
-    if (!Scriptish.enabled) return ret;
+    if (!Scriptish.enabled) return CP.ACCEPT;
     // don't interrupt the view-source: scheme
-    if ("view-source" == cl.scheme) return ret;
+    if ("view-source" == cl.scheme) return CP.ACCEPT;
 
-    if ((ct == CP.TYPE_DOCUMENT || CP.TYPE_SUBDOCUMENT)
-        && cl.spec.match(/\.user\.js$/)
+    this.ignoreNextScript_ = false;
+
+    // CP.TYPE is not binary, so do not use bitwise logic tricks
+    if ((ct == CP.TYPE_DOCUMENT || ct == CP.TYPE_SUBDOCUMENT)
+        && this._reg_userjs.test(cl.spec)
         && !this.ignoreNextScript_ && !this.isTempScript(cl)) {
-      tools.Scriptish_installUri(cl, ctx.contentWindow);
-      ret = CP.REJECT_REQUEST;
+      this.ignoreNextScript_ = false;
+      this.Scriptish_installUri(cl, ctx.contentWindow);
+      return CP.REJECT_REQUEST;
     }
 
     this.ignoreNextScript_ = false;
-    return ret;
+    return CP.ACCEPT;
   },
 
   shouldProcess: function(ct, cl, org, ctx, mt, ext) CP.ACCEPT,
@@ -258,16 +267,12 @@ ScriptishService.prototype = {
     this.ignoreNextScript_ = true;
   },
 
+  _tmpDir: Services.dirsvc.get("TmpD", Ci.nsILocalFile),
   isTempScript: function(uri) {
-    if (uri.scheme != "file") return false;
+    if (!(uri instanceof Ci.nsIFileURL)) return false;
 
-    var fph = Cc["@mozilla.org/network/protocol;1?name=file"]
-        .getService(Ci.nsIFileProtocolHandler);
-
-    var file = fph.getFileFromURLSpec(uri.spec);
-    var tmpDir = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
-
-    return file.parent.equals(tmpDir) && file.leafName != "newscript.user.js";
+    var file = uri.file;
+    return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
   },
 
   initScripts: function(url, wrappedContentWin, aCallback) {
@@ -399,5 +404,6 @@ ScriptishService.prototype = {
     }
   }
 }
+Cu.import("resource://scriptish/utils/Scriptish_installUri.js", ScriptishService.prototype);
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
