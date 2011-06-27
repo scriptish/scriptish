@@ -48,12 +48,12 @@ article {
   border-radius: 15px;
 }
 
-table {
+#main table {
   width: 100%;
   padding: 0;
   margin: 0;
 }
-td {
+#main td {
   vertical-align: top;
   margin: 1ex;
 }
