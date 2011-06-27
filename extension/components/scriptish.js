@@ -14,6 +14,7 @@ Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js");
 Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWindowIDs.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
@@ -378,6 +379,17 @@ ScriptishService.prototype = {
       }
       catch (e if (e.message == "return not in function"
           || /\(NS_ERROR_OUT_OF_MEMORY\) \[nsIXPCComponents_Utils.evalInSandbox\]/.test(e.message))) {
+        var sw = Instances.se;
+        sw.init(
+          Scriptish_stringBundle("warning.returnfrommain"),
+          fileURL,
+          "",
+          e.lineNumber || 0,
+          e.columnNumber || 0,
+          sw.warningFlag,
+          "scriptish userscript warnings"
+          );
+        Scriptish_logScriptError(sw, aWindow, fileURL, aScript.id);
         Cu.evalInSandbox(
             "(function(){"+src+"})()", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       }
