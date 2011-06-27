@@ -13,6 +13,7 @@
   </commandset>
 
   <preferences id="scriptish-preferences">
+    <preference id="pref-cache-enabled" name="extensions.scriptish.cache.enabled" type="bool"/>
     <preference id="pref-disableNotifications" name="extensions.scriptish.disableNotifications" type="bool"/>
     <preference id="pref-editor" name="extensions.scriptish.editor" type="unichar"/>
     <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
@@ -70,6 +71,10 @@
   </prefpane>
 
   <prefpane id="pane-advanced" label="options.pane.advanced" localize="label">
+    <groupbox>
+      <caption label="options.cache" localize="label"/>
+      <checkbox preference="pref-cache-enabled" label="options.cache.enabled" localize="label"/>
+    </groupbox>
     <groupbox>
       <caption label="options.notifications" localize="label"/>
       <checkbox preference="pref-disableNotifications" label="options.notifications.disable" localize="label"/>

@@ -13,6 +13,7 @@ Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/script/cachedresource.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
@@ -92,6 +93,7 @@ function Script(config) {
   this["_run-at"] = null;
 }
 Script.prototype = {
+  __proto__: CachedResource.prototype,
   includesDisabled: false,
   isCompatible: true,
   blocklistState: Ci.nsIBlocklistService.STATE_NOT_BLOCKED,
@@ -347,7 +349,7 @@ Script.prototype = {
   },
   get name() this._name,
   get namespace() this._namespace,
-  get prefroot() { 
+  get prefroot() {
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
   },
@@ -520,8 +522,6 @@ Script.prototype = {
   },
 
   get fileURL() Scriptish_getUriFromFile(this._file).spec,
-  get textContent() Scriptish_getContents(this._file),
-  getTextContent: function(aCallback) Scriptish_getContents(this._file, 0, aCallback),
 
   get size() {
     var size = this._file.fileSize;
@@ -609,6 +609,8 @@ Script.prototype = {
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
     var oldPriority = this.priority;
     var newPriority = newScript.priority;
+
+    this.clearResourceCaches();
 
     // Copy new values.
     this.blocked = newScript.blocked;
@@ -1157,7 +1159,7 @@ Script.loadFromXML = function(aConfig, aNode) {
 
     script._modified = script._file.lastModifiedTime;
     var parsedScript = Script.parse(
-        aConfig, Scriptish_getContents(script._file), 
+        aConfig, Scriptish_getContents(script._file),
         script._downloadURL && NetUtil.newURI(script._downloadURL),
         script);
     script._dependhash = tools.Scriptish_cryptoHash(parsedScript._rawMeta);
