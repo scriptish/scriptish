@@ -5,110 +5,219 @@ Components.utils.import("resource://scriptish/logging.js");
 module("Scriptish_log");
 var PREF_BRANCH = Services.prefs.getBranch("extensions.scriptish.");
 
-asyncTest("extensions.scriptish.logChrome", 2, function() {
-  var tID, logChrome = false;
-
-  // making console listener
-  var consoleListener = {
-    observe: function({message}) {
-      if ("[Scriptish] TEST" == message && logChrome) {
-        clearTimeout(tID);
-        unregListener();
-        ok(true, "message was logged successfully as expected");
+function runListener(callback) {
+  var list = {
+    observe: function(message) {
+      unreg();
+      try {
+        callback(message);
+      }
+      finally {
         start();
       }
     }
   };
+  var unreg = function() {
+    if (!list) {
+      return;
+    }
+    Services.console.unregisterListener(list);
+    list = null;
+  }
+  Services.console.registerListener(list);
+  return unreg;
+}
 
-  // add console listener
-  Services.cs.registerListener(consoleListener);
-  function unregListener() Services.cs.unregisterListener(consoleListener);
 
-  // get extensions.scriptish.logChrome pref if it exists
+asyncTest("extensions.scriptish.logChrome = false", 0, function() {
+  var unreg = runListener(function({message}) {
+    equal(message, "[Scriptish] TEST");
+  });
+
+  var logChrome = null;
   try {
-    logChrome = PREF_BRANCH.getBoolPref("logChrome");
-  } catch (e) {}
-
-  tID = setTimeout(function() {
-    unregListener();
-    ok(!logChrome, "message was not logged");
-    start();
-  }, 500);
+    var logChrome = PREF_BRANCH.getBoolPref("logChrome");
+  }
+  catch (ex) {}
+  PREF_BRANCH.setBoolPref("logChrome", false);
 
   try {
     Scriptish_log("TEST");
-    ok(true, "sent message without error being thrown");
-  } catch (e) {
-    ok(false, e);
+    start();
+  }
+  finally {
+    unreg();
+    if (logChrome !== null) {
+      PREF_BRANCH.setBoolPref("logChrome", logChrome);
+    }
+    else {
+      PREF_BRANCH.clearUserPref("logChrome", logChrome);
+    }
   }
 });
 
 
-asyncTest("forced log message", 2, function() {
-  var tID;
+asyncTest("extensions.scriptish.logChrome = true", 1, function() {
+  runListener(function({message}) {
+    equal(message, "[Scriptish] TEST");
+  });
 
-  // making console listener
-  var consoleListener = {
-    observe: function({message}) {
-      if ("[Scriptish] FORCED TEST" == message) {
-        clearTimeout(tID);
-        unregListener();
-        ok(true, "message was logged successfully as expected");
-        start();
-      }
-    }
-  };
-
-  // add console listener
-  Services.cs.registerListener(consoleListener);
-  function unregListener() Services.cs.unregisterListener(consoleListener);
-
-  tID = setTimeout(function() {
-    unregListener();
-    ok(false, "message was not logged");
-    start();
-  }, 500);
+  var logChrome = null;
+  try {
+    var logChrome = PREF_BRANCH.getBoolPref("logChrome");
+  }
+  catch (ex) {}
+  PREF_BRANCH.setBoolPref("logChrome", true);
 
   try {
-    Scriptish_log("FORCED TEST", true);
-    ok(true, "sent message without error being thrown");
-  } catch (e) {
-    ok(false, e);
+    Scriptish_log("TEST");
+  }
+  finally {
+    if (logChrome !== null) {
+      PREF_BRANCH.setBoolPref("logChrome", logChrome);
+    }
+    else {
+      PREF_BRANCH.clearUserPref("logChrome", logChrome);
+    }
   }
 });
 
-asyncTest("null char removed", 2, function() {
-  var tID, msg = "FORCED \0TEST \0WITH \0NULLS";
+asyncTest("null char removed", 1, function() {
+  runListener(function({message}) {
+    equal(message, "[Scriptish] FORCED TEST WITH NULLS");
+  });
 
-  // making console listener
-  var consoleListener = {
-    observe: function({message}) {
-      if ("[Scriptish] FORCED TEST WITH NULLS" == message || msg == message) {
-        if ("[Scriptish] FORCED TEST WITH NULLS" == message)
-          ok(true, "message was logged successfully as expected");
-        else if (msg == message)
-          ok(false, "null chars were not removed");
-        clearTimeout(tID);
-        unregListener();
-        start();
-      }
-    }
-  };
-
-  // add console listener
-  Services.cs.registerListener(consoleListener);
-  function unregListener() Services.cs.unregisterListener(consoleListener);
-
-  tID = setTimeout(function() {
-    unregListener();
-    ok(false, "message was not logged");
-    start();
-  }, 500);
+  var logChrome = null;
+  try {
+    var logChrome = PREF_BRANCH.getBoolPref("logChrome");
+  }
+  catch (ex) {}
+  PREF_BRANCH.setBoolPref("logChrome", true);
 
   try {
-    Scriptish_log(msg, true);
-    ok(true, "sent message without error being thrown");
-  } catch (e) {
-    ok(false, e);
+    Scriptish_log("FORCED \0TEST \0WITH \0NULLS");
+  }
+  finally {
+    if (logChrome !== null) {
+      PREF_BRANCH.setBoolPref("logChrome", logChrome);
+    }
+    else {
+      PREF_BRANCH.clearUserPref("logChrome", logChrome);
+    }
   }
 });
+
+// logScriptError
+
+asyncTest("logScriptError: js error", 9, function() {
+  runListener(function(message) {
+    ok(message instanceof Ci.nsIScriptError);
+    ok(message instanceof Ci.nsIScriptError2);
+
+    equal(message.errorMessage, "[baz] Error: foo");
+    equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
+    equal(message.sourceLine, "");
+    ok(message.lineNumber > 10);
+    equal(message.columnNumber, 0);
+    equal(message.category, "scriptish userscript error");
+    equal(message.flags, message.errorFlag);
+  });
+  Scriptish_logScriptError(new Error("foo"), window, "bar.js", "baz");
+});
+
+asyncTest("logScriptError: nsIScriptError", 9, function() {
+  runListener(function(message) {
+    ok(message instanceof Ci.nsIScriptError);
+    ok(message instanceof Ci.nsIScriptError2);
+
+    equal(message.errorMessage, "[baz] foo");
+    equal(message.sourceName, "source");
+    equal(message.sourceLine, "line");
+    equal(message.lineNumber, 0xaa);
+    equal(message.columnNumber, 0xff);
+    equal(message.category, "category");
+    equal(message.flags, message.warningFlag);
+  });
+  var se = Instances.se;
+  se.init("foo", "source", "line", 0xaa, 0xff, se.warningFlag, "category");
+  Scriptish_logScriptError(se, window, "bar.js", "baz");
+});
+
+asyncTest("logScriptError: nsIScriptError; omit id", 9, function() {
+  runListener(function(message) {
+    ok(message instanceof Ci.nsIScriptError);
+    ok(message instanceof Ci.nsIScriptError2);
+
+    equal(message.errorMessage, "[Scriptish] foo");
+    equal(message.sourceName, "source");
+    equal(message.sourceLine, "line");
+    equal(message.lineNumber, 0xaa);
+    equal(message.columnNumber, 0xff);
+    equal(message.category, "category");
+    equal(message.flags, message.warningFlag);
+  });
+  var se = Instances.se;
+  se.init("foo", "source", "line", 0xaa, 0xff, se.warningFlag, "category");
+  Scriptish_logScriptError(se, window);
+});
+
+asyncTest("test nsIScriptError; omit optionals", function() {
+  expect(9);
+  runListener(function(message) {
+    ok(message instanceof Ci.nsIScriptError);
+    ok(message instanceof Ci.nsIScriptError2);
+
+    equal(message.errorMessage, "[Scriptish] foo");
+    equal(message.sourceName, "[user.js]");
+    equal(message.sourceLine, "line");
+    equal(message.lineNumber, 0xaa);
+    equal(message.columnNumber, 0xff);
+    equal(message.category, "category");
+    equal(message.flags, message.warningFlag);
+  });
+  var se = Instances.se;
+  se.init("foo", "", "line", 0xaa, 0xff, se.warningFlag, "category");
+  Scriptish_logScriptError(se, window);
+});
+
+asyncTest("test nsIException", function() {
+  expect(9);
+  runListener(function(message) {
+    ok(message instanceof Ci.nsIScriptError);
+    ok(message instanceof Ci.nsIScriptError2);
+
+    equal(message.errorMessage, "[baz] foo");
+    equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
+    equal(message.sourceLine, "");
+    ok(message.lineNumber > 10);
+    equal(message.columnNumber, 0);
+    equal(message.category, "scriptish userscript error");
+    equal(message.flags, message.errorFlag);
+  });
+  var ex = Components.Exception("foo");
+  Scriptish_logScriptError(ex, window, "bar.js", "baz");
+});
+
+asyncTest("test TypeError", function() {
+  expect(9);
+  runListener(function(message) {
+    ok(message instanceof Ci.nsIScriptError);
+    ok(message instanceof Ci.nsIScriptError2);
+
+    equal(message.errorMessage, "[baz] TypeError: f is undefined");
+    equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
+    equal(message.sourceLine, "");
+    ok(message.lineNumber > 10);
+    equal(message.columnNumber, 0);
+    equal(message.category, "scriptish userscript error");
+    equal(message.flags, message.errorFlag);
+  });
+  try {
+    var f;
+    f.o.o = b.a.r;
+  }
+  catch (ex) {
+    Scriptish_logScriptError(ex, window, "bar.js", "baz");
+  }
+});
+

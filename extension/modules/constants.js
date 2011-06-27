@@ -29,7 +29,8 @@ var Instances = {
   get json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
   get lf() Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile),
   get process() Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess),
-  get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
+  get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError)
+      .QueryInterface(Ci.nsIScriptError2),
   get ss() Cc["@mozilla.org/supports-string;1"]
       .createInstance(Ci.nsISupportsString),
   get suc() Cc["@mozilla.org/intl/scriptableunicodeconverter"]
