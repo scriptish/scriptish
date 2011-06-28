@@ -97,8 +97,8 @@ function createScriptSource() {
     namespace: $("namespace").value,
     author: $("author").value,
     description: $("description").value,
-    includes: $("includes").value ? $("includes").value.match(/.+/g) : [],
-    excludes: $("excludes").value ? $("excludes").value.match(/.+/g) : []
+    include: $("includes").value ? $("includes").value.match(/.+/g) : [],
+    exclude: $("excludes").value ? $("excludes").value.match(/.+/g) : []
   }
   try {
     return Scriptish_createUserScriptSource(header, scriptContent);
