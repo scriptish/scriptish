@@ -12,27 +12,17 @@
     <command id="cmd-change-editor" oncommand="changeEditor()"/>
   </commandset>
 
-  <preferences id="scriptish-preferences">
-    <preference id="pref-cache-enabled" name="extensions.scriptish.cache.enabled" type="bool"/>
-    <preference id="pref-disableNotifications" name="extensions.scriptish.disableNotifications" type="bool"/>
-    <preference id="pref-editor" name="extensions.scriptish.editor" type="unichar"/>
-    <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
-    <preference id="pref-enabledSchemes-about" name="extensions.scriptish.enabledSchemes.about" type="bool"/>
-    <preference id="pref-enabledSchemes-chrome" name="extensions.scriptish.enabledSchemes.chrome" type="bool"/>
-    <preference id="pref-enabledSchemes-data" name="extensions.scriptish.enabledSchemes.data" type="bool"/>
-    <preference id="pref-enabledSchemes-file" name="extensions.scriptish.enabledSchemes.file" type="bool"/>
-    <preference id="pref-enabledSchemes-ftp" name="extensions.scriptish.enabledSchemes.ftp" type="bool"/>
-    <preference id="pref-enabledSchemes-http" name="extensions.scriptish.enabledSchemes.http" type="bool"/>
-    <preference id="pref-enabledSchemes-unmht" name="extensions.scriptish.enabledSchemes.unmht" type="bool"/>
-    <preference id="pref-logChrome" name="extensions.scriptish.logChrome" type="bool"/>
-    <preference id="pref-uninstallPreferences" name="extensions.scriptish.uninstallPreferences" type="bool"/>
-    <preference id="pref-update-requireBuiltInCerts" name="extensions.scriptish.update.requireBuiltInCerts" type="bool"/>
-    <preference id="pref-update-requireSecured" name="extensions.scriptish.update.requireSecured" type="bool"/>
-    <preference id="pref-useDefaultLocale" name="extensions.scriptish.useDefaultLocale" type="bool"/>
-    <preference id="pref-useDownloadURLForUpdateURL" name="extensions.scriptish.useDownloadURLForUpdateURL" type="bool"/>
-  </preferences>
-
   <prefpane id="pane-main" label="options.pane.main" localize="label">
+    <preferences>
+      <preference id="pref-enabledSchemes-http" name="extensions.scriptish.enabledSchemes.http" type="bool"/>
+      <preference id="pref-enabledSchemes-ftp" name="extensions.scriptish.enabledSchemes.ftp" type="bool"/>
+      <preference id="pref-enabledSchemes-data" name="extensions.scriptish.enabledSchemes.data" type="bool"/>
+      <preference id="pref-editor" name="extensions.scriptish.editor" type="unichar"/>
+      <preference id="pref-uninstallPreferences" name="extensions.scriptish.uninstallPreferences" type="bool"/>
+      <preference id="pref-useDownloadURLForUpdateURL" name="extensions.scriptish.useDownloadURLForUpdateURL" type="bool"/>
+      <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
+    </preferences>
+
     <groupbox>
       <caption label="options.enabledSchemes.main" localize="label"/>
       <checkbox preference="pref-enabledSchemes-http" label="options.enabledSchemes.http" localize="label"/>
@@ -71,6 +61,19 @@
   </prefpane>
 
   <prefpane id="pane-advanced" label="options.pane.advanced" localize="label">
+    <preferences>
+      <preference id="pref-cache-enabled" name="extensions.scriptish.cache.enabled" type="bool"/>
+      <preference id="pref-disableNotifications" name="extensions.scriptish.disableNotifications" type="bool"/>
+      <preference id="pref-useDefaultLocale" name="extensions.scriptish.useDefaultLocale" type="bool"/>
+      <preference id="pref-enabledSchemes-file" name="extensions.scriptish.enabledSchemes.file" type="bool"/>
+      <preference id="pref-enabledSchemes-chrome" name="extensions.scriptish.enabledSchemes.chrome" type="bool"/>
+      <preference id="pref-enabledSchemes-unmht" name="extensions.scriptish.enabledSchemes.unmht" type="bool"/>
+      <preference id="pref-enabledSchemes-about" name="extensions.scriptish.enabledSchemes.about" type="bool"/>
+      <preference id="pref-logChrome" name="extensions.scriptish.logChrome" type="bool"/>
+      <preference id="pref-update-requireSecured" name="extensions.scriptish.update.requireSecured" type="bool"/>
+      <preference id="pref-update-requireBuiltInCerts" name="extensions.scriptish.update.requireBuiltInCerts" type="bool"/>
+    </preferences>
+
     <groupbox>
       <caption label="options.cache" localize="label"/>
       <checkbox preference="pref-cache-enabled" label="options.cache.enabled" localize="label"/>
