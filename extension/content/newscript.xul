@@ -17,28 +17,28 @@
     </columns>
     <rows>
       <row>
-        <label id="label-id" control="id" value="newscript.id" localize="value"/>
+        <label control="id" value="newscript.id" localize="value"/>
         <textbox id="id"/>
         <toolbarbutton id="generate-id" hidden="true"/>
       </row>
       <row>
-        <label id="label-name" control="name" value="newscript.name" localize="value"/>
+        <label control="name" value="newscript.name" localize="value"/>
         <textbox id="name"/>
       </row>
       <row>
-        <label id="label-namespace" control="namespace" value="newscript.namespace" localize="value"/>
+        <label control="namespace" value="newscript.namespace" localize="value"/>
         <textbox id="namespace"/>
       </row>
       <row>
-        <label id="label-description" control="description" value="newscript.description" localize="value"/>
+        <label control="description" value="newscript.description" localize="value"/>
         <textbox id="description"/>
       </row>
       <row>
-        <label id="label-includes" control="includes" value="newscript.includes" localize="value"/>
+        <label control="includes" value="newscript.includes" localize="value"/>
         <textbox id="includes" multiline="true" rows="4" cols="60"/>
       </row>
       <row>
-        <label id="label-excludes" control="excludes" value="newscript.excludes" localize="value"/>
+        <label control="excludes" value="newscript.excludes" localize="value"/>
         <textbox id="excludes" multiline="true" rows="4" cols="60"/>
       </row>
     </rows>
