@@ -1,4 +1,4 @@
-(function(inc, _) {
+(function(inc, tools) {
   "use strict";
   inc("resource://scriptish/utils/Scriptish_stringBundle.js", tools);
 
