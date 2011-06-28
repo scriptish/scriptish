@@ -22,6 +22,7 @@ window.addEventListener("load", function() {
   // load defaults
   $("id").value = Scriptish_prefRoot.getValue("newscript_id", "");
   $("namespace").value = Scriptish_prefRoot.getValue("newscript_namespace", "");
+  $("author").value = Scriptish_prefRoot.getValue("newscript_author", "");
 
   (function considerLocation() {
     if (!window.opener.gBrowser) {
@@ -80,8 +81,9 @@ function doInstall() {
     // and fire up the editor!
     tools.Scriptish_openInEditor(script, window);
 
-    // persist namespace value
+    // persist values
     Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
+    Scriptish_prefRoot.setValue("newscript_author", script.author);
   })
 
   return true;
@@ -93,6 +95,7 @@ function createScriptSource() {
     id: $("id").value,
     name: $("name").value,
     namespace: $("namespace").value,
+    author: $("author").value,
     description: $("description").value,
     includes: $("includes").value ? $("includes").value.match(/.+/g) : [],
     excludes: $("excludes").value ? $("excludes").value.match(/.+/g) : []

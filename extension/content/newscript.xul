@@ -30,6 +30,10 @@
         <textbox id="namespace"/>
       </row>
       <row>
+        <label control="author" value="newscript.author" localize="value"/>
+        <textbox id="author"/>
+      </row>
+      <row>
         <label control="description" value="newscript.description" localize="value"/>
         <textbox id="description"/>
       </row>
