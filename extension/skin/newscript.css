@@ -1,0 +1,6 @@
+@import url(chrome://global/skin/);
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+#generate-id {
+  list-style-image: url(generate.png);
+}

@@ -1,3 +1,4 @@
+Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/scriptish.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_createUserScriptSource.js");
@@ -22,10 +23,27 @@ window.addEventListener("load", function() {
   $("id").value = Scriptish_prefRoot.getValue("newscript_id", "");
   $("namespace").value = Scriptish_prefRoot.getValue("newscript_namespace", "");
 
-  // default the includes with the current page's url
-  var content = window.opener.document.getElementById("content");
-  if (content)
-    $("includes").value = content.selectedBrowser.contentWindow.location.href;
+  (function considerLocation() {
+    if (!window.opener.gBrowser) {
+      return;
+    }
+    let contentLocation = window.opener.gBrowser.selectedBrowser.contentWindow.location;
+    $("includes").value = contentLocation.href;
+    if (!contentLocation.host) {
+      return;
+    }
+    let host = contentLocation.host;
+
+    let generateIdButton = $('generate-id');
+    generateIdButton.hidden = false;
+    generateIdButton.addEventListener("command", function generateId() {
+      let gid = contentLocation.host
+      gid += "-" + Services.uuid.generateUUID().toString().slice(1, -1);
+      gid += "@" + ($("namespace").value || "scriptish").replace(/^@/, "");
+      $("id").value = gid;
+    }, false);
+
+  })();
 }, false);
 
 function doInstall() {

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="16px"
+   height="16px"
+   id="svg2985"
+   version="1.1"
+   inkscape:version="0.48.1 "
+   sodipodi:docname="generate.svg"
+   inkscape:export-filename="C:\Users\MaierMan\workspace\scriptish\assets\generate.png"
+   inkscape:export-xdpi="32"
+   inkscape:export-ydpi="32">
+  <title
+     id="title2999">Generate button (hashtag)</title>
+  <defs
+     id="defs2987">
+    <filter
+       id="filter3246"
+       inkscape:label="Drop shadow"
+       width="1.5"
+       height="1.5"
+       x="-.25"
+       y="-.25">
+      <feGaussianBlur
+         id="feGaussianBlur3248"
+         in="SourceAlpha"
+         stdDeviation="1"
+         result="blur" />
+      <feColorMatrix
+         id="feColorMatrix3250"
+         result="bluralpha"
+         type="matrix"
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.45 0 " />
+      <feOffset
+         id="feOffset3252"
+         in="bluralpha"
+         dx="1"
+         dy="1"
+         result="offsetBlur" />
+      <feMerge
+         id="feMerge3254">
+        <feMergeNode
+           id="feMergeNode3256"
+           in="offsetBlur" />
+        <feMergeNode
+           id="feMergeNode3258"
+           in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="22.197802"
+     inkscape:cx="-3.4876239"
+     inkscape:cy="10.370898"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:window-width="1600"
+     inkscape:window-height="878"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata2990">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Generate button (hashtag)</dc:title>
+        <dc:date>2011/06/28</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Nils Maier</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>CC-0 (Public domain)</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <g
+       style="font-size:24.89369774px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#1a1a1a;fill-opacity:1;stroke:none;filter:url(#filter3246);font-family:Sans"
+       id="text2993"
+       transform="matrix(0.85803232,0,0,0.85803232,0.94167533,0.51672597)">
+      <path
+         d="m 13.602795,11.539069 -2.710593,0 L 10.442462,16 l -1.7989588,0 0.4497397,-4.460931 -3.0995571,0 L 5.5439462,16 l -1.7989587,0 0.4497397,-4.460931 -2.5890418,0 0,-1.5801665 2.7470584,0 0.4375845,-4.2542941 -2.5647315,0 0,-1.5801664 2.7227482,0 0.4132743,-4.01119148 1.7746483,0 -0.4011191,4.01119148 3.1117122,0 0.4132743,-4.01119148 1.798959,0 -0.42543,4.01119148 2.613352,0 0,1.5801664 -2.771368,0 -0.42543,4.2542941 2.552577,0 z M 9.2634147,9.9589025 9.6888441,5.7046084 l -3.1117123,0 -0.4254294,4.2542941 z"
+         style="font-variant:normal;font-stretch:normal;fill:#1a1a1a;font-family:Consolas;-inkscape-font-specification:Consolas"
+         id="path2986"
+         inkscape:connector-curvature="0" />
+    </g>
+  </g>
+</svg>
