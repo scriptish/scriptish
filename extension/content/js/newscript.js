@@ -6,6 +6,8 @@ Components.utils.import("resource://scriptish/utils/Scriptish_localizeDOM.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 var $ = function(aID) document.getElementById(aID);
+var $$ = function(q) document.querySelector(q);
+var $$$ = function(q) document.querySelectorAll(q);
 
 Scriptish_localizeOnLoad(this);
 
@@ -17,7 +19,17 @@ try {
 } catch(e) {}
 
 window.addEventListener("load", function() {
-  $("scriptish").addEventListener("dialogaccept", function() doInstall(), false);
+  $("scriptish").addEventListener("dialogaccept", function(evt) {
+    try {
+      if (doInstall()) {
+        return true;
+      }
+    } catch (e) {}
+
+    evt.preventDefault();
+    evt.stopProgapation();
+    return false;
+  }, false);
 
   // load defaults
   $("id").value = Scriptish_prefRoot.getValue("newscript_id", "");
@@ -48,6 +60,17 @@ window.addEventListener("load", function() {
 }, false);
 
 function doInstall() {
+  // validate some
+  var ok = Array.reduce($$$("*[required]"), function(p,v) {
+    var vok = !!v.value;
+    v.setAttribute("invalid", !vok);
+    return p & vok;
+  }, true);
+
+  if (!ok) {
+    return false;
+  }
+
   var tools = {};
   Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
   Components.utils.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);

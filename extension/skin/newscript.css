@@ -1,5 +1,21 @@
 @import url(chrome://global/skin/);
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+row {
+  /* some more white space, so that the invalid borders don't overlap */
+  margin-bottom: 2px;
+  margin-bottom: 4px;
+}
+
+textbox {
+  margin-left: 1em;
+  min-width: 44em;
+}
+
+*[required][invalid="true"] {
+  box-shadow: 0pt 0pt 1.5px 1px red;
+}
 
 #generate-id {
   list-style-image: url(generate.png);

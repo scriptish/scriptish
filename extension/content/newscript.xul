@@ -18,12 +18,12 @@
     <rows>
       <row>
         <label control="id" value="newscript.id" localize="value"/>
-        <textbox id="id"/>
+        <textbox id="id" placeholder="newscript.missing.id" localize="placeholder" required="true"/>
         <toolbarbutton id="generate-id" hidden="true"/>
       </row>
       <row>
         <label control="name" value="newscript.name" localize="value"/>
-        <textbox id="name"/>
+        <textbox id="name" placeholder="newscript.missing.name" localize="placeholder" required="true"/>
       </row>
       <row>
         <label control="namespace" value="newscript.namespace" localize="value"/>
