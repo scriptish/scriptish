@@ -524,10 +524,13 @@ Script.prototype = {
   get fileURL() Scriptish_getUriFromFile(this._file).spec,
 
   get size() {
-    var size = this._file.fileSize;
-    for each (var r in this._requires) size += r._file.fileSize;
-    for each (var r in this._resources) size += r._file.fileSize;
-    return size;
+    if (!this._size) {
+      var size = this._file.fileSize;
+      for each (var r in this._requires) size += r._file.fileSize;
+      for each (var r in this._resources) size += r._file.fileSize;
+      this._size = size;
+    }
+    return this._size;
   },
 
   getScriptHeader: function(aKey) {
@@ -582,10 +585,30 @@ Script.prototype = {
   get previewURL() Services.io.newFileURI(this._tempFile).spec,
 
   isModified: function() {
-    if (!this.fileExists()) return false;
-    if (this._modified != this._file.lastModifiedTime) {
-      this._modified = this._file.lastModifiedTime;
-      return true;
+    let now = Date.now();
+    if (now - this._isModified_lastcheck < 1000) {
+      // prevent thrashing by stat requests
+      // it can be safely assumed, that a user does not usually change a script
+      // and reload a website more often than once in a second
+      return false;
+    }
+    this._isModified_lastcheck = now;
+
+    try {
+      let lmt = this._file.lastModifiedTime;
+      if (this._modified != lmt) {
+        this._modified = lmt;
+
+        // drop the precomputed size
+        this._size = 0;
+
+        return true;
+      }
+    }
+    catch (ex) {
+      if (!this.fileExists()) {
+        this.uninstallProcess();
+      }
     }
     return false;
   },
@@ -748,7 +771,9 @@ Script.prototype = {
 
     if (Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
 
-    this._modified = this._file.lastModifiedTime;
+    // set up _modified and stat thrashing stuff
+    this.isModified();
+
     this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
   }
@@ -1157,7 +1182,9 @@ Script.loadFromXML = function(aConfig, aNode) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
-    script._modified = script._file.lastModifiedTime;
+    // set up _modified and stat thrashing stuff
+    script.isModified();
+
     var parsedScript = Script.parse(
         aConfig, Scriptish_getContents(script._file),
         script._downloadURL && NetUtil.newURI(script._downloadURL),
