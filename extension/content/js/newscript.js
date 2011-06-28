@@ -38,7 +38,7 @@ window.addEventListener("load", function() {
     let generateIdButton = $('generate-id');
     generateIdButton.hidden = false;
     generateIdButton.addEventListener("command", function generateId() {
-      let gid = contentLocation.host
+      let gid = contentLocation.host;
       gid += "-" + Services.uuid.generateUUID().toString().slice(1, -1);
       gid += "@" + ($("namespace").value || "scriptish").replace(/^@/, "");
       $("id").value = gid;
