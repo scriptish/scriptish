@@ -607,7 +607,7 @@ Script.prototype = {
     }
     catch (ex) {
       if (!this.fileExists()) {
-        this.uninstallProcess();
+        this.uninstall();
       }
     }
     return false;
