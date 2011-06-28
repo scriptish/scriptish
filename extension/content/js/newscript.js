@@ -1,9 +1,12 @@
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/scriptish.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_createUserScriptSource.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_localizeDOM.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 var $ = function(aID) document.getElementById(aID);
+
+Scriptish_localizeOnLoad(this);
 
 var scriptContent = "";
 try {
@@ -13,15 +16,7 @@ try {
 } catch(e) {}
 
 window.addEventListener("load", function() {
-  $("scriptish").setAttribute("title", Scriptish_stringBundle("menu.new"));
-  $("scriptish").setAttribute("ondialogaccept", "return doInstall();");
-  $("label-id").setAttribute("value", Scriptish_stringBundle("newscript.id"));
-  $("label-name").setAttribute("value", Scriptish_stringBundle("newscript.name"));
-  $("label-namespace").setAttribute("value", Scriptish_stringBundle("newscript.namespace"));
-  $("label-description").setAttribute("value", Scriptish_stringBundle("newscript.description"));
-  $("label-includes").setAttribute("value", Scriptish_stringBundle("newscript.includes"));
-  $("label-excludes").setAttribute("value", Scriptish_stringBundle("newscript.excludes"));
-  $("label-includes").setAttribute("value", Scriptish_stringBundle("newscript.includes"));
+  $("scriptish").addEventListener("dialogaccept", function() doInstall(), false);
 
   // load defaults
   $("id").value = Scriptish_prefRoot.getValue("newscript_id", "");

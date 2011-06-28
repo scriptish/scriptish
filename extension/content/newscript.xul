@@ -3,27 +3,42 @@
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     id="scriptish"
     buttons="accept,cancel"
-    orient="vertical">
+    orient="vertical"
+    title="menu.new"
+    localize="title"
+    >
   <script type="application/x-javascript" src="chrome://scriptish/content/js/newscript.js" />
 
-  <vbox>
-    <label id="label-id" control="id"/>
-    <textbox id="id"/>
-    <separator class="thin"/>
-    <label id="label-name" control="name"/>
-    <textbox id="name"/>
-    <separator class="thin"/>
-    <label id="label-namespace" control="namespace"/>
-    <textbox id="namespace"/>
-    <separator class="thin"/>
-    <label id="label-description" control="description"/>
-    <textbox id="description"/>
-    <separator class="thin"/>
-    <label id="label-includes" control="includes"/>
-    <textbox id="includes" multiline="true" rows="4" cols="60"/>
-    <separator class="thin"/>
-    <label id="label-excludes" control="excludes"/>
-    <textbox id="excludes" multiline="true" rows="4" cols="60"/>
-    <separator class="thin"/>
-  </vbox>
+  <grid>
+    <columns>
+      <column />
+      <column flex="1"/>
+    </columns>
+    <rows>
+      <row>
+        <label id="label-id" control="id" value="newscript.id" localize="value"/>
+        <textbox id="id"/>
+      </row>
+      <row>
+        <label id="label-name" control="name" value="newscript.name" localize="value"/>
+        <textbox id="name"/>
+      </row>
+      <row>
+        <label id="label-namespace" control="namespace" value="newscript.namespace" localize="value"/>
+        <textbox id="namespace"/>
+      </row>
+      <row>
+        <label id="label-description" control="description" value="newscript.description" localize="value"/>
+        <textbox id="description"/>
+      </row>
+      <row>
+        <label id="label-includes" control="includes" value="newscript.includes" localize="value"/>
+        <textbox id="includes" multiline="true" rows="4" cols="60"/>
+      </row>
+      <row>
+        <label id="label-excludes" control="excludes" value="newscript.excludes" localize="value"/>
+        <textbox id="excludes" multiline="true" rows="4" cols="60"/>
+      </row>
+    </rows>
+  </grid>
 </dialog>
