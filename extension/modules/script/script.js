@@ -657,7 +657,7 @@ Script.prototype = {
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
-    this["_run-at"] = newScript.runAt;
+    this["_run-at"] = newScript["_run-at"];
     this._noframes = newScript._noframes;
     this._version = newScript._version;
 
