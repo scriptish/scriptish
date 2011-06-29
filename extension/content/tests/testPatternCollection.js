@@ -71,3 +71,22 @@ test("merged2", function() {
   equal(pc.test("foobar1"), true, "foobar1");
   equal(pc.test("foobaz2"), true, "foobaz2");
 });
+
+test("tld", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("http://google.tld/*");
+  pc.addPattern("http://yahoo.tld/*");
+  pc.addPattern("http://bing.com/*");
+  pc.addPattern("http://mozilla.com/*");
+  deepEqual(pc._regs.map(function(e) e.source), ["^http:\\/\\/bing\\.com\\/.*$", "^http:\\/\\/mozilla\\.com\\/.*$"], "regs");
+  deepEqual(pc._regsTLD.map(function(e) e.source), ["^http:\\/\\/google\\.tld\\/.*$", "^http:\\/\\/yahoo\\.tld\\/.*$"], "regsTLD");
+  equal(pc.merged.source, "^http:\\/\\/(?:bing\\.com\\/.*$|mozilla\\.com\\/.*$)", "merged");
+  equal(pc.mergedTLD.source, "^http:\\/\\/(?:google\\.tld\\/.*$|yahoo\\.tld\\/.*$)", "mergedTLD");
+  equal(pc.test("http://mozilla.com/"), true, "moco");
+  equal(pc.test("http://mozilla.org/"), false, "mofo");
+  equal(pc.test("http://google.de/"), true, "g.de");
+  equal(pc.test("http://google.com/"), true, "g.com");
+  equal(pc.test("http://google.co.uk/"), true, "g.co.uk");
+});
