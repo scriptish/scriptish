@@ -5,6 +5,7 @@ var tools = {};
 
 (function(Cu) {
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/utils/q.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_alert.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_createUserScriptSource.js", tools);
@@ -25,9 +26,11 @@ Cu.import("resource://scriptish/utils/Scriptish_getWindowIDs.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_installUri.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_launchApplicationWithDoc.js", tools);
+Cu.import("resource://scriptish/utils/Scriptish_localizeDOM.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_memoize.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
+Cu.import("resource://scriptish/utils/Scriptish_openInTab.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js", tools);
 Cu.import("resource://scriptish/third-party/MatchPattern.js", tools);
 Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js", tools);
@@ -41,8 +44,9 @@ test("Scriptish", function() {
   });
 
 test("Utils", function() {
-  expect(24);
+  expect(28);
 
+  equals(typeof(tools.Q), "object", "has Q");
   equals(typeof(tools.Scriptish_alert), "function", "has Scriptish_alert");
   equals(typeof(tools.Scriptish_convert2RegExp), "function", "has Scriptish_convert2RegExp");
   equals(typeof(tools.Scriptish_createUserScriptSource), "function", "has Scriptish_createUserScriptSource");
@@ -63,9 +67,12 @@ test("Utils", function() {
   equals(typeof(tools.Scriptish_getWriteStream), "function", "has Scriptish_getWriteStream");
   equals(typeof(tools.Scriptish_installUri), "function", "has Scriptish_installUri");
   equals(typeof(tools.Scriptish_launchApplicationWithDoc), "function", "has Scriptish_launchApplicationWithDoc");
+  equals(typeof(tools.Scriptish_localizeOnLoad), "function", "has Scriptish_localizeOnLoad");
+  equals(typeof(tools.Scriptish_localizeSubtree), "function", "has Scriptish_localizeSubtree");
   equals(typeof(tools.Scriptish_memoize), "function", "has Scriptish_memoize");
   equals(typeof(tools.Scriptish_notification), "function", "has Scriptish_notification");
   equals(typeof(tools.Scriptish_openInEditor), "function", "has Scriptish_openInEditor");
+  equals(typeof(tools.Scriptish_openInTab), "function", "has Scriptish_openInTab");
   equals(typeof(tools.Scriptish_stringBundle), "function", "has Scriptish_stringBundle");
 });
 
