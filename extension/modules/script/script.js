@@ -11,8 +11,6 @@ Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/utils/PatternCollection.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
-Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
-Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/script/cachedresource.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
