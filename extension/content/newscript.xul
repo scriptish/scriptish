@@ -40,11 +40,11 @@
       </row>
       <row>
         <label control="includes" value="newscript.includes" localize="value"/>
-        <textbox id="includes" multiline="true" rows="4" cols="60"/>
+        <textbox id="includes" multiline="true" wrap="off" rows="4" cols="60"/>
       </row>
       <row>
         <label control="excludes" value="newscript.excludes" localize="value"/>
-        <textbox id="excludes" multiline="true" rows="4" cols="60"/>
+        <textbox id="excludes" multiline="true" wrap="off" rows="4" cols="60"/>
       </row>
     </rows>
   </grid>
