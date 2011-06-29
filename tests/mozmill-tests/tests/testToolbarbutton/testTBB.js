@@ -34,17 +34,28 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://scriptish/scriptish.js");
+
 var setupModule = function(module) {
   module.controller = mozmill.getBrowserController();
 }
 
 // Test that the element with ID 'scriptish-button' can be found.
-var testToolbarButtonExists = function() {
-  controller.waitFor(function() {
-    return (new elementslib.ID(controller.window.document, "scriptish-button")).exists();
-  }, "Scriptish toolbar button should be found", 2000);
+var testToolbarButton = function() {
+  var status = Scriptish.enabled;
+  var tbb = (new elementslib.ID(controller.window.document, "scriptish-button"));
+  var tbbm = controller.window.document.getElementById("scriptish-tb-popup");
+  controller.click(tbb);
+  controller.assert(function() (!status == Scriptish.enabled), "Scriptish is disabled");
+  controller.assert(function() (tbbm.state == "closed"), "Menu is closed");
+  controller.click(tbb);
+  controller.assert(function() (status == Scriptish.enabled), "Scriptish is enabled");
+  controller.assert(function() (tbbm.state == "closed"), "Menu is closed");
+  // below this line is WIP.
+  controller.rightClick(tbb);
+  controller.assert(function() (status == Scriptish.enabled), "Scriptish is still enabled");
+  /*controller.waitFor(function() {
+    return (tbbm.state == "open" || tbbm.state == "showing");
+  }, "Menu is open", 500, 2);*/
+};
 
-  controller.waitFor(function() {
-    return (new elementslib.ID(controller.window.document, "scriptish-tb-popup")).exists();
-  }, "Scriptish toolbar button should be found", 2000);
-}
