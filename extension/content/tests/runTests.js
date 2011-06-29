@@ -27,6 +27,7 @@ function runTests() {
     function() include("tests/testScriptishConvert2RegExp.js"),
     function() include("tests/testScriptishCreateUserScriptSource.js"),
     function() include("tests/testScriptishEnabled.js"),
+    function() include("tests/testScriptishGetTLDURL.js"),
     function() include("tests/testScriptishUpdateSecurely.js"),
     function() include("tests/testScriptishMemoize.js"),
     function() include("tests/testScriptishLogger.js"),
