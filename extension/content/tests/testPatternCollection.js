@@ -90,3 +90,24 @@ test("tld", function() {
   equal(pc.test("http://google.com/"), true, "g.com");
   equal(pc.test("http://google.co.uk/"), true, "g.co.uk");
 });
+
+test("clear", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("http://google.tld/*");
+  pc.addPattern("http://yahoo.tld/*");
+  pc.addPattern("http://bing.com/*");
+  pc.addPattern("http://mozilla.com/*");
+  equal(pc.merged.source, "^http:\\/\\/(?:bing\\.com\\/.*$|mozilla\\.com\\/.*$)", "merged");
+  equal(pc.mergedTLD.source, "^http:\\/\\/(?:google\\.tld\\/.*$|yahoo\\.tld\\/.*$)", "mergedTLD");
+  pc.clear();
+  deepEqual(pc.patterns, [], "cleared patterns");
+  deepEqual(pc._regs, [], "cleared regs");
+  deepEqual(pc._regsTLD, [], "cleared regs");
+  equal(pc._merged, null, "cleared _merge");
+  equal(pc._mergedTLD, null, "cleared _mergeTLD");
+  equal(pc.merged.source, undefined, "cleared merged");
+  equal(pc.mergedTLD.source, undefined, "cleared mergedTLD");
+  equal(pc.test("http://mozilla.com/"), false, "no matches");
+});
