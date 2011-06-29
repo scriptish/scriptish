@@ -18,7 +18,9 @@ try {
       .GetString(0);
 } catch(e) {}
 
-window.addEventListener("load", function() {
+addEventListener("DOMContentLoaded", function init() {
+  removeEventListener("DOMContentLoaded", init, false);
+
   $("scriptish").addEventListener("dialogaccept", function(evt) {
     try {
       if (doInstall()) {
