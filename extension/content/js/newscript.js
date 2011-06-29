@@ -43,7 +43,7 @@ addEventListener("DOMContentLoaded", function init() {
       return;
     }
     let contentLocation = window.opener.gBrowser.selectedBrowser.contentWindow.location;
-    $("includes").value = contentLocation.href;
+    $("includes").value = contentLocation.href + "\n";
     if (!contentLocation.host) {
       return;
     }
