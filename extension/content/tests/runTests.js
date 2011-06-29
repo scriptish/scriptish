@@ -15,6 +15,14 @@ function importModule(m, ctx) {
   return _;
 }
 
+function checkExports(m, exports) {
+  deepEqual(
+    Object.keys(importModule(m)),
+    exports,
+    "Correct exports"
+    );
+}
+
 function runTests() {
   var tools = {};
   Q.chain(
