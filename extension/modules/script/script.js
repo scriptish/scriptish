@@ -1104,10 +1104,10 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
 
   script.domains = aSkeleton.domains;
   aSkeleton.contributors.forEach(script.addContributor.bind(script));
-  aSkeleton.includes.forEach(function(i) script.addInclude(i));
-  aSkeleton.excludes.forEach(function(i) script.addExclude(i));
-  aSkeleton.user_includes.forEach(function(i) script.addInclude(i, true));
-  aSkeleton.user_excludes.forEach(function(i) script.addExclude(i, true));
+  script.addInclude(aSkeleton.includes);
+  script.addExclude(aSkeleton.excludes);
+  script.addInclude(aSkeleton.user_includes, true);
+  script.addExclude(aSkeleton.user_excludes, true);
   aSkeleton.matches.forEach(function(i) script._matches.push(new MatchPattern(i)));
   aSkeleton.requires.forEach(function(i) {
     var scriptRequire = new ScriptRequire(script);
