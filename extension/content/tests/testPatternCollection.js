@@ -49,7 +49,7 @@ test("merged", function() {
   deepEqual(pc._regs.map(function(e) e.source), ["^foobar.*$", "^foobaz.*$"], "regs");
   equal(pc.merged.source, "^fooba(?:r.*$|z.*$)", "merged");
   equal(pc.test("foo"), false, "foo");
-  equal(pc.test("fooba"), false, "foobar");
+  equal(pc.test("fooba"), false, "fooba");
   equal(pc.test("foobar"), true, "foobar");
   equal(pc.test("foobar1"), true, "foobar1");
   equal(pc.test("foobaz2"), true, "foobaz2");
@@ -66,7 +66,7 @@ test("merged2", function() {
   deepEqual(pc._regs.map(function(e) e.source), ["^foo$", "^foobar.*$", "^foobaz.*$"], "regs");
   equal(pc.merged.source, "^foo(?:$|bar.*$|baz.*$)", "merged");
   equal(pc.test("foo"), true, "foo");
-  equal(pc.test("fooba"), false, "foobar");
+  equal(pc.test("fooba"), false, "fooba");
   equal(pc.test("foobar"), true, "foobar");
   equal(pc.test("foobar1"), true, "foobar1");
   equal(pc.test("foobaz2"), true, "foobaz2");
