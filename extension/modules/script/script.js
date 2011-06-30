@@ -326,8 +326,8 @@ Script.prototype = {
       return this._user_includes.test(aURL)
           && !this._user_excludes.test(aURL);
 
-    return this._all_includes.test(aURL)
-      || this._matches.some(function(m) m.doMatch(aURL))
+    return (this._all_includes.test(aURL)
+      || this._matches.some(function(m) m.doMatch(aURL)))
       && !this._excludes.test(aURL);
   },
 
