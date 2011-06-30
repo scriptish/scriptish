@@ -28,7 +28,7 @@
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
 
-    <em:version>0.1.2pre</em:version>
+    <em:version>0.1.2</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
     <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
