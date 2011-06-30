@@ -328,7 +328,7 @@ Script.prototype = {
 
     return (this._all_includes.test(aURL)
       || this._matches.some(function(m) m.doMatch(aURL)))
-      && !this._excludes.test(aURL);
+      && !this._all_excludes.test(aURL);
   },
 
   get id() {
