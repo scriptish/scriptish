@@ -3,6 +3,7 @@ Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/scriptish.js");
 Components.utils.import("resource://scriptish/logging.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_notification.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_popupNotification.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const Scriptish_ScriptProvider = {
@@ -18,7 +19,17 @@ const Scriptish_ScriptProvider = {
       var msg = "'" + script.name;
       if (script.version) msg += " " + script.version;
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
-      Scriptish_notification(msg, null, null, function() Scriptish.openManager());
+      var callback = function() Scriptish.openManager();
+
+      Scriptish_popupNotification({
+        id: "scriptish-install-popup-notification",
+        message: msg,
+        mainAction: {
+          label: "Open User Scripts Manager",
+          accessKey: "O",
+          callback: callback
+        }
+      });
       break;
     case "scriptish-script-edit-enabling":
       AddonManagerPrivate.callAddonListeners(
@@ -42,7 +53,17 @@ const Scriptish_ScriptProvider = {
       msg += "' " + (("scriptish-script-updated" == aTopic)
           ? Scriptish_stringBundle("statusbar.updated")
           : Scriptish_stringBundle("statusbar.modified"));
-      Scriptish_notification(msg, null, null, function() Scriptish.openManager());
+      var callback = function() Scriptish.openManager();
+
+      Scriptish_popupNotification({
+        id: "scriptish-install-popup-notification",
+        message: msg,
+        mainAction: {
+          label: "Open User Scripts Manager",
+          accessKey: "O",
+          callback: callback
+        }
+      });
       break;
     case "scriptish-script-uninstalling":
       AddonManagerPrivate.callAddonListeners("onUninstalling", script, false);

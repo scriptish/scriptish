@@ -14,3 +14,7 @@ toolbar[iconsize="small"] #scriptish-button {
 toolbar[iconsize="small"] #scriptish-button[scriptish-disabled] {
 	list-style-image: url("chrome://scriptish/skin/scriptish16_disabled.png");
 }
+
+.popup-notification-icon[popupid="scriptish-install-popup-notification"] {
+  list-style-image: url("chrome://scriptish/skin/scriptish64.png");
+}
