@@ -6,13 +6,13 @@
   <script type="application/x-javascript" src="chrome://scriptish/content/js/browser.js"/>
 
   <broadcasterset id="mainBroadcasterSet">
+    <broadcaster id="scriptish-options-brd"/>
     <broadcaster id="scriptish-tb-popup-brd"/>
     <broadcaster id="scriptish-button-brd"/>
     <broadcaster id="scriptish-tb-no-scripts-brd"/>
     <broadcaster id="scriptish-tb-cmds-brd"/>
     <broadcaster id="scriptish-tb-new-us-brd"/>
     <broadcaster id="scriptish-tb-show-us-brd"/>
-    <broadcaster id="scriptish-tb-options-brd"/>
     <broadcaster id="scriptish-tb-enabled-brd"/>
   </broadcasterset>
 
@@ -28,6 +28,8 @@
     <menupopup id="scriptish-tools-menupop">
       <menuitem id="scriptish-tools-enabled-item"
           observes="scriptish-tb-enabled-brd" type="checkbox"/>
+      <menuseparator/>
+      <menuitem id="scriptish-tools-options" observes="scriptish-options-brd"/>
       <menuseparator/>
       <menuitem id="scriptish-tools-show-us"/>
       <menuitem id="scriptish-tools-new"/>
@@ -47,10 +49,11 @@
         <menuseparator id="scriptish-tb-no-scripts-sep"/>
         <menu id="scriptish-tb-cmds" observes="scriptish-tb-cmds-brd" disabled="false"><menupopup/></menu>
         <menuseparator/>
+        <menuitem id="scriptish-tb-options" observes="scriptish-options-brd"/>
+        <menuseparator/>
         <menuitem id="scriptish-tb-new-us" observes="scriptish-tb-new-us-brd"/>
         <menuitem id="scriptish-tb-show-us" observes="scriptish-tb-show-us-brd"/>
         <menuseparator/>
-        <menuitem id="scriptish-tb-options" observes="scriptish-tb-options-brd"/>
         <menuitem id="scriptish-tb-enabled-item" observes="scriptish-tb-enabled-brd" type="checkbox"/>
       </menupopup>
     </toolbarbutton>

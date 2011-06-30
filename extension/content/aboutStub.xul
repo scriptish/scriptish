@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!DOCTYPE window>
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="text/javascript"><![CDATA[
+    Components.utils.import("resource://scriptish/utils/Scriptish_openInTab.js");
+    Scriptish_openInTab("about:scriptish", false, true);
+    close();
+  ]]></script>
+</window>

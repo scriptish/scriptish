@@ -5,6 +5,7 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_openInTab.js");
 
 const moduleFilename = Components.stack.filename;
 const NS_XHTML = "http://www.w3.org/1999/xhtml";
@@ -173,33 +174,9 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     return aScript.getScriptHeader(key);
   }
 
-  this.GM_openInTab = function GM_openInTab(aURL, aReuse) {
+  this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-
-    // Try to reuse an existing tab
-    if (aReuse) {
-      let browserEnumerator = Services.wm.getEnumerator("navigator:browser");
-
-      while (browserEnumerator.hasMoreElements()) {
-        let browserWin = browserEnumerator.getNext();
-        let tabBrowser = browserWin.gBrowser;
-        let i = tabBrowser.browsers.length - 1;
-
-        for (; ~i; i--) {
-          let browser = tabBrowser.getBrowserAtIndex(i);
-          // TODO: check rel=canonical too
-          if (aURL === browser.currentURI.spec) {
-            tabBrowser.selectedTab = tabBrowser.tabContainer.childNodes[i];
-            browserWin.focus();
-            return getWindowForBrowser(browser);
-          }
-        }
-      }
-    }
-
-    // Opening a new tab
-    return getWindowForBrowser(aChromeWin.gBrowser
-        .getBrowserForTab(aChromeWin.gBrowser.addTab(aURL)))
+    return Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
@@ -252,11 +229,12 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
     return tools.Scriptish_cryptoHash.apply(null, arguments);
   }
-
-  this.GM_generateUUID = function() Services.uuid.generateUUID().toString();
-
-  this.GM_updatingEnabled = true;
 }
+
+GM_API.prototype.GM_generateUUID = function GM_generateUUID() (
+    Services.uuid.generateUUID().toString());
+
+GM_API.prototype.GM_updatingEnabled = true;
 
 GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
   if (!GM_apiLeakCheck("GM_setClipboard")) return;
@@ -264,7 +242,3 @@ GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
   Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
   tools.GM_setClipboard.apply(null, arguments);
 }
-
-
-function getWindowForBrowser(browser) browser.docShell
-    .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);

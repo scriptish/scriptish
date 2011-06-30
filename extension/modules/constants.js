@@ -1,9 +1,9 @@
 var EXPORTED_SYMBOLS = [
-    "Cc", "Ci", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
+    "Cc", "Ci", "Cr", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
     "Services", "Instances", "timeout"];
 
-const {classes: Cc, interfaces: Ci} = Components;
-const ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
+const {classes: Cc, interfaces: Ci, results: Cr} = Components;
+const global = this;
 var Services = {};
 (function(inc, tools){
   inc("resource://gre/modules/XPCOMUtils.jsm");
@@ -29,7 +29,8 @@ var Instances = {
   get json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
   get lf() Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile),
   get process() Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess),
-  get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError),
+  get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError)
+      .QueryInterface(Ci.nsIScriptError2),
   get ss() Cc["@mozilla.org/supports-string;1"]
       .createInstance(Ci.nsISupportsString),
   get suc() Cc["@mozilla.org/intl/scriptableunicodeconverter"]
@@ -55,6 +56,9 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
     Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
     "nsIClipboardHelper");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Services, "cs", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 XPCOMUtils.defineLazyServiceGetter(
     Services, "eps", "@mozilla.org/uriloader/external-protocol-service;1",
@@ -85,6 +89,18 @@ XPCOMUtils.defineLazyServiceGetter(
     "nsIUUIDGenerator");
 
 function timeout(cb, delay) {
-  Instances.timer.initWithCallback(
-      { notify: function(){ cb.call(null) } }, delay || 0, ONE_SHOT);
+  var callback = function() cb.call(null);
+  delay = delay || 0;
+  if (0 >= delay) {
+    Services.tm.currentThread.dispatch(callback, Ci.nsIThread.DISPATCH_NORMAL);
+    return;
+  }
+
+  if (!global.setTimeout) {
+    let tools = {};
+    Components.utils.import("resource://scriptish/third-party/Timer.js", tools);
+    global.setTimeout = (new tools.Timer()).setTimeout;
+  }
+
+  setTimeout(callback, delay);
 }

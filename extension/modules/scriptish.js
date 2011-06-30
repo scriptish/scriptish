@@ -7,6 +7,7 @@ Cu.import("resource://scriptish/logging.js");
 function setStatus() (enabled = Scriptish_prefRoot.getValue("enabled", true));
 function notifyStatusChg(aVal) (
     Scriptish.notify(null, "scriptish-enabled", {enabling: aVal}));
+
 var ignoreEnable = false, enabled = setStatus();
 Scriptish_prefRoot.watch("enabled", function() {
   if (ignoreEnable) return ignoreEnable = false;
@@ -15,8 +16,11 @@ Scriptish_prefRoot.watch("enabled", function() {
 
 var global = this;
 
+// don't delay calling aCallback; keep script injection time consistent post load
+function getConfig(aCallback) aCallback(global.config);
+
 const Scriptish = {
-  updateSecurely: Scriptish_prefRoot.getValue("update.requireSecured"),
+  updateSecurely: Scriptish_prefRoot.getBoolValue("update.requireSecured"),
   notify: function(aSubject, aTopic, aData) {
     if (true === aData) {
       aData = {saved: true};
@@ -31,9 +35,7 @@ const Scriptish = {
     Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
   getConfig: function(aCallback) {
-    if (global.config) {
-      aCallback(global.config);
-    } else if (!global.configQueue) {
+    if (!global.configQueue) {
       global.configQueue = [aCallback];
       var tools = {};
       Cu.import("resource://scriptish/config/config.js", tools);
@@ -41,6 +43,7 @@ const Scriptish = {
       cf.load(function() {
         Scriptish_log("Scriptish config loaded"); // TODO: force & l10n
         global.config = cf;
+        Scriptish.getConfig = getConfig;
         global.configQueue.forEach(function(f) f(cf));
         delete global["configQueue"];
       });
@@ -68,29 +71,30 @@ const Scriptish = {
     // if the url provide is not a valid url, then an error could be thrown
     try {
       var scheme = Services.io.extractScheme(aURL);
+      if (!scheme) {
+        return false;
+      }
     } catch (e) {
       return false;
     }
-
     switch (scheme) {
       case "http":
       case "https":
+        return Scriptish_prefRoot.getBoolValue("enabledSchemes.http", true);
+
       case "ftp":
       case "data":
-        return true;
+        return Scriptish_prefRoot.getBoolValue("enabledSchemes." + scheme, true);
+
       case "about":
         // Always allow "about:blank".
-        if (/^about:blank/.test(aURL)) return true;
-        // Conditionally allow the rest of "about:".
-        return Scriptish_prefRoot.getValue('aboutIsGreaseable');
-      case "file":
-        return Scriptish_prefRoot.getValue('fileIsGreaseable');
-      case "unmht":
-        return Scriptish_prefRoot.getValue('unmhtIsGreaseable');
+        if (/^about:blank(?:[#?].*)?$/.test(aURL)) return true;
+        // no break
+      default:
+        return Scriptish_prefRoot.getBoolValue("enabledSchemes." + scheme, false);
     }
-    return false;
   },
-  getMostRecentWindow: function() Service.wm.getMostRecentWindow("navigator:browser"),
+  getMostRecentWindow: function() Services.wm.getMostRecentWindow("navigator:browser"),
   getWindows: function() Services.wm.getEnumerator("navigator:browser")
 }
 

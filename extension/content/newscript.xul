@@ -1,29 +1,51 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://scriptish/skin/newscript.css" type="text/css"?>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     id="scriptish"
     buttons="accept,cancel"
-    orient="vertical">
+    orient="vertical"
+    title="menu.new"
+    localize="title"
+    >
   <script type="application/x-javascript" src="chrome://scriptish/content/js/newscript.js" />
 
-  <vbox>
-    <label id="label-id" control="id"/>
-    <textbox id="id"/>
-    <separator class="thin"/>
-    <label id="label-name" control="name"/>
-    <textbox id="name"/>
-    <separator class="thin"/>
-    <label id="label-namespace" control="namespace"/>
-    <textbox id="namespace"/>
-    <separator class="thin"/>
-    <label id="label-description" control="description"/>
-    <textbox id="description"/>
-    <separator class="thin"/>
-    <label id="label-includes" control="includes"/>
-    <textbox id="includes" multiline="true" rows="4" cols="60"/>
-    <separator class="thin"/>
-    <label id="label-excludes" control="excludes"/>
-    <textbox id="excludes" multiline="true" rows="4" cols="60"/>
-    <separator class="thin"/>
-  </vbox>
+  <grid>
+    <columns>
+      <column />
+      <column flex="1"/>
+    </columns>
+    <rows>
+      <row>
+        <label control="id" value="newscript.id" localize="value"/>
+        <hbox>
+          <textbox id="id" placeholder="newscript.missing.id" localize="placeholder" required="true"/>
+          <toolbarbutton id="generate-id" hidden="true"/>
+        </hbox>
+      </row>
+      <row>
+        <label control="name" value="newscript.name" localize="value"/>
+        <textbox id="name" placeholder="newscript.missing.name" localize="placeholder" required="true"/>
+      </row>
+      <row>
+        <label control="namespace" value="newscript.namespace" localize="value"/>
+        <textbox id="namespace"/>
+      </row>
+      <row>
+        <label control="author" value="newscript.author" localize="value"/>
+        <textbox id="author"/>
+      </row>
+      <row>
+        <label control="description" value="newscript.description" localize="value"/>
+        <textbox id="description"/>
+      </row>
+      <row>
+        <label control="includes" value="newscript.includes" localize="value"/>
+        <textbox id="includes" multiline="true" wrap="off" rows="4" cols="60"/>
+      </row>
+      <row>
+        <label control="excludes" value="newscript.excludes" localize="value"/>
+        <textbox id="excludes" multiline="true" wrap="off" rows="4" cols="60"/>
+      </row>
+    </rows>
+  </grid>
 </dialog>

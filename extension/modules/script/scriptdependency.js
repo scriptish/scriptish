@@ -5,6 +5,7 @@ inc("resource://scriptish/logging.js");
 inc("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 inc("resource://scriptish/utils/Scriptish_getContents.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
+inc("resource://scriptish/script/cachedresource.js");
 })(Components.utils.import)
 
 function ScriptDependency(aScript) {
@@ -19,6 +20,7 @@ function ScriptDependency(aScript) {
 }
 
 ScriptDependency.prototype = {
+  __proto__: CachedResource.prototype,
   get _file() {
     var file = this._script._basedirFile;
     file.append(this._filename);
@@ -26,8 +28,6 @@ ScriptDependency.prototype = {
   },
   get tempFile() this._tempFile,
   get fileURL() Scriptish_getUriFromFile(this._file).spec,
-  get textContent() Scriptish_getContents(this._file),
-  getTextContent: function(aCallback) Scriptish_getContents(this._file, 0, aCallback),
 
   get downloadURL() this._downloadURL,
   get downloadURLFilename() {

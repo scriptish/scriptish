@@ -13,6 +13,7 @@ Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
 Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Cu.import("resource://scriptish/script/cachedresource.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
 Cu.import("resource://scriptish/script/scripticon.js");
 Cu.import("resource://scriptish/script/scriptrequire.js");
@@ -92,6 +93,7 @@ function Script(config) {
   this["_run-at"] = null;
 }
 Script.prototype = {
+  __proto__: CachedResource.prototype,
   includesDisabled: false,
   isCompatible: true,
   blocklistState: Ci.nsIBlocklistService.STATE_NOT_BLOCKED,
@@ -140,9 +142,15 @@ Script.prototype = {
   get isActive() !this.userDisabled,
   pendingOperations: AddonManager.PENDING_NONE,
   type: "userscript",
-  isUSOScript: function() (usoURLChk.test(this._downloadURL)
-      || usoURLChk.test(this._homepageURL)
-      || usoURLChk.test(this._updateURL)),
+  isUSOScript: function() {
+    try {
+      return usoURLChk.test(this._downloadURL)
+          || usoURLChk.test(this._homepageURL)
+          || usoURLChk.test(this._updateURL);
+    } catch (e) {
+      return false;
+    }
+  },
   /*averageRating: undefined,
   reviewCount: undefined,
   totalDownloads: undefined,*/
@@ -326,8 +334,7 @@ Script.prototype = {
           && !this._user_excludeRegExps.some(testI);
 
     let includes = this._user_includeRegExps.concat(this._includeRegExps);
-    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps)
-        .concat(this._config.excludeRegExps);
+    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps);
 
     return (includes.some(testI) || this._matches.some(testII))
         && !excludes.some(testI);
@@ -342,7 +349,7 @@ Script.prototype = {
   },
   get name() this._name,
   get namespace() this._namespace,
-  get prefroot() { 
+  get prefroot() {
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
     return this._prefroot;
   },
@@ -515,14 +522,15 @@ Script.prototype = {
   },
 
   get fileURL() Scriptish_getUriFromFile(this._file).spec,
-  get textContent() Scriptish_getContents(this._file),
-  getTextContent: function(aCallback) Scriptish_getContents(this._file, 0, aCallback),
 
   get size() {
-    var size = this._file.fileSize;
-    for each (var r in this._requires) size += r._file.fileSize;
-    for each (var r in this._resources) size += r._file.fileSize;
-    return size;
+    if (!this._size) {
+      var size = this._file.fileSize;
+      for each (var r in this._requires) size += r._file.fileSize;
+      for each (var r in this._resources) size += r._file.fileSize;
+      this._size = size;
+    }
+    return this._size;
   },
 
   getScriptHeader: function(aKey) {
@@ -577,10 +585,30 @@ Script.prototype = {
   get previewURL() Services.io.newFileURI(this._tempFile).spec,
 
   isModified: function() {
-    if (!this.fileExists()) return false;
-    if (this._modified != this._file.lastModifiedTime) {
-      this._modified = this._file.lastModifiedTime;
-      return true;
+    let now = Date.now();
+    if (now - this._isModified_lastcheck < 1000) {
+      // prevent thrashing by stat requests
+      // it can be safely assumed, that a user does not usually change a script
+      // and reload a website more often than once in a second
+      return false;
+    }
+    this._isModified_lastcheck = now;
+
+    try {
+      let lmt = this._file.lastModifiedTime;
+      if (this._modified != lmt) {
+        this._modified = lmt;
+
+        // drop the precomputed size
+        this._size = 0;
+
+        return true;
+      }
+    }
+    catch (ex) {
+      if (!this.fileExists()) {
+        this.uninstall();
+      }
     }
     return false;
   },
@@ -605,6 +633,8 @@ Script.prototype = {
     var oldPriority = this.priority;
     var newPriority = newScript.priority;
 
+    this.clearResourceCaches();
+
     // Copy new values.
     this.blocked = newScript.blocked;
     this.updateAvailable = false;
@@ -627,7 +657,7 @@ Script.prototype = {
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
-    this["_run-at"] = newScript.runAt;
+    this["_run-at"] = newScript["_run-at"];
     this._noframes = newScript._noframes;
     this._version = newScript._version;
 
@@ -741,7 +771,9 @@ Script.prototype = {
 
     if (Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
 
-    this._modified = this._file.lastModifiedTime;
+    // set up _modified and stat thrashing stuff
+    this.isModified();
+
     this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
   }
@@ -1150,9 +1182,11 @@ Script.loadFromXML = function(aConfig, aNode) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
-    script._modified = script._file.lastModifiedTime;
+    // set up _modified and stat thrashing stuff
+    script.isModified();
+
     var parsedScript = Script.parse(
-        aConfig, Scriptish_getContents(script._file), 
+        aConfig, Scriptish_getContents(script._file),
         script._downloadURL && NetUtil.newURI(script._downloadURL),
         script);
     script._dependhash = tools.Scriptish_cryptoHash(parsedScript._rawMeta);

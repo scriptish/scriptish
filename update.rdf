@@ -6,23 +6,23 @@
       <RDF:Seq>
         <RDF:li>
           <RDF:Description>
-            <em:version>0.1.1</em:version>
+            <em:version>0.1.2</em:version>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-                <em:minVersion>4.0b5pre</em:minVersion>
+                <em:minVersion>4.0</em:minVersion>
                 <em:maxVersion>7.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1.xpi</em:updateLink>
-                <em:updateHash>sha1:3f04004e1785cb19de68281788649f5bf88ef838</em:updateHash>
+                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1.2.xpi</em:updateLink>
+                <em:updateHash>sha1:66d989425a66c23d5fde71bd347f3eeabdf08150</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
                 <em:minVersion>2.1a3</em:minVersion>
-                <em:maxVersion>2.1.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1.xpi</em:updateLink>
-                <em:updateHash>sha1:3f04004e1785cb19de68281788649f5bf88ef838</em:updateHash>
+                <em:maxVersion>2.2.*</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1.2.xpi</em:updateLink>
+                <em:updateHash>sha1:66d989425a66c23d5fde71bd347f3eeabdf08150</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>
@@ -30,6 +30,6 @@
       </RDF:Seq>
     </em:updates>
 
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAAPzS8oVq4PiKYgoFiNxBx2ycYzP1XcBU9M1X2oEosvE3T6d1660ooRRRt88dzZOSfGWvq5s9ebD6v5QF7m7/PvxSHzWDY/Sp08kV6oqWz+k7Y+88qg9Nbr0cyqUT3KBE5LOlpgaSiuh4f2ujlyHrsft/p5gThtNgOPfVR72JI3G</em:signature>
+    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAKZ2vuVHpL2Fi82I4J6hQhX94lreD6FClbs9aeTusEfmYO2vuyXeiCPhppLNSL0sLu1lCaAx078AR9oGaCN/h5dtAZcYb9t7DUnutTrjPRrSEiQCqkCM44tky5NffQmWw+wavzRmIHiem2DJdXo1y1RLOqTBvmNUGheU4iHSDtF7</em:signature>
   </RDF:Description>
 </RDF:RDF>

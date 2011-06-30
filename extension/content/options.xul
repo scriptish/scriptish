@@ -1,40 +1,123 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-    buttons="accept"
-    id="scriptish-options-dialog"
-    persist="screenX screenY">
+<?xml-stylesheet href="chrome://scriptish/skin/options.css" type="text/css"?>
+<prefwindow
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  id="scriptish-options-dialog"
+  title="options.title"
+  localize="title"
+  style="min-width: 48em;"
+  persist="screenX screenY">
+
+  <commandset>
+    <command id="cmd-change-editor" oncommand="changeEditor()"/>
+  </commandset>
+
+  <prefpane id="pane-main" label="options.pane.main" localize="label">
+    <preferences>
+      <preference id="pref-enabledSchemes-http" name="extensions.scriptish.enabledSchemes.http" type="bool"/>
+      <preference id="pref-enabledSchemes-ftp" name="extensions.scriptish.enabledSchemes.ftp" type="bool"/>
+      <preference id="pref-enabledSchemes-data" name="extensions.scriptish.enabledSchemes.data" type="bool"/>
+      <preference id="pref-editor" name="extensions.scriptish.editor" type="unichar"/>
+      <preference id="pref-uninstallPreferences" name="extensions.scriptish.uninstallPreferences" type="bool"/>
+      <preference id="pref-useDownloadURLForUpdateURL" name="extensions.scriptish.useDownloadURLForUpdateURL" type="bool"/>
+      <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
+    </preferences>
+
+    <groupbox>
+      <caption label="options.enabledSchemes.main" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-http" label="options.enabledSchemes.http" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-ftp" label="options.enabledSchemes.ftp" localize="label"/>
+      <checkbox preference="pref-enabledSchemes-data" label="options.enabledSchemes.data" localize="label"/>
+    </groupbox>
+
+    <groupbox orient="horizontal">
+      <caption label="options.editor" localize="label"/>
+      <textbox preference="pref-editor" flex="1" readonly="true" placeholder="options.editor.notset" localize="placeholder"/>
+      <button command="cmd-change-editor" label="options.changeEditor" localize="label"/>
+    </groupbox>
+
+    <groupbox>
+      <caption label="Uninstall" localize="label"/>
+      <checkbox preference="pref-uninstallPreferences" label="options.alsoUninstallPrefs" localize="label"/>
+    </groupbox>
+
+    <groupbox>
+      <caption label="Update" localize="label"/>
+      <checkbox preference="pref-useDownloadURLForUpdateURL" label="options.useDownloadURL" localize="label"/>
+    </groupbox>
+
+    <groupbox>
+      <caption label="options.addonsManager" localize="label"/>
+      <checkbox preference="pref-enableCopyDownloadURL" label="options.enableCopyDownloadURL" localize="label"/>
+    </groupbox>
+  </prefpane>
+
+  <prefpane id="pane-excludes" label="options.pane.excludes" localize="label">
+    <description control="excludes" value="options.excludes.desc" localize="value"/>
+    <textbox id="excludes" multiline="true" rows="15" placeholder="options.excludes.empty" localize="placeholder"/>
+    <hbox pack="end">
+      <label class="remark" control="excludes" value="options.excludes.remark" localize="value"/>
+    </hbox>
+  </prefpane>
+
+  <prefpane id="pane-advanced" label="options.pane.advanced" localize="label">
+    <preferences>
+      <preference id="pref-cache-enabled" name="extensions.scriptish.cache.enabled" type="bool"/>
+      <preference id="pref-disableNotifications" name="extensions.scriptish.disableNotifications" type="bool"/>
+      <preference id="pref-useDefaultLocale" name="extensions.scriptish.useDefaultLocale" type="bool"/>
+      <preference id="pref-enabledSchemes-file" name="extensions.scriptish.enabledSchemes.file" type="bool"/>
+      <preference id="pref-enabledSchemes-chrome" name="extensions.scriptish.enabledSchemes.chrome" type="bool"/>
+      <preference id="pref-enabledSchemes-unmht" name="extensions.scriptish.enabledSchemes.unmht" type="bool"/>
+      <preference id="pref-enabledSchemes-about" name="extensions.scriptish.enabledSchemes.about" type="bool"/>
+      <preference id="pref-logChrome" name="extensions.scriptish.logChrome" type="bool"/>
+      <preference id="pref-update-requireSecured" name="extensions.scriptish.update.requireSecured" type="bool"/>
+      <preference id="pref-update-requireBuiltInCerts" name="extensions.scriptish.update.requireBuiltInCerts" type="bool"/>
+    </preferences>
+
+    <groupbox>
+      <caption label="options.cache" localize="label"/>
+      <checkbox preference="pref-cache-enabled" label="options.cache.enabled" localize="label"/>
+    </groupbox>
+    <groupbox>
+      <caption label="options.notifications" localize="label"/>
+      <checkbox preference="pref-disableNotifications" label="options.notifications.disable" localize="label"/>
+    </groupbox>
+    <groupbox>
+      <caption label="options.translation" localize="label"/>
+      <checkbox preference="pref-useDefaultLocale" label="options.translation.useEnglish" localize="label"/>
+    </groupbox>
+    <groupbox id="enabledschemes-advanced">
+      <caption label="options.enabledSchemes.advanced" localize="label"/>
+      <grid>
+        <columns>
+          <column flex="1"/>
+          <column flex="1"/>
+        </columns>
+        <rows>
+          <row>
+            <checkbox preference="pref-enabledSchemes-file" label="options.enabledSchemes.file" localize="label"/>
+            <checkbox preference="pref-enabledSchemes-chrome" label="options.enabledSchemes.chrome" localize="label"/>
+          </row>
+          <row>
+            <checkbox preference="pref-enabledSchemes-unmht" label="options.enabledSchemes.unmht" localize="label"/>
+            <checkbox preference="pref-enabledSchemes-about" label="options.enabledSchemes.about" localize="label"/>
+          </row>
+        </rows>
+      </grid>
+      <separator class="thin"/>
+      <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark" localize="value"/>
+      <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark2" localize="value"/>
+    </groupbox>
+    <groupbox>
+      <caption label="options.logging" localize="label"/>
+      <checkbox preference="pref-logChrome" label="options.logChrome" localize="label"/>
+    </groupbox>
+    <groupbox>
+      <caption label="options.update.security" localize="label"/>
+      <checkbox preference="pref-update-requireSecured" label="options.requireSecured" localize="label"/>
+      <checkbox preference="pref-update-requireBuiltInCerts" label="options.requireBuiltInCerts" localize="label"/>
+    </groupbox>
+  </prefpane>
+
   <script type="application/x-javascript" src="chrome://scriptish/content/js/options.js"/>
-
-  <dialogheader id="scriptish-header" title="Scriptish"/>
-
-  <vbox>
-    <groupbox>
-      <caption id="excludes-caption" control="excludes"/>
-      <textbox id="excludes" multiline="true" rows="4" cols="60"/>
-    </groupbox>
-
-    <groupbox>
-      <caption id="caption-editor"/>
-      <button id="btn-editor">
-        <label id="label-editor"/>
-      </button>
-    </groupbox>
-
-    <groupbox>
-      <caption id="caption-uninstall"/>
-      <checkbox id="check-uninstall"/>
-    </groupbox>
-
-    <groupbox>
-      <caption id="caption-update"/>
-      <checkbox id="check-downloadURL"/>
-      <checkbox id="check-requireSecured"/>
-    </groupbox>
-
-    <groupbox>
-      <caption id="caption-addonmanager"/>
-      <checkbox id="check-copydownloadURL"/>
-    </groupbox>
-  </vbox>
-</dialog>
+</prefwindow>

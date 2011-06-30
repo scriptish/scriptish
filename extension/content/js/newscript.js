@@ -1,32 +1,78 @@
+Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/prefmanager.js");
 Components.utils.import("resource://scriptish/scriptish.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_createUserScriptSource.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_localizeDOM.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 var $ = function(aID) document.getElementById(aID);
+var $$ = function(q) document.querySelector(q);
+var $$$ = function(q) document.querySelectorAll(q);
 
-window.addEventListener("load", function() {
-  $("scriptish").setAttribute("title", Scriptish_stringBundle("menu.new"));
-  $("scriptish").setAttribute("ondialogaccept", "return doInstall();");
-  $("label-id").setAttribute("value", Scriptish_stringBundle("newscript.id"));
-  $("label-name").setAttribute("value", Scriptish_stringBundle("newscript.name"));
-  $("label-namespace").setAttribute("value", Scriptish_stringBundle("newscript.namespace"));
-  $("label-description").setAttribute("value", Scriptish_stringBundle("newscript.description"));
-  $("label-includes").setAttribute("value", Scriptish_stringBundle("newscript.includes"));
-  $("label-excludes").setAttribute("value", Scriptish_stringBundle("newscript.excludes"));
-  $("label-includes").setAttribute("value", Scriptish_stringBundle("newscript.includes"));
+Scriptish_localizeOnLoad(this);
+
+var scriptContent = "";
+try {
+  scriptContent = window.arguments[0]
+      .QueryInterface(Components.interfaces.nsIDialogParamBlock)
+      .GetString(0);
+} catch(e) {}
+
+addEventListener("DOMContentLoaded", function init() {
+  removeEventListener("DOMContentLoaded", init, false);
+
+  $("scriptish").addEventListener("dialogaccept", function(evt) {
+    try {
+      if (doInstall()) {
+        return true;
+      }
+    } catch (e) {}
+
+    evt.preventDefault();
+    evt.stopProgapation();
+    return false;
+  }, false);
 
   // load defaults
   $("id").value = Scriptish_prefRoot.getValue("newscript_id", "");
   $("namespace").value = Scriptish_prefRoot.getValue("newscript_namespace", "");
+  $("author").value = Scriptish_prefRoot.getValue("newscript_author", "");
 
-  // default the includes with the current page's url
-  var content = window.opener.document.getElementById("content");
-  if (content)
-    $("includes").value = content.selectedBrowser.contentWindow.location.href;
+  (function considerLocation() {
+    if (!window.opener.gBrowser) {
+      return;
+    }
+    let contentLocation = window.opener.gBrowser.selectedBrowser.contentWindow.location;
+    $("includes").value = contentLocation.href + "\n";
+    if (!contentLocation.host) {
+      return;
+    }
+    let host = contentLocation.host;
+
+    let generateIdButton = $('generate-id');
+    generateIdButton.hidden = false;
+    generateIdButton.addEventListener("command", function generateId() {
+      let gid = contentLocation.host;
+      gid += "-" + Services.uuid.generateUUID().toString().slice(1, -1);
+      gid += "@" + ($("namespace").value || "scriptish").replace(/^@/, "");
+      $("id").value = gid;
+    }, false);
+
+  })();
 }, false);
 
 function doInstall() {
+  // validate some
+  var ok = Array.reduce($$$("*[required]"), function(p,v) {
+    var vok = !!v.value;
+    v.setAttribute("invalid", !vok);
+    return p & vok;
+  }, true);
+
+  if (!ok) {
+    return false;
+  }
+
   var tools = {};
   Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
   Components.utils.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
@@ -60,8 +106,9 @@ function doInstall() {
     // and fire up the editor!
     tools.Scriptish_openInEditor(script, window);
 
-    // persist namespace value
+    // persist values
     Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
+    Scriptish_prefRoot.setValue("newscript_author", script.author);
   })
 
   return true;
@@ -73,12 +120,13 @@ function createScriptSource() {
     id: $("id").value,
     name: $("name").value,
     namespace: $("namespace").value,
+    author: $("author").value,
     description: $("description").value,
-    includes: $("includes").value ? $("includes").value.match(/.+/g) : [],
-    excludes: $("excludes").value ? $("excludes").value.match(/.+/g) : []
+    include: $("includes").value ? $("includes").value.match(/.+/g) : [],
+    exclude: $("excludes").value ? $("excludes").value.match(/.+/g) : []
   }
   try {
-    return Scriptish_createUserScriptSource(header);
+    return Scriptish_createUserScriptSource(header, scriptContent);
   } catch (e) {
     alert(e.message);
   }

@@ -25,7 +25,7 @@ function ScriptDownloader(uri, contentWin) {
 }
 ScriptDownloader.prototype.startInstall = function() {
   this.type = "install";
-  this.startDownload();
+  this.startDownload(true);
 }
 ScriptDownloader.prototype.startViewScript = function() {
   this.type = "view";
@@ -38,11 +38,14 @@ ScriptDownloader.prototype.startUpdateScript = function(aScriptInstaller) {
   this.startDownload();
   return this;
 }
-ScriptDownloader.prototype.startDownload = function() {
+ScriptDownloader.prototype.startDownload = function(bypassCache) {
   Scriptish_log("Fetching Script");
   let req = this.req_ = Instances.xhr;
   req.overrideMimeType("text/plain");
   req.open("GET", this.uri_.spec, true);
+  if (bypassCache && (req.channel instanceof Ci.nsIRequest)) {
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
+  }
   if (this.secure) {
     // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
     req.channel.notificationCallbacks =

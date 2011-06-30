@@ -17,26 +17,37 @@
         <em:description>Управление пользовательских скриптов для Firefox</em:description>
       </Description>
     </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>es-ES</em:locale>
+        <em:name>Scriptish</em:name>
+        <em:description>Un gestor de scripts de usuario para aplicaciones Mozilla</em:description>
+      </Description>
+    </em:localized>
+
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
 
-    <em:version>0.1.1</em:version>
+    <em:version>0.1.2</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
+    <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
     <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://scriptish/skin/scriptish32.png</em:iconURL>
     <em:icon64URL>chrome://scriptish/skin/scriptish64.png</em:icon64URL>
 
+    <em:developer>Greg Parris; http://phob.net/</em:developer>
+    <em:developer>Nils Maier; https://tn123.org/</em:developer>
     <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
     <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>
     <em:contributor>Chris Feldmann; http://axlotl.net/</em:contributor>
     <em:contributor>David Schontzler; http://stilleye.com/</em:contributor>
     <em:contributor>Gareth Andrew; http://freegarethandrew.org/</em:contributor>
-    <em:contributor>Greg Parris; http://phob.net/</em:contributor>
     <em:contributor>Hisateru Tanaka</em:contributor>
     <em:contributor>Jeremy Dunck; http://dunck.us/anabasis/</em:contributor>
     <em:contributor>Jesper Kristensen; mailto:mail@jesperkristensen.dk</em:contributor>
     <em:contributor>Johan Sundström; http://ecmanaut.blogspot.com/</em:contributor>
+    <em:contributor>John J. Barton</em:contributor>
     <em:contributor>JP Sugarbroad</em:contributor>
     <em:contributor>Juan Pablo Guereca Alonso</em:contributor>
     <em:contributor>Manpreet Singh</em:contributor>
@@ -44,6 +55,7 @@
     <em:contributor>Marti Martz</em:contributor>
     <em:contributor>Matthew Gray; http://mkgray.com:8000/</em:contributor>
     <em:contributor>Matthias Bauer; http://moeffju.net/</em:contributor>
+    <em:contributor>Melih Bilgil; http://picol.org/</em:contributor>
     <em:contributor>Mike Medley; http://sizzlemctwizzle.com/</em:contributor>
     <em:contributor>Nikolas Coukouma; http://atrus.org/</em:contributor>
     <em:contributor>Ori Avtallon</em:contributor>
@@ -51,11 +63,13 @@
     <em:contributor>Sergio Abreu; http://sitedosergio.sitesbr.net/</em:contributor>
     <em:contributor>Slowpoke</em:contributor>
     <em:contributor>Tommi Rautava</em:contributor>
-    <em:contributor>Nils Maier</em:contributor>
-    <em:contributor>Melih Bilgil; http://picol.org/</em:contributor>
-    <em:contributor>John J. Barton</em:contributor>
 
-    <em:translator>nishikawasasaki (kohsei yamamoto)</em:translator>
+    <em:translator>Alfredo Fernández Díaz (es-ES)</em:translator>
+    <em:translator>k2jp (ja-JP)</em:translator>
+    <em:translator>Mauro José da Silva (pt-BR)</em:translator>
+    <em:translator>Mikael Hiort af Ornäs (sv-SE)</em:translator>
+    <em:translator>Nils Maier (de)</em:translator>
+    <em:translator>nishikawasasaki (kohsei yamamoto) (ja-JP)</em:translator>
 
     <em:updateURL>http://github.com/downloads/erikvold/scriptish/update.rdf</em:updateURL>
     <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDjEA/hqcsMgPctoWvqJFfjtNcQbfBi1uP3zoWR3PPMRSXnpBJv/5Kb5lJD9HJ+963CFQ3oFvkgO9+oEWisiKBjxhx94Bynl0Ym2sZ1DdEzTsH9kV4HGFLjeYTix5WkQqdoswyM32ebtDSYrFbSqxpBrgHwVLELfFYM1qZsnWpJKwIDAQAB</em:updateKey>
@@ -64,7 +78,7 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>4.0b5pre</em:minVersion>
+        <em:minVersion>4.0</em:minVersion>
         <em:maxVersion>7.*</em:maxVersion>
       </Description>
     </em:targetApplication>
@@ -73,7 +87,7 @@
       <Description>
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.1a3</em:minVersion>
-        <em:maxVersion>2.1b3pre</em:maxVersion>
+        <em:maxVersion>2.2.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>

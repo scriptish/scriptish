@@ -3,7 +3,7 @@
  *
  * http://docs.jquery.com/QUnit
  *
- * Copyright (c) 2011 John Resig, Jörn Zaefferer
+ * Copyright (c) 2011 John Resig, JÃ¶rn Zaefferer
  * Dual licensed under the MIT (MIT-LICENSE.txt)
  * or GPL (GPL-LICENSE.txt) licenses.
  */
@@ -449,8 +449,8 @@ var config = {
 
 // Load paramaters
 (function() {
-	var location = window.location || { search: "", protocol: "file:" },
-		params = location.search.slice( 1 ).split( "&" ),
+	var location = window.location || { href: "", protocol: "file:" },
+		params = ( location.href.split( "?" )[ 1 ] || "" ).split( "&" ),
 		length = params.length,
 		urlParams = {},
 		current;
@@ -625,7 +625,7 @@ extend(QUnit, {
 			var source = sourceFromStacktrace();
 			if (source) {
 				details.source = source;
-				output += '<tr class="test-source"><th>Source: </th><td><pre>' + source +'</pre></td></tr>';
+				output += '<tr class="test-source"><th>Source: </th><td><pre>' + escapeHtml(source) + '</pre></td></tr>';
 			}
 		}
 		output += "</table>";
@@ -776,12 +776,6 @@ function done() {
 
 	if ( tests ) {
 		id( "qunit-testresult" ).innerHTML = html;
-	}
-
-	if ( typeof document !== "undefined" && document.title ) {
-		// show ? for good, ? for bad suite result in title
-		// use escape sequences in case file gets loaded with non-utf-8-charset
-		document.title = (config.stats.bad ? "\u2716" : "\u2714") + " " + document.title;
 	}
 
 	QUnit.done( {
@@ -954,7 +948,7 @@ function id(name) {
 // Test for equality any JavaScript type.
 // Discussions and reference: http://philrathe.com/articles/equiv
 // Test suites: http://philrathe.com/tests/equiv
-// Author: Philippe Rathé <prathe@gmail.com>
+// Author: Philippe RathÃ© <prathe@gmail.com>
 QUnit.equiv = function () {
 
     var innerEquiv; // the real equiv function

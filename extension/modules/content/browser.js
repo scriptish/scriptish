@@ -14,6 +14,7 @@ const ICON_24_OFF = "chrome://scriptish/skin/scriptish24_disabled.png";
 function Scriptish_BrowserUIM(aWin, aBrowserUI) {
   this.$ = function(aID) aWin.document.getElementById(aID);
   this._win = aWin;
+  this._optionsWin = null;
   this._browserUI = aBrowserUI;
 }
 Scriptish_BrowserUIM.prototype = {
@@ -45,15 +46,38 @@ Scriptish_BrowserUIM.prototype = {
       tbImg.setAttribute("scriptish-disabled", "scriptish-disabled");
     }
   },
-  openChromeWindow: function(aURL) {
+  openChromeWindow: function(aURL, aParams) {
+    aParams = aParams || null;
     Services.ww.openWindow(
         this._win, aURL, null, "chrome,dependent,centerscreen,resizable,dialog",
-        null);
+        aParams);
   },
-  newUserScript: function() (
-    this.openChromeWindow("chrome://scriptish/content/newscript.xul")),
-  openOptionsWin: function() (
-    this.openChromeWindow("chrome://scriptish/content/options.xul")),
+  newUserScript: function(aContent) {
+    var params = null;
+    aContent = aContent || null;
+    if (aContent) {
+      params = Cc["@mozilla.org/embedcomp/dialogparam;1"]
+          .createInstance(Ci.nsIDialogParamBlock);
+      params.SetString(0, aContent);
+    }
+    this.openChromeWindow("chrome://scriptish/content/newscript.xul", params);
+  },
+  openOptionsWin: function() {
+    var instantApply = false;
+    try {
+      instantApply = Services.prefs.getBoolPref("browser.preferences.instantApply");
+    }
+    catch (ex) {};
+
+    if (!this._optionsWin || this._optionsWin.closed) {
+      this._optionsWin = this._win.openDialog(
+        "chrome://scriptish/content/options.xul",
+        "scriptish-options-dialog",
+        "chrome,titlebar,toolbar,resizable,centerscreen" + (instantApply ? ",dialog=no" : ",modal")
+      );
+    }
+    this._optionsWin.focus();
+  },
   showUserscriptList: function() {
     Cu.import("resource://scriptish/addonprovider.js");
     timeout(Scriptish.openManager);

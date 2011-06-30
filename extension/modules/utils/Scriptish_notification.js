@@ -1,7 +1,12 @@
 var EXPORTED_SYMBOLS = ["Scriptish_notification"];
 Components.utils.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/prefmanager.js");
+Components.utils.import("resource://scriptish/logging.js");
 
 function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
+  if (Scriptish_prefRoot.getValue("disableNotifications"))
+    return Scriptish_log(aMsg);
+
   timeout(function() {
     if (aCallback) var callback = new Observer(aCallback);
 

@@ -49,13 +49,6 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   sbShowUSEle.setAttribute("oncommand",
       "Scriptish_BrowserUIM.showUserscriptList()");
 
-  var showOptionsEle = $("scriptish-tb-options-brd");
-  showOptionsEle.setAttribute("label", Scriptish_stringBundle("options")+"...");
-  showOptionsEle.setAttribute("accesskey",
-      Scriptish_stringBundle("menu.options.ak"));
-  showOptionsEle.setAttribute("oncommand",
-      "Scriptish_BrowserUIM.openOptionsWin()");
-
   var sbPopUp = $("scriptish-tb-popup-brd");
   sbPopUp.setAttribute("onclick",
       "Scriptish_popupClicked(event);event.stopPropagation();");
@@ -83,6 +76,11 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   var tmEle = $('scriptish_general_menu');
   tmEle.setAttribute("label", Scriptish_stringBundle("menu.title"));
   tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.title.ak"));
+
+  tmEle = $('scriptish-options-brd');
+  tmEle.setAttribute("label", Scriptish_stringBundle("options"));
+  tmEle.setAttribute("accesskey", Scriptish_stringBundle("menu.options.ak"));
+  tmEle.setAttribute("oncommand", "Scriptish_BrowserUIM.openOptionsWin()");
 
   var statusEnabledItem = this.statusCasterEle = $("scriptish-tb-enabled-brd");
   statusEnabledItem.setAttribute("label",
@@ -162,8 +160,15 @@ Scriptish_BrowserUI.disableMenuCommand = function(commandUUID, aWinID) {
  * a user selects "show script source" in the install dialog.
  */
 Scriptish_BrowserUI.showInstallBanner = function(browser) {
-  var greeting = Scriptish_stringBundle("greeting.msg");
+  var self = this;
   var notificationBox = gBrowser.getNotificationBox(browser);
+  var greeting = Scriptish_stringBundle("greeting.msg");
+  var btnLabel;
+  Scriptish.getConfig(function(config) {
+    btnLabel = Scriptish_stringBundle(
+        (config.installIsUpdate(self.scriptDownloader_.script) ? "re" : "")
+        + "install");
+  });
 
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
@@ -177,7 +182,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
     "install-userscript",
     "chrome://scriptish/skin/scriptish16.png",
     notificationBox.PRIORITY_WARNING_MEDIUM,
-    [{label: Scriptish_stringBundle("greeting.btn"),
+    [{label: btnLabel,
       accessKey: Scriptish_stringBundle("greeting.btn.ak"),
       popup: null,
       callback: this.installCurrentScript.bind(this)
@@ -309,7 +314,7 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
       return urls.some(function(url) script.matchesURL(url));
     }
 
-    return config.getMatchingScripts(testMatchURLs).sort(function(a,b) {
+    return config.getMatchingScripts(testMatchURLs, urls).sort(function(a,b) {
       a = a.name.toLocaleLowerCase(), b = b.name.toLocaleLowerCase();
       return a.localeCompare(b);
     });

@@ -3,17 +3,16 @@ Components.utils.import("resource://scriptish/constants.js");
 
 module("Timeout");
 
-asyncTest("Default Works", function() {
-  expect(1);
-
+asyncTest("Default Works", 1, function() {
   try {
-    var success = false;
+    var t2;
     timeout(function() {
-      ok((success = true), "timeout success");
+      if (typeof t2 == "number") clearTimeout(t2);
+      ok(true, "timeout succeeded");
       start();
     });
-    setTimeout(function() {
-      ok(false, "timeout error: timeout");
+    t2 = setTimeout(function() {
+      ok(false, "timeout error: second timeout function called");
       start();
     }, 500);
   } catch (e) {

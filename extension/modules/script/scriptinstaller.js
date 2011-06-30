@@ -19,7 +19,7 @@ ScriptInstall.prototype = {
         timeout(function() {
           self.changed("InstallStarted");
           self.scriptDownloader.installScript();
-        }, 0)
+        });
         break;
       case "DownloadCancelled":
         this.state = AddonManager.STATE_CANCELLED;
@@ -36,12 +36,13 @@ ScriptInstall.prototype = {
       default:
         return;
     }
-    AddonManagerPrivate.callAddonListeners("on"+aType, this);
+    AddonManagerPrivate.callAddonListeners("on"+aType, this, this._script);
     if (!this._listeners.length) return;
     var listeners = this._listeners;
     for (var i = 0, listener; listener = listeners[i]; i++) {
-      if (listener["on"+aType])
-        listener["on"+aType](this, ("InstallEnded" == aType && this._script));
+      if (listener["on"+aType]) {
+        listener["on"+aType](this, this._script);
+      }
     }
   },
   get name() this._script.name,

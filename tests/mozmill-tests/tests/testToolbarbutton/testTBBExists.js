@@ -43,4 +43,8 @@ var testToolbarButtonExists = function() {
   controller.waitFor(function() {
     return (new elementslib.ID(controller.window.document, "scriptish-button")).exists();
   }, "Scriptish toolbar button should be found", 2000);
+
+  controller.waitFor(function() {
+    return (new elementslib.ID(controller.window.document, "scriptish-tb-popup")).exists();
+  }, "Scriptish toolbar button should be found", 2000);
 }

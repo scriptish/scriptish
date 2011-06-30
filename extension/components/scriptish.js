@@ -14,15 +14,12 @@ Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js");
 Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWindowIDs.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
 
 function isScriptRunnable(script, url, topWin) {
-  if (!script.fileExists()) {
-    script.uninstall();
-    return false;
-  }
   let chk = !(!topWin && script.noframes)
       && !script.delayInjection
       && script.enabled
@@ -93,6 +90,7 @@ ScriptishService.prototype = {
     if (!window || !window.unloaders || !window.unloaders.length) return;
     for (var i = window.unloaders.length - 1; ~i; i--)
       window.unloaders[i]();
+    delete windows[aWinID];
   },
 
   docReady: function(safeWin, chromeWin) {
@@ -105,6 +103,11 @@ ScriptishService.prototype = {
     let href = (safeWin.location.href
         || (safeWin.frameElement && safeWin.frameElement.src))
         || "";
+
+    if (!href && safeWin.frameElement) {
+      this.waitForFrame(safeWin, chromeWin);
+      return;
+    }
 
     // Show the scriptish install banner if the user is navigating to a .user.js
     // file in a top-level tab.  If the file was previously cached it might have
@@ -178,11 +181,11 @@ ScriptishService.prototype = {
 
           // inject @run-at document-idle scripts
           if (scripts["document-idle"].length)
-            self.timer.setTimeout(function() {
+            timeout(function() {
               if (shouldNotRun()) return;
               self.injectScripts(
                   scripts["document-idle"], href, currentInnerWindowID, safeWin, chromeWin);
-            }, 0);
+            });
 
           // inject @run-at document-end scripts
           self.injectScripts(scripts["document-end"], href, currentInnerWindowID, safeWin, chromeWin);
@@ -202,7 +205,6 @@ ScriptishService.prototype = {
 
       windows[currentInnerWindowID].unloaders.push(function() {
         winClosed = true;
-        delete windows[currentInnerWindowID];
         self.docUnload(currentInnerWindowID, gmBrowserUI);
       });
     });
@@ -222,32 +224,63 @@ ScriptishService.prototype = {
     return;
   },
 
-  shouldLoad: function(ct, cl, org, ctx, mt, ext) {
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_installUri.js", tools);
+  waitForFrame: function(safeWin, chromeWin) {
+    let self = this;
+    safeWin.addEventListener("DOMContentLoaded", function _frame_loader() {
+      // not perfect, but anyway
+      let href = (safeWin.location.href
+          || (safeWin.frameElement && safeWin.frameElement.src))
+          || "";
 
+      if (!href) {
+        return; // wait for it :p
+      }
+      safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
+      self.docReady(safeWin, chromeWin);
+
+      // fake DOMContentLoaded to get things rolling
+      var evt = safeWin.document.createEvent("Events");
+      evt.initEvent("DOMContentLoaded", true, true);
+      safeWin.dispatchEvent(evt);
+    }, false);
+  },
+
+  _test_org: {
+    "chrome": true,
+    "about": true
+  },
+  _test_cl: {
+    "chrome": true,
+    "resource": true
+  },
+  _reg_userjs: /\.user\.js$/,
+  shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     // block content detection of scriptish by denying it chrome: & resource:
     // content, unless loaded from chrome: or about:
-    if (org && !/^(?:chrome|about)$/.test(org.scheme)
-        && /^(?:chrome|resource)$/.test(cl.scheme) && cl.host == "scriptish") {
+    if (org && !this._test_org[org.scheme]
+        && this._test_cl[cl.scheme]
+        && cl.host == "scriptish") {
       return CP.REJECT_SERVER;
     }
 
-    var ret = CP.ACCEPT;
     // don't intercept anything when Scriptish is not enabled
-    if (!Scriptish.enabled) return ret;
+    if (!Scriptish.enabled) return CP.ACCEPT;
     // don't interrupt the view-source: scheme
-    if ("view-source" == cl.scheme) return ret;
+    if ("view-source" == cl.scheme) return CP.ACCEPT;
 
-    if ((ct == CP.TYPE_DOCUMENT || CP.TYPE_SUBDOCUMENT)
-        && cl.spec.match(/\.user\.js$/)
+    this.ignoreNextScript_ = false;
+
+    // CP.TYPE is not binary, so do not use bitwise logic tricks
+    if ((ct == CP.TYPE_DOCUMENT || ct == CP.TYPE_SUBDOCUMENT)
+        && this._reg_userjs.test(cl.spec)
         && !this.ignoreNextScript_ && !this.isTempScript(cl)) {
-      tools.Scriptish_installUri(cl, ctx.contentWindow);
-      ret = CP.REJECT_REQUEST;
+      this.ignoreNextScript_ = false;
+      this.Scriptish_installUri(cl, ctx.contentWindow);
+      return CP.REJECT_REQUEST;
     }
 
     this.ignoreNextScript_ = false;
-    return ret;
+    return CP.ACCEPT;
   },
 
   shouldProcess: function(ct, cl, org, ctx, mt, ext) CP.ACCEPT,
@@ -257,16 +290,12 @@ ScriptishService.prototype = {
     this.ignoreNextScript_ = true;
   },
 
+  _tmpDir: Services.dirsvc.get("TmpD", Ci.nsILocalFile),
   isTempScript: function(uri) {
-    if (uri.scheme != "file") return false;
+    if (!(uri instanceof Ci.nsIFileURL)) return false;
 
-    var fph = Cc["@mozilla.org/network/protocol;1?name=file"]
-        .getService(Ci.nsIFileProtocolHandler);
-
-    var file = fph.getFileFromURLSpec(uri.spec);
-    var tmpDir = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
-
-    return file.parent.equals(tmpDir) && file.leafName != "newscript.user.js";
+    var file = uri.file;
+    return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
   },
 
   initScripts: function(url, wrappedContentWin, aCallback) {
@@ -283,7 +312,7 @@ ScriptishService.prototype = {
         let chk = isScriptRunnable(script, url, isTopWin);
         if (chk) scripts[script.runAt].push(script);
         return chk;
-      });
+      }, [url]);
 
       aCallback(scripts);
     });
@@ -296,17 +325,27 @@ ScriptishService.prototype = {
     let script;
     let unsafeContentWin = wrappedContentWin.wrappedJSObject;
     let tools = {};
-    Cu.import("resource://scriptish/api/GM_console.js", tools);
     Cu.import("resource://scriptish/api.js", tools);
 
-    let delays = [];
-    wrappedContentWin.addEventListener("unload", function() {
-      for (let [, timerID] in Iterator(delays))
-        self.timer.clearTimeout(timerID);
-    }, true);
+    tools.console = (function getConsole() {
+      let rv = Scriptish_getFirebugConsole(wrappedContentWin, chromeWin);
+      if (rv) {
+        return rv;
+      }
+      if (wrappedContentWin.console) {
+        return wrappedContentWin.console;
+      }
+      rv = {};
+      Cu.import("resource://scriptish/api/GM_console.js", rv);
+      return rv.GM_console(script);
+    })();
 
-    // detect and grab reference to firebug console and context, if it exists
-    let fbConsole = Scriptish_getFirebugConsole(wrappedContentWin, chromeWin);
+
+    let delays = [];
+    let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
+    windows[winID].unloaders.push(function() {
+      for (let [, id] in Iterator(delays)) self.timer.clearTimeout(id);
+    });
 
     for (var i = 0; script = scripts[i++];) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
@@ -319,7 +358,7 @@ ScriptishService.prototype = {
 
       // add GM_* API to sandbox
       for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
-      sandbox.console = fbConsole || new tools.GM_console(script);
+      sandbox.console = tools.console;
 
       sandbox.unsafeWindow = unsafeContentWin;
       sandbox.__proto__ = wrappedContentWin;
@@ -327,27 +366,34 @@ ScriptishService.prototype = {
       let delay = script.delay;
       if (delay || delay === 0) {
         let (script = script, sb = sandbox) {
+          // don't use window's setTimeout, b/c then window could clearTimeout
           delays.push(self.timer.setTimeout(function() {
-            self.evalInSandbox(script, sandbox);
+            self.evalInSandbox(script, sandbox, wrappedContentWin);
           }, script.delay));
         }
       } else {
-        this.evalInSandbox(script, sandbox);
+        this.evalInSandbox(script, sandbox, wrappedContentWin);
       }
     }
   },
 
-  evalInSandbox: function(aScript, aSandbox) {
+  evalInSandbox: function(aScript, aSandbox, aWindow) {
     var jsVer = aScript.jsversion;
     var fileURL;
 
     try {
       for (let [, req] in Iterator(aScript.requires)) {
-        fileURL = req.fileURL;
-        Cu.evalInSandbox(
-            req.textContent + "\n", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
+        try {
+          fileURL = req.fileURL;
+          Cu.evalInSandbox(
+              req.textContent + "\n", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
+        }
+        catch (ex) {
+          Scriptish_logScriptError(ex, aWindow, fileURL);
+        }
       }
-    } catch (e) {
+    }
+    catch (e) {
       return Scriptish_logError(e, 0, fileURL, e.lineNumber);
     }
 
@@ -358,15 +404,29 @@ ScriptishService.prototype = {
         Cu.evalInSandbox(src, aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       // catch errors when return is not in a function or when a window global
       // is being overwritten (which throws NS_ERROR_OUT_OF_MEMORY..)
-      } catch (e if (e.message == "return not in function"
+      }
+      catch (e if (e.message == "return not in function"
           || /\(NS_ERROR_OUT_OF_MEMORY\) \[nsIXPCComponents_Utils.evalInSandbox\]/.test(e.message))) {
+        var sw = Instances.se;
+        sw.init(
+          Scriptish_stringBundle("warning.returnfrommain"),
+          fileURL,
+          "",
+          e.lineNumber || 0,
+          e.columnNumber || 0,
+          sw.warningFlag,
+          "scriptish userscript warnings"
+          );
+        Scriptish_logScriptError(sw, aWindow, fileURL, aScript.id);
         Cu.evalInSandbox(
             "(function(){"+src+"})()", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       }
-    } catch (e) {
-      Scriptish_logError(e, 0, fileURL, e.lineNumber);
+    }
+    catch (e) {
+      Scriptish_logScriptError(e, aWindow, fileURL, aScript.id);
     }
   }
 }
+Cu.import("resource://scriptish/utils/Scriptish_installUri.js", ScriptishService.prototype);
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);

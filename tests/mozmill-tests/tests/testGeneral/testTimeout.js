@@ -54,6 +54,7 @@ var testTimeoutDefault = function() {
   timeout(function() {
     success = true;
   });
+  controller.assert(function() !success);
 
   controller.waitFor(
       function() { return success; },
@@ -61,15 +62,19 @@ var testTimeoutDefault = function() {
       250, 10);
 }
 
-//Test that timeout works
+//Test that timeout works with a param
 var testTimeoutWithParam = function() {
   var success = false;
-  timeout(function() {
-   success = true;
-  }, 50);
+  timeout(function() (success = true), 50);
+
+  controller.assert(function() !success);
+  controller.sleep(30);
+  controller.assert(function() !success);
+  controller.sleep(30);
+  controller.assert(function() success);
 
   controller.waitFor(
-     function() { return success; },
+     function() success,
      "Test timeout works with a param",
      250, 10);
 }

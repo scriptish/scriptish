@@ -11,6 +11,7 @@ skin       scriptish    classic/1.0 skin/
 style      chrome://global/content/customizeToolbar.xul chrome://scriptish/skin/browser.css
 
 overlay    chrome://browser/content/browser.xul chrome://scriptish/content/browser.xul
+overlay    chrome://browser/content/scratchpad.xul chrome://scriptish/content/scratchpad.xul
 overlay    chrome://navigator/content/navigator.xul chrome://scriptish/content/browser.xul
 overlay    about:addons chrome://scriptish/content/addonstab.xul
 overlay    chrome://mozapps/content/extensions/extensions.xul chrome://scriptish/content/addonstab.xul
@@ -20,5 +21,8 @@ overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/clo
 overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/closewindow.xul
 
 locale     scriptish  en-US  locale/en-US/
+locale     scriptish  de  locale/de/
+locale     scriptish  es-ES  locale/es_ES/
 locale     scriptish  ja-JP  locale/ja-JP/
 locale     scriptish  ru-RU  locale/ru-RU/
+locale     scriptish  sv-SE  locale/sv-SE/
