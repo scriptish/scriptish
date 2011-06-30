@@ -3,7 +3,7 @@
 const EXPORTED_SYMBOLS = ["Scriptish_localizeSubtree", "Scriptish_localizeOnLoad"];
 
 Components.utils.import("resource://scriptish/logging.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringbundle.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
 function Scriptish_localizeOnLoad(window) {
   window.addEventListener("DOMContentLoaded", function localize() {
