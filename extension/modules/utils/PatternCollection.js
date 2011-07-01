@@ -27,9 +27,9 @@ PatternCollection.prototype = {
     }
   },
   clear: function() {
-    this._patterns.splice(0);
-    this._regs.splice(0);
-    this._regsTLD.splice(0);
+    this._patterns.length = 0;
+    this._regs.length = 0;
+    this._regsTLD.length = 0;
     this._merged = this._mergedTLD = null;
   },
   get patterns() this._patterns.concat(),
