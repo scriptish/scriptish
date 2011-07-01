@@ -105,9 +105,7 @@ test("clear", function() {
   deepEqual(pc.patterns, [], "cleared patterns");
   deepEqual(pc._regs, [], "cleared regs");
   deepEqual(pc._regsTLD, [], "cleared regs");
-  equal(pc._merged, null, "cleared _merge");
-  equal(pc._mergedTLD, null, "cleared _mergeTLD");
-  equal(pc.merged.source, undefined, "cleared merged");
-  equal(pc.mergedTLD.source, undefined, "cleared mergedTLD");
+  strictEqual(pc._merged, null, "cleared _merge");
+  strictEqual(pc._mergedTLD, null, "cleared _mergeTLD");
   equal(pc.test("http://mozilla.com/"), false, "no matches");
 });
