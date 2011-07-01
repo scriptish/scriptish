@@ -16,7 +16,7 @@ function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
         aIconURL || "chrome://scriptish/skin/scriptish32.png",
         aTitle || "Scriptish", aMsg+"", !!callback, "", callback || null);
     } catch (e) {}
-  }, 0);
+  });
 };
 
 function Observer(aCallback) {
