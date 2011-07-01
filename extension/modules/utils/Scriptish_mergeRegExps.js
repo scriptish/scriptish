@@ -1,7 +1,7 @@
 "use strict";
 const EXPORTED_SYMBOLS = ["Scriptish_mergeRegExpStrings", "Scriptish_mergeRegExps"];
 
-Components.utils.import("resource://scriptish/third-party/regexpmerger.jsm");
+Components.utils.import("resource://scriptish/third-party/regexpmerger.js");
 
 function Scriptish_mergeRegExpStrings(strs) {
   return new RegExp(merge(strs), "i");
