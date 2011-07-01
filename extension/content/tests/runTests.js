@@ -1,13 +1,48 @@
 
-QUnit.url = function(params) {
-  var querystring = "";
-  for (var key in params) {
-    if (!params[key]) continue;
-    querystring += "&" + encodeURIComponent(key) + "=" +
-        encodeURIComponent(params[key]);
+// Import QUnit
+(function() {
+  var fakeWindow = {
+    window: fakeWindow,
+    document: document,
+    get location() {return {
+      href: window.location.href,
+      "search": window.location.href.split("?")[1],
+      protocol: window.location.protocol
+    }},
+    navigator: window.navigator,
+    set location(loc) window.location = loc,
+    setTimeout: window.setTimeout.bind(window),
+    clearTimeout: window.clearTimeout.bind(window),
+    addEventListener: window.addEventListener.bind(window)
+  };
+  var fakeWindowKeys = [];
+  for (var key in fakeWindow) fakeWindowKeys.push(key);
+
+  // Load QUnit
+  Services.scriptloader.loadSubScript(
+      "chrome://scriptish/content/js/third-party/qunit/qunit.js", fakeWindow);
+
+  var {QUnit} = fakeWindow;
+
+  QUnit.config.urlbase = "about:scriptish";
+  QUnit.config.autostart = false; // prevents QUnit from auto starting onload
+
+  QUnit.url = function(params) {
+    var querystring = "";
+    for (var key in params) {
+      if (!params[key]) continue;
+      querystring += "&" + encodeURIComponent(key) + "=" +
+          encodeURIComponent(params[key]);
+    }
+    return "about:scriptish?test" + querystring;
   }
-  return "about:scriptish?test" + querystring;
-}
+
+  // export QUnit variables
+  for (var key in fakeWindow) {
+    if (~fakeWindowKeys.indexOf(key)) continue;
+    window[key] = fakeWindow[key];
+  }
+})();
 
 function importModule(m, ctx) {
   var _ = ctx || {};
