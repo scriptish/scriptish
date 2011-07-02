@@ -213,11 +213,11 @@ function largestPrefixGroup(patterns, low, high, level) {
 function mergePatterns(patterns, low, high, prefix) {
   let pl = prefix.length;
 
-  // splice the prefix group, and chop off the common prefix
-  let lg = patterns.splice(low, high - low).map(function(p) p.substring(pl));
+  // splice the patterns to be merged, and chop off their common prefix
+  let tails = patterns.splice(low, high - low).map(function(p) p.substring(pl));
 
-  // build a prefix pattern
-  let lgp = lg.map(function(p) {
+  // build a tail pattern
+  let tail = tails.map(function(p) {
     // strip out group expressions so that their inner '|'s are ignored
     // TODO: atm "() | ()".replace(RE_GROUPSTRIP, '') == "" is bad
     if (p.replace(RE_GROUPSTRIP, '').indexOf('|') == -1) {
@@ -227,10 +227,11 @@ function mergePatterns(patterns, low, high, prefix) {
     return "(?:" + p + ")";
   }).join("|");
 
+  // add merged pattern
   if (prefix) {
-    patterns.push(prefix + "(?:" + lgp + ")");
+    patterns.push(prefix + "(?:" + tail + ")");
   } else {
-    patterns.push(lgp);
+    patterns.push(tail);
   }
 
   // need to return sorted as largestPrefixGroup relies on sorting
