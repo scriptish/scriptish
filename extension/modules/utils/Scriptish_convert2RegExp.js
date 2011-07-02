@@ -9,10 +9,7 @@ function Scriptish_convert2RegExp(aPattern, aNoTLD) {
   var s = aPattern.toString().trim();
 
   // Already a regexp?
-  var m = s.match(RE_REGEXP);
-  if (m) {
-    return new RegExp(m[1], m[2]);
-  }
+  if (RE_REGEXP.test(s)) return new RegExp(RegExp.$1, RegExp.$2);
 
   var res = "^" + s
     .replace(RE_ESCAPE, "\\$&")
