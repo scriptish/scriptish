@@ -43,7 +43,7 @@ test("merged", function() {
   var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
 
   var pc = new PatternCollection();
-  var patterns = ["foobar*", "foobaz*", "/^foobax$/"];
+  var patterns = ["foobar*", "foobaz*", "/^foobax$/i"];
   pc.addPattern(patterns[0]);
   pc.addPattern(patterns[1]);
   pc.addPattern(patterns[2]);
