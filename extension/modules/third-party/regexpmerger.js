@@ -41,22 +41,27 @@ const EXPORTED_SYMBOLS = ['merge'];
 const RE_GROUPSTRIP = /\(.*\)/g;
 
 /**
- * Return a good prefix, with no bracket mismatches
+ * Return a good prefix, without out bracket mismatches
  *
  * @param string Calculate the prefix from
- * @returns {String} Calculated prefix
+ * @returns {String} Calculated safe prefix without out bracket mismatches
  */
 function killInvalidBrackets(string) {
-  let c = 0; // (
-  let C = 0; // [
-  let good = -1; // store last good position
-  for (let i = 0; i < string.length; ++i) {
+  let c = 0; // num of unclosed (
+  let C = 0; // num of unclosed [
+  let good = -1; // last good position
+  let strLen = string.length;
+
+  for (let i = 0; i < strLen; ++i) {
     let ch = string[i];
+
     if (ch == "\\") {
       // step over escaping
       ++i;
       continue;
     }
+
+    // ()
     if (ch == '(') {
       if (!C) {
         // not in a character class []
@@ -66,11 +71,11 @@ function killInvalidBrackets(string) {
         }
         ++c;
       }
-      continue
+      continue;
     }
     if (ch == ')') {
       if (!C) {
-        // not in a character class
+        // not in a character class []
         --c;
         if (c < 0) {
           // cannot be valid and negative at the same time
@@ -84,6 +89,8 @@ function killInvalidBrackets(string) {
       }
       continue;
     }
+
+    // []
     if (ch == '[') {
       if (!C && !c) {
         // last good (nothing open)
@@ -103,6 +110,7 @@ function killInvalidBrackets(string) {
       }
     }
   }
+
   if (c == 0 && C == 0) {
     // all closed, use whole string
     return string;
@@ -111,6 +119,7 @@ function killInvalidBrackets(string) {
     // something is bad, but we got a good position
     return string.substring(0, good + 1);
   }
+
   // whole string is invalid
   return "";
 }
@@ -133,9 +142,9 @@ function largestPrefixGroup(patterns, low, high, level) {
   let heads = patterns.map(function(p) p.charAt(0));
   let tails = patterns.map(function(p) p.substring(1));
 
-  let besti = -1;
-  let beste = 0;
-  let bestc = 0;
+  let besti = -1; // best starting match
+  let beste = 0;  // best ending match
+  let bestc = 0; // num of matches
 
   for (let i = low; i < high - 1; ++i) {
     let allgood = true;
@@ -178,14 +187,14 @@ function largestPrefixGroup(patterns, low, high, level) {
 
   let [nlow, nhigh, np] = largestPrefixGroup(tails, besti, beste, level + 1);
   if (nhigh) {
-    let rv = head + np;
+    let prefix = head + np;
     if (!level) {
       // root level needs to check for bracket mismatches
       // this might cause the group to get smaller than it has to be
       // Consumers should/will account for this
-      rv = killInvalidBrackets(rv);
+      prefix = killInvalidBrackets(prefix);
     }
-    return [nlow, nhigh, rv];
+    return [nlow, nhigh, prefix];
   }
 
   return [besti, beste, head];
@@ -194,30 +203,35 @@ function largestPrefixGroup(patterns, low, high, level) {
 /**
  * Merge prefix group with set of patterns according to bounds and prefix
  *
- * @param patterns Set of patterns
- * @param low Lower bound
- * @param high Higher bound
- * @param prefix Prefix of the group
+ * @param patterns {array} Set of patterns
+ * @param low {int} Lower bound
+ * @param high {int} Higher bound
+ * @param prefix {string} Prefix of the group
+ * @return 
  */
 function mergePatterns(patterns, low, high, prefix) {
   let pl = prefix.length;
-  // slice the largest group, and chop of the common prefix
+
+  // splice the prefix group, and chop off the common prefix
   let lg = patterns.splice(low, high - low).map(function(p) p.substring(pl));
+
   // build a prefix pattern
-  let lgp = lg
-    .map(function(p) {
-      if (p.replace(RE_GROUPSTRIP, '').indexOf('|') == -1) {
-        return p;
-      }
-      return "(?:" + p + ")";
-    })
-    .join("|");
+  let lgp = lg.map(function(p) {
+    // strip out group expressions so that their inner '|'s are ignored
+    // TODO: atm "() | ()".replace(RE_GROUPSTRIP, '') == "" is bad
+    if (p.replace(RE_GROUPSTRIP, '').indexOf('|') == -1) {
+      return p;
+    }
+
+    return "(?:" + p + ")";
+  }).join("|");
+
   if (prefix) {
     patterns.push(prefix + "(?:" + lgp + ")");
-  }
-  else {
+  } else {
     patterns.push(lgp);
   }
+
   // need to return sorted as largestPrefixGroup relies on sorting
   return patterns.sort();
 }
@@ -237,12 +251,12 @@ function merge(patterns) {
   patterns.sort();
 
   for (;;) {
-    let [i, e, head] = largestPrefixGroup(patterns);
+    let [i, e, prefix] = largestPrefixGroup(patterns);
     if (!e) {
       // no common prefix found in (remaining) patterns
       break;
     }
-    patterns = mergePatterns(patterns, i, e, head);
+    patterns = mergePatterns(patterns, i, e, prefix);
   }
 
   let len = patterns.length;
