@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Nils Maier <MaierMan@web.de>
+ *   Erik Vold <erikvvold@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,8 +38,6 @@
 "use strict";
 
 const EXPORTED_SYMBOLS = ['merge'];
-
-const RE_GROUPSTRIP = /\(.*\)/g;
 
 /**
  * Return a good prefix, without out bracket mismatches
@@ -217,15 +216,7 @@ function mergePatterns(patterns, low, high, prefix) {
   let tails = patterns.splice(low, high - low).map(function(p) p.substring(pl));
 
   // build a tail pattern
-  let tail = tails.map(function(p) {
-    // strip out group expressions so that their inner '|'s are ignored
-    // TODO: atm "() | ()".replace(RE_GROUPSTRIP, '') == "" is bad
-    if (p.replace(RE_GROUPSTRIP, '').indexOf('|') == -1) {
-      return p;
-    }
-
-    return "(?:" + p + ")";
-  }).join("|");
+  let tail = tails.join("|");
 
   // add merged pattern
   if (prefix) {
