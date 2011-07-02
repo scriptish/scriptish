@@ -154,6 +154,7 @@ function largestPrefixGroup(patterns, low, high, level) {
       allgood = false;
       break;
     }
+
     if (allgood) {
       let c = high - i;
       if (bestc < c) {
@@ -174,6 +175,7 @@ function largestPrefixGroup(patterns, low, high, level) {
   if (tails.some(function(p) p.length == 0)) {
     return [besti, beste, head];
   }
+
   let [nlow, nhigh, np] = largestPrefixGroup(tails, besti, beste, level + 1);
   if (nhigh) {
     let rv = head + np;
@@ -185,6 +187,7 @@ function largestPrefixGroup(patterns, low, high, level) {
     }
     return [nlow, nhigh, rv];
   }
+
   return [besti, beste, head];
 }
 
@@ -242,12 +245,13 @@ function merge(patterns) {
     patterns = mergePatterns(patterns, i, e, head);
   }
 
-  if (patterns.length == 1) {
-    // already merge to a single pattern
+  let len = patterns.length;
+  if (len == 1) {
+    // already merged in to a single pattern
     return patterns[0];
   }
 
   // not yet a single pattern (i.e. not all patterns shared a common prefix)
-  // merge without a prefix to get s aingle pattern
-  return mergePatterns(patterns, 0, patterns.length, "")[0];
+  // merge without a prefix to get a single pattern
+  return mergePatterns(patterns, 0, len, "")[0];
 }
