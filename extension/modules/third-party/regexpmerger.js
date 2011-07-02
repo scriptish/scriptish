@@ -207,7 +207,8 @@ function largestPrefixGroup(patterns, low, high, level) {
  * @param low {int} Lower bound
  * @param high {int} Higher bound
  * @param prefix {string} Prefix of the group
- * @return 
+ * @return {array} mutated & reduced patterns array where the patterns specified
+ *                 by the low & high params are merged.
  */
 function mergePatterns(patterns, low, high, prefix) {
   let pl = prefix.length;
