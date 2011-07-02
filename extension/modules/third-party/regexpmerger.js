@@ -225,10 +225,13 @@ function mergePatterns(patterns, low, high, prefix) {
  * @returns {String} Resulting merged and optimized pattern
  */
 function merge(patterns) {
-  patterns = patterns.slice(0).sort();
+  patterns = patterns.slice(0);
+
   if (patterns.length < 2) {
     return patterns[0];
   }
+
+  patterns.sort();
 
   for (;;) {
     let [i, e, head] = largestPrefixGroup(patterns);
@@ -238,10 +241,12 @@ function merge(patterns) {
     }
     patterns = mergePatterns(patterns, i, e, head);
   }
+
   if (patterns.length == 1) {
     // already merge to a single pattern
     return patterns[0];
   }
+
   // not yet a single pattern (i.e. not all patterns shared a common prefix)
   // merge without a prefix to get s aingle pattern
   return mergePatterns(patterns, 0, patterns.length, "")[0];
