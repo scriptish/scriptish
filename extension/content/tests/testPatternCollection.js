@@ -43,16 +43,22 @@ test("merged", function() {
   var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
 
   var pc = new PatternCollection();
-  pc.addPattern("foobar*");
-  pc.addPattern("foobaz*");
-  deepEqual(pc.patterns, ["foobar*", "foobaz*"], "patterns");
-  deepEqual(pc._regs.map(function(e) e.source), ["^foobar.*$", "^foobaz.*$"], "regs");
-  equal(pc.merged.source, "^fooba(?:r.*$|z.*$)", "merged");
+  var patterns = ["foobar*", "foobaz*", "/^foobax$/"];
+  pc.addPattern(patterns[0]);
+  pc.addPattern(patterns[1]);
+  pc.addPattern(patterns[2]);
+  deepEqual(pc.patterns, patterns, "patterns");
+  deepEqual(
+      pc._regs.map(function(e) e.source),
+      ["^foobar.*$", "^foobaz.*$", "^foobax$"],
+      "regs");
+  equal(pc.merged.source, "^fooba(?:r.*$|x$|z.*$)", "merged");
   equal(pc.test("foo"), false, "foo");
   equal(pc.test("fooba"), false, "fooba");
   equal(pc.test("foobar"), true, "foobar");
   equal(pc.test("foobar1"), true, "foobar1");
   equal(pc.test("foobaz2"), true, "foobaz2");
+  equal(pc.test("foobax"), true, "foobax");
 });
 
 test("merged2", function() {
