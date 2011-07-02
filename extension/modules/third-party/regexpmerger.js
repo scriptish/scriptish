@@ -39,19 +39,26 @@
 
 const EXPORTED_SYMBOLS = ['merge'];
 
+const RE_GROUPSTRIP = /\(.*\)/g;
+
 /**
- * Return a good prefix, without out bracket mismatches
+ * Array filter function to create an unique array
+ * @usage arr.filter(unique_filter, {});
+ */
+function unique_filter(e) !((e in this) || (this[e] = null));
+
+/**
+ * Return a good prefix, with no bracket mismatches
  *
- * @param string Calculate the prefix from
+ * @param {String} Calculate the prefix from
  * @return {String} Calculated safe prefix without bracket mismatches
  */
 function killInvalidBrackets(string) {
   let c = 0; // num of unclosed (
   let C = 0; // num of unclosed [
   let good = -1; // last good position
-  let strLen = string.length;
 
-  for (let i = 0; i < strLen; ++i) {
+  for (let i = 0, e = string.length; i < e; ++i) {
     let ch = string[i];
 
     if (ch == "\\") {
@@ -74,7 +81,7 @@ function killInvalidBrackets(string) {
     }
     if (ch == ')') {
       if (!C) {
-        // not in a character class []
+        // not in a character class
         --c;
         if (c < 0) {
           // cannot be valid and negative at the same time
@@ -114,6 +121,7 @@ function killInvalidBrackets(string) {
     // all closed, use whole string
     return string;
   }
+
   if (good >= 0) {
     // something is bad, but we got a good position
     return string.substring(0, good + 1);
@@ -124,13 +132,48 @@ function killInvalidBrackets(string) {
 }
 
 /**
+ * Splits a pattern into individual alternates, if any
+ * @param {String} pattern Pattern to process
+ * @param {Array} rv Result array patterns will be pushed to
+ */
+function splitAlternates(pattern, rv) {
+  if (!pattern || pattern.replace(RE_GROUPSTRIP).indexOf("|") == -1) {
+    rv.push(pattern);
+    return;
+  }
+  let open = 0, cur = "";
+  for (let i = 0, e = pattern.length; i < e; ++i) {
+    let c = pattern[i];
+    if (c == "\\") {
+      cur += c + pattern[++i];
+    }
+    else if (c == "(" || c == "[") {
+      cur += c;
+      ++open;
+    }
+    else if (c == ")" || c == "]") {
+      cur += c;
+      --open;
+    }
+    else if (!open && c == "|") {
+      rv.push(cur);
+      cur = "";
+    }
+    else {
+      cur += c;
+    }
+  }
+  rv.push(cur);
+}
+
+/**
  * Recursively determine the the largest group with a common prefix
  * The group is guaranteed to contain at least 3 items
  *
- * @param patterns Patterns to process. Must be sorted.
- * @param low Optional. Low bound. Default = 0
- * @param high Optional. High bound. Default = patterns.length
- * @param level Optional. Recursion level. Default = length
+ * @param {Array} patterns Patterns to process. Must be sorted.
+ * @param {int} low Optional. Low bound. Default = 0
+ * @param {int} high Optional. High bound. Default = patterns.length
+ * @param {int} level Optional. Recursion level. Default = length
  */
 function largestPrefixGroup(patterns, low, high, level) {
   level = level || 0;
@@ -142,11 +185,12 @@ function largestPrefixGroup(patterns, low, high, level) {
   let tails = patterns.map(function(p) p.substring(1));
 
   let besti = -1; // best starting match
-  let beste = 0;  // best ending match
+  let beste = 0; // best ending match
   let bestc = 0; // num of matches
 
   for (let i = low; i < high - 1; ++i) {
     let allgood = true;
+
     for (let e = i + 1; e < high; ++e) {
       if (heads[i] == heads[e]) {
         continue;
@@ -178,15 +222,15 @@ function largestPrefixGroup(patterns, low, high, level) {
     return [0,0,0];
   }
 
-  let head = heads[besti];
+  let prefix = heads[besti];
 
   if (tails.some(function(p) p.length == 0)) {
-    return [besti, beste, head];
+    return [besti, beste, prefix];
   }
 
   let [nlow, nhigh, np] = largestPrefixGroup(tails, besti, beste, level + 1);
   if (nhigh) {
-    let prefix = head + np;
+    prefix += np;
     if (!level) {
       // root level needs to check for bracket mismatches
       // this might cause the group to get smaller than it has to be
@@ -196,34 +240,40 @@ function largestPrefixGroup(patterns, low, high, level) {
     return [nlow, nhigh, prefix];
   }
 
-  return [besti, beste, head];
+  return [besti, beste, prefix];
 }
 
 /**
  * Merge prefix group with set of patterns according to bounds and prefix
  *
- * @param patterns {array} Set of patterns
- * @param low {int} Lower bound
- * @param high {int} Higher bound
- * @param prefix {string} Prefix of the group
- * @return {array} mutated & reduced patterns array where the patterns specified
- *                 by the low & high params are merged.
+ * @param {Array} patterns Set of patterns
+ * @param {int} low Lower bound
+ * @param {int} high Higher bound
+ * @param {String} prefix Prefix of the group
+ * @return {Array} mutated & reduced patterns array where the patterns
+ *                  specified by the low & high params are merged.
  */
 function mergePatterns(patterns, low, high, prefix) {
   let pl = prefix.length;
 
-  // splice the patterns to be merged, and chop off their common prefix
+  // splice the patterns to be merged, chop off their common prefix and join
   let tails = patterns.splice(low, high - low).map(function(p) p.substring(pl));
 
-  // build a tail pattern
-  let tail = tails.join("|");
-
-  // add merged pattern
-  if (prefix) {
-    patterns.push(prefix + "(?:" + tail + ")");
-  } else {
-    patterns.push(tail);
+  // if there is an empty tail, then we can omit the whole group
+  let newpattern = "";
+  if (tails.indexOf("") == -1) {
+    newpattern = tails.join("|");
   }
+
+  if (prefix && newpattern) {
+    newpattern = prefix + "(?:" + newpattern + ")";
+  }
+  else if (prefix) {
+    newpattern = prefix;
+  }
+
+  // Add the merged pattern
+  patterns.push(newpattern);
 
   // need to return sorted as largestPrefixGroup relies on sorting
   return patterns.sort();
@@ -231,16 +281,31 @@ function mergePatterns(patterns, low, high, prefix) {
 
 /**
  * Merge patterns with optimizations (prefixes)
- * @param patterns Patterns to merge
+ * @param {Array} patterns Patterns to merge
  * @returns {String} Resulting merged and optimized pattern
  */
 function merge(patterns) {
-  patterns = patterns.slice(0);
-
   if (patterns.length < 2) {
     return patterns[0];
   }
 
+  // Copy patterns and make unique
+  patterns = patterns.filter(unique_filter, {});
+  if (patterns.length < 2) {
+    return patterns[0];
+  }
+
+  // split patterns into pieces by top-level alternates
+  let newpatterns = [];
+  for (let [,p] in Iterator(patterns)) {
+    splitAlternates(p, newpatterns);
+  }
+  patterns = newpatterns.filter(unique_filter, {});
+  if (patterns.length < 2) {
+    return patterns[0];
+  }
+
+  // Good to go
   patterns.sort();
 
   for (;;) {
@@ -254,11 +319,11 @@ function merge(patterns) {
 
   let len = patterns.length;
   if (len == 1) {
-    // already merged in to a single pattern
+    // already merged into a single pattern
     return patterns[0];
   }
 
   // not yet a single pattern (i.e. not all patterns shared a common prefix)
-  // merge without a prefix to get a single pattern
+  // merge without a prefix to get single pattern
   return mergePatterns(patterns, 0, len, "")[0];
 }
