@@ -44,7 +44,7 @@ const RE_GROUPSTRIP = /\(.*\)/g;
  * Return a good prefix, without out bracket mismatches
  *
  * @param string Calculate the prefix from
- * @returns {String} Calculated safe prefix without out bracket mismatches
+ * @returns {String} Calculated safe prefix without bracket mismatches
  */
 function killInvalidBrackets(string) {
   let c = 0; // num of unclosed (
