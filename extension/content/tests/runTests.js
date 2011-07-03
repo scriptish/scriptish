@@ -50,18 +50,20 @@ function importModule(m, ctx) {
   return _;
 }
 
-function checkExports(m, exports) {
-  deepEqual(
-    Object.keys(importModule(m)),
-    exports,
-    "Correct exports"
-    );
-}
+function checkExports(m, exports) (
+    deepEqual(Object.keys(importModule(m)), exports, "Correct exports"))
+
+function contains(ary, vals) (vals.forEach(function(val) (
+    ok(!!~ary.indexOf(val), JSON.stringify(ary) + " contains " + val))))
+
+function checkExported(m, exported) (
+    contains(Object.keys(importModule(m)), exported))
 
 function runTests() {
   var tools = {};
   Q.chain(
     function() include("tests/testAvailability.js"),
+    function() include("tests/testLazyImport.js"),
     function() include("tests/testCachedResource.js"),
     function() include("tests/testCryptoHash.js"),
     function() include("tests/testToolsMenuItem.js"),
