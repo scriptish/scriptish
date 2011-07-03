@@ -101,6 +101,41 @@ test("merged3", function() {
   equal(pc.test("foobaz2"), true, "foobaz2");
 });
 
+test("merged4", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("/foobar/i");
+  pc.addPattern("/foo|bar/i");
+  pc.addPattern("/foo|baz/i");
+
+  equal(pc.test("fo"), false, "fo");
+  equal(pc.test("foo"), true, "foo");
+  equal(pc.test("foob"), true, "foob");
+  equal(pc.test("foobar"), true, "foobar");
+  equal(pc.test("ba"), false, "ba");
+  equal(pc.test("bar"), true, "bar");
+  equal(pc.test("bar1"), true, "bar1");
+  equal(pc.test("baz"), true, "baz");
+});
+
+test("merged5", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("/fo(o)bar/i");
+  pc.addPattern("/fo(o)|(baz)/i");
+
+  equal(pc.test("fo"), false, "fo");
+  equal(pc.test("foo"), true, "foo");
+  equal(pc.test("foob"), true, "foob");
+  equal(pc.test("foobar"), true, "foobar");
+  equal(pc.test("ba"), false, "ba");
+  equal(pc.test("bar"), false, "bar");
+  equal(pc.test("baz1"), true, "baz1");
+  equal(pc.test("baz"), true, "baz");
+});
+
 test("tld", function() {
   var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
 
