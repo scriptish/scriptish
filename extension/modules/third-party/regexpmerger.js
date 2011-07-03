@@ -139,26 +139,42 @@ function splitAlternates(pattern, rv) {
     rv.push(pattern);
     return;
   }
-  let open = 0, cur = "";
+
+  let c = 0; // num of unclosed (
+  let C = 0; // num of unclosed [
+  let cur = ""; // current alternate
   for (let i = 0, e = pattern.length; i < e; ++i) {
-    let c = pattern[i];
-    if (c == "\\") {
-      cur += c + pattern[++i];
-    }
-    else if (c == "(" || c == "[") {
-      cur += c;
-      ++open;
-    }
-    else if (c == ")" || c == "]") {
-      cur += c;
-      --open;
-    }
-    else if (!open && c == "|") {
-      rv.push(cur);
-      cur = "";
-    }
-    else {
-      cur += c;
+    let char = pattern[i];
+
+    switch (char) {
+    case "\\":
+      cur += char + pattern[++i];
+      continue;
+    case "(":
+      if (!C) ++c;
+      cur += char;
+      continue;
+    case ")":
+      --c;
+      cur += char;
+      continue;
+    case "[":
+      if (!C) ++C;
+      cur += char;
+      continue;
+    case "]":
+      if (C) --C;
+      cur += char;
+      continue;
+    case "|":
+      if (!c && !C) {
+        rv.push(cur);
+        cur = "";
+        continue;
+      }
+    default:
+      cur += char;
+      continue;
     }
   }
   rv.push(cur);
