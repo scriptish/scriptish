@@ -136,6 +136,18 @@ test("merged5", function() {
   equal(pc.test("baz"), true, "baz");
 });
 
+test("merged6", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("/a/i");
+  pc.addPattern("/toString/i");
+
+  equal(pc.test("fo"), false, "fo");
+  equal(pc.test("a"), true, "a");
+  equal(pc.test("toString"), true, "toString");
+});
+
 test("tld", function() {
   var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
 
