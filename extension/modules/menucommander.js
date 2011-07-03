@@ -2,7 +2,6 @@ var EXPORTED_SYMBOLS = ["Scriptish_MenuCommander"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
 
 function Scriptish_MenuCommander(aDoc) {
   this.doc = aDoc;
