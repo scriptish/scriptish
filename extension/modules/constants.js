@@ -100,7 +100,7 @@ function lazyImport(obj, resource, symbols) {
         return _m;
       });
   }
-  for (let i = 0, e = symbols.length; i < e; ++i) {
+  for (let i = symbols.length; ~--i;) {
     let s = symbols[i];
     XPCOMUtils.defineLazyGetter(obj, s, function() _lazyModules[resource][s]);
   }
