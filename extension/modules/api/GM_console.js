@@ -34,7 +34,7 @@ function getConsoleFor(contentWindow, chromeWindow) {
 function GM_console(script, contentWindow, chromeWindow) {
   const _console = getConsoleFor(contentWindow, chromeWindow);
   const console = {};
-  const prefix = "[" + script.id + "]";
+  const prefix = "[" + (script.id || "Scriptish") + "]";
 
   // Wrap log functions
   // Redirect any missing log function to .log
