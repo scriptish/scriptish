@@ -27,19 +27,7 @@ function getConsoleFor(contentWindow, chromeWindow) {
   }
 
   return {
-    log: function() Scriptish_log(Array.slice(arguments).join(" "), true),
-    trace: function() {
-      let msg = "";
-
-      // Skip the top two frames
-      let stack = Components.stack.caller;
-      if (stack && (stack = stack.caller)) {
-        for (let i = 0; i < 10 && stack; ++i, stack = stack.caller) {
-          msg += "\n" + stack.filename + ":" + stack.lineNumber;
-        }
-      }
-      Scriptish_log(Array.slice(arguments).join(" ") + msg, true);
-    }
+    log: function() Scriptish_log(Array.slice(arguments).join(" "), true)
   };
 }
 
@@ -54,6 +42,22 @@ function GM_console(script, contentWindow, chromeWindow) {
     let fn = log_functions[i];
     if (fn in _console) {
       console[fn] = _console[fn].bind(_console, prefix);
+    }
+    else if (fn == "trace") {
+      console.trace = function() {
+        let args = Array.slice(arguments);
+        let msg = "";
+
+        // Skip the top two frames
+        let stack = Components.stack.caller;
+        if (stack && (stack = stack.caller)) {
+          for (let i = 0; i < 10 && stack; ++i, stack = stack.caller) {
+            msg += "\n[@" + stack.filename + ":" + stack.lineNumber + "]";
+          }
+          args.push(msg);
+        }
+        console.log.apply(console, args);
+      };
     }
     else {
       console[fn] = console.log.bind(console);
