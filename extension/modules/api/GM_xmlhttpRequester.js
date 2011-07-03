@@ -139,7 +139,12 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
   if (details.mozBackgroundRequest) req.mozBackgroundRequest = true;
 
   req.open(
-      details.method, safeUrl, true, details.user || "", details.password || "");
+      details.method || "GET",
+      safeUrl,
+      true,
+      details.user || "",
+      details.password || ""
+      );
 
   if (details.overrideMimeType) req.overrideMimeType(details.overrideMimeType);
 
