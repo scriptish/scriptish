@@ -25,8 +25,8 @@ const Scriptish_ScriptProvider = {
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
-          label: "Open User Scripts Manager",
-          accessKey: "O",
+          label: Scriptish_stringBundle("openUserScriptsManager"),
+          accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
           callback: callback
         }
       });
@@ -59,8 +59,8 @@ const Scriptish_ScriptProvider = {
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
-          label: "Open User Scripts Manager",
-          accessKey: "O",
+          label: Scriptish_stringBundle("openUserScriptsManager"),
+          accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
           callback: callback
         }
       });
