@@ -1,10 +1,8 @@
 var EXPORTED_SYMBOLS = ["Scriptish_logError", "Scriptish_logScriptError", "Scriptish_log"];
 
 const Cu = Components.utils;
-(function(inc){
-  inc("resource://scriptish/constants.js");
-  inc("resource://scriptish/prefmanager.js");
-})(Cu.import)
+Cu.import("resource://scriptish/constants.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 
 // Utility to create an error message in the log without throwing an error.
 function Scriptish_logError(aErr, opt_warn, fileName, lineNumber) {
