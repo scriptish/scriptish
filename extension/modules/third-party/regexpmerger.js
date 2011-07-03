@@ -155,15 +155,15 @@ function splitAlternates(pattern, rv) {
       cur += char;
       continue;
     case ")":
-      --c;
+      if (!C) --c;
       cur += char;
       continue;
     case "[":
-      if (!C) ++C;
+      ++C;
       cur += char;
       continue;
     case "]":
-      if (C) --C;
+      --C;
       cur += char;
       continue;
     case "|":
