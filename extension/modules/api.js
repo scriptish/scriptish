@@ -3,9 +3,16 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_notification.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Cu.import("resource://scriptish/utils/Scriptish_openInTab.js");
+
+lazyImport(this, "resource://scriptish/utils/Scriptish_cryptoHash.js", ["Scriptish_cryptoHash"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_notification.js", ["Scriptish_notification"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_openInTab.js", ["Scriptish_openInTab"]);
+
+lazyImport(this, "resource://scriptish/api/GM_ScriptStorage.js", ["GM_ScriptStorage"]);
+lazyImport(this, "resource://scriptish/api/GM_xmlhttpRequester.js", ["GM_xmlhttpRequester"]);
+lazyImport(this, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
+lazyImport(this, "resource://scriptish/api/GM_setClipboard.js", ["GM_setClipboard"]);
 
 const moduleFilename = Components.stack.filename;
 const NS_XHTML = "http://www.w3.org/1999/xhtml";
@@ -48,31 +55,16 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
   var Scriptish_BrowserUI = aChromeWin.Scriptish_BrowserUI;
   var windowID = aWinID;
 
-  function getXmlhttpRequester() {
-    if (!_xmlhttpRequester) {
-      var tools = {};
-      Cu.import("resource://scriptish/api/GM_xmlhttpRequester.js", tools);
-      _xmlhttpRequester = new tools.GM_xmlhttpRequester(
-          aUnsafeContentWin, aURL, aScript);
-    }
-    return _xmlhttpRequester;
-  }
-  function getStorage() {
-    if (!_storage) {
-      var tools = {};
-      Cu.import("resource://scriptish/api/GM_ScriptStorage.js", tools);
-      _storage = new tools.GM_ScriptStorage(aScript);
-    }
-    return _storage;
-  }
-  function getResources() {
-    if (!_resources) {
-      var tools = {};
-      Cu.import("resource://scriptish/api/GM_Resources.js", tools);
-      _resources = new tools.GM_Resources(aScript);
-    }
-    return _resources;
-  }
+  var lazyLoaders = {};
+  XPCOMUtils.defineLazyGetter(lazyLoaders, "xmlhttpRequester", function() {
+    return new GM_xmlhttpRequester(aUnsafeContentWin, aURL, aScript);
+  });
+  XPCOMUtils.defineLazyGetter(lazyLoaders, "storage", function() {
+    return new GM_ScriptStorage(aScript);
+  });
+  XPCOMUtils.defineLazyGetter(lazyLoaders, "resources", function() {
+    return new GM_Resources(aScript);
+  });
 
   this.GM_addStyle = function GM_addStyle(css) {
     var head = document.getElementsByTagName("head")[0];
@@ -107,28 +99,28 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 
   this.GM_setValue = function GM_setValue() {
     if (!GM_apiLeakCheck("GM_setValue")) return;
-    return getStorage().setValue.apply(getStorage(), arguments);
+    return lazyLoaders.storage.setValue.apply(getStorage(), arguments);
   }
   this.GM_getValue = function GM_getValue() {
     if (!GM_apiLeakCheck("GM_getValue")) return;
-    return getStorage().getValue.apply(getStorage(), arguments);
+    return lazyLoaders.storage.getValue.apply(getStorage(), arguments);
   }
   this.GM_deleteValue = function GM_deleteValue() {
     if (!GM_apiLeakCheck("GM_deleteValue")) return;
-    return getStorage().deleteValue.apply(getStorage(), arguments);
+    return lazyLoaders.storage.deleteValue.apply(getStorage(), arguments);
   }
   this.GM_listValues = function GM_listValues() {
     if (!GM_apiLeakCheck("GM_listValues")) return;
-    return getStorage().listValues.apply(getStorage(), arguments);
+    return lazyLoaders.storage.listValues.apply(getStorage(), arguments);
   }
 
   this.GM_getResourceURL = function GM_getResourceURL() {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
-    return getResources().getResourceURL.apply(getResources(), arguments)
+    return lazyLoaders.resources.getResourceURL.apply(getResources(), arguments)
   }
   this.GM_getResourceText = function GM_getResourceText() {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
-    return getResources().getResourceText.apply(getResources(), arguments)
+    return lazyLoaders.resources.getResourceText.apply(getResources(), arguments)
   }
 
   this.GM_getMetadata = function(aKey, aLocalVal) {
@@ -171,7 +163,7 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
     if (!GM_apiLeakCheck("GM_xmlhttpRequest")) return;
-    let xhr = getXmlhttpRequester();
+    let xhr = lazyLoaders.xmlhttpRequester;
     return xhr.contentStartRequest.apply(xhr, arguments);
   }
 
@@ -215,9 +207,7 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 
   this.GM_cryptoHash = function GM_cryptoHash() {
     if (!GM_apiLeakCheck("GM_cryptoHash")) return;
-    var tools = {};
-    Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
-    return tools.Scriptish_cryptoHash.apply(null, arguments);
+    return Scriptish_cryptoHash.apply(null, arguments);
   }
 }
 
@@ -228,7 +218,5 @@ GM_API.prototype.GM_updatingEnabled = true;
 
 GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
   if (!GM_apiLeakCheck("GM_setClipboard")) return;
-  var tools = {};
-  Cu.import("resource://scriptish/api/GM_setClipboard.js", tools);
-  tools.GM_setClipboard.apply(null, arguments);
+  GM_setClipboard.apply(null, arguments);
 }
