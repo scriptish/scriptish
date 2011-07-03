@@ -2,9 +2,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_BrowserUIM"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 
 const ICON_16_ON = "chrome://scriptish/skin/scriptish16.png";
 const ICON_16_OFF = "chrome://scriptish/skin/scriptish16_disabled.png";
