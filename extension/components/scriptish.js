@@ -12,7 +12,6 @@ Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
 Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js");
-Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWindowIDs.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
@@ -326,20 +325,7 @@ ScriptishService.prototype = {
     let unsafeContentWin = wrappedContentWin.wrappedJSObject;
     let tools = {};
     Cu.import("resource://scriptish/api.js", tools);
-
-    tools.console = (function getConsole() {
-      let rv = Scriptish_getFirebugConsole(wrappedContentWin, chromeWin);
-      if (rv) {
-        return rv;
-      }
-      if (wrappedContentWin.console) {
-        return wrappedContentWin.console;
-      }
-      rv = {};
-      Cu.import("resource://scriptish/api/GM_console.js", rv);
-      return rv.GM_console(script);
-    })();
-
+    Cu.import("resource://scriptish/api/GM_console.js", tools);
 
     let delays = [];
     let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
@@ -358,7 +344,8 @@ ScriptishService.prototype = {
 
       // add GM_* API to sandbox
       for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
-      sandbox.console = tools.console;
+      sandbox.console = tools.GM_console(script, wrappedContentWin, chromeWin);
+      sandbox.GM_log = sandbox.console.log.bind(sandbox.console);
 
       sandbox.unsafeWindow = unsafeContentWin;
       sandbox.__proto__ = wrappedContentWin;

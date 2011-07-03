@@ -73,14 +73,6 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     }
     return _resources;
   }
-  function getLogger() {
-    if (!_logger) {
-      var tools = {};
-      Cu.import("resource://scriptish/api/GM_ScriptLogger.js", tools);
-      _logger = new tools.GM_ScriptLogger(aScript);
-    }
-    return _logger;
-  }
 
   this.GM_addStyle = function GM_addStyle(css) {
     var head = document.getElementsByTagName("head")[0];
@@ -101,8 +93,6 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     body.appendChild(Services.suhtml.parseFragment(aHTMLStr, false, null, body));
     return doc;
   }
-
-  this.GM_log = function GM_log() getLogger().log.apply(getLogger(), arguments)
 
   this.GM_notification =
       function GM_notification(aMsg, aTitle, aIcon, aCallback) {

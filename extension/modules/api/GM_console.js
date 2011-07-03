@@ -1,18 +1,81 @@
+"use strict";
 var EXPORTED_SYMBOLS = ["GM_console"];
-Components.utils.import("resource://scriptish/api/GM_ScriptLogger.js");
+
+const Cu = Components.utils;
+Cu.import("resource://scriptish/logging.js");
+Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
+
+// moz-4: log, warn, error, info
+// moz-5: debug (alias to log)
+// moz-6: trace (callstack)
+const log_functions = ["log", "debug", "warn", "error", "info", "trace"];
 
 // based on http://www.getfirebug.com/firebug/firebugx.js
-const keys = [
-    "debug", "warn", "error", "info", "assert", "dir", "dirxml",
-    "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile",
-    "profileEnd"];
+const aux_functions = ["assert", "dir", "dirxml", "group", "groupEnd", "time",
+                        "timeEnd", "count", "profile", "profileEnd"
+                        ];
 
-function GM_console(script) {
-  for (var i = keys.length - 1, key; key = keys[i--];)
-    this[key] = function() {};
+function getConsoleFor(contentWindow, chromeWindow) {
 
-  // Important to use this private variable so that user scripts can't make
-  // this call something else by redefining <this> or <logger>.
-  var logger = new GM_ScriptLogger(script);
-  this.log = function() { logger.log(Array.slice(arguments).join("\n")); };
+  let rv = Scriptish_getFirebugConsole(contentWindow, chromeWindow);
+  if (rv) {
+    return rv;
+  }
+
+  if (contentWindow.console) {
+    return contentWindow.console;
+  }
+
+  return {
+    log: function() Scriptish_log(Array.slice(arguments).join(" "), true),
+    trace: function() {
+      let msg = "";
+
+      // Skip the top two frames
+      let stack = Components.stack.caller;
+      if (stack && (stack = stack.caller)) {
+        for (let i = 0; i < 10 && stack; ++i, stack = stack.caller) {
+          msg += "\n" + stack.filename + ":" + stack.lineNumber;
+        }
+      }
+      Scriptish_log(Array.slice(arguments).join(" ") + msg, true);
+    }
+  };
+}
+
+function GM_console(script, contentWindow, chromeWindow) {
+  const _console = getConsoleFor(contentWindow, chromeWindow);
+  const console = {};
+  const prefix = "[" + script.id + "]";
+
+  // Wrap log functions
+  // Redirect any missing log function to .log
+  for (let i = 0, e = log_functions.length; i < e; ++i) {
+    let fn = log_functions[i];
+    if (fn in _console) {
+      console[fn] = _console[fn].bind(_console, prefix);
+    }
+    else {
+      console[fn] = console.log.bind(console);
+    }
+  }
+
+  // Wrap aux functions
+  for (let i = 0, e = aux_functions.length; i < e; ++i) {
+    let fn = aux_functions[i];
+    if (fn in console) {
+      console[fn] = _console[fn].bind(_console);
+    }
+  }
+  Object.defineProperty(console, "__noSuchMethod__", {
+    value: function(id, args) {
+      if (aux_functions.indexOf(id) != -1) {
+        let fn = _console[id] || (function() {});
+        return fn.apply(_console, args);
+      }
+      throw new Error("No such method");
+    }
+  });
+
+  return console;
 }
