@@ -21,6 +21,7 @@ test("plain", function() {
   deepEqual(pc.patterns, ["foo"], "patterns");
   deepEqual(pc._regs.map(function(e) e.source), ["^foo$"], "regs");
   equal(pc.merged.source, "^foo$", "merged");
+  equal(pc.merged.ignoreCase, true, "ignoreCase");
   equal(pc._hasTLD, false, "hasTLD");
   equal(pc.test("foo"), true, "foo");
   equal(pc.test("bar"), false, "bar");
@@ -35,6 +36,7 @@ test("tld", function() {
   pc.addPattern(tldPattern);
   deepEqual(pc.patterns, [tldPattern], "patterns");
   deepEqual(pc._regsTLD.map(function(e) e.source), ["^http:\\/\\/google\\.tld\\/test$"], "regsTLD");
+  equal(pc.mergedTLD.ignoreCase, true, "ignoreCase");
   equal(pc._hasTLD, true, "hasTLD");
   equal(pc.test("http://google.com/test"), true, "http://google.com/test");
   equal(pc.test("http://google.net/test"), true, "http://google.net/test");
@@ -116,6 +118,7 @@ test("merged2 with sensitive reg exp", function() {
       ["foobax$"],
       "regs");
   equal(pc.mergedSensitives.source, "foobax$", "merged");
+  equal(pc.mergedSensitives.ignoreCase, false, "ignoreCase");
   equal(pc.test("foo"), false, "foo");
   equal(pc.test("fooba"), false, "fooba");
   equal(pc.test("foobar"), true, "foobar");

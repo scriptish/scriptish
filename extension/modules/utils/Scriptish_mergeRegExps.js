@@ -3,10 +3,8 @@ const EXPORTED_SYMBOLS = ["Scriptish_mergeRegExpStrings", "Scriptish_mergeRegExp
 
 Components.utils.import("resource://scriptish/third-party/regexpmerger.js");
 
-function Scriptish_mergeRegExpStrings(strs) {
-  return new RegExp(merge(strs), "i");
-}
+function Scriptish_mergeRegExpStrings(strs, flags) (
+    new RegExp(merge(strs), flags || ""))
 
-function Scriptish_mergeRegExps(regs) {
-  return Scriptish_mergeRegExpStrings([r.source for ([,r] in Iterator(regs))]);
-}
+function Scriptish_mergeRegExps(regs, flags) (
+    Scriptish_mergeRegExpStrings([r.source for ([,r] in Iterator(regs))], flags))

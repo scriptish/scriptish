@@ -46,18 +46,18 @@ PatternCollection.prototype = {
     this._merged = this._mergedTLD = null;
   },
   get patterns() this._patterns.concat(),
-  _merge: function(regs) {
+  _merge: function(regs, flags) {
     if (!regs.length) {
       // No patterns -> always test |false|
       // Do not merge, or we'll create an empty expression
       // that will always test |true|
       return FAKE_REGEXP;
     }
-    return Scriptish_mergeRegExps(regs);
+    return Scriptish_mergeRegExps(regs, flags);
   },
   get merged() {
     if (!this._merged)
-      this._merged = this._merge(this._regs);
+      this._merged = this._merge(this._regs, "i");
     return this._merged;
   },
   get mergedSensitives() {
@@ -67,7 +67,7 @@ PatternCollection.prototype = {
   },
   get mergedTLD() {
     if (!this._mergedTLD)
-      this._mergedTLD = this._merge(this._regsTLD);
+      this._mergedTLD = this._merge(this._regsTLD, "i");
     return this._mergedTLD;
   },
   test: function(url) this.merged.test(url) || this.mergedSensitives.test(url)
