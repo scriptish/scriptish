@@ -1,9 +1,8 @@
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 (function(inc){
-  inc("resource://scriptish/constants.js");
-  inc("resource://scriptish/logging.js");
-  inc("resource://scriptish/utils/Scriptish_stringBundle.js");
   inc("resource://scriptish/api.js");
+  inc("resource://scriptish/constants.js");
+  lazyImport(this, "resource://scriptish/utils/Scriptish_stringBundle.js", ["Scriptish_stringBundle"]);
 })(Components.utils.import)
 
 const MIME_JSON = /^(application|text)\/(?:x-)?json/i;
