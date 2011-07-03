@@ -325,7 +325,6 @@ ScriptishService.prototype = {
     let unsafeContentWin = wrappedContentWin.wrappedJSObject;
     let tools = {};
     Cu.import("resource://scriptish/api.js", tools);
-    Cu.import("resource://scriptish/api/GM_console.js", tools);
 
     let delays = [];
     let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
@@ -344,8 +343,16 @@ ScriptishService.prototype = {
 
       // add GM_* API to sandbox
       for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
-      sandbox.console = tools.GM_console(script, wrappedContentWin, chromeWin);
-      sandbox.GM_log = sandbox.console.log.bind(sandbox.console);
+      sandbox.__defineGetter__("console", function() {
+        delete sandbox.console;
+        var _m = {};
+        Cu.import("resource://scriptish/api/GM_console.js", _m);
+        return (sandbox.console = _m.GM_console(script, wrappedContentWin, chromeWin));
+      });
+      sandbox.__defineGetter__("GM_log", function() {
+        delete sandbox.GM_log;
+        return (sandbox.GM_log = sandbox.console.log.bind(sandbox.console));
+      });
 
       sandbox.unsafeWindow = unsafeContentWin;
       sandbox.__proto__ = wrappedContentWin;
