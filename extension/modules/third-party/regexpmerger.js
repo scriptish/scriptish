@@ -41,7 +41,7 @@ const EXPORTED_SYMBOLS = ['merge'];
 
 /**
  * Array filter function to create an unique array
- * @usage arr.filter(unique_filter, {});
+ * @usage arr.filter(unique_filter, {__proto__: null});
  */
 function unique_filter(e) !((e in this) || (this[e] = null));
 
@@ -288,7 +288,7 @@ function merge(patterns) {
   }
 
   // Copy patterns and make unique
-  patterns = patterns.filter(unique_filter, {});
+  patterns = patterns.filter(unique_filter, {__proto__: null});
   if (patterns.length < 2) {
     return patterns[0];
   }
@@ -298,7 +298,7 @@ function merge(patterns) {
   for (let [,p] in Iterator(patterns)) {
     splitAlternates(p, newpatterns);
   }
-  patterns = newpatterns.filter(unique_filter, {});
+  patterns = newpatterns.filter(unique_filter, {__proto__: null});
   if (patterns.length < 2) {
     return patterns[0];
   }
