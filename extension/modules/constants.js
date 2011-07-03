@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "Cr", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
-    "Services", "Instances", "timeout"];
+    "Services", "Instances", "lazyImport", "timeout"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
 const global = this;
@@ -87,6 +87,24 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
     Services, "uuid", "@mozilla.org/uuid-generator;1",
     "nsIUUIDGenerator");
+
+const _lazyModules = {};
+function lazyImport(obj, resource, symbols) {
+  if (!(resource in _lazyModules)) {
+    XPCOMUtils.defineLazyGetter(
+      _lazyModules,
+      resource,
+      function() {
+        let _m = {};
+        Components.utils.import(resource, _m);
+        return _m;
+      });
+  }
+  for (let i = 0, e = symbols.length; i < e; ++i) {
+    let s = symbols[i];
+    XPCOMUtils.defineLazyGetter(obj, s, function() _lazyModules[resource][s]);
+  }
+}
 
 function timeout(cb, delay) {
   var callback = function() cb.call(null);
