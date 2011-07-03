@@ -5,16 +5,29 @@ Components.utils.import("resource://scriptish/utils/Scriptish_convert2RegExp.js"
 Components.utils.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_mergeRegExps.js");
 
+const FAKE_REGEXP = {test: function() false};
+
 function PatternCollection() {
   this._patterns = [];
   this._regs = [];
   this._regsTLD = [];
+  this._regsSensitives = [];
 }
 PatternCollection.prototype = {
+  _hasTLD: false,
   addPattern: function(pattern) {
     this._patterns.push(pattern);
     var r = Scriptish_convert2RegExp(pattern);
-    (r.isTLD ? this._regsTLD : this._regs).push(r);
+    if (r.isTLD) {
+      this._regsTLD.push(r);
+      this._hasTLD = true;
+    } else {
+      if (r.ignoreCase)
+        this._regs.push(r);
+      else
+        this._regsSensitives.push(r);
+    }
+
     this._merged = this._mergedTLD = null;
   },
   addPatterns: function(patterns) {
@@ -28,8 +41,8 @@ PatternCollection.prototype = {
   },
   clear: function() {
     this._patterns.length = 0;
-    this._regs.length = 0;
-    this._regsTLD.length = 0;
+    this._regs.length = this._regsSensitives = this._regsTLD.length = 0;
+    delete this._hasTLD;
     this._merged = this._mergedTLD = null;
   },
   get patterns() this._patterns.concat(),
@@ -38,22 +51,25 @@ PatternCollection.prototype = {
       // No patterns -> always test |false|
       // Do not merge, or we'll create an empty expression
       // that will always test |true|
-      return {test: function() false};
+      return FAKE_REGEXP;
     }
     return Scriptish_mergeRegExps(regs);
   },
   get merged() {
-    if (!this._merged) {
+    if (!this._merged)
       this._merged = this._merge(this._regs);
-    }
     return this._merged;
   },
+  get mergedSensitives() {
+    if (!this._mergedSensitives)
+      this._mergedSensitives = this._merge(this._regsSensitives);
+    return this._mergedSensitives;
+  },
   get mergedTLD() {
-    if (!this._mergedTLD) {
+    if (!this._mergedTLD)
       this._mergedTLD = this._merge(this._regsTLD);
-    }
     return this._mergedTLD;
   },
-  test: function(url) this.merged.test(url) ||
-    (!!this._regsTLD.length && this.mergedTLD.test(Scriptish_getTLDURL(url)))
+  test: function(url) this.merged.test(url) || this.mergedSensitives.test(url)
+      || (!!this._hasTLD && this.mergedTLD.test(Scriptish_getTLDURL(url)))
 };
