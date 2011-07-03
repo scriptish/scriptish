@@ -10,10 +10,13 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
 Cu.import("resource://scriptish/third-party/Timer.js");
-Cu.import("resource://scriptish/utils/Scriptish_alert.js");
 Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js");
 Cu.import("resource://scriptish/utils/Scriptish_getWindowIDs.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_stringBundle.js", ["Scriptish_stringBundle"]);
+lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
+lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
 
 const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
@@ -123,13 +126,12 @@ ScriptishService.prototype = {
     let self = this;
     let tools = {};
     let winClosed = false;
-    Cu.import("resource://scriptish/prefmanager.js", tools);
 
     function shouldNotRun() (
       winClosed || !Scriptish.enabled || !Scriptish.isGreasemonkeyable(href));
 
     // check if there are any modified scripts
-    if (tools.Scriptish_prefRoot.getValue("enableScriptRefreshing"))
+    if (Scriptish_prefRoot.getValue("enableScriptRefreshing"))
       Scriptish.getConfig(function(config) config.updateModifiedScripts(function(script) {
         if (shouldNotRun()
             || !isScriptRunnable(script, href, safeWin === safeWin.top))
@@ -324,7 +326,6 @@ ScriptishService.prototype = {
     let script;
     let unsafeContentWin = wrappedContentWin.wrappedJSObject;
     let tools = {};
-    Cu.import("resource://scriptish/api.js", tools);
 
     let delays = [];
     let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
@@ -335,23 +336,21 @@ ScriptishService.prototype = {
     for (var i = 0; script = scripts[i++];) {
       sandbox = new Cu.Sandbox(wrappedContentWin);
 
-      let GM_API = new tools.GM_API(
+      let GM_api = new GM_API(
           script, url, winID, wrappedContentWin, unsafeContentWin, chromeWin);
 
       // hack XPathResult since that is so commonly used
       sandbox.XPathResult = XPATH_RESULT;
 
       // add GM_* API to sandbox
-      for (var funcName in GM_API) sandbox[funcName] = GM_API[funcName];
-      sandbox.__defineGetter__("console", function() {
-        delete sandbox.console;
-        var _m = {};
-        Cu.import("resource://scriptish/api/GM_console.js", _m);
-        return (sandbox.console = _m.GM_console(script, wrappedContentWin, chromeWin));
+      for (var funcName in GM_api) {
+        sandbox[funcName] = GM_api[funcName];
+      }
+      XPCOMUtils.defineLazyGetter(sandbox, "console", function() {
+        return GM_console(script, wrappedContentWin, chromeWin);
       });
-      sandbox.__defineGetter__("GM_log", function() {
-        delete sandbox.GM_log;
-        return (sandbox.GM_log = sandbox.console.log.bind(sandbox.console));
+      XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
+        return sandbox.console.log.bind(sandbox.console);
       });
 
       sandbox.unsafeWindow = unsafeContentWin;
@@ -421,6 +420,9 @@ ScriptishService.prototype = {
     }
   }
 }
-Cu.import("resource://scriptish/utils/Scriptish_installUri.js", ScriptishService.prototype);
+lazyImport(ScriptishService.prototype,
+           "resource://scriptish/utils/Scriptish_installUri.js",
+           ["Scriptish_installUri"]
+           );
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
