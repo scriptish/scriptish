@@ -41,7 +41,7 @@ const EXPORTED_SYMBOLS = ['merge'];
 
 /**
  * Array filter function to create an unique array
- * @usage arr.filter(unique_filter, {__proto__: null});
+ * @usage arr.filter(unique_filter, Object.create(null));
  */
 function unique_filter(e) !((e in this) || (this[e] = null));
 
@@ -146,35 +146,33 @@ function splitAlternates(pattern, rv) {
   for (let i = 0, e = pattern.length; i < e; ++i) {
     let char = pattern[i];
 
-    switch (char) {
-    case "\\":
+    if (char == "\\") {
       cur += char + pattern[++i];
-      continue;
-    case "(":
+    }
+    else if (char == "(") {
       if (!C) ++c;
       cur += char;
-      continue;
-    case ")":
+    }
+    else if (char == ")") {
       if (!C) --c;
       cur += char;
-      continue;
-    case "[":
+    }
+    else if (char == "[") {
       ++C;
       cur += char;
-      continue;
-    case "]":
+    }
+    else if (char == "]") {
       --C;
       cur += char;
-      continue;
-    case "|":
-      if (!c && !C) {
+    }
+    else {
+      if (char == "|" && !c && !C) {
         rv.push(cur);
         cur = "";
-        continue;
       }
-    default:
-      cur += char;
-      continue;
+      else {
+        cur += char;
+      }
     }
   }
   rv.push(cur);
@@ -304,7 +302,7 @@ function merge(patterns) {
   }
 
   // Copy patterns and make unique
-  patterns = patterns.filter(unique_filter, {__proto__: null});
+  patterns = patterns.filter(unique_filter, Object.create(null));
   if (patterns.length < 2) {
     return patterns[0];
   }
@@ -314,7 +312,7 @@ function merge(patterns) {
   for (let [,p] in Iterator(patterns)) {
     splitAlternates(p, newpatterns);
   }
-  patterns = newpatterns.filter(unique_filter, {__proto__: null});
+  patterns = newpatterns.filter(unique_filter, Object.create(null));
   if (patterns.length < 2) {
     return patterns[0];
   }
