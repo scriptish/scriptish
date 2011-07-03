@@ -9,11 +9,11 @@ inc("resource://scriptish/constants.js");
 inc("resource://scriptish/logging.js");
 inc("resource://scriptish/prefmanager.js");
 inc("resource://scriptish/scriptish.js");
+inc("resource://scriptish/utils/PatternCollection.js");
 inc("resource://scriptish/utils/Scriptish_getContents.js");
 inc("resource://scriptish/utils/Scriptish_getWriteStream.js");
 inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
 inc("resource://scriptish/utils/Scriptish_stringBundle.js");
-inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
 inc("resource://scriptish/third-party/Timer.js");
 inc("resource://scriptish/script/script.js");
@@ -25,8 +25,7 @@ function Config(aBaseDir) {
   this.timer = new Timer();
   this._observers = [];
   this._saveTimer = null;
-  this._excludes = [];
-  this._excludeRegExps = [];
+  this._excludes = new PatternCollection();
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
 
@@ -154,7 +153,7 @@ Config.prototype = {
         Scriptish_getContents(file, 0, function(str) {
           self._blocklist = Instances.json.decode(str);
           self._blocklistHash = Scriptish_cryptoHash(str);
-      
+
           // block scripts
           self._blockScripts();
         });
@@ -409,29 +408,18 @@ Config.prototype = {
     }
   },
 
-  get excludes() this._excludes.concat(),
+  get excludes() this._excludes.patterns,
   set excludes(excludes) {
-    this._excludes = [];
-    this._excludeRegExps = [];
-    this.addExclude(excludes)
+    this._excludes.clear();
+    this._excludes.addPatterns(excludes);
   },
-  get excludeRegExps() this._excludeRegExps.concat(),
-  addExclude: function(excludes) {
-    if (!excludes) return;
-    excludes = (typeof excludes == "string") ? [excludes] : excludes;
-    for (let [, exclude] in Iterator(excludes)) {
-      this._excludes.push(exclude);
-      this._excludeRegExps.push(Scriptish_convert2RegExp(exclude));
-    }
-  },
-
+  addExclude: function(excludes) this._excludes.addPatterns(excludes),
   get scripts() this._scripts.concat(),
   getMatchingScripts: function(testFunc, urls) {
-    var globalExcludes = this._excludeRegExps;
     for (var i = urls.length - 1; ~i; i--) {
-      let url = urls[i];
-      if (globalExcludes.some(function(reg) reg.test(url)))
+      if (this._excludes.test(urls[i])) {
         return [];
+      }
     }
     return this.scripts.filter(testFunc);
   },

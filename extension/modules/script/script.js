@@ -8,10 +8,9 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
+Cu.import("resource://scriptish/utils/PatternCollection.js");
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
-Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
-Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/script/cachedresource.js");
 Cu.import("resource://scriptish/script/scriptinstaller.js");
@@ -72,13 +71,11 @@ function Script(config) {
   this._enabled = true;
   this.needsUninstall = false;
   this.domains = [];
-  this._includes = [];
-  this._excludes = [];
+  this._includes = new PatternCollection();
+  this._excludes = new PatternCollection();
   this._matches = [];
-  this._includeRegExps = [];
-  this._excludeRegExps = [];
-  this.user_includes = [];
-  this.user_excludes = [];
+  this._user_includes = new PatternCollection();
+  this._user_excludes = new PatternCollection();
   this._delay = null;
   this.priority = 0;
   this._requires = [];
@@ -321,23 +318,17 @@ Script.prototype = {
   },
 
   matchesURL: function(aURL) {
-    function testI(regExp) (
-        (regExp.isTLD) ? regExp.test(Scriptish_getTLDURL(aURL)) : regExp.test(aURL));
-    function testII(aMatchPattern) aMatchPattern.doMatch(aURL);
-
     // check if the domain is ok
     if (!this.matchesDomain(aURL)) return false;
 
     // check if script @includes/@excludes are disabled
     if (this.includesDisabled)
-      return this._user_includeRegExps.some(testI)
-          && !this._user_excludeRegExps.some(testI);
+      return this._user_includes.test(aURL)
+          && !this._user_excludes.test(aURL);
 
-    let includes = this._user_includeRegExps.concat(this._includeRegExps);
-    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps);
-
-    return (includes.some(testI) || this._matches.some(testII))
-        && !excludes.some(testI);
+    return (this._all_includes.test(aURL)
+      || this._matches.some(function(m) m.doMatch(aURL)))
+      && !this._all_excludes.test(aURL);
   },
 
   get id() {
@@ -413,35 +404,44 @@ Script.prototype = {
     this._delay = ((val || val === 0) && val > 0) ? val : null;
   },
 
-  get includes() this._includes.concat(),
-  get excludes() this._excludes.concat(),
-  get user_includes() this._user_includes.concat(),
-  getUserIncStr: function(type) this["_user_" + (type || "include") + "s"].join("\n"),
-  get user_excludes() this._user_excludes.concat(),
+  get includes() this._includes.patterns,
+  get excludes() this._excludes.patterns,
+  get user_includes() this._user_includes.patterns,
+  get user_excludes() this._user_excludes.patterns,
+  getUserIncStr: function(type) this["_user_" + (type || "include") + "s"].patterns.join("\n"),
   set user_includes(aPatterns) {
-    this._user_includes = [];
-    this._user_includeRegExps = [];
-    this.addInclude(aPatterns, true)
+    this._user_includes.clear();
+    this.addInclude(aPatterns, true);
   },
   set user_excludes(aPatterns) {
-    this._user_excludes = [];
-    this._user_excludeRegExps = [];
+    this._user_excludes.clear();
     this.addExclude(aPatterns, true)
   },
   get matches() this._matches.concat(),
-  addInclude: function(aPattern, aUserVal) (
-    this.addPattern(((aUserVal) ? "_user" : "") + "_include", aPattern)),
-  addExclude: function(aPattern, aUserVal) (
-    this.addPattern(((aUserVal) ? "_user" : "") + "_exclude", aPattern)),
-  addPattern: function(aPrefix, aPattern) {
-    if (!aPattern) return;
-    var patterns = (typeof aPattern == "string") ? [aPattern] : aPattern;
-    for (let [, pattern] in Iterator(patterns)) {
-      this[aPrefix + "s"].push(pattern);
-      this[aPrefix + "RegExps"].push(Scriptish_convert2RegExp(pattern));
-    }
+  addInclude: function(aPattern, aUserVal) {
+    this[aUserVal ? "_user_includes" : "_includes"].addPatterns(aPattern);
+    this.__all_includes = null;
   },
-
+  addExclude: function(aPattern, aUserVal) {
+    this[aUserVal ? "_user_excludes" : "_excludes"].addPatterns(aPattern);
+    this.__all_excludes = null;
+  },
+  get _all_includes() {
+    if (!this.__all_includes) {
+      this.__all_includes = new PatternCollection();
+      this.__all_includes.addPatterns(this._includes.patterns);
+      this.__all_includes.addPatterns(this._user_includes.patterns);
+    }
+    return this.__all_includes;
+  },
+  get _all_excludes() {
+    if (!this.__all_excludes) {
+      this.__all_excludes = new PatternCollection();
+      this.__all_excludes.addPatterns(this._excludes.patterns);
+      this.__all_excludes.addPatterns(this._user_excludes.patterns);
+    }
+    return this.__all_excludes;
+  },
   get requires() this._requires.concat(),
   get resources() this._resources.concat(),
   get noframes() this._noframes,
@@ -641,8 +641,6 @@ Script.prototype = {
     this.domains = newScript.domains;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
-    this._includeRegExps = newScript._includeRegExps;
-    this._excludeRegExps = newScript._excludeRegExps;
     this._matches = newScript._matches;
     this._delay = newScript._delay;
     this.priority = newPriority;
@@ -706,11 +704,11 @@ Script.prototype = {
   toJSON: function() ({
     contributors: this._contributors,
     domains: this.domains,
-    includes: this._includes,
-    excludes: this._excludes,
+    includes: this._includes.patterns,
+    excludes: this._excludes.patterns,
     matches: this._matches.map(function(match) match.pattern),
-    user_includes: this._user_includes,
-    user_excludes: this._user_excludes,
+    user_includes: this._user_includes.patterns,
+    user_excludes: this._user_excludes.patterns,
     screenshots: this._screenshots.map(function(screenshot) ({
       url: screenshot.url,
       thumbnailURL: screenshot.thumbnailURL
@@ -1106,10 +1104,10 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
 
   script.domains = aSkeleton.domains;
   aSkeleton.contributors.forEach(script.addContributor.bind(script));
-  aSkeleton.includes.forEach(function(i) script.addInclude(i));
-  aSkeleton.excludes.forEach(function(i) script.addExclude(i));
-  aSkeleton.user_includes.forEach(function(i) script.addInclude(i, true));
-  aSkeleton.user_excludes.forEach(function(i) script.addExclude(i, true));
+  script.addInclude(aSkeleton.includes);
+  script.addExclude(aSkeleton.excludes);
+  script.addInclude(aSkeleton.user_includes, true);
+  script.addExclude(aSkeleton.user_excludes, true);
   aSkeleton.matches.forEach(function(i) script._matches.push(new MatchPattern(i)));
   aSkeleton.requires.forEach(function(i) {
     var scriptRequire = new ScriptRequire(script);

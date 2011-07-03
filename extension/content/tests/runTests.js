@@ -50,6 +50,14 @@ function importModule(m, ctx) {
   return _;
 }
 
+function checkExports(m, exports) {
+  deepEqual(
+    Object.keys(importModule(m)),
+    exports,
+    "Correct exports"
+    );
+}
+
 function runTests() {
   var tools = {};
   Q.chain(
@@ -57,8 +65,9 @@ function runTests() {
     function() include("tests/testCachedResource.js"),
     function() include("tests/testCryptoHash.js"),
     function() include("tests/testToolsMenuItem.js"),
-    function() include("tests/testIsGMable.js"),
     function() include("tests/testGetConfig.js"),
+    function() include("tests/testIsGMable.js"),
+    function() include("tests/testPatternCollection.js"),
     function() include("tests/testScriptishConvert2RegExp.js"),
     function() include("tests/testScriptishCreateUserScriptSource.js"),
     function() include("tests/testScriptishEnabled.js"),
