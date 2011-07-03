@@ -1,10 +1,9 @@
 var EXPORTED_SYMBOLS = [];
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/scriptish.js");
-Components.utils.import("resource://scriptish/logging.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_notification.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_popupNotification.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+
+lazyImport(this, "resource://scriptish/utils/Scriptish_popupNotification.js", ["Scriptish_popupNotification"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_stringBundle.js", ["Scriptish_stringBundle"]);
 
 const Scriptish_ScriptProvider = {
   observe: function(aSubject, aTopic, aData) Scriptish.getConfig(function(config) {
