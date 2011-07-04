@@ -100,28 +100,28 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 
   this.GM_setValue = function GM_setValue() {
     if (!GM_apiLeakCheck("GM_setValue")) return;
-    return lazyLoaders.storage.setValue.apply(getStorage(), arguments);
+    return lazyLoaders.storage.setValue.apply(lazyLoaders.storage, arguments);
   }
   this.GM_getValue = function GM_getValue() {
     if (!GM_apiLeakCheck("GM_getValue")) return;
-    return lazyLoaders.storage.getValue.apply(getStorage(), arguments);
+    return lazyLoaders.storage.getValue.apply(lazyLoaders.storage, arguments);
   }
   this.GM_deleteValue = function GM_deleteValue() {
     if (!GM_apiLeakCheck("GM_deleteValue")) return;
-    return lazyLoaders.storage.deleteValue.apply(getStorage(), arguments);
+    return lazyLoaders.storage.deleteValue.apply(lazyLoaders.storage, arguments);
   }
   this.GM_listValues = function GM_listValues() {
     if (!GM_apiLeakCheck("GM_listValues")) return;
-    return lazyLoaders.storage.listValues.apply(getStorage(), arguments);
+    return lazyLoaders.storage.listValues.apply(lazyLoaders.storage, arguments);
   }
 
   this.GM_getResourceURL = function GM_getResourceURL() {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
-    return lazyLoaders.resources.getResourceURL.apply(getResources(), arguments)
+    return lazyLoaders.resources.getResourceURL.apply(lazyLoaders.resources, arguments)
   }
   this.GM_getResourceText = function GM_getResourceText() {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
-    return lazyLoaders.resources.getResourceText.apply(getResources(), arguments)
+    return lazyLoaders.resources.getResourceText.apply(lazyLoaders.resources, arguments)
   }
 
   this.GM_getMetadata = function(aKey, aLocalVal) {
