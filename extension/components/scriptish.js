@@ -131,6 +131,7 @@ ScriptishService.prototype = {
     let tools = {};
     let winClosed = false;
 
+    // rechecks values that can change at any moment
     function shouldNotRun() (
       winClosed || !Scriptish.enabled || !Scriptish.isGreasemonkeyable(href));
 
@@ -238,8 +239,7 @@ ScriptishService.prototype = {
     safeWin.addEventListener("DOMContentLoaded", function _frame_loader() {
       // not perfect, but anyway
       let href = (safeWin.location.href
-          || (safeWin.frameElement && safeWin.frameElement.src))
-          || "";
+          || (safeWin.frameElement && safeWin.frameElement.src));
 
       if (!href) return; // wait for it :p
       safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
