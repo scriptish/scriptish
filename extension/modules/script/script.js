@@ -339,7 +339,7 @@ Script.prototype = {
   set id(aId) {
     this._id = aId.replace(nonIdChars, ''); // remove unacceptable chars
   },
-  get name() this._name,
+  get name() this._name || Scriptish_stringBundle("untitledScript"),
   get namespace() this._namespace,
   get prefroot() {
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
