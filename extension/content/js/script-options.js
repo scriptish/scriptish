@@ -1,6 +1,6 @@
-Components.utils.import("resource://scriptish/scriptish.js");
-Components.utils.import("resource://scriptish/logging.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Components.utils.import("resource://scriptish/constants.js");
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyUtil(this, "stringBundle");
 
 var $ = function(aID) document.getElementById(aID);
 var script;
@@ -20,7 +20,15 @@ window.addEventListener("load", function() {
     let dialog = $("scriptish-script-options-dialog");
     dialog.setAttribute("title", script.name + " - " + options);
     dialog.setAttribute("ondialogaccept", "return doSave();");
-    $("header").setAttribute("description", options);
+
+    // setup script info
+    $("scriptIcon").src = script.iconURL;
+
+    let title = (script.name || Scriptish_stringBundle("untitledScript"));
+    if (script.version) {
+      title += " " + script.version;
+    }
+    $("scriptTitle").textContent = title;
 
     $("includes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.includes"));
     $("excludes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.excludes"));
