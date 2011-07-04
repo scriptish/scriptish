@@ -21,3 +21,4 @@ pref("extensions.scriptish.update.uso.interval", 86400);
 pref("extensions.scriptish.update.uso.lastFetch", 0);
 pref("extensions.scriptish.useDefaultLocale", false);
 pref("extensions.scriptish.useDownloadURLForUpdateURL", false);
+pref("extensions.scriptish.logToErrorConsole", true);

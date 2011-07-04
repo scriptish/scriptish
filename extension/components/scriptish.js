@@ -13,6 +13,7 @@ lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scri
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
+lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
 lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_installUri.js", ["Scriptish_installUri"]);
 
@@ -355,6 +356,13 @@ ScriptishService.prototype = {
         return GM_console(script, wrappedContentWin, chromeWin);
       });
       XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
+        if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
+          var logger = new GM_ScriptLogger(script);
+          return function() {
+            logger.log(Array.slice(arguments).join(" "));
+            sandbox.console.log.apply(sandbox.console, arguments);
+          }
+        }
         return sandbox.console.log.bind(sandbox.console);
       });
 
