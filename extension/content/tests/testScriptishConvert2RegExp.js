@@ -48,3 +48,9 @@ test("Regular Exp @includes", 5, function() {
   ok(regExp.test(url));
   ok(!regExp.test("http://googleTcom/"));
 });
+
+test("forceString", function() {
+  var c2r = importModule("resource://scriptish/utils/Scriptish_convert2RegExp.js").Scriptish_convert2RegExp;
+  var regExp = c2r("/notaregexp/i", false, true);
+  equal(regExp.source, "^\\/notaregexp\\/i$", "not a regexp");
+});
