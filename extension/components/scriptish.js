@@ -14,6 +14,7 @@ lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
 lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_installUri.js", ["Scriptish_installUri"]);
 
 lazyUtil(this, "getBrowserForContentWindow");
 lazyUtil(this, "getWindowIDs");
@@ -54,13 +55,15 @@ function ScriptishService() {
 }
 
 ScriptishService.prototype = {
-  classDescription:  DESCRIPTION,
-  classID:           CLASSID,
-  contractID:        CONTRACTID,
-  _xpcom_categories: [{category: "content-policy",
-                       entry: CONTRACTID,
-                       value: CONTRACTID,
-                       service: true}],
+  classDescription: DESCRIPTION,
+  classID: CLASSID,
+  contractID: CONTRACTID,
+  _xpcom_categories: [{
+    category: "content-policy",
+    entry: CONTRACTID,
+    value: CONTRACTID,
+    service: true
+  }],
   QueryInterface: XPCOMUtils.generateQI([
       Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIContentPolicy]),
 
@@ -128,7 +131,6 @@ ScriptishService.prototype = {
 
     let unsafeWin = safeWin.wrappedJSObject;
     let self = this;
-    let tools = {};
     let winClosed = false;
 
     // rechecks values that can change at any moment
@@ -282,7 +284,7 @@ ScriptishService.prototype = {
         && this._reg_userjs.test(cl.spec)
         && !this.ignoreNextScript_ && !this.isTempScript(cl)) {
       this.ignoreNextScript_ = false;
-      this.Scriptish_installUri(cl, ctx.contentWindow);
+      Scriptish_installUri(cl, ctx.contentWindow);
       return CP.REJECT_REQUEST;
     }
 
@@ -328,10 +330,7 @@ ScriptishService.prototype = {
   injectScripts: function(scripts, url, winID, wrappedContentWin, chromeWin) {
     if (0 >= scripts.length) return;
     let self = this;
-    let sandbox;
-    let script;
     let unsafeContentWin = wrappedContentWin.wrappedJSObject;
-    let tools = {};
 
     let delays = [];
     let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
@@ -339,8 +338,8 @@ ScriptishService.prototype = {
       for (let [, id] in Iterator(delays)) self.timer.clearTimeout(id);
     });
 
-    for (var i = 0; script = scripts[i++];) {
-      sandbox = new Cu.Sandbox(wrappedContentWin);
+    for (var i = 0, script; script = scripts[i++];) {
+      let sandbox = new Cu.Sandbox(wrappedContentWin);
 
       let GM_api = new GM_API(
           script, url, winID, wrappedContentWin, unsafeContentWin, chromeWin);
@@ -386,13 +385,11 @@ ScriptishService.prototype = {
           fileURL = req.fileURL;
           Cu.evalInSandbox(
               req.textContent + "\n", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
-        }
-        catch (ex) {
+        } catch (ex) {
           Scriptish_logScriptError(ex, aWindow, fileURL);
         }
       }
-    }
-    catch (e) {
+    } catch (e) {
       return Scriptish_logError(e, 0, fileURL, e.lineNumber);
     }
 
@@ -420,15 +417,10 @@ ScriptishService.prototype = {
         Cu.evalInSandbox(
             "(function(){"+src+"})()", aSandbox, jsVer, fileURLPrefix+fileURL, 1);
       }
-    }
-    catch (e) {
+    } catch (e) {
       Scriptish_logScriptError(e, aWindow, fileURL, aScript.id);
     }
   }
 }
-lazyImport(ScriptishService.prototype,
-           "resource://scriptish/utils/Scriptish_installUri.js",
-           ["Scriptish_installUri"]
-           );
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([ScriptishService]);
