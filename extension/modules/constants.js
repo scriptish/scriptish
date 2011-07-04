@@ -96,7 +96,13 @@ function lazyImport(obj, resource, symbols) {
       resource,
       function() {
         let _m = {};
-        Components.utils.import(resource, _m);
+        try {
+          Components.utils.import(resource, _m);
+        }
+        catch (ex) {
+          Components.utils.reportError("Failed to import resource: " + resource);
+          throw ex;
+        }
         return _m;
       });
   }
