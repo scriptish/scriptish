@@ -339,7 +339,12 @@ ScriptishService.prototype = {
       for (let [, id] in Iterator(delays)) self.timer.clearTimeout(id);
     });
 
-    for (var i = 0, script; script = scripts[i++];) {
+    for (var i = 0, e = scripts.length; i < e; ++i) {
+      // Do not "optimize" |script| out of the loop block and into the loop
+      // declaration!
+      // Need to keep a valid reference to |script| around so that GM_log
+      // and the delay code (and probably other consumer work).
+      let script = scripts[i];
       let sandbox = new Cu.Sandbox(wrappedContentWin);
 
       let GM_api = new GM_API(
@@ -357,6 +362,7 @@ ScriptishService.prototype = {
       });
       XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
         if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
+          sandbox.console.log("binding");
           var logger = new GM_ScriptLogger(script);
           return function() {
             logger.log(Array.slice(arguments).join(" "));
