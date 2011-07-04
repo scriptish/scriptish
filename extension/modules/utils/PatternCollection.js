@@ -71,5 +71,5 @@ PatternCollection.prototype = {
     return this._mergedTLD;
   },
   test: function(url) this.merged.test(url) || this.mergedSensitives.test(url)
-      || (!!this._hasTLD && this.mergedTLD.test(Scriptish_getTLDURL(url)))
+      || (this._hasTLD && this.mergedTLD.test(Scriptish_getTLDURL(url)))
 };
