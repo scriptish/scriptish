@@ -362,7 +362,6 @@ ScriptishService.prototype = {
       });
       XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
         if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
-          sandbox.console.log("binding");
           var logger = new GM_ScriptLogger(script);
           return function() {
             logger.log(Array.slice(arguments).join(" "));
