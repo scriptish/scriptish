@@ -57,7 +57,6 @@ function MatchPattern(pattern) {
   }
 
   // special case wild scheme
-  var wildScheme = false;
   if (pattern[0] == "*") {
     this.wildScheme = true;
     // use http, because we need to ensure we get a host
