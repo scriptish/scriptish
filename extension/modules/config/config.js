@@ -446,10 +446,11 @@ Config.prototype = {
       if (!script.isModified()) continue;
 
       let theScript = script;
-      theScript.getTextContent(function(content) {
+      Scriptish_getContents(script._file, 0, function(content) {
         let parsedScript = self.parse(
             content,
-            theScript._downloadURL && NetUtil.newURI(theScript._downloadURL), theScript);
+            theScript._downloadURL && NetUtil.newURI(theScript._downloadURL),
+            theScript);
         theScript.updateFromNewScript(parsedScript, scriptInjector);
       });
     }
