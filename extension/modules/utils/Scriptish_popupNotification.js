@@ -7,7 +7,7 @@ lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
 function Scriptish_popupNotification(options) {
-  if (Scriptish_prefRoot.getValue("disableNotifications"))
+  if (!Scriptish_prefRoot.getValue("enableNotifications"))
     return Scriptish_log(aMsg);
 
   timeout(function() {

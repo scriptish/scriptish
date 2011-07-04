@@ -48,13 +48,13 @@
 
   <prefpane id="pane-ui" label="options.pane.ui" localize="label">
     <preferences>
-      <preference id="pref-disableNotifications" name="extensions.scriptish.disableNotifications" type="bool"/>
+      <preference id="pref-enableNotifications" name="extensions.scriptish.enableNotifications" type="bool"/>
       <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
       <preference id="pref-useDefaultLocale" name="extensions.scriptish.useDefaultLocale" type="bool"/>
     </preferences>
     <groupbox>
       <caption label="options.notifications" localize="label"/>
-      <checkbox preference="pref-disableNotifications" label="options.notifications.disable" localize="label"/>
+      <checkbox preference="pref-enableNotifications" label="options.notifications.enable" localize="label"/>
     </groupbox>
     <groupbox>
       <caption label="options.translation" localize="label"/>
