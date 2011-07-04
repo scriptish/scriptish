@@ -628,6 +628,7 @@ Script.prototype = {
     Scriptish.notify(
         this, "scriptish-script-updated", {saved: true, reloadUI: true});
   },
+
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
@@ -642,6 +643,8 @@ Script.prototype = {
     this.domains = newScript.domains;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
+    delete this.__all_includes;
+    delete this.__all_excludes;
     this._matches = newScript._matches;
     this._delay = newScript._delay;
     this.priority = newPriority;
