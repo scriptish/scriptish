@@ -19,7 +19,23 @@ test("import exists",/* any,*/ function() {
   var o = {};
   lazyImport(o, "resource://scriptish/utils/Scriptish_stringBundle.js", ["Scriptish_stringBundle"]);
   ok(typeof o.Scriptish_stringBundle == "function");
-  for (var k in o)
-    ok((k == "Scriptish_stringBundle") ? true : false,
-        "only Scriptish_stringBundle should have been exported");
+  deepEqual(Object.keys(o), ["Scriptish_stringBundle"], "only Scriptish_stringBundle should have been exported");
+});
+
+test("lazyUtil DNE",/* any,*/ function() {
+  var lazyImport = importModule("resource://scriptish/constants.js").lazyImport;
+  raises(function() {
+    var o = {};
+    lazyUtil(o, "DNE");
+    deepEqual(Object.keys(o), ["Scriptish_DNE"]);
+    o.Scriptish_DNE();
+  });
+});
+
+test("lazyUtil exists",/* any,*/ function() {
+  var lazyImport = importModule("resource://scriptish/constants.js").lazyImport;
+  var o = {};
+  lazyUtil(o, "stringBundle");
+  ok(typeof o.Scriptish_stringBundle == "function");
+  deepEqual(Object.keys(o), ["Scriptish_stringBundle"], "only Scriptish_stringBundle should have been exported");
 });
