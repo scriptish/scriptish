@@ -2,6 +2,7 @@
 var EXPORTED_SYMBOLS = ["GM_console"];
 
 const Cu = Components.utils;
+Cu.import("resource://gre/modules/HUDService.jsm");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js");
 
@@ -16,13 +17,13 @@ const aux_functions = ["assert", "dir", "dirxml", "group", "groupEnd", "time",
                         ];
 
 function getConsoleFor(contentWindow, chromeWindow) {
-
   let rv = Scriptish_getFirebugConsole(contentWindow, chromeWindow);
   if (rv) {
     return rv;
   }
 
-  if (contentWindow.console) {
+  let hud = HUDService.getHeadsUpDisplay(HUDService.getHudIdByWindow(contentWindow));
+  if (hud && hud.style.height != 0 && contentWindow.console) {
     return contentWindow.console;
   }
 

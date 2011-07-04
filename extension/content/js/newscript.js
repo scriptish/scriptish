@@ -21,6 +21,9 @@ try {
 addEventListener("DOMContentLoaded", function init() {
   removeEventListener("DOMContentLoaded", init, false);
 
+  // remove focus from the first textbox
+  $("scriptish").focus();
+
   $("scriptish").addEventListener("dialogaccept", function(evt) {
     try {
       if (doInstall()) {
