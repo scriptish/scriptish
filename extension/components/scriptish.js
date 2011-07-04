@@ -23,12 +23,11 @@ const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
 
 function isScriptRunnable(script, url, topWin) {
-  let chk = !(!topWin && script.noframes)
+  return !(!topWin && script.noframes)
       && !script.delayInjection
       && script.enabled
       && !script.needsUninstall
       && script.matchesURL(url);
-  return chk;
 }
 
 let windows = {};
@@ -96,7 +95,7 @@ ScriptishService.prototype = {
     delete windows[aWinID];
   },
 
-  docReady: function(safeWin, chromeWin) {
+  docReady: function(safeWin, chromeWin) Scriptish.getConfig((function(config) {
     if (!Scriptish.enabled || !chromeWin) return;
 
     let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
@@ -132,8 +131,8 @@ ScriptishService.prototype = {
       winClosed || !Scriptish.enabled || !Scriptish.isGreasemonkeyable(href));
 
     // check if there are any modified scripts
-    if (Scriptish_prefRoot.getValue("enableScriptRefreshing"))
-      Scriptish.getConfig(function(config) config.updateModifiedScripts(function(script) {
+    if (Scriptish_prefRoot.getValue("enableScriptRefreshing")) {
+       config.updateModifiedScripts(function(script) {
         if (shouldNotRun()
             || !isScriptRunnable(script, href, safeWin === safeWin.top))
           return;
@@ -165,15 +164,19 @@ ScriptishService.prototype = {
           break;
         }
         inject();
-      }));
+      });
+    }
 
-    // if the focused tab's window is loading, then attach menuCommander
+    // if the focused tab's window is the one loading, then attach menuCommander
     if (safeWin === gBrowser.selectedBrowser.contentWindow) {
       if (gmBrowserUI.currentMenuCommander)
         gmBrowserUI.currentMenuCommander.detach();
       gmBrowserUI.currentMenuCommander =
           gmBrowserUI.getCommander(currentInnerWindowID).attach();
     }
+
+    // if the url is a excluded url then stop
+    if (config.isURLExcluded(href)) return;
 
     // find matching scripts
     this.initScripts(href, safeWin, function(scripts) {
@@ -210,7 +213,7 @@ ScriptishService.prototype = {
         self.docUnload(currentInnerWindowID, gmBrowserUI);
       });
     });
-  },
+  }).bind(this)),
 
   docUnload: function(aWinID, aGMBrowserUI) {
     let menuCmders = aGMBrowserUI.menuCommanders;
@@ -234,9 +237,7 @@ ScriptishService.prototype = {
           || (safeWin.frameElement && safeWin.frameElement.src))
           || "";
 
-      if (!href) {
-        return; // wait for it :p
-      }
+      if (!href) return; // wait for it :p
       safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
       self.docReady(safeWin, chromeWin);
 

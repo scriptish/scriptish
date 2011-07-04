@@ -416,14 +416,8 @@ Config.prototype = {
   },
   addExclude: function(excludes) this._excludes.addPatterns(excludes),
   get scripts() this._scripts.concat(),
-  getMatchingScripts: function(testFunc, urls) {
-    for (var i = urls.length - 1; ~i; i--) {
-      if (this._excludes.test(urls[i])) {
-        return [];
-      }
-    }
-    return this.scripts.filter(testFunc);
-  },
+  isURLExcluded: function(url) this._excludes.test(url),
+  getMatchingScripts: function(testFunc) this.scripts.filter(testFunc),
   sortScripts: function() this._scripts.sort(function(a, b) b.priority - a.priority),
   injectScript: function(script) {
     var unsafeWin = this.wrappedContentWin.wrappedJSObject;

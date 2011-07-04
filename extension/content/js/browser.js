@@ -31,9 +31,6 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   $("scriptish-button-brd").setAttribute(
       "onclick", "Scriptish_BrowserUIM.onIconClick(event)");
 
-  $("scriptish-tb-no-scripts-brd").setAttribute(
-      "label", Scriptish_stringBundle("statusbar.noScripts"));
-
   var sbCmdsEle = $("scriptish-tb-cmds-brd");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
   sbCmdsEle.setAttribute("accesskey",
@@ -307,16 +304,20 @@ function Scriptish_popupClicked(aEvt) {
   }
 }
 
+/**
+ * Handles a Scriptish menu popup event
+ */
 function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   var $ = function(aID) document.getElementById(aID);
   Scriptish_BrowserUI.reattachMenuCmds();
 
-  function scriptsMatching(urls) {
-    function testMatchURLs(script) {
-      return urls.some(function(url) script.matchesURL(url));
-    }
+  function okURL(url) (
+      (Scriptish.isGreasemonkeyable(url) && !config.isURLExcluded(url)));
 
-    return config.getMatchingScripts(testMatchURLs, urls).sort(function(a,b) {
+  function scriptsMatching(urls) {
+    return config.getMatchingScripts(function testMatchURLs(script) {
+      return urls.some(function(url) okURL(url) && script.matchesURL(url));
+    }).sort(function(a,b) {
       a = a.name.toLocaleLowerCase(), b = b.name.toLocaleLowerCase();
       return a.localeCompare(b);
     });
@@ -344,8 +345,13 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   }
 
   var urls = Scriptish_getURLsForContentWindow(getBrowser().contentWindow);
-  var runsOnTop = scriptsMatching([urls.shift()]); // first url = top window
-  var runsFramed = scriptsMatching(urls); // remainder are all its subframes
+  var url = urls.shift();
+
+  // first url = top window
+  var runsOnTop = scriptsMatching([url]);
+
+  // remainder are all its subframes
+  var runsFramed = scriptsMatching(urls);
 
   // drop all runsFramed scripts already present in runsOnTop
   for (var i = 0; i < runsOnTop.length; i++) {
@@ -357,7 +363,8 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   }
 
   // build the new list of scripts
-  if (runsFramed.length) {
+  var frameScriptLen = runsFramed.length;
+  if (frameScriptLen) {
     runsFramed.forEach(appendScriptToPopup);
     if (runsOnTop.length) { // only add the separator if there is stuff below
       var separator = document.createElement("menuseparator");
@@ -367,6 +374,18 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   }
   runsOnTop.forEach(appendScriptToPopup);
 
-  $("scriptish-tb-no-scripts").collapsed =
-      !!(runsFramed.length + runsOnTop.length);
+  let (menuitem = $("scriptish-tb-no-scripts")) {
+    let collapsed = menuitem.collapsed = !!(frameScriptLen + runsOnTop.length);
+    if (collapsed) return;
+
+    // determine the correct label
+    let label;
+    if (config.isURLExcluded(url))
+      label = Scriptish_stringBundle("statusbar.noScripts.excluded");
+    else if (!Scriptish.isGreasemonkeyable(url))
+      label = Scriptish_stringBundle("statusbar.noScripts.scheme");
+    else
+      label = Scriptish_stringBundle("statusbar.noScripts.notfound");
+    menuitem.setAttribute("label", label);
+  }
 })
