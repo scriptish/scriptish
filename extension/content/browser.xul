@@ -58,6 +58,10 @@
     </toolbarbutton>
   </toolbarpalette>
 
+  <box id="notification-popup-box">
+    <image id="scriptish-notification-icon" class="notification-anchor-icon" role="button" />
+  </box>
+
   <popup id="contentAreaContextMenu">
     <menuitem id="scriptish-context-menu-install"
         class="menuitem-iconic"

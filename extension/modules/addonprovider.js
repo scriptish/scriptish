@@ -27,6 +27,10 @@ const Scriptish_ScriptProvider = {
           label: Scriptish_stringBundle("openUserScriptsManager"),
           accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
           callback: callback
+        },
+        options: {
+          removeOnDismissal: true,
+          persistWhileVisible: true
         }
       });
       break;
@@ -61,6 +65,10 @@ const Scriptish_ScriptProvider = {
           label: Scriptish_stringBundle("openUserScriptsManager"),
           accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
           callback: callback
+        },
+        options: {
+          removeOnDismissal: true,
+          persistWhileVisible: true
         }
       });
       break;

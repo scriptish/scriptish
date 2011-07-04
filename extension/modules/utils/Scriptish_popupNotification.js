@@ -6,7 +6,7 @@ lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
-function Scriptish_popupNotification(options) {
+function Scriptish_popupNotification(details) {
   if (!Scriptish_prefRoot.getValue("enableNotifications"))
     return Scriptish_log(aMsg);
 
@@ -14,17 +14,18 @@ function Scriptish_popupNotification(options) {
       var win = Scriptish.getMostRecentWindow();
       win.PopupNotifications.show(
         win.gBrowser.selectedBrowser,
-        options.id,
-        options.message,
-        null, /* anchor ID */
+        details.id,
+        details.message,
+        "scriptish-notification-icon",
         {
-          label: options.mainAction.label,
-          accessKey: options.mainAction.accessKey,
+          label: details.mainAction.label,
+          accessKey: details.mainAction.accessKey,
           callback: function() {
-            options.mainAction.callback();
+            details.mainAction.callback();
           }
         },
-        null  /* secondary action */
+        null  /* secondary action */,
+        details.options
       );
   });
 };
