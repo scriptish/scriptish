@@ -118,7 +118,7 @@ ScriptishService.prototype = {
 
     // Show the scriptish install banner if the user is navigating to a .user.js
     // file in a top-level tab.
-    if (safeWin === safeWin.top && href.match(RE_USERSCRIPT)
+    if (safeWin === safeWin.top && RE_USERSCRIPT.test(href)
         && !RE_CONTENTTYPE.test(safeWin.document.contentType)) {
       gmBrowserUI.showInstallBanner(
           gBrowser.getBrowserForDocument(safeWin.document));
