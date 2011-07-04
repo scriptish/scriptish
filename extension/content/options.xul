@@ -70,6 +70,7 @@
       <preference id="pref-enabledSchemes-unmht" name="extensions.scriptish.enabledSchemes.unmht" type="bool"/>
       <preference id="pref-enabledSchemes-about" name="extensions.scriptish.enabledSchemes.about" type="bool"/>
       <preference id="pref-logChrome" name="extensions.scriptish.logChrome" type="bool"/>
+      <preference id="pref-logToErrorConsole" name="extensions.scriptish.logToErrorConsole" type="bool"/>
       <preference id="pref-update-requireSecured" name="extensions.scriptish.update.requireSecured" type="bool"/>
       <preference id="pref-update-requireBuiltInCerts" name="extensions.scriptish.update.requireBuiltInCerts" type="bool"/>
     </preferences>
@@ -111,6 +112,7 @@
     <groupbox>
       <caption label="options.logging" localize="label"/>
       <checkbox preference="pref-logChrome" label="options.logChrome" localize="label"/>
+      <checkbox preference="pref-logToErrorConsole" label="options.logToErrorConsole" localize="label"/>
     </groupbox>
     <groupbox>
       <caption label="options.update.security" localize="label"/>
