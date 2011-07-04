@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "Cr", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
-    "Services", "Instances", "lazyImport", "timeout"];
+    "Services", "Instances", "lazyImport", "lazyUtil", "timeout"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
 const global = this;
@@ -111,6 +111,10 @@ function lazyImport(obj, resource, symbols) {
     XPCOMUtils.defineLazyGetter(obj, s, function() _lazyModules[resource][s]);
   }
 }
+function lazyUtil(obj, name) lazyImport(obj,
+                                        "resource://scriptish/utils/Scriptish_" + name + ".js",
+                                        ["Scriptish_" + name]
+                                        );
 
 function timeout(cb, delay) {
   var callback = function() cb.call(null);
