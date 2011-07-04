@@ -22,13 +22,9 @@ function getConsoleFor(contentWindow, chromeWindow) {
     return rv;
   }
 
-  let hudID = HUDService.getHudIdByWindow(contentWindow);
-  let hud = HUDService.getHeadsUpDisplay(hudID);
-  if (hud) {
-    let hudShowing = hud.style.height != 0;
-    if (hudShowing && contentWindow.console) {
-      return contentWindow.console;
-    }
+  let hud = HUDService.getHeadsUpDisplay(HUDService.getHudIdByWindow(contentWindow));
+  if (hud && hud.style.height != 0 && contentWindow.console) {
+    return contentWindow.console;
   }
 
   return {
