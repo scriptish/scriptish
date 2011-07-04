@@ -10,7 +10,7 @@ lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/script/cachedresource.js", ["CachedResource"]);
 lazyImport(this, "resource://scriptish/utils/PatternCollection.js", ["PatternCollection"]);
-lazyImport(this, "resource://scriptish/script/scriptinstaller.js", ["ScriptInstaller"]);
+lazyImport(this, "resource://scriptish/script/scriptinstaller.js", ["ScriptInstall"]);
 lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
 lazyImport(this, "resource://scriptish/script/scriptrequire.js", ["ScriptRequire"]);
 lazyImport(this, "resource://scriptish/script/scriptresource.js", ["ScriptResource"]);
