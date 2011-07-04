@@ -27,11 +27,10 @@ function Scriptish_localizeSubtree(aNode) {
         if (l == "#text") {
           let s = Scriptish_stringBundle(n.textContent);
           n.textContent = s;
+          continue;
         }
-        else {
-          let s = Scriptish_stringBundle(n.getAttribute(l));
-          n.setAttribute(l, s);
-        }
+        let s = Scriptish_stringBundle(n.getAttribute(l));
+        n.setAttribute(l, s);
 
         // also localize pref-panes
         if (/^pane-/.test(n.id)) {
