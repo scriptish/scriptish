@@ -5,11 +5,13 @@ const RE_ESCAPE = /[{}()\[\]\\^$.?]/g;
 const RE_WILD = /\*/g;
 const RE_TLD = /^\^[^\/]*(?:\/\/)?[^\/]*\\\.tld(?:\/.*)?\$$/;
 
-function Scriptish_convert2RegExp(aPattern, aNoTLD) {
-  var s = aPattern.toString().trim();
+function Scriptish_convert2RegExp(aPattern, aNoTLD, forceString) {
+  var s = aPattern.toString().trim(), m;
 
   // Already a regexp?
-  if (RE_REGEXP.test(s)) return new RegExp(RegExp.$1, RegExp.$2);
+  if (!forceString && (m = s.match(RE_REGEXP))) {
+    return new RegExp(m[1], m[2]);
+  }
 
   var res = "^" + s
     .replace(RE_ESCAPE, "\\$&")
