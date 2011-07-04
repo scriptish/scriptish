@@ -89,14 +89,21 @@
 
     <tabbox>
       <tabs>
-        <tab label="options.cache" localize="label"/>
+        <tab label="options.pane.main" localize="label"/>
         <tab label="options.enabledSchemes.advanced" localize="label" />
-        <tab label="options.logging" localize="label" />
         <tab label="options.update.security" localize="label"/>
       </tabs>
       <tabpanels>
         <tabpanel>
-          <checkbox preference="pref-cache-enabled" label="options.cache.enabled" localize="label"/>
+          <groupbox>
+          <caption label="options.cache" localize="label" />
+            <checkbox preference="pref-cache-enabled" label="options.cache.enabled" localize="label"/>
+          </groupbox>
+          <groupbox>
+            <caption label="options.logging" localize="label" />
+            <checkbox preference="pref-logChrome" label="options.logChrome" localize="label"/>
+            <checkbox preference="pref-logToErrorConsole" label="options.logToErrorConsole" localize="label"/>
+          </groupbox>
         </tabpanel>
         <tabpanel>
           <checkbox preference="pref-enabledSchemes-file" label="options.enabledSchemes.file" localize="label"/>
@@ -106,10 +113,6 @@
           <separator class="thin"/>
           <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark" localize="value"/>
           <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark2" localize="value"/>
-        </tabpanel>
-        <tabpanel>
-          <checkbox preference="pref-logChrome" label="options.logChrome" localize="label"/>
-          <checkbox preference="pref-logToErrorConsole" label="options.logToErrorConsole" localize="label"/>
         </tabpanel>
         <tabpanel>
           <checkbox preference="pref-update-requireSecured" label="options.requireSecured" localize="label"/>
