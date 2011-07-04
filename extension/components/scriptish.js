@@ -22,6 +22,11 @@ lazyUtil(this, "stringBundle");
 const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
 
+// If the file was previously cached it might have been given a number after
+// .user, like gmScript.user-12.js
+const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
+const RE_CONTENTTYPE = /text\/html/i;
+
 function isScriptRunnable(script, url, topWin) {
   return !(!topWin && script.noframes)
       && !script.delayInjection
@@ -112,10 +117,9 @@ ScriptishService.prototype = {
     }
 
     // Show the scriptish install banner if the user is navigating to a .user.js
-    // file in a top-level tab.  If the file was previously cached it might have
-    // been given a number after .user, like gmScript.user-12.js
-    if (safeWin === safeWin.top && href.match(/\.user(?:-\d+)?\.js$/)
-        && !/text\/html/i.test(safeWin.document.contentType)) {
+    // file in a top-level tab.
+    if (safeWin === safeWin.top && href.match(RE_USERSCRIPT)
+        && !RE_CONTENTTYPE.test(safeWin.document.contentType)) {
       gmBrowserUI.showInstallBanner(
           gBrowser.getBrowserForDocument(safeWin.document));
     }
