@@ -4,20 +4,21 @@ const SCRIPTISH_CONFIG_XML = "scriptish-config.xml";
 const SCRIPTISH_CONFIG_JSON = "scriptish-config.json";
 const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 
-(function(inc) {
-inc("resource://scriptish/constants.js");
-inc("resource://scriptish/logging.js");
-inc("resource://scriptish/prefmanager.js");
-inc("resource://scriptish/scriptish.js");
-inc("resource://scriptish/utils/PatternCollection.js");
-inc("resource://scriptish/utils/Scriptish_getContents.js");
-inc("resource://scriptish/utils/Scriptish_getWriteStream.js");
-inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
-inc("resource://scriptish/utils/Scriptish_stringBundle.js");
-inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
-inc("resource://scriptish/third-party/Timer.js");
-inc("resource://scriptish/script/script.js");
-})(Components.utils.import);
+const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
+
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/utils/PatternCollection.js", ["PatternCollection"]);
+lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
+lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
+
+lazyUtil(this, "cryptoHash");
+lazyUtil(this, "getContents");
+lazyUtil(this, "getProfileFile");
+lazyUtil(this, "getWriteStream");
+lazyUtil(this, "stringBundle");
 
 function Config(aBaseDir) {
   var self = this;

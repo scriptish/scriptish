@@ -116,6 +116,7 @@ function lazyUtil(obj, name) lazyImport(obj,
                                         ["Scriptish_" + name]
                                         );
 
+lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 function timeout(cb, delay) {
   var callback = function() cb.call(null);
   delay = delay || 0;
@@ -125,9 +126,7 @@ function timeout(cb, delay) {
   }
 
   if (!global.setTimeout) {
-    let tools = {};
-    Components.utils.import("resource://scriptish/third-party/Timer.js", tools);
-    global.setTimeout = (new tools.Timer()).setTimeout;
+    global.setTimeout = (new Timer()).setTimeout;
   }
 
   setTimeout(callback, delay);

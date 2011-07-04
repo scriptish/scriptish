@@ -5,20 +5,21 @@ const valueSplitter = /(\S+)(?:\s+([^\r\f\n]+))?/;
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/CertUtils.jsm");
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/PatternCollection.js");
-Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Cu.import("resource://scriptish/script/cachedresource.js");
-Cu.import("resource://scriptish/script/scriptinstaller.js");
-Cu.import("resource://scriptish/script/scripticon.js");
-Cu.import("resource://scriptish/script/scriptrequire.js");
-Cu.import("resource://scriptish/script/scriptresource.js");
-Cu.import("resource://scriptish/third-party/MatchPattern.js");
-Cu.import("resource://scriptish/config/configdownloader.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/script/cachedresource.js", ["CachedResource"]);
+lazyImport(this, "resource://scriptish/utils/PatternCollection.js", ["PatternCollection"]);
+lazyImport(this, "resource://scriptish/script/scriptinstaller.js", ["ScriptInstaller"]);
+lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
+lazyImport(this, "resource://scriptish/script/scriptrequire.js", ["ScriptRequire"]);
+lazyImport(this, "resource://scriptish/script/scriptresource.js", ["ScriptResource"]);
+lazyImport(this, "resource://scriptish/third-party/MatchPattern.js", ["MatchPattern"]);
+lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
+
+lazyUtil(this, "getUriFromFile");
+lazyUtil(this, "getContents");
+lazyUtil(this, "stringBundle");
 
 const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid

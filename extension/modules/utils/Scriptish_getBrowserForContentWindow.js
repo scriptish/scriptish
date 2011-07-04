@@ -1,5 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getBrowserForContentWindow"];
 Components.utils.import("resource://scriptish/constants.js");
+
 function Scriptish_getBrowserForContentWindow(aWin) {
   // enumerate through browser windows
   let browserEnumerator = Services.wm.getEnumerator("navigator:browser");

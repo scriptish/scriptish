@@ -1,7 +1,7 @@
 var EXPORTED_SYMBOLS = ["Scriptish_notification"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/logging.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
 function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
   if (Scriptish_prefRoot.getValue("disableNotifications"))

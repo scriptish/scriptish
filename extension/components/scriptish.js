@@ -7,16 +7,17 @@ const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/third-party/Timer.js");
-Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js");
-Cu.import("resource://scriptish/utils/Scriptish_getWindowIDs.js");
 
-lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
-lazyImport(this, "resource://scriptish/utils/Scriptish_stringBundle.js", ["Scriptish_stringBundle"]);
 lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
+lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
+
+lazyUtil(this, "getBrowserForContentWindow");
+lazyUtil(this, "getWindowIDs");
+lazyUtil(this, "stringBundle");
 
 const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];

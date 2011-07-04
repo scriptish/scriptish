@@ -2,10 +2,10 @@ var EXPORTED_SYMBOLS = ["Scriptish_getEditor"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_alert.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
+lazyUtil(this, "alert");
+lazyUtil(this, "stringBundle");
 
 const Scriptish_getEditor = function(parentWindow, change) {
   var editorPath = Scriptish_prefRoot.getValue("editor");

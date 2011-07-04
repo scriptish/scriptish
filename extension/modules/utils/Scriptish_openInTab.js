@@ -2,7 +2,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_openInTab"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/scriptish.js");
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 
 function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
   aChromeWin = aChromeWin || Scriptish.getMostRecentWindow();

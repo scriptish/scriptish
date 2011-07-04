@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getTLDURL"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_memoize.js");
+lazyUtil(this, "memoize");
 
 const Scriptish_getTLDURL = Scriptish_memoize(function(aURL) {
   let tldURL = aURL;

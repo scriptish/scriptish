@@ -2,21 +2,23 @@ var Scriptish_BrowserUI = {
   menuCommanders: [],
   currentMenuCommander: null
 };
-var Scriptish_BrowserUIM;
 
 (function(inc, tools){
-inc("resource://scriptish/content/browser.js");
-inc("resource://scriptish/prefmanager.js");
-inc("resource://scriptish/scriptish.js");
-inc("resource://scriptish/utils/Scriptish_installUri.js");
-inc("resource://scriptish/utils/Scriptish_openInEditor.js");
-inc("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
-inc("resource://scriptish/utils/Scriptish_getWindowIDs.js");
-inc("resource://scriptish/utils/Scriptish_stringBundle.js");
-inc("resource://scriptish/config/configdownloader.js");
-inc("resource://scriptish/menucommander.js");
-inc("resource://scriptish/logging.js");
 inc("resource://scriptish/constants.js", tools);
+const {lazyImport, lazyUtil} = tools;
+
+lazyImport(window, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(window, "resource://scriptish/content/browser.js", ["Scriptish_BrowserUIM"]);
+lazyImport(window, "resource://scriptish/menucommander.js", ["Scriptish_MenuCommander"]);
+lazyImport(window, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(window, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
+
+lazyUtil(window, "installUri");
+lazyUtil(window, "openInEditor");
+lazyUtil(window, "stringBundle");
+lazyUtil(window, "getURLsForContentWindow");
+lazyUtil(window, "getWindowIDs");
+
 var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;

@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getBinaryContents"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
+lazyUtil(this, "getUriFromFile");
 
 function Scriptish_getBinaryContents(aFile) {
   var channel = Services.io.newChannelFromURI(Scriptish_getUriFromFile(aFile));

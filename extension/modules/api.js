@@ -2,12 +2,13 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-lazyImport(this, "resource://scriptish/utils/Scriptish_cryptoHash.js", ["Scriptish_cryptoHash"]);
-lazyImport(this, "resource://scriptish/utils/Scriptish_notification.js", ["Scriptish_notification"]);
-lazyImport(this, "resource://scriptish/utils/Scriptish_openInTab.js", ["Scriptish_openInTab"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError"]);
+
+lazyUtil(this, "cryptoHash");
+lazyUtil(this, "notification");
+lazyUtil(this, "openInTab");
+lazyUtil(this, "stringBundle");
 
 lazyImport(this, "resource://scriptish/api/GM_ScriptStorage.js", ["GM_ScriptStorage"]);
 lazyImport(this, "resource://scriptish/api/GM_xmlhttpRequester.js", ["GM_xmlhttpRequester"]);

@@ -1,7 +1,7 @@
 var EXPORTED_SYMBOLS = ["ScriptResource"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/script/scriptdependency.js");
-lazyImport(this, "resource://scriptish/utils/Scriptish_getBinaryContents.js", ["Scriptish_getBinaryContents"]);
+lazyImport(this, "resource://scriptish/script/scriptdependency.js", ["ScriptDependency"]);
+lazyUtil(this, "getBinaryContents");
 
 function ScriptResource() {
   ScriptDependency.apply(this, arguments);

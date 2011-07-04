@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_createUserScriptSource"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+lazyUtil(this, "stringBundle");
 
 function Scriptish_createUserScriptSource(aHeader, aContent) {
   var script = ["// ==UserScript=="];

@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_configDownloader"];
-Components.utils.import("resource://scriptish/script/scriptdownloader.js");
 Components.utils.import("resource://scriptish/constants.js");
+lazyImport(this, "resource://scriptish/script/scriptdownloader.js", ["ScriptDownloader"]);
 
 var Scriptish_configDownloader = {
   startInstall: function(aURI, aWin) {

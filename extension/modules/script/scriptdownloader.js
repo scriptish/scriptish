@@ -3,14 +3,16 @@ var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/CertUtils.jsm");
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/script/script.js");
-Cu.import("resource://scriptish/script/scripticon.js");
-Cu.import("resource://scriptish/utils/Scriptish_alert.js");
-Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
+lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
+
+lazyUtil(this, "alert");
+lazyUtil(this, "getWriteStream");
+lazyUtil(this, "stringBundle");
 
 function ScriptDownloader(uri, contentWin) {
   this.uri_ = uri || null;

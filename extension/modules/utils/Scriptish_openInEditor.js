@@ -2,11 +2,11 @@ var EXPORTED_SYMBOLS = ["Scriptish_openInEditor"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/utils/Scriptish_getEditor.js");
-Cu.import("resource://scriptish/utils/Scriptish_launchApplicationWithDoc.js");
-Cu.import("resource://scriptish/utils/Scriptish_alert.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyUtil(this, "getEditor");
+lazyUtil(this, "launchApplicationWithDoc");
+lazyUtil(this, "alert");
+lazyUtil(this, "stringBundle");
 
 function Scriptish_openInEditor(script, parentWindow) {
   var file = script.editFile;

@@ -1,10 +1,10 @@
 
 var EXPORTED_SYMBOLS = ["Scriptish_popupNotification"];
-Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/scriptish.js");
-Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/logging.js");
 Components.utils.import("resource://gre/modules/PopupNotifications.jsm");
+Components.utils.import("resource://scriptish/constants.js");
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
 function Scriptish_popupNotification(options) {
   if (Scriptish_prefRoot.getValue("disableNotifications"))
