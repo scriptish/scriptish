@@ -21,7 +21,8 @@
   background:InfoBackground;
   color: InfoText;
   border-bottom:1px black dotted;
-  padding:0.5em;
+  padding: 0.5em;
+  padding-right: 1.5em;
 }
 
 #scriptIcon {
@@ -30,9 +31,11 @@
   margin-right: 1ex;
 }
 
-#scriptDescription{margin:0;}
-
-#scriptDescription strong{font-size: 1.25em;}
+#scriptTitle {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 1ex;
+}
 
 #showSource-box{margin: 1ex;}
 

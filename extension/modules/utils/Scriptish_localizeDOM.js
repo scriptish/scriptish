@@ -24,8 +24,14 @@ function Scriptish_localizeSubtree(aNode) {
     let localized = n.getAttribute("localize").split(",");
     for each (let l in localized) {
       try {
-        let s = Scriptish_stringBundle(n.getAttribute(l));
-        n.setAttribute(l, s);
+        if (l == "#text") {
+          let s = Scriptish_stringBundle(n.textContent);
+          n.textContent = s;
+        }
+        else {
+          let s = Scriptish_stringBundle(n.getAttribute(l));
+          n.setAttribute(l, s);
+        }
 
         // also localize pref-panes
         if (/^pane-/.test(n.id)) {
