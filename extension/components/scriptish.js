@@ -376,12 +376,10 @@ ScriptishService.prototype = {
 
       let delay = script.delay;
       if (delay || delay === 0) {
-        let (script = script, sb = sandbox) {
-          // don't use window's setTimeout, b/c then window could clearTimeout
-          delays.push(self.timer.setTimeout(function() {
-            self.evalInSandbox(script, sandbox, wrappedContentWin);
-          }, script.delay));
-        }
+        // don't use window's setTimeout, b/c then window could clearTimeout
+        delays.push(self.timer.setTimeout(function() {
+          self.evalInSandbox(script, sandbox, wrappedContentWin);
+        }, delay));
       } else {
         this.evalInSandbox(script, sandbox, wrappedContentWin);
       }
