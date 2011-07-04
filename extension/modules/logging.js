@@ -37,7 +37,7 @@ function Scriptish_logScriptError(aError, aWindow, aFileURL, aId) {
         .outerWindowID;
     }
     catch (ex) {
-      throw new Error("failed to get window id window id");
+      throw new Error("failed to get window id");
     }
 
     // defaults
