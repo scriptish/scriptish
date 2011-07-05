@@ -31,7 +31,7 @@
   </menupopup>
 
   <richlistbox id="categories">
-    <richlistitem id="category-scriptish"
+    <richlistitem id="category-userscript"
         class="category"
         insertafter="category-plugins"
         value="addons://list/userscript">

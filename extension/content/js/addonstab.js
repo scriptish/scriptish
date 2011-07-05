@@ -17,16 +17,9 @@ gStrings.ext = Scriptish_bundle;
 let NetUtil = tools.NetUtil;
 let Services = tools.Services;
 
-// Work-around for Firefox4/5 selection restore failures
-if (!AddonManagerPrivate.AddonType) {
-  window.addEventListener("DOMContentLoaded", function() {
-    if ($("categories").selectedIndex == -1) {
-      $("categories").selectedItem = $("category-scriptish");
-    }
-  }, false);
-}
-
 window.addEventListener("load", function() {
+  $("category-userscript").setAttribute("name", Scriptish_stringBundle("userscripts"));
+
   function addonIsInstalledScript(aAddon) {
     if (!aAddon || "userscript" != aAddon.type || aAddon.needsUninstall)
       return false;
@@ -70,14 +63,6 @@ window.addEventListener("load", function() {
       cmd.addEventListener("popupshowing", hideUSMenuitem, false);
     }
   })();
-
-  var category = $("category-scriptish");
-  if (AddonManagerPrivate.AddonType) {
-    category.parentNode.removeChild(category);
-  } else {
-    category.setAttribute("id", "category-userscript");
-    category.setAttribute("name", Scriptish_stringBundle("userscripts"));
-  }
 
   $("scriptish-get-scripts-btn").addEventListener("command", function() {
     var gBrowser = Services.wm.getMostRecentWindow("navigator:browser").gBrowser;
