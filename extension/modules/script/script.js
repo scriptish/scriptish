@@ -651,7 +651,6 @@ Script.prototype = {
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
     this._updateURL = newScript._updateURL;
-    this._applyBackgroundUpdates = newScript._applyBackgroundUpdates;
     this.supportURL = newScript.supportURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
