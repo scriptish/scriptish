@@ -29,6 +29,8 @@ const runAtValues = ["document-start", "document-end", "document-idle", "window-
 const defaultRunAt = runAtValues[1];
 const defaultAutoUpdateState = AddonManager.AUTOUPDATE_DISABLE;
 const usoURLChk = /^https?:\/\/userscripts\.org\/scripts\/[^\d]+(\d+)/i;
+const RE_USERSCRIPT_HEADER_START = /\/\/[ \t]*==UserScript==/i;
+const RE_USERSCRIPT_HEADER_END = /\/\/[ \t]*==\/UserScript==/i;
 
 function noUpdateFound(aListener, aReason) {
   aListener.onNoUpdateAvailable(this);
@@ -781,62 +783,39 @@ Script.prototype = {
 };
 
 Script.parseVersion = function Script_parseVersion(aSrc) {
-  var lines = aSrc.match(/\s*\/\/ [=@].*/g);
-  if (!lines) return null;
-  var lnIdx = 0;
-  var result = {};
-  var foundMeta = false;
-  var start = "// ==UserScript==";
-  var end = "// ==/UserScript==";
-  var version = /\/\/ \@version\s+([^\s]+)/;
-
-  while ((result = lines[lnIdx++])) {
-    if (result.indexOf(start) != 0) continue;
-    foundMeta = true;
-    break;
-  }
-  if (!foundMeta) return;
-  while ((result = lines[lnIdx++])) {
-    if (result.indexOf(end) == 0) break;
-    var match = result.match(version);
-    if (match !== null) return match[1];
-  }
+  var parsed = Script.header_parse(aSrc);
+  if (parsed.version) return parsed.version.pop();
   return null;
 }
 
 // TODO: DRY this by combining it with Script.parse some way..
 Script.header_parse = function(aSource) {
   var headers = {};
+  var foundMeta = false;
+  var line;
+
+  // do not 'optimize' by reusing this reg exp! it should not be reused!
+  var metaRegExp = /\/\/[ \t]*(?:==(\/?UserScript)==|\@(\S+)(?:[ \t]+([^\r\f\n]+))?)/g;
 
   // read one line at a time looking for start meta delimiter or EOF
-  var lines = aSource.match(metaRegExp);
-  var i = 0;
-  var result;
-  var foundMeta = false;
-
-  // used for duplicate resource name detection
-  var previousResourceNames = {};
-
-  if (!lines) lines = [""];
-  while (result = lines[i++]) {
-    if (!foundMeta) {
-      if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
-      continue;
+  while (line = metaRegExp.exec(aSource)) {
+    if (line[1]) {
+      if ("userscript" == line[1].toLowerCase()) {
+        foundMeta = true; // start
+        continue;
+      } else {
+        break; // done
+      }
     }
+    if (!foundMeta) continue;
 
-    if (result.indexOf("// ==/UserScript==") == 0) {
-      // done gathering up meta lines
-      break;
-    }
-
-    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
-    if (match === null) continue;
-    var header = match[1];
-    var value = match[2];
+    var header = line[2].toLowerCase();
+    var value = line[3];
 
     if (!headers[header]) headers[header] = [value];
-    else headers[header].push(value)
+    else headers[header].push(value);
   }
+
   return headers;
 }
 
@@ -859,11 +838,11 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   if (!lines) lines = [""];
   while (result = lines[i++]) {
     if (!foundMeta) {
-      if (result.match(/\/\/[ \t]*==UserScript==/i)) foundMeta = true;
+      if (result.match(RE_USERSCRIPT_HEADER_START)) foundMeta = true;
       continue;
     }
 
-    if (result.match(/\/\/[ \t]*==\/UserScript==/i))
+    if (result.match(RE_USERSCRIPT_HEADER_END))
       break; // done gathering up meta lines
 
     var match = result.match(/\/\/[ \t]*\@(\S+)(?:\s+([^\r\f\n]+))?/);
