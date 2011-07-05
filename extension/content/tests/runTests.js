@@ -66,6 +66,7 @@ function runTests() {
     function() include("tests/testLazyImport.js"),
     function() include("tests/testCachedResource.js"),
     function() include("tests/testCryptoHash.js"),
+    function() include("tests/testScriptHeaderParse.js"),
     function() include("tests/testToolsMenuItem.js"),
     function() include("tests/testGetConfig.js"),
     function() include("tests/testIsGMable.js"),
