@@ -8,6 +8,8 @@ test("normal @keys (with space b4 @)", function() {
   // @name test-name
   // @version test-version
   // @version test-version-II
+  // @key v1 v2 v3
+  // @key v1 v2
   // ==/UserScript==
   ]]></>).toString();
   var parsed = parser(header);
@@ -15,6 +17,7 @@ test("normal @keys (with space b4 @)", function() {
   deepEqual(parsed.id, ["test-id"], "@id found");
   deepEqual(parsed.name, ["test-name"], "@name found");
   deepEqual(parsed.version, ["test-version", "test-version-II"], "@versions found");
+  deepEqual(parsed.key, ["v1 v2 v3", "v1 v2"], "@key w/ multiple values found");
   equal(parsed.fail, undefined, "@fail not found");
 });
 
@@ -85,6 +88,8 @@ test("@keys without space b4 @", function() {
   //@name test-name
   //@version test-version
   //@version test-version-II
+  //@key v1 v2 v3
+  //@key v1 v2
   //==/UserScript==
   //@fail test-fail
   ]]></>).toString();
@@ -93,5 +98,6 @@ test("@keys without space b4 @", function() {
   deepEqual(parsed.id, ["test-id"], "@id found");
   deepEqual(parsed.name, ["test-name"], "@name found");
   deepEqual(parsed.version, ["test-version", "test-version-II"], "@versions found");
+  deepEqual(parsed.key, ["v1 v2 v3", "v1 v2"], "@key w/ multiple values found");
   equal(parsed.fail, undefined, "@fail not found");
 });
