@@ -17,6 +17,15 @@ gStrings.ext = Scriptish_bundle;
 let NetUtil = tools.NetUtil;
 let Services = tools.Services;
 
+// Work-around for Firefox4/5 selection restore failures
+if (!AddonManagerPrivate.AddonType) {
+  window.addEventListener("DOMContentLoaded", function() {
+    if ($("categories").node.selectedIndex == -1) {
+      $("categories").node.selectedIndex = 0;
+    }
+  }, false);
+}
+
 window.addEventListener("load", function() {
   function addonIsInstalledScript(aAddon) {
     if (!aAddon || "userscript" != aAddon.type || aAddon.needsUninstall)
