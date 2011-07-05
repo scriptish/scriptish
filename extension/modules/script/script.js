@@ -783,26 +783,8 @@ Script.prototype = {
 };
 
 Script.parseVersion = function Script_parseVersion(aSrc) {
-  var lines = aSrc.match(/\s*\/\/ [=@].*/g);
-  if (!lines) return null;
-  var lnIdx = 0;
-  var result = {};
-  var foundMeta = false;
-  var start = "// ==UserScript==";
-  var end = "// ==/UserScript==";
-  var version = /\/\/ \@version\s+([^\s]+)/;
-
-  while ((result = lines[lnIdx++])) {
-    if (result.indexOf(start) != 0) continue;
-    foundMeta = true;
-    break;
-  }
-  if (!foundMeta) return;
-  while ((result = lines[lnIdx++])) {
-    if (result.indexOf(end) == 0) break;
-    var match = result.match(version);
-    if (match !== null) return match[1];
-  }
+  var parsed = Script.header_parse(aSrc);
+  if (parsed.version) return parsed.version.pop();
   return null;
 }
 
@@ -827,7 +809,7 @@ Script.header_parse = function(aSource) {
     }
     if (!foundMeta) continue;
 
-    var header = line[2];
+    var header = line[2].toLowerCase();
     var value = line[3];
 
     if (!headers[header]) headers[header] = [value];
