@@ -21,7 +21,7 @@ let Services = tools.Services;
 if (!AddonManagerPrivate.AddonType) {
   window.addEventListener("DOMContentLoaded", function() {
     if ($("categories").selectedIndex == -1) {
-      $("categories").selectedIndex = 0;
+      $("categories").selectedItem = $("category-scriptish");
     }
   }, false);
 }
