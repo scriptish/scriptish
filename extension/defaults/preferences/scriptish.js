@@ -15,6 +15,7 @@ pref("extensions.scriptish.enabledSchemes.http", true);
 pref("extensions.scriptish.enabledSchemes.unmht", false);
 pref("extensions.scriptish.enableCopyDownloadURL", false);
 pref("extensions.scriptish.enableScriptRefreshing", true);
+pref("extensions.scriptish.optimizingRegexpMerge", false);
 pref("extensions.scriptish.uninstallPreferences", true);
 pref("extensions.scriptish.update.requireBuiltInCerts", true);
 pref("extensions.scriptish.update.requireSecured", true);

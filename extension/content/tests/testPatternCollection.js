@@ -1,5 +1,9 @@
 module("Pattern Collection");
 
+(function() {
+
+const optimized = importModule("resource://scriptish/prefmanager.js").Scriptish_prefRoot.getValue("optimizingRegexpMerge");
+
 test("exports", function() checkExports(
     "resource://scriptish/utils/PatternCollection.js",
     ["PatternCollection"]
@@ -68,7 +72,12 @@ test("merged", function() {
       pc._regs.map(function(e) e.source),
       ["^foobar.*$", "^foobaz.*$", "^foobax$"],
       "regs");
-  equal(pc.merged.source, "^fooba(?:r.*$|x$|z.*$)", "merged");
+  if (optimized) {
+    equal(pc.merged.source, "^fooba(?:r.*$|x$|z.*$)", "merged");
+  }
+  else {
+    equal(pc.merged.source, "(?:^foobar.*$)|(?:^foobaz.*$)|(?:^foobax$)", "merged");
+  }
   equal(pc.test("foo"), false, "foo");
   equal(pc.test("fooba"), false, "fooba");
   equal(pc.test("foobar"), true, "foobar");
@@ -88,7 +97,12 @@ test("merged {}", function() {
       pc._regs.map(function(e) e.source),
       ["ab{2}c", "ab{4}c", "ab{5}c"],
       "regs");
-  equal(pc.merged.source, "a(?:b{2}c|b{4}c|b{5}c)", "merged"); // maybe (?:ab{2}c|ab{4}c|ab{5}c) ?
+  if (optimized) {
+    equal(pc.merged.source, "a(?:b{2}c|b{4}c|b{5}c)", "merged");
+  }
+  else {
+    equal(pc.merged.source, "(?:ab{2}c)|(?:ab{4}c)|(?:ab{5}c)", "merged");
+  }
 });
 
 test("merged {} 2", function() {
@@ -102,7 +116,12 @@ test("merged {} 2", function() {
       pc._regs.map(function(e) e.source),
       ["ab(cd){2}c", "ab(cd){4}c", "ab(cd){5}c"],
   "regs");
-  equal(pc.merged.source, "ab(?:(cd){2}c|(cd){4}c|(cd){5}c)", "merged"); // maybe (?:ab{2}c|ab{4}c|ab{5}c) ?
+  if (optimized) {
+    equal(pc.merged.source, "ab(?:(cd){2}c|(cd){4}c|(cd){5}c)", "merged");
+  }
+  else {
+    equal(pc.merged.source, "(?:ab(cd){2}c)|(?:ab(cd){4}c)|(?:ab(cd){5}c)", "merged");
+  }
 });
 
 test("merged {} 3", function() {
@@ -116,7 +135,12 @@ test("merged {} 3", function() {
       pc._regs.map(function(e) e.source),
       ["ab(cd)e{2}c", "ab(cd)e{4}c", "ab(cd)e{5}c"],
   "regs");
-  equal(pc.merged.source, "ab(cd)(?:e{2}c|e{4}c|e{5}c)", "merged"); // maybe (?:ab{2}c|ab{4}c|ab{5}c) ?
+  if (optimized) {
+    equal(pc.merged.source, "ab(cd)(?:e{2}c|e{4}c|e{5}c)", "merged");
+  }
+  else {
+    equal(pc.merged.source, "(?:ab(cd)e{2}c)|(?:ab(cd)e{4}c)|(?:ab(cd)e{5}c)", "merged");
+  }
 });
 
 test("merged2 with reg exp", function() {
@@ -132,7 +156,12 @@ test("merged2 with reg exp", function() {
       pc._regs.map(function(e) e.source),
       ["^foobar.*$", "^foobaz.*$", "foobax$"],
       "regs");
-  equal(pc.merged.source, "^foobar.*$|^foobaz.*$|foobax$", "merged");
+  if (optimized) {
+    equal(pc.merged.source, "^foobar.*$|^foobaz.*$|foobax$", "merged");
+  }
+  else {
+    equal(pc.merged.source, "(?:^foobar.*$)|(?:^foobaz.*$)|(?:foobax$)", "merged");
+  }
   equal(pc.test("foo"), false, "foo");
   equal(pc.test("fooba"), false, "fooba");
   equal(pc.test("foobar"), true, "foobar");
@@ -179,7 +208,12 @@ test("merged3", function() {
   pc.addPattern("foobaz*");
   deepEqual(pc.patterns, ["foo", "foobar*", "foobaz*"], "patterns");
   deepEqual(pc._regs.map(function(e) e.source), ["^foo$", "^foobar.*$", "^foobaz.*$"], "regs");
-  equal(pc.merged.source, "^foo(?:$|bar.*$|baz.*$)", "merged");
+  if (optimized) {
+    equal(pc.merged.source, "^foo(?:$|bar.*$|baz.*$)", "merged");
+  }
+  else {
+    equal(pc.merged.source, "(?:^foo$)|(?:^foobar.*$)|(?:^foobaz.*$)", "merged");
+  }
   equal(pc.test("foo"), true, "foo");
   equal(pc.test("fooba"), false, "fooba");
   equal(pc.test("foobar"), true, "foobar");
@@ -312,8 +346,14 @@ test("tld", function() {
   pc.addPattern("http://mozilla.com/*");
   deepEqual(pc._regs.map(function(e) e.source), ["^http:\\/\\/bing\\.com\\/.*$", "^http:\\/\\/mozilla\\.com\\/.*$"], "regs");
   deepEqual(pc._regsTLD.map(function(e) e.source), ["^http:\\/\\/google\\.tld\\/.*$", "^http:\\/\\/yahoo\\.tld\\/.*$"], "regsTLD");
-  equal(pc.merged.source, "^http:\\/\\/(?:bing\\.com\\/.*$|mozilla\\.com\\/.*$)", "merged");
-  equal(pc.mergedTLD.source, "^http:\\/\\/(?:google\\.tld\\/.*$|yahoo\\.tld\\/.*$)", "mergedTLD");
+  if (optimized) {
+    equal(pc.merged.source, "^http:\\/\\/(?:bing\\.com\\/.*$|mozilla\\.com\\/.*$)", "merged");
+    equal(pc.mergedTLD.source, "^http:\\/\\/(?:google\\.tld\\/.*$|yahoo\\.tld\\/.*$)", "mergedTLD");
+  }
+  else {
+    equal(pc.merged.source, "(?:^http:\\/\\/bing\\.com\\/.*$)|(?:^http:\\/\\/mozilla\\.com\\/.*$)", "merged");
+    equal(pc.mergedTLD.source, "(?:^http:\\/\\/google\\.tld\\/.*$)|(?:^http:\\/\\/yahoo\\.tld\\/.*$)", "mergedTLD");
+  }
   equal(pc.test("http://mozilla.com/"), true, "moco");
   equal(pc.test("http://mozilla.org/"), false, "mofo");
   equal(pc.test("http://google.de/"), true, "g.de");
@@ -329,8 +369,6 @@ test("clear", function() {
   pc.addPattern("http://yahoo.tld/*");
   pc.addPattern("http://bing.com/*");
   pc.addPattern("http://mozilla.com/*");
-  equal(pc.merged.source, "^http:\\/\\/(?:bing\\.com\\/.*$|mozilla\\.com\\/.*$)", "merged");
-  equal(pc.mergedTLD.source, "^http:\\/\\/(?:google\\.tld\\/.*$|yahoo\\.tld\\/.*$)", "mergedTLD");
   pc.clear();
   deepEqual(pc.patterns, [], "cleared patterns");
   deepEqual(pc._regs, [], "cleared regs");
@@ -339,3 +377,5 @@ test("clear", function() {
   strictEqual(pc._mergedTLD, null, "cleared _mergeTLD");
   equal(pc.test("http://mozilla.com/"), false, "no matches");
 });
+
+})();
