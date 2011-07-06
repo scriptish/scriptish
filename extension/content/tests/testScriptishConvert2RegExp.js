@@ -7,7 +7,7 @@ test("exports", function() {
     );
 });
 
-test("Regular @includes", 5, function() {
+test("Regular @includes", 6, function() {
   var c2r = importModule("resource://scriptish/utils/Scriptish_convert2RegExp.js").Scriptish_convert2RegExp;
   var url = "https://google.com/";
   var regExp = c2r("https://google.com/*");
@@ -26,6 +26,8 @@ test("Regular @includes", 5, function() {
     "@include with ?"
   );
   equal(regExp.isTLD, true, "should be a tld");
+
+  equal(c2r("***").toString(), "/^.*$/i", "@include ***");
 });
 
 test("Regular Exp @includes", 5, function() {

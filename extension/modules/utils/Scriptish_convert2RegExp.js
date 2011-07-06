@@ -2,7 +2,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_convert2RegExp"];
 
 const RE_REGEXP = /^\/(.*)\/(i)?$/;
 const RE_ESCAPE = /[{}()\[\]\\^$.?]/g;
-const RE_WILD = /\*/g;
+const RE_WILD = /\*+/g;
 const RE_TLD = /^\^[^\/]*(?:\/\/)?[^\/]*\\\.tld(?:\/.*)?\$$/;
 
 function Scriptish_convert2RegExp(aPattern, aNoTLD, forceString) {
