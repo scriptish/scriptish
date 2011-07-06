@@ -212,7 +212,7 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
             || MIME_JSON.test(details.overrideMimeType)
             || MIME_JSON.test(req.channel.contentType)) {
           try {
-            responseState.responseJSON = Instances.json.decode(req.responseText);
+            responseState.responseJSON = JSON.parse(req.responseText);
           } catch (e) {
             responseState.responseJSON = {};
           }

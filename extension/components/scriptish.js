@@ -83,7 +83,7 @@ ScriptishService.prototype = {
         if (win) win.Scriptish_BrowserUI.installCurrentScript();
         break;
       case "scriptish-enabled":
-        aData = Instances.json.decode(aData);
+        aData = JSON.parse(aData);
         let bWins = Scriptish.getWindows();
         let on = aData.enabling;
         while (bWins.hasMoreElements()) {

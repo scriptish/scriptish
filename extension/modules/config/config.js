@@ -118,7 +118,7 @@ Config.prototype = {
     req.onload = function() {
       var json = req.responseText;
       try {
-        var blocklist = Instances.json.decode(json);
+        var blocklist = JSON.parse(json);
       } catch (e) {
         return;
       }
@@ -155,7 +155,7 @@ Config.prototype = {
       var file = self._blocklistFile;
       if (file.exists()) {
         Scriptish_getContents(file, 0, function(str) {
-          self._blocklist = Instances.json.decode(str);
+          self._blocklist = JSON.parse(str);
           self._blocklistHash = Scriptish_cryptoHash(str);
 
           // block scripts
