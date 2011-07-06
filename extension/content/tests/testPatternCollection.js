@@ -81,7 +81,7 @@ test("merged {}", function() {
   var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
 
   var pc = new PatternCollection();
-  var patterns = ["/ab{2}c/i", "/ba{4}c/i", "/ab{5}c/i"];
+  var patterns = ["/ab{2}c/i", "/ab{4}c/i", "/ab{5}c/i"];
   pc.addPatterns(patterns);
   deepEqual(pc.patterns, patterns, "patterns");
   deepEqual(
