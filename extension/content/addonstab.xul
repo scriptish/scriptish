@@ -30,13 +30,7 @@
         command="cmd_scriptish_userscript_dl_link" type="userscript"/>
   </menupopup>
 
-  <richlistbox id="categories">
-    <richlistitem id="category-userscript"
-        class="category"
-        insertafter="category-plugins"
-        value="addons://list/userscript">
-    </richlistitem>
-  </richlistbox>
+  <richlistbox id="categories"/>
 
   <hbox id="detail-controls">
       <button class="addon-control button_scriptish_userscript_edit"

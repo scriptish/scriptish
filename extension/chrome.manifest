@@ -15,6 +15,8 @@ overlay    chrome://browser/content/scratchpad.xul chrome://scriptish/content/sc
 overlay    chrome://navigator/content/navigator.xul chrome://scriptish/content/browser.xul
 overlay    about:addons chrome://scriptish/content/addonstab.xul
 overlay    chrome://mozapps/content/extensions/extensions.xul chrome://scriptish/content/addonstab.xul
+overlay    chrome://scriptish/content/addonstab.xul chrome://scriptish/content/addonstab-moz5.xul application={ec8030f7-c20a-464f-9b0e-13a3a9e97384} appversion<5.0+
+overlay    chrome://scriptish/content/addonstab.xul chrome://scriptish/content/addonstab-moz5.xul application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a} appversion<2.1+
 
 overlay    chrome://scriptish/content/install.xul chrome://scriptish/content/closewindow.xul
 overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/closewindow.xul

@@ -18,8 +18,6 @@ let NetUtil = tools.NetUtil;
 let Services = tools.Services;
 
 window.addEventListener("load", function() {
-  $("category-userscript").setAttribute("name", Scriptish_stringBundle("userscripts"));
-
   function addonIsInstalledScript(aAddon) {
     if (!aAddon || "userscript" != aAddon.type || aAddon.needsUninstall)
       return false;
