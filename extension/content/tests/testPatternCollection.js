@@ -77,6 +77,20 @@ test("merged", function() {
   equal(pc.test("foobax"), true, "foobax");
 });
 
+test("merged {}", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  var patterns = ["/ab{2}c/i", "/ba{4}c/i", "/ab{5}c/i"];
+  pc.addPatterns(patterns);
+  deepEqual(pc.patterns, patterns, "patterns");
+  deepEqual(
+      pc._regs.map(function(e) e.source),
+      ["ab{2}c", "ab{4}c", "ab{5}c"],
+      "regs");
+  equal(pc.merged.source, "a(?:b{2}c|b{4}c|b{5}c)", "merged"); // maybe (?:ab{2}c|ab{4}c|ab{5}c) ?
+});
+
 test("merged2 with reg exp", function() {
   var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
 
