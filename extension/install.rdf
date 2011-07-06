@@ -3,27 +3,6 @@
     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>scriptish@erikvold.com</em:id>
-    <em:localized>
-      <Description>
-        <em:locale>ja-JP</em:locale>
-        <em:name>Scriptish</em:name>
-        <em:description>Firefox用のスクリプトマネージャ</em:description>
-      </Description>
-    </em:localized>
-    <em:localized>
-      <Description>
-        <em:locale>ru-RU</em:locale>
-        <em:name>Scriptish</em:name>
-        <em:description>Управление пользовательских скриптов для Firefox</em:description>
-      </Description>
-    </em:localized>
-    <em:localized>
-      <Description>
-        <em:locale>es-ES</em:locale>
-        <em:name>Scriptish</em:name>
-        <em:description>Un gestor de scripts de usuario para aplicaciones Mozilla</em:description>
-      </Description>
-    </em:localized>
 
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>

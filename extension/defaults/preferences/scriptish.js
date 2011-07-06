@@ -1,3 +1,4 @@
+pref("extensions.scriptish@erikvold.com.description", "chrome://scriptish/locale/description.properties");
 pref("extensions.scriptish.blocklist.enabled", true);
 pref("extensions.scriptish.blocklist.interval", 86400);
 pref("extensions.scriptish.blocklist.lastFetch", 0);
