@@ -25,6 +25,9 @@ var Instances = {
       .createInstance(Ci.nsIDOMSerializer),
   get fos() Cc["@mozilla.org/network/file-output-stream;1"]
       .createInstance(Ci.nsIFileOutputStream),
+  get sfos() Cc["@mozilla.org/network/safe-file-output-stream;1"]
+      .createInstance(Ci.nsIFileOutputStream)
+      .QueryInterface(Ci.nsISafeOutputStream),
   get fp() Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker),
   get json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
   get lf() Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile),

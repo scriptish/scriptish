@@ -69,7 +69,7 @@ Config.prototype = {
     switch(aTopic) {
     case "scriptish-script-user-prefs-change":
       Scriptish.notify(
-          aSubject, "scriptish-script-modified", {saved:false, reloadUI:false});
+          aSubject, "scriptish-script-modified", {saved:true, reloadUI:false});
     case "scriptish-script-prefs-change":
     case "scriptish-script-installed":
     case "scriptish-script-modified":
@@ -132,9 +132,12 @@ Config.prototype = {
       // write blocklist
       let converter = Instances.suc;
       converter.charset = "UTF-8";
+      let writeStream = Scriptish_getWriteStream(file, {defer:true, safe:true});
       NetUtil.asyncCopy(
-          converter.convertToInputStream(json),
-          Scriptish_getWriteStream(file, true));
+          converter.convertToInputStream(json), // source must be buffered!
+          writeStream,
+          function() writeStream.finish()
+          );
 
       Scriptish_log("Updated Scriptish blocklist " + SCRIPTISH_BLOCKLIST, true);
 
@@ -266,7 +269,7 @@ Config.prototype = {
 
     // Load the config (trying from various sources)
     var configFile;
-    // source: Scriptish JSON tmp
+    // source: Scriptish JSON tmp; for pre-nsISafeOutputStream compatiblity
     self._loadJSON(self._tempFile, function(aSuccess) {
       if (aSuccess) return callback(true);
 
@@ -325,14 +328,10 @@ Config.prototype = {
     }
     delete this["_saveTimer"];
 
-    var self = this;
-
     if (this._isSaving)
       return (this._pendingSave = true);
 
     this._isSaving = true;
-
-    let tempFile = self._tempFile;
 
     // make sure that the configFile is SCRIPTISH_CONFIG_JSON
     (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON);
@@ -343,22 +342,18 @@ Config.prototype = {
     let converter = Instances.suc;
     converter.charset = "UTF-8";
     let json = JSON.stringify(this.toJSON());
+    let writeStream = Scriptish_getWriteStream(this._configFile, {defer:true, safe:true});
     NetUtil.asyncCopy(
-        converter.convertToInputStream(json),
-        Scriptish_getWriteStream(tempFile, true),
-        function() {
-          NetUtil.asyncCopy(
-                converter.convertToInputStream(json),
-                Scriptish_getWriteStream(self._configFile, true),
-                function() {
-                  tempFile.remove(true);
-                  delete self["_isSaving"];
-                  if (self._pendingSave) {
-                    delete self["_pendingSave"];
-                    self._save();
-                  }
-                });
-        });
+      converter.convertToInputStream(json), // source must be buffered!
+      writeStream,
+      function() {
+        writeStream.finish();
+        delete this._isSaving;
+        if (this._pendingSave) {
+          delete this._pendingSave;
+          this._save();
+        }
+      }.bind(this));
   },
 
   parse: function(source, uri, aUpdateScript) (
