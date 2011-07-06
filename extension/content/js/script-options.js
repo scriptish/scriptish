@@ -54,6 +54,7 @@ function doSave() {
   }
 
   script.includesDisabled = $("disableScriptIncludes").checked;
+  script.update();
 
   return true;
 }

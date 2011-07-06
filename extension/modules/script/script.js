@@ -19,6 +19,7 @@ lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_
 
 lazyUtil(this, "getUriFromFile");
 lazyUtil(this, "getContents");
+lazyUtil(this, "memoize");
 lazyUtil(this, "stringBundle");
 
 const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
@@ -322,20 +323,32 @@ Script.prototype = {
     return false;
   },
 
-  matchesURL: function(aURL) {
+  matchesURL: null,
+  _matchesURL_noincludes: function(aURL) {
     // check if the domain is ok
     if (!this.matchesDomain(aURL)) return false;
 
-    // check if script @includes/@excludes are disabled
-    if (this.includesDisabled)
-      return this._user_includes.test(aURL)
-          && !this._user_excludes.test(aURL);
+    return this._user_includes.test(aURL)
+        && !this._user_excludes.test(aURL);
+  },
+  _matchesURL_includes: function(aURL) {
+    // check if the domain is ok
+    if (!this.matchesDomain(aURL)) return false;
 
     return (this._all_includes.test(aURL)
       || this._matches.some(function(m) m.doMatch(aURL)))
       && !this._all_excludes.test(aURL);
   },
 
+  _make_matchesURL: function() {
+    if (this.includesDisabled) {
+      this.matchesURL = this._matchesURL_noincludes.bind(this);
+    }
+    else {
+      this.matchesURL = this._matchesURL_includes.bind(this);
+    }
+    this.matchesURL = Scriptish_memoize(this.matchesURL, 100);
+  },
   get id() {
     if (!this._id) this.id = this.name + "@" + this.namespace;
     return this._id;
@@ -631,6 +644,11 @@ Script.prototype = {
     }
   },
 
+  update: function() {
+    this.clearResourceCaches();
+    this._make_matchesURL();
+  },
+
   replaceScriptWith: function(aNewScript) {
     this.removeFiles();
     this.updateFromNewScript(aNewScript.installProcess());
@@ -643,8 +661,6 @@ Script.prototype = {
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
     var oldPriority = this.priority;
     var newPriority = newScript.priority;
-
-    this.clearResourceCaches();
 
     // Copy new values.
     this.blocked = newScript.blocked;
@@ -711,6 +727,9 @@ Script.prototype = {
         Scriptish.notify(this, "scriptish-script-modified", {saved: true, reloadUI: true});
       }
     }
+
+    this.update();
+
     if (oldPriority != newPriority) this._config.sortScripts();
   },
 
@@ -1148,6 +1167,8 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script.totalDownloads = aSkeleton.totalDownloads;
   script._applyBackgroundUpdates = aSkeleton.applyBackgroundUpdates
 
+  script.update();
+
   aConfig.addScript(script);
   return false;
 }
@@ -1268,6 +1289,8 @@ Script.loadFromXML = function(aConfig, aNode) {
     script.reviewCount = aNode.getAttribute("reviewCount") * 1;
   if (aNode.getAttribute("totalDownloads"))
     script.totalDownloads = aNode.getAttribute("totalDownloads") * 1;
+
+  script.update();
 
   aConfig.addScript(script);
   return fileModified;
