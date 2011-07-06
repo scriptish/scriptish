@@ -8,9 +8,12 @@ row {
   margin-bottom: 4px;
 }
 
+row > label {
+  margin-right: 1em;
+}
+
 textbox {
-  margin-left: 1em;
-  min-width: 44em;
+  min-width: 35em;
 }
 
 *[required][invalid="true"] {

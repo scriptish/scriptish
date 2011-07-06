@@ -9,7 +9,7 @@
     >
   <script type="application/x-javascript" src="chrome://scriptish/content/js/newscript.js" />
 
-  <grid>
+  <grid flex="1">
     <columns>
       <column />
       <column flex="1"/>
@@ -27,6 +27,10 @@
         <textbox id="name" placeholder="newscript.missing.name" localize="placeholder" required="true"/>
       </row>
       <row>
+        <label control="version" value="newscript.version" localize="value"/>
+        <textbox id="version" value="1.0"/>
+      </row>
+      <row>
         <label control="namespace" value="newscript.namespace" localize="value"/>
         <textbox id="namespace"/>
       </row>
@@ -40,11 +44,22 @@
       </row>
       <row>
         <label control="includes" value="newscript.includes" localize="value"/>
-        <textbox id="includes" multiline="true" wrap="off" rows="4" cols="60"/>
+        <textbox id="includes" multiline="true" wrap="off" rows="4" cols="50"/>
       </row>
       <row>
         <label control="excludes" value="newscript.excludes" localize="value"/>
-        <textbox id="excludes" multiline="true" wrap="off" rows="4" cols="60"/>
+        <textbox id="excludes" multiline="true" wrap="off" rows="4" cols="50"/>
+      </row>
+      <row>
+        <label control="run-at" value="newscript.runat" localize="value"/>
+        <menulist id="run-at">
+          <menupopup>
+            <menuitem label="newscript.runat.documentend" value="document-end" localize="label"/>
+            <menuitem label="newscript.runat.documentstart" value="document-start" localize="label"/>
+            <menuitem label="newscript.runat.documentidle" value="document-idle" localize="label"/>
+            <menuitem label="newscript.runat.windowload" value="window-load" localize="label"/>
+          </menupopup>
+        </menulist>
       </row>
     </rows>
   </grid>
