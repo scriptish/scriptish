@@ -8,10 +8,11 @@ const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
+lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_sandboxScripts"]);
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
 lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
 lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
@@ -346,6 +347,7 @@ ScriptishService.prototype = {
       // and the delay code (and probably other consumer work).
       let script = scripts[i];
       let sandbox = new Cu.Sandbox(wrappedContentWin);
+      Cu.evalInSandbox(GM_sandboxScripts, sandbox);
 
       let GM_api = new GM_API(
           script, url, winID, wrappedContentWin, unsafeContentWin, chromeWin);

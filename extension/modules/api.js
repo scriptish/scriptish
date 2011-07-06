@@ -67,17 +67,6 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     return new GM_Resources(aScript);
   });
 
-  this.GM_addStyle = function GM_addStyle(css) {
-    var head = document.getElementsByTagName("head")[0];
-    if (head) {
-      var style = document.createElement("style");
-      style.textContent = css;
-      style.type = "text/css";
-      head.appendChild(style);
-    }
-    return style;
-  }
-
   this.GM_safeHTMLParser = function GM_safeHTMLParser(aHTMLStr) {
     if (!GM_apiLeakCheck("GM_safeHTMLParser")) return;
     let doc = document.implementation.createDocument(NS_XHTML, "html", null);
@@ -214,8 +203,6 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 
 GM_API.prototype.GM_generateUUID = function GM_generateUUID() (
     Services.uuid.generateUUID().toString());
-
-GM_API.prototype.GM_updatingEnabled = true;
 
 GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
   if (!GM_apiLeakCheck("GM_setClipboard")) return;
