@@ -1,17 +1,17 @@
 module("Match Pattern");
 
-test("exports", function() {
+test("exports", 1, function() {
   checkExports("resource://scriptish/third-party/MatchPattern.js", ["MatchPattern"]);
 });
 
-test("&lt;all_urls&gt;", function() {
+test("&lt;all_urls&gt;", 2, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("<all_urls>");
   ok(m.doMatch("http://google.com/"));
   ok(!m.doMatch("extern://google.com/"));
 });
 
-test("* scheme", function() {
+test("* scheme", 4, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("*://google.com/");
   ok(m.doMatch("http://google.com/"));
@@ -20,7 +20,7 @@ test("* scheme", function() {
   ok(!m.doMatch("extern://google.com/"));
 });
 
-test("fully defined", function() {
+test("fully defined", 5, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("http://google.com/");
   ok(m.doMatch("http://google.com/"));
@@ -30,7 +30,7 @@ test("fully defined", function() {
   ok(!m.doMatch("http://google.com/a"));
 });
 
-test("fully wild host", function() {
+test("fully wild host", 6, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("http://*/");
   ok(m.doMatch("http://google.com/"));
@@ -41,7 +41,7 @@ test("fully wild host", function() {
   ok(!m.doMatch("http://google.com/a"));
 });
 
-test("wild host", function() {
+test("wild host", 8, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("http://*.google.com/");
   ok(m.doMatch("http://google.com/"));
@@ -50,14 +50,16 @@ test("wild host", function() {
   ok(!m.doMatch("https://google.com/"));
   ok(!m.doMatch("extern://google.com/"));
   ok(!m.doMatch("http://google.com/a"));
+  ok(!m.doMatch("http://example.org/www.google.com/"));
+  ok(!m.doMatch("http://example.org/?www.google.com/"));
 });
 
-test("wild host invalid", function() {
+test("wild host invalid", 1, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   raises(function() new MatchPattern("http://docs.*.google.com/"));
 });
 
-test("wild path", function() {
+test("wild path", 5, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("http://google.com/*");
   ok(m.doMatch("http://google.com/"));
@@ -67,7 +69,7 @@ test("wild path", function() {
   ok(m.doMatch("http://google.com/a"));
 });
 
-test("wild path2", function() {
+test("wild path2", 8, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("http://*.google.com/a/*");
   ok(m.doMatch("http://google.com/a/"));
@@ -77,9 +79,10 @@ test("wild path2", function() {
   ok(!m.doMatch("extern://google.com/a/"));
   ok(m.doMatch("http://google.com/a/bc"));
   ok(!m.doMatch("http://docs.google.com/a"));
+  ok(!m.doMatch("http://example.org/docs.google.com/a/"));
 });
 
-test("file", function() {
+test("file", 4, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("file:///dude*");
   ok(m.doMatch("file:///dude"));
@@ -90,7 +93,7 @@ test("file", function() {
   ok(m.doMatch("file://dude/dudette"));
 });
 
-test("issue 405", function() {
+test("issue 405", 2, function() {
   var {MatchPattern} = importModule("resource://scriptish/third-party/MatchPattern.js");
   var m = new MatchPattern("*://*.somesite.com/somepage.php?*");
   ok(m.doMatch("http://somesite.com/somepage.php?id=1"));
