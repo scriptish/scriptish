@@ -91,6 +91,34 @@ test("merged {}", function() {
   equal(pc.merged.source, "a(?:b{2}c|b{4}c|b{5}c)", "merged"); // maybe (?:ab{2}c|ab{4}c|ab{5}c) ?
 });
 
+test("merged {} 2", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  var patterns = ["/ab(cd){2}c/i", "/ab(cd){4}c/i", "/ab(cd){5}c/i"];
+  pc.addPatterns(patterns);
+  deepEqual(pc.patterns, patterns, "patterns");
+  deepEqual(
+      pc._regs.map(function(e) e.source),
+      ["ab(cd){2}c", "ab(cd){4}c", "ab(cd){5}c"],
+  "regs");
+  equal(pc.merged.source, "ab(?:(cd){2}c|(cd){4}c|(cd){5}c)", "merged"); // maybe (?:ab{2}c|ab{4}c|ab{5}c) ?
+});
+
+test("merged {} 3", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  var patterns = ["/ab(cd)e{2}c/i", "/ab(cd)e{4}c/i", "/ab(cd)e{5}c/i"];
+  pc.addPatterns(patterns);
+  deepEqual(pc.patterns, patterns, "patterns");
+  deepEqual(
+      pc._regs.map(function(e) e.source),
+      ["ab(cd)e{2}c", "ab(cd)e{4}c", "ab(cd)e{5}c"],
+  "regs");
+  equal(pc.merged.source, "ab(cd)(?:e{2}c|e{4}c|e{5}c)", "merged"); // maybe (?:ab{2}c|ab{4}c|ab{5}c) ?
+});
+
 test("merged2 with reg exp", function() {
   var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
 
