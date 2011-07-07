@@ -9,6 +9,11 @@ page.scriptish #addon-list-empty, #scriptish-list-empty {
   display: none;
 }
 
+page.scriptish #scriptish-detail-contrib-description {
+  font-style: italic;
+  margin-bottom: 1em;
+  color: #373D48; /* color not set in gnomestripe... */
+}
 page.scriptish #scriptish-detail-contrib-description, #detail-contrib-description {
   display: inline;
 }
