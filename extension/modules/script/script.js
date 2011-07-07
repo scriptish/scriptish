@@ -52,6 +52,8 @@ function Script(config) {
   this._observers = [];
 
   this._homepageURL = null;
+  this._contributionURL = null;
+  this._contributionAmount = null;
   this._downloadURL = null;
   this._updateURL = null;
   this._tempFile = null; // Only for scripts not installed
@@ -479,7 +481,12 @@ Script.prototype = {
     }
     return this._homepageURL = url;
   },
+
+  get contributionURL() this._contributionURL,
+  get contributionAmount() this._contributionAmount,
+
   supportURL: "",
+
   get updateURL() {
     if (!this.version) return null;
     if (Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL"))
@@ -651,8 +658,10 @@ Script.prototype = {
     this.priority = newPriority;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
-    this._updateURL = newScript._updateURL;
+    this._contributionURL = newScript.contributionURL;
+    this._contributionAmount = newScript.contributionAmount;
     this.supportURL = newScript.supportURL;
+    this._updateURL = newScript._updateURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this.author = newScript._author;
@@ -745,6 +754,8 @@ Script.prototype = {
     "run-at": this["_run-at"],
     includesDisabled: this.includesDisabled,
     homepageURL: this.homepageURL,
+    contributionURL: this._contributionURL,
+    contributionAmount: this._contributionAmount,
     downloadURL: this._downloadURL,
     updateURL: this._updateURL,
     supportURL: this.supportURL,
@@ -905,6 +916,17 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
             break;
           }
           script._homepageURL = uri.spec;
+          break;
+        case "contributionurl":
+          try {
+            var uri = NetUtil.newURI(value);
+          } catch (e) {
+            break;
+          }
+          script._contributionURL = uri.spec;
+          break;
+        case "contributionamount":
+          script._contributionAmount = value;
           break;
         case "supporturl":
           try {
@@ -1068,6 +1090,8 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script._downloadURL = aSkeleton.downloadURL;
   script._updateURL = aSkeleton.updateURL;
   script._homepageURL = aSkeleton.homepageURL;
+  script._contributionURL = aSkeleton.contributionURL;
+  script._contributionAmount = aSkeleton.contributionAmount;
   script.supportURL = aSkeleton.supportURL;
   script._jsversion = aSkeleton.jsversion;
   script["_run-at"] = aSkeleton["run-at"];
