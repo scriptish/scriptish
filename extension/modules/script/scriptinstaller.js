@@ -51,7 +51,7 @@ ScriptInstall.prototype = {
   get icon64URL() this._script.icon64URL,
   releaseNotesURI: null,
   type: "userscript",
-  state: AddonManager.STATE_DOWNLOADING,
+  state: AddonManager.STATE_AVAILABLE,
   error: null,
   sourceURI: null,
   file: null,

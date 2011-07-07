@@ -39,7 +39,7 @@ function noUpdateFound(aListener, aReason) {
 }
 function updateFound(aListener, aReason) {
   var AddonInstall = new ScriptInstall(this);
-  this.updateAvailable = true;
+  this.updateAvailable = AddonInstall;
   AddonManagerPrivate.callAddonListeners("onNewInstall", AddonInstall);
   aListener.onUpdateAvailable(this, AddonInstall);
   if (aListener.onUpdateFinished)
@@ -641,7 +641,6 @@ Script.prototype = {
 
     // Copy new values.
     this.blocked = newScript.blocked;
-    this.updateAvailable = false;
     this.domains = newScript.domains;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;

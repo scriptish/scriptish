@@ -100,10 +100,29 @@ AddonManagerPrivate.registerProvider({
     });
   },
   getAddonsByTypes: function(aTypes, aCallback) {
-    if (aTypes && aTypes.indexOf("userscript") < 0) aCallback([]);
-    else Scriptish.getConfig(function(config) {
-      aCallback(config.scripts);
-    });
+    if (aTypes && aTypes.indexOf("userscript") < 0) {
+      aCallback([]);
+    } else {
+      Scriptish.getConfig(function(config) {
+        aCallback(config.scripts);
+      });
+    }
+  },
+
+  getInstallsByTypes: function(aTypes, aCallback) {
+    if (aTypes && aTypes.indexOf("userscript") < 0) {
+      aCallback([]);
+    } else {
+      Scriptish.getConfig(function(config) {
+        let updates = [];
+        config.scripts.forEach(function(script) {
+          if (script.updateAvailable
+              && script.updateAvailable.state == AddonManager.STATE_AVAILABLE)
+            updates.push(script.updateAvailable);
+        });
+        aCallback(updates);
+      });
+    }
   }
 }, types);
 [
