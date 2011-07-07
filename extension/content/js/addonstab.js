@@ -71,18 +71,39 @@ window.addEventListener("load", function() {
       "value", Scriptish_stringBundle("userscripts.noneInstalled"));
   $("scriptish-get-scripts-btn").setAttribute(
       "label", Scriptish_stringBundle("userscripts.get"));
+  $("scriptish-detail-contrib-description").textContent =
+      Scriptish_stringBundle("contributions.description");
 
   function onViewChanged() {
     let de = document.documentElement;
-    if ("addons://list/userscript" == gViewController.currentViewId) {
-      de.classList.add("scriptish");
-      Scriptish.getConfig(function(config) {
-        if (!config.scripts.length)
-          $("scriptish-list-empty").style.display = "-moz-box";
-      });
-    } else {
+    let view = /^addons:\/\/([^/]+)(?:\/([^/]+)?)?$/.exec(gViewController.currentViewId);
+
+    function reset() {
       de.classList.remove("scriptish");
       $("scriptish-list-empty").style.display = "none";
+    }
+
+    // something strange happened if `null`
+    if (view == null) return reset();
+
+    switch (view[1]) {
+      case "list":
+        if (view[2] != "userscript") return reset();
+        de.classList.add("scriptish");
+        Scriptish.getConfig(function(config) {
+          if (!config.scripts.length)
+            $("scriptish-list-empty").style.display = "-moz-box";
+        });
+        break;
+      case "detail":
+        Scriptish.getConfig(function(config) {
+          let script = config.getScriptById(decodeURIComponent(view[2]));
+          if (script == null || !script.contributionURL) return reset();
+          de.classList.add("scriptish");
+        });
+        break;
+      default:
+        reset();
     }
   }
   window.addEventListener('ViewChanged', onViewChanged, false);

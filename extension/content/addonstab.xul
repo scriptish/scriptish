@@ -41,6 +41,11 @@
               insertbefore="detail-prefs-btn" />
   </hbox>
 
+  <vbox id="detail-contributions">
+    <description id="scriptish-detail-contrib-description"
+                 insertbefore="detail-contrib-description"></description>
+  </vbox>
+
   <vbox id="list-view">
   <vbox id="scriptish-list-empty" insertbefore="addon-list-empty"
       class="alert-container" flex="1">
