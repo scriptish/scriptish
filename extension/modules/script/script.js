@@ -806,6 +806,8 @@ Script.prototype = {
     // set up _modified and stat thrashing stuff
     this.isModified();
 
+    this.update();
+
     this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
   }
