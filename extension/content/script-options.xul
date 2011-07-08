@@ -15,17 +15,17 @@
     </vbox>
     <vbox flex="1">
       <description id="scriptTitle"/>
-      <label id="includes-label" control="includes"/>
+      <label control="includes" value="scriptOptions.includes" localize="value"/>
       <textbox id="includes" multiline="true" rows="4" cols="50"/>
 
       <separator class="thin"/>
 
-      <label id="excludes-label" control="excludes"/>
+      <label control="excludes" value="scriptOptions.excludes" localize="value"/>
       <textbox id="excludes" multiline="true" rows="4" cols="50"/>
 
       <separator class="thin"/>
 
-      <checkbox id="disableScriptIncludes"/>
+      <checkbox id="disableScriptIncludes" label="scriptOptions.disableScriptIncludes" localize="label"/>
     </vbox>
   </hbox>
 </dialog>

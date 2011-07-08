@@ -1,9 +1,12 @@
 Components.utils.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/utils/Scriptish_localizeDOM.js");
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyUtil(this, "stringBundle");
 
 var $ = function(aID) document.getElementById(aID);
 var script;
+
+Scriptish_localizeOnLoad(this);
 
 window.addEventListener("DOMContentLoaded", function() {
   var scriptID = window.location.search.match(/[\?&]id=([^&,]+)/i);
@@ -30,14 +33,10 @@ window.addEventListener("DOMContentLoaded", function() {
     }
     $("scriptTitle").textContent = title;
 
-    $("includes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.includes"));
-    $("excludes-label").setAttribute("value", Scriptish_stringBundle("scriptOptions.excludes"));
     $("includes").value = script.getUserIncStr();
     $("excludes").value = script.getUserIncStr("exclude");
 
-    let tmp = $("disableScriptIncludes");
-    tmp.setAttribute("label", Scriptish_stringBundle("scriptOptions.disableScriptIncludes"));
-    tmp.checked = script.includesDisabled;
+    $("disableScriptIncludes").checked = script.includesDisabled;
   });
 
   return true;
