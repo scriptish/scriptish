@@ -5,7 +5,7 @@ lazyUtil(this, "stringBundle");
 var $ = function(aID) document.getElementById(aID);
 var script;
 
-window.addEventListener("load", function() {
+window.addEventListener("DOMContentLoaded", function() {
   var scriptID = window.location.search.match(/[\?&]id=([^&,]+)/i);
   if (!scriptID) {
     //window.close();
