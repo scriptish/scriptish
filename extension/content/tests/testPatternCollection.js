@@ -378,4 +378,49 @@ test("clear", function() {
   equal(pc.test("http://mozilla.com/"), false, "no matches");
 });
 
+test("untainted", 1, function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("foo");
+  pc.addPattern("bar");
+  pc.addPattern("/(foo)baz\\\\1/i");
+  pc.addPattern("/(foo)baz\\\\x25/i");
+  pc.addPattern("/(foo)baz\\\\u0025/i");
+  notEqual(pc.merged.source, undefined, "untainted");
+});
+
+test("tainted backref", 2, function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("foo");
+  pc.addPattern("bar");
+  pc.addPattern("/(foo)baz\\1/i");
+  equal(pc.merged.source, undefined, "tainted");
+  equal(pc.test("foobazfoo"), true, "test");
+});
+
+test("tainted \\x escape", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("foo");
+  pc.addPattern("bar");
+  pc.addPattern("/(foo)baz\\x25/i");
+  equal(pc.merged.source, undefined, "tainted");
+  equal(pc.test("foobaz\x25"), true, "test");
+});
+
+test("tainted \\u escape", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("foo");
+  pc.addPattern("bar");
+  pc.addPattern("/(foo)baz\\u0025/i");
+  equal(pc.merged.source, undefined, "tainted");
+  equal(pc.test("foobaz\u0025"), true, "test");
+});
+
 })();
