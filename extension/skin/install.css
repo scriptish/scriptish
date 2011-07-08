@@ -25,10 +25,20 @@
   padding-right: 1.5em;
 }
 
-#scriptIcon {
-  max-width: 48px;
-  max-height: 48px;
+#scriptIconBox {
+  width: 64px;
+  height: 64px;
+  margin-top: 1ex;
   margin-right: 1ex;
+}
+
+#scriptIcon {
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 64px;
+  max-height: 64px;
+  image-rendering: optimizeQuality;
+  image-rendering: -moz-crisp-edges;
 }
 
 #scriptTitle {

@@ -20,7 +20,7 @@
   </hbox>
   <vbox id="installBox" flex="1">
     <hbox id="script-desc-vbox">
-      <vbox pack="start">
+      <vbox pack="start" align="center" id="scriptIconBox">
         <image id="scriptIcon"/>
       </vbox>
       <vbox flex="1">

@@ -10,7 +10,7 @@
   <script type="application/x-javascript" src="chrome://scriptish/content/js/script-options.js"/>
 
   <hbox>
-    <vbox pack="start">
+    <vbox pack="start" align="center" id="scriptIconBox">
       <image id="scriptIcon"/>
     </vbox>
     <vbox flex="1">
