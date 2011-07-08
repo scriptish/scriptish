@@ -12,3 +12,41 @@ function GM_addStyle(css) {
   }
   return style;
 }
+
+function GM_xpath(details) {
+  var contextNode = details.node || document;
+  var paths = details.paths || [details.path];
+  var result;
+
+  if (details.all) {
+    var rv = [], i, e;
+    for (var [,path] in Iterator(paths)) {
+      result = document.evaluate(
+        path,
+        contextNode,
+        null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+      for (i = 0, e = result.snapshotLength; i < e; ++i) {
+        rv.push(result.snapshotItem(i));
+      }
+    }
+    return rv;
+  }
+
+
+  for (var [,path] in Iterator(paths)) {
+     result = document.evaluate(
+        path,
+        contextNode,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+    ).singleNodeValue;
+    if (result) {
+      return result;
+    }
+  }
+  return null;
+}
