@@ -4,6 +4,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_alert.js", ["Scriptish_alert"]);
 
 lazyUtil(this, "cryptoHash");
 lazyUtil(this, "notification");
@@ -207,4 +208,9 @@ GM_API.prototype.GM_generateUUID = function GM_generateUUID() (
 GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
   if (!GM_apiLeakCheck("GM_setClipboard")) return;
   GM_setClipboard.apply(null, arguments);
+}
+
+// temp solution for #422
+GM_API.prototype.alert = function alert(aMsg) {
+  Scriptish_alert(aMsg);
 }
