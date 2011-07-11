@@ -402,7 +402,11 @@ Script.prototype = {
   },
   get description() this._description,
   get version() this._version,
-  get optionsURL() "chrome://scriptish/content/script-options.xul?id=" + this.id,
+  get optionsURL() {
+    if (this.enabled)
+      return "chrome://scriptish/content/script-options.xul?id=" + this.id;
+    return null;
+  },
   get icon() this._icon,
   set icon(aIcon) this._icon = aIcon,
   get icon64() this._icon64,
