@@ -14,17 +14,40 @@ function GM_addStyle(css) {
 }
 
 function GM_xpath(details) {
-  var contextNode = details.node || document;
-  var paths = details.paths || [details.path];
-  var result;
+  var contextNode, contextDocument, paths, resolver, namespace, result;
+  contextNode = "node" in details ? details.node : document;
+  if (!contextNode) {
+    throw new Error("The value specified for node is invalid");
+  }
+
+  if (contextNode.ownerDocument) {
+    contextDocument = contextNode.ownerDocument;
+  }
+  else if (contextNode.evaluate) {
+    // contextNode is a Document already
+    contextDocument = contextNode;
+  }
+  else {
+    throw new Error("No owning document for the specified node. Make sure you pass a valid node!");
+  }
+
+  paths = details.paths || details.path;
+  if (typeof paths == "string") {
+    paths = [paths];
+  }
+
+  if (contextNode.namepaceURI) {
+    namespace = contextNode.namespaceURI;
+    resolver = {lookupNamespaceURI: function(p) namespace};
+  }
 
   if (details.all) {
     var rv = [], i, e;
     for (var [,path] in Iterator(paths)) {
-      result = document.evaluate(
+      result = contextDocument.evaluate(
         path,
         contextNode,
-        null,
+        resolver,
         XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
         null
       );
@@ -37,10 +60,10 @@ function GM_xpath(details) {
 
 
   for (var [,path] in Iterator(paths)) {
-     result = document.evaluate(
+     result = contextDocument.evaluate(
         path,
         contextNode,
-        null,
+        resolver,
         XPathResult.FIRST_ORDERED_NODE_TYPE,
         null
     ).singleNodeValue;
