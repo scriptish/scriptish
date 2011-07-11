@@ -366,6 +366,7 @@ Config.prototype = {
       this._scripts[existingIndex].replaceScriptWith(aNewScript);
     } else {
       aNewScript.installProcess();
+      timeout(aNewScript.updateUSOData.bind(aNewScript));
       this.addScript(aNewScript);
 
       Scriptish.notify(aNewScript, "scriptish-script-installed", true);
