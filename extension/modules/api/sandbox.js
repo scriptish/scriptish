@@ -15,6 +15,7 @@ function GM_addStyle(css) {
 
 function GM_xpath(details) {
   var contextNode, contextDocument, paths, resolver, namespace, result;
+
   contextNode = "node" in details ? details.node : document;
   if (!contextNode) {
     throw new Error("The value specified for node is invalid");
@@ -36,7 +37,21 @@ function GM_xpath(details) {
     paths = [paths];
   }
 
-  if (contextNode.namepaceURI) {
+  if (details.resolver) {
+    if (typeof details.resolver == "string") {
+      resolver = {lookupNamespaceURI: function(p) details.resolver};
+    }
+    else if (typeof details.resolver == "function") {
+      resolver = {lookupNamespaceURI: details.resolver};
+    }
+    else if (typeof resolver.lookupNamespaceURI == "function") {
+      resolver = details.resolver;
+    }
+    else {
+      throw new Error("resolver is invalid");
+    }
+  }
+  else if (contextNode.namepaceURI) {
     namespace = contextNode.namespaceURI;
     resolver = {lookupNamespaceURI: function(p) namespace};
   }
