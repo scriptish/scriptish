@@ -8,7 +8,7 @@ lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
 function Scriptish_popupNotification(details) {
   if (!Scriptish_prefRoot.getValue("enableNotifications"))
-    return Scriptish_log(aMsg);
+    return Scriptish_log(details.message);
 
   timeout(function() {
       var win = Scriptish.getMostRecentWindow();
