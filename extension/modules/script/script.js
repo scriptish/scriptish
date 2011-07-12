@@ -34,7 +34,8 @@ const RE_USERSCRIPT_HEADER_START = /\/\/[ \t]*==UserScript==/i;
 const RE_USERSCRIPT_HEADER_END = /\/\/[ \t]*==\/UserScript==/i;
 
 function noUpdateFound(aListener, aReason) {
-  aListener.onNoUpdateAvailable(this);
+  if (aListener.onNoUpdateAvailable)
+    aListener.onNoUpdateAvailable(this);
   if (aListener.onUpdateFinished)
     aListener.onUpdateFinished(this, aReason || AddonManager.UPDATE_STATUS_NO_ERROR);
 }
