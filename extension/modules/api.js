@@ -3,7 +3,7 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_alert.js", ["Scriptish_alert"]);
 
 lazyUtil(this, "cryptoHash");
@@ -39,12 +39,18 @@ function GM_apiLeakCheck(apiName) {
   return true;
 }
 
-function GM_apiSafeCallback(aWin, aThis, aCb, aArgs) {
+function GM_apiSafeCallback(aWindow, aScript, aThis, aCb, aArgs) {
   // Pop back onto browser scope and call event handler.
   // Have to use nested function here otherwise aCallback.apply can point to
   // window.setTimeout, which can be abused to get increased privileges.
-  new XPCNativeWrapper(aWin, "setTimeout()")
-      .setTimeout(function() aCb.apply(aThis, aArgs), 0);
+  new XPCNativeWrapper(aWindow, "setTimeout()").setTimeout(function() {
+    try {
+      aCb.apply(aThis, aArgs);
+    }
+    catch (ex) {
+      Scriptish_logScriptError(ex, aWindow, aScript.fileURL, aScript.id);
+    }
+  }, 0);
 }
 
 function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) {
@@ -84,7 +90,7 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     if (typeof aIcon != "string") aIcon = aScript.iconURL;
     var callback = null;
     if (typeof aCallback == "function")
-      callback = function() GM_apiSafeCallback(aSafeWin, null, aCallback);
+      callback = function() GM_apiSafeCallback(aSafeWin, aScript, null, aCallback);
     Scriptish_notification(aMsg, aTitle, aIcon, callback);
   }
 

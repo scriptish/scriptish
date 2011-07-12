@@ -191,6 +191,7 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
 GM_xmlhttpRequester.prototype.setupRequestEvent =
     function(unsafeContentWin, req, event, details) {
   var origMimeType = details.overrideMimeType;
+  var script = this.script;
 
   if (details[event]) {
     req[event] = function() {
@@ -221,7 +222,7 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
       }
 
       GM_apiSafeCallback(
-          unsafeContentWin, details, details[event], [responseState]);
+          unsafeContentWin, script, details, details[event], [responseState]);
     }
   }
 }
