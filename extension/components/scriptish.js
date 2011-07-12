@@ -427,7 +427,7 @@ ScriptishService.prototype = {
         var sw = Instances.se;
         sw.init(
           Scriptish_stringBundle("warning.returnfrommain"),
-          fileURL,
+          aScript.fileURL,
           "",
           e.lineNumber || 0,
           e.columnNumber || 0,
