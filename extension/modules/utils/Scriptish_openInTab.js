@@ -32,9 +32,16 @@ function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
 
   // Opening a new tab
   var browser = aChromeWin.gBrowser;
-  return getWindowForBrowser(browser.getBrowserForTab(browser.loadOneTab(aURL, {
-    "inBackground": !!aLoadInBackground
-  })));
+  var selectedTab = browser.selectedTab;
+  var newTab = browser.loadOneTab(aURL, {"inBackground": !!aLoadInBackground});
+  var afterCurrent = Services.prefs
+      .getBranch("browser.tabs.")
+      .getBoolPref("insertRelatedAfterCurrent");
+
+  if (afterCurrent)
+    browser.moveTabTo(newTab, selectedTab._tPos + 1);
+
+  return getWindowForBrowser(browser.getBrowserForTab(newTab));
 }
 
 function getWindowForBrowser(browser) browser.docShell
