@@ -325,7 +325,7 @@ ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
 }
 ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
-    Scriptish_alert(this.dependencyError, 0);
+    Scriptish_alert(this.dependencyError, null, 0);
     return false;
   } else if (this.scriptInstaller && this.dependenciesLoaded_) {
     this.scriptInstaller._script.replaceScriptWith(this.script);

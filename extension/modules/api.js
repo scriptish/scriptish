@@ -200,6 +200,13 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     if (!GM_apiLeakCheck("GM_cryptoHash")) return;
     return Scriptish_cryptoHash.apply(null, arguments);
   }
+
+  //temp solution for #422
+  let scriptName = aScript.name || aScript.id;
+  this.alert = function alert(aMsg) {
+    Scriptish_alert(aMsg, scriptName);
+  }
+
 }
 
 GM_API.prototype.GM_generateUUID = function GM_generateUUID() (
@@ -208,9 +215,4 @@ GM_API.prototype.GM_generateUUID = function GM_generateUUID() (
 GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
   if (!GM_apiLeakCheck("GM_setClipboard")) return;
   GM_setClipboard.apply(null, arguments);
-}
-
-// temp solution for #422
-GM_API.prototype.alert = function alert(aMsg) {
-  Scriptish_alert(aMsg);
 }
