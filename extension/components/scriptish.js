@@ -108,10 +108,13 @@ ScriptishService.prototype = {
   docReady: function(safeWin, chromeWin) Scriptish.getConfig((function(config) {
     if (!Scriptish.enabled || !chromeWin) return;
 
-    let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
-    windows[currentInnerWindowID] = {unloaders: []};
     let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
     let gBrowser = chromeWin.gBrowser;
+    if (!gmBrowserUI || !gBrowser) return;
+
+    let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
+    windows[currentInnerWindowID] = {unloaders: []};
+
     let href = (safeWin.location.href
         || (safeWin.frameElement && safeWin.frameElement.src))
         || "";
