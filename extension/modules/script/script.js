@@ -70,6 +70,7 @@ function Script(config) {
   this._prefroot = null;
   this._author = null;
   this._applyBackgroundUpdates = defaultAutoUpdateState;
+  this._developers = [];
   this._contributors = [];
   this._description = null;
   this._version = null;
@@ -388,14 +389,25 @@ Script.prototype = {
       this._creator = this._author;
     }
   },
+  get developers() {
+    var devs = this._developers;
+    if (!AddonManagerPrivate.AddonAuthor) return devs;
+    var ary = [];
+    for (var i = devs.length-1; ~i; i--)
+      ary.unshift(new AddonManagerPrivate.AddonAuthor(devs[i]));
+    return ary;
+  },
   get contributors() {
-    if (!AddonManagerPrivate.AddonAuthor) return this._contributors;
-    var contributors = [];
-    for (var i = this._contributors.length-1; i >= 0; i--) {
-      contributors.unshift(
-          new AddonManagerPrivate.AddonAuthor(this._contributors[i]));
-    }
-    return contributors;
+    var contribs = this._contributors;
+    if (!AddonManagerPrivate.AddonAuthor) return contribs;
+    var ary = [];
+    for (var i = contribs.length-1; ~i; i--)
+      ary.unshift(new AddonManagerPrivate.AddonAuthor(contribs[i]));
+    return ary;
+  },
+  addDeveloper: function(aVal) {
+    if (!aVal) return;
+    this._developers.push(aVal);
   },
   addContributor: function(aContributor) {
     if (!aContributor) return;
@@ -686,6 +698,7 @@ Script.prototype = {
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this.author = newScript._author;
+    this._developers = newScript._developers;
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
@@ -739,7 +752,6 @@ Script.prototype = {
   },
 
   toJSON: function() ({
-    contributors: this._contributors,
     domains: this.domains,
     includes: this._includes.patterns,
     excludes: this._excludes.patterns,
@@ -763,6 +775,8 @@ Script.prototype = {
     name: this.name,
     namespace: this.namespace,
     author: this._author,
+    developers: this._developers,
+    contributors: this._contributors,
     blocklistState: this.blocklistState,
     description: this._description,
     version: this._version,
@@ -907,6 +921,10 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
             script.author = value;
             continue;
           }
+          // nobreak
+        case "developer":
+          script.addDeveloper(value);
+          continue;
         case "contributor":
           script.addContributor(value);
           continue;
@@ -1134,7 +1152,10 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script._noframes = aSkeleton.noframes;
 
   script.domains = aSkeleton.domains;
-  aSkeleton.contributors.forEach(script.addContributor.bind(script));
+  if (aSkeleton.developers)
+    aSkeleton.developers.forEach(script.addDeveloper.bind(script));
+  if (aSkeleton.contributors)
+    aSkeleton.contributors.forEach(script.addContributor.bind(script));
   script.addInclude(aSkeleton.includes);
   script.addExclude(aSkeleton.excludes);
   script.addInclude(aSkeleton.user_includes, true);
