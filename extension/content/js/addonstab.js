@@ -77,7 +77,7 @@ window.addEventListener("load", function() {
       var fp = tools.Instances.fp;
       fp.init(
           window,
-          Scriptish_stringBundle("installFromFile.title"),
+          Scriptish_stringBundle("installFromFile"),
           nsIFilePicker.modeOpen);
       fp.appendFilter(Scriptish_stringBundle("userscript"), "*.js");
       fp.appendFilters(nsIFilePicker.filterAll);
@@ -140,7 +140,7 @@ window.addEventListener("load", function() {
 
   // localize install us from file menuitem
   let (mi = $("scriptish-installFromFile")) {
-    mi.setAttribute("label", Scriptish_stringBundle("installFromFile.title"));
+    mi.setAttribute("label", Scriptish_stringBundle("installFromFile"));
     mi.setAttribute("accesskey", Scriptish_stringBundle("installFromFile.ak"));
   }
 
