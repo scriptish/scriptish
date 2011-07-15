@@ -4,9 +4,10 @@ Cu.import("resource://scriptish/constants.js", tools);
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_ExtendedStringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_installUri.js");
 Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js");
 Cu.import("resource://scriptish/addonprovider.js");
 
@@ -24,6 +25,26 @@ window.addEventListener("load", function() {
     return true;
   }
 
+  gViewController.commands.cmd_scriptish_installFromFile = {
+    isEnabled: function() {
+      return true;
+    },
+    doCommand: function() {
+      var nsIFilePicker = Ci.nsIFilePicker;
+      var fp = tools.Instances.fp;
+      fp.init(
+          window,
+          Scriptish_stringBundle("installFromFile.title"),
+          nsIFilePicker.modeOpen);
+      fp.appendFilter(Scriptish_stringBundle("userscript"), "*.js");
+      fp.appendFilters(nsIFilePicker.filterAll);
+
+      if (fp.show() != nsIFilePicker.returnOK || !fp.file.exists())
+        return;
+
+      Scriptish_installUri(tools.Services.io.newFileURI(fp.file));
+    }
+  };
   gViewController.commands.cmd_scriptish_userscript_edit = {
     isEnabled: addonIsInstalledScript,
     doCommand: function(aAddon) { Scriptish_openInEditor(aAddon, window); }
@@ -73,6 +94,13 @@ window.addEventListener("load", function() {
       "label", Scriptish_stringBundle("userscripts.get"));
   $("scriptish-detail-contrib-description").textContent =
       Scriptish_stringBundle("contributions.description");
+
+  // localize install us from file menuitem
+  let (mi = $("scriptish-installFromFile")) {
+    mi.setAttribute("label", Scriptish_stringBundle("installFromFile.title"));
+    mi.setAttribute("accesskey", Scriptish_stringBundle("installFromFile.ak"));
+  }
+  
 
   function onViewChanged() {
     let de = document.documentElement;
