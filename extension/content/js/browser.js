@@ -59,6 +59,11 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   delete Scriptish_BrowserUI["tbBtnSetup"];
 
   Scriptish_setupPopup();
+  gBrowser.addProgressListener({
+    onLocationChange: function(aProgress, aRequest, aURI) {
+      Scriptish_setupPopup();
+    }
+  });
 }
 
 /**
@@ -395,11 +400,5 @@ function Scriptish_setupPopup() Scriptish.getConfig(function(config) {
     else
       label = Scriptish_stringBundle("statusbar.noScripts.notfound");
     menuitem.setAttribute("label", label);
-  }
-});
-
-gBrowser.addProgressListener({
-  onLocationChange: function(aProgress, aRequest, aURI) {
-    Scriptish_setupPopup();
   }
 });
