@@ -3,6 +3,9 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="chrome://scriptish/content/js/addonstab.js" />
 
+  <commandset id="globalCommandSet">
+    <command id="cmd_scriptish_installFromFile"/>
+  </commandset>
   <commandset id="viewCommandSet">
     <!-- looks a little convoluted, but is required for the list-view
          controls binding to work correctly.
@@ -57,4 +60,10 @@
     <spacer class="alert-spacer-after"/>
   </vbox>
   </vbox>
+
+  <menupopup id="utils-menu">
+    <menuitem id="scriptish-installFromFile"
+          command="cmd_scriptish_installFromFile"
+          insertafter="utils-installFromFile"/>
+  </menupopup>
 </overlay>

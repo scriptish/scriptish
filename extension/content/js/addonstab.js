@@ -4,11 +4,14 @@ Cu.import("resource://scriptish/constants.js", tools);
 Cu.import("resource://scriptish/prefmanager.js");
 Cu.import("resource://scriptish/logging.js");
 Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/utils/Scriptish_ExtendedStringBundle.js");
+Cu.import("resource://scriptish/utils/Scriptish_installUri.js");
 Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js");
+Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js");
 Cu.import("resource://scriptish/addonprovider.js");
+
+const RE_USERSCRIPT = /^.*\.user(?:-\d+)?\.js$/i;
 
 var Scriptish_bundle = new Scriptish_ExtendedStringBundle(gStrings.ext);
 Scriptish_bundle.strings["header-userscript"] = Scriptish_stringBundle("userscripts");
@@ -24,6 +27,67 @@ window.addEventListener("load", function() {
     return true;
   }
 
+  var oldDD = gDragDrop.onDrop;
+  gDragDrop.onDrop = function(aEvt) {
+    var dt = aEvt.dataTransfer;
+    var uris = [];
+
+    function handleStrType(type, i) {
+      let url = dt.mozGetDataAt(type, i);
+      if (url) {
+        url = url.trim().match(/$[^\n\r\t]*/)[0];
+        if (!RE_USERSCRIPT.test(url)) return false;
+        uris.push(Services.io.newURI(url));
+        removeType(type, i);
+        return true;
+      }
+      return false;
+    }
+    function removeType(type, i) {
+      dt.mozClearDataAt(type, i);
+    }
+
+    for (var i = dt.mozItemCount - 1; ~i; i--) {
+      if (handleStrType("text/uri-list", i)) continue;
+      if (handleStrType("text/x-moz-url", i)) continue;
+
+      let file = dt.mozGetDataAt("application/x-moz-file", i);
+      if (file) {
+        let uri = Services.io.newFileURI(file);
+        if (!RE_USERSCRIPT.test(uri.spec)) return;
+        uris.push(uri);
+        removeType("application/x-moz-file", i);
+        continue;
+      }
+    }
+
+    uris.forEach(function(uri) {
+      Scriptish_installUri(uri);
+    });
+
+    oldDD(aEvt)
+  }
+
+  gViewController.commands.cmd_scriptish_installFromFile = {
+    isEnabled: function() {
+      return true;
+    },
+    doCommand: function() {
+      var nsIFilePicker = Ci.nsIFilePicker;
+      var fp = tools.Instances.fp;
+      fp.init(
+          window,
+          Scriptish_stringBundle("installFromFile.title"),
+          nsIFilePicker.modeOpen);
+      fp.appendFilter(Scriptish_stringBundle("userscript"), "*.js");
+      fp.appendFilters(nsIFilePicker.filterAll);
+
+      if (fp.show() != nsIFilePicker.returnOK || !fp.file.exists())
+        return;
+
+      Scriptish_installUri(tools.Services.io.newFileURI(fp.file));
+    }
+  };
   gViewController.commands.cmd_scriptish_userscript_edit = {
     isEnabled: addonIsInstalledScript,
     doCommand: function(aAddon) { Scriptish_openInEditor(aAddon, window); }
@@ -73,6 +137,12 @@ window.addEventListener("load", function() {
       "label", Scriptish_stringBundle("userscripts.get"));
   $("scriptish-detail-contrib-description").textContent =
       Scriptish_stringBundle("contributions.description");
+
+  // localize install us from file menuitem
+  let (mi = $("scriptish-installFromFile")) {
+    mi.setAttribute("label", Scriptish_stringBundle("installFromFile.title"));
+    mi.setAttribute("accesskey", Scriptish_stringBundle("installFromFile.ak"));
+  }
 
   function onViewChanged() {
     let de = document.documentElement;
