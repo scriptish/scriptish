@@ -41,6 +41,7 @@
         observes="scriptish-button-brd"
         type="menu-button"
         context=""
+        scriptCount="1"
         class="toolbarbutton-1 chromeclass-toolbar-additional"
         label="Scriptish">
       <menupopup id="scriptish-tb-popup" observes="scriptish-tb-popup-brd">
