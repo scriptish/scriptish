@@ -53,6 +53,9 @@ ScriptDownloader.prototype.startDownload = function(bypassCache) {
     req.channel.notificationCallbacks =
         new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
   }
+  if (req.channel instanceof Ci.nsIHttpChannelInternal) {
+    req.channel.forceAllowThirdPartyCookie = true;
+  }
   req.onerror = this.handleErr.bind(this);
   req.onreadystatechange = this.chkContentTypeB4DL.bind(this);
   req.onload = this.handleScriptDownloadComplete.bind(this);
@@ -201,6 +204,9 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
     }
 
     var sourceChannel = Services.io.newChannelFromURI(sourceUri);
+    if (sourceChannel instanceof Ci.nsIHttpChannelInternal) {
+      sourceChannel.forceAllowThirdPartyCookie = true;
+    }
     sourceChannel.notificationCallbacks = (this.secure)
         ? new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"))
         : new NotificationCallbacks();
