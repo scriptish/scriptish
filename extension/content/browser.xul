@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://scriptish/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scriptish/content/third-party/firebug/startButton.css" type="text/css"?>
 
 <overlay id="scriptish-browser-overlay"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -41,6 +42,8 @@
         observes="scriptish-button-brd"
         type="menu-button"
         context=""
+        scriptCount="1"
+        showScripts="true"
         class="toolbarbutton-1 chromeclass-toolbar-additional"
         label="Scriptish">
       <menupopup id="scriptish-tb-popup" observes="scriptish-tb-popup-brd">
