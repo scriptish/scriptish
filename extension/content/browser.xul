@@ -9,7 +9,10 @@
   <broadcasterset id="mainBroadcasterSet">
     <broadcaster id="scriptish-options-brd"/>
     <broadcaster id="scriptish-tb-popup-brd"/>
-    <broadcaster id="scriptish-button-brd"/>
+    <broadcaster id="scriptish-button-brd"
+      showScripts="true"
+      scriptCount="0"
+      persist="showScripts"/>
     <broadcaster id="scriptish-tb-cmds-brd"/>
     <broadcaster id="scriptish-tb-new-us-brd"/>
     <broadcaster id="scriptish-tb-show-us-brd"/>
@@ -42,8 +45,6 @@
         observes="scriptish-button-brd"
         type="menu-button"
         context=""
-        scriptCount="1"
-        showScripts="true"
         class="toolbarbutton-1 chromeclass-toolbar-additional"
         label="Scriptish">
       <menupopup id="scriptish-tb-popup" observes="scriptish-tb-popup-brd">

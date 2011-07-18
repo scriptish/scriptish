@@ -28,8 +28,22 @@ Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
 Scriptish_BrowserUI.tbBtnSetup = function() {
-  $("scriptish-button-brd").setAttribute(
-      "onclick", "Scriptish_BrowserUIM.onIconClick(event)");
+  function updateShowScripts() {
+    tbBtnBrd.setAttribute("showScripts",
+        Scriptish_prefRoot.getValue("toolbarbutton.showScripts")
+        && Scriptish_prefRoot.getValue("enabled")
+        );
+  }
+
+  var tbBtnBrd = $("scriptish-button-brd");
+  tbBtnBrd.setAttribute("onclick", "Scriptish_BrowserUIM.onIconClick(event)");
+  updateShowScripts();
+  Scriptish_prefRoot.watch("enabled", updateShowScripts);
+  Scriptish_prefRoot.watch("toolbarbutton.showScripts", updateShowScripts);
+  window.addEventListener("unload", function() {
+    Scriptish_prefRoot.unwatch("enabled", updateShowScripts);
+    Scriptish_prefRoot.unwatch("toolbarbutton.showScripts", updateShowScripts);
+  });
 
   var sbCmdsEle = $("scriptish-tb-cmds-brd");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
@@ -235,7 +249,6 @@ Scriptish_BrowserUI.reattachMenuCmds = function() {
  * leak it's memory.
  */
 Scriptish_BrowserUI.chromeUnload = function() {
-  Scriptish_prefRoot.unwatch("enabled", this.statusWatcher);
   gBrowser.removeProgressListener(this);
   delete this.menuCommanders;
 }
