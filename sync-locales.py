@@ -18,7 +18,7 @@ class Properties(object):
                 line = line.strip()
                 if line.startswith("#"):
                     continue
-                key, value = line.split("=", 2)
+                key, value = line.split("=", 1)
                 self._items[key] = value
 
     def merge(self, rhs):
@@ -30,7 +30,7 @@ class Properties(object):
         # add new keys
         for k in rhs._items.keys():
             if not k in self._items:
-                self._items[key] = ""
+                self._items[k] = ""
 
     def save(self):
         with copen(self.file, "wb", encoding="utf-8") as op:
