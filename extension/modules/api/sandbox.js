@@ -57,17 +57,17 @@ function GM_xpath(details) {
   }
 
   if (details.all) {
-    var rv = [], i, e;
+    var rv = [], n;
     for (var [,path] in Iterator(paths)) {
       result = contextDocument.evaluate(
         path,
         contextNode,
         resolver,
-        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        XPathResult.ORDERED_NODE_ITERATOR_TYPE,
         null
       );
-      for (i = 0, e = result.snapshotLength; i < e; ++i) {
-        rv.push(result.snapshotItem(i));
+      while (n = result.iterateNext()) {
+        rv.push(n);
       }
     }
     return rv;
