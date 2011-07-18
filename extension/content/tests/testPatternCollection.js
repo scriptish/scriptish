@@ -396,8 +396,14 @@ test("tainted backref", 2, function() {
   var pc = new PatternCollection();
   pc.addPattern("foo");
   pc.addPattern("bar");
+  pc.addPattern("/(foo)bad\\1/i");
   pc.addPattern("/(foo)baz\\1/i");
-  equal(pc.merged.source, undefined, "tainted");
+  if (optimized) {
+    equal(pc.merged.source, "(?:^(?:bar$|foo$))|(?:(foo)bad\\1)|(?:(foo)baz\\1)", "tainted");
+  }
+  else {
+    equal(pc.merged.source, "(?:^foo$)|(?:^bar$)|(?:(foo)bad\\1)|(?:(foo)baz\\1)", "tainted");
+  }
   equal(pc.test("foobazfoo"), true, "test");
 });
 
@@ -408,7 +414,12 @@ test("tainted \\x escape", function() {
   pc.addPattern("foo");
   pc.addPattern("bar");
   pc.addPattern("/(foo)baz\\x25/i");
-  equal(pc.merged.source, undefined, "tainted");
+  if (optimized) {
+    equal(pc.merged.source, "(?:^(?:bar$|foo$))|(?:(foo)baz\\x25)", "tainted");
+  }
+  else {
+    equal(pc.merged.source, "(?:^foo$)|(?:^bar$)|(?:(foo)baz\\x25)", "tainted");
+  }
   equal(pc.test("foobaz\x25"), true, "test");
 });
 
@@ -419,7 +430,12 @@ test("tainted \\u escape", function() {
   pc.addPattern("foo");
   pc.addPattern("bar");
   pc.addPattern("/(foo)baz\\u0025/i");
-  equal(pc.merged.source, undefined, "tainted");
+  if (optimized) {
+    equal(pc.merged.source, "(?:^(?:bar$|foo$))|(?:(foo)baz\\u0025)", "tainted");
+  }
+  else {
+    equal(pc.merged.source, "(?:^foo$)|(?:^bar$)|(?:(foo)baz\\u0025)", "tainted");
+  }
   equal(pc.test("foobaz\u0025"), true, "test");
 });
 
