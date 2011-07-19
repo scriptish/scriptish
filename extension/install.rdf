@@ -10,7 +10,7 @@
     <em:version>0.1.4a1pre</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
-    <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
+    <em:homepageURL>http://scriptish.org</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://scriptish/skin/scriptish32.png</em:iconURL>
     <em:icon64URL>chrome://scriptish/skin/scriptish64.png</em:icon64URL>
