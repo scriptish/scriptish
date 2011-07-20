@@ -20,7 +20,7 @@
   </broadcasterset>
 
   <menupopup id="menu_ToolsPopup">
-    <menu id="scriptish_general_menu" insertbefore="javascriptConsole"/>
+    <menu id="scriptish_general_menu"/>
   </menupopup>
   <menupopup id="taskPopup">
     <menu id="scriptish_general_menu" insertbefore="downloadMgr"/>
