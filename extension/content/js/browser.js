@@ -43,7 +43,7 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   window.addEventListener("unload", function() {
     Scriptish_prefRoot.unwatch("enabled", updateShowScripts);
     Scriptish_prefRoot.unwatch("toolbarbutton.showScripts", updateShowScripts);
-  });
+  }, false);
 
   var sbCmdsEle = $("scriptish-tb-cmds-brd");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
