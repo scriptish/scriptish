@@ -1,16 +1,16 @@
+# About
+
 Scriptish is a userscript manager for Firefox, forked from Greasemonkey.
 
 
-Requirements
-----------
+# Requirements
 
 * Using Scriptish: Firefox 4.0b5pre or higher
 * Building an XPI: Unix shell
 * Playing w/ code: Git
 
 
-Links
-----------
+# Links
 
 * Addons.Mozilla.Org (AMO): https://addons.mozilla.org/en-US/firefox/addon/scriptish
 * Userscripts:              http://userscripts.org
