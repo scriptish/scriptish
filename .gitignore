@@ -8,4 +8,7 @@ LOCAL.*
 REMOTE.*
 build
 *.DS_Store
+*.py
+*.rb
+*.sh
 
