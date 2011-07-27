@@ -11,4 +11,5 @@ build
 *.py
 *.rb
 *.sh
+node_modules
 
