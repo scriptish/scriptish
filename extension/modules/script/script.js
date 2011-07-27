@@ -613,7 +613,7 @@ Script.prototype = {
     this._filename = file.leafName;
 
     Scriptish_log(Scriptish_stringBundle("moving.script") + " "
-        + tempFile.path + " --> " + file.path, true);
+        + tempFile.path + " --> " + file.path);
 
     file.remove(true);
     tempFile.moveTo(file.parent, file.leafName);

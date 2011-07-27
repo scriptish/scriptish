@@ -84,7 +84,7 @@ asyncTest("extensions.scriptish.logChrome = true", 1, function() {
 
 asyncTest("null char removed", 1, function() {
   runListener(function({message}) {
-    equal(message, "[Scriptish] FORCED TEST WITH NULLS");
+    equal(message, "[Scriptish] TEST WITH NULLS");
   });
 
   var logChrome = null;
@@ -95,7 +95,7 @@ asyncTest("null char removed", 1, function() {
   PREF_BRANCH.setBoolPref("logChrome", true);
 
   try {
-    Scriptish_log("FORCED \0TEST \0WITH \0NULLS");
+    Scriptish_log("TEST \0WITH \0NULLS");
   }
   finally {
     if (logChrome !== null) {
