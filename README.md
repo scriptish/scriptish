@@ -7,7 +7,6 @@ Scriptish is a userscript manager for Firefox, forked from Greasemonkey.
 
 * Using Scriptish: Firefox 4+
 * Building an XPI: Unix shell
-* Playing w/ code: Git
 
 
 # Links
