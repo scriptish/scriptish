@@ -52,7 +52,7 @@ ScriptDependency.prototype = {
     this._filename = file.leafName;
 
     Scriptish_log(Scriptish_stringBundle("moving.dependency") + " "
-        + this._tempFile.path + " --> " + file.path, true);
+        + this._tempFile.path + " --> " + file.path);
 
     file.remove(true);
     this._tempFile.moveTo(file.parent, file.leafName);
