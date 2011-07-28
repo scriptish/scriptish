@@ -25,6 +25,8 @@ var Instances = {
       .createInstance(Ci.nsIDOMSerializer),
   get fos() Cc["@mozilla.org/network/file-output-stream;1"]
       .createInstance(Ci.nsIFileOutputStream),
+  get ftc() Cc["@mozilla.org/feed-textconstruct;1"]
+      .createInstance(Ci.nsIFeedTextConstruct),
   get sfos() Cc["@mozilla.org/network/safe-file-output-stream;1"]
       .createInstance(Ci.nsIFileOutputStream)
       .QueryInterface(Ci.nsISafeOutputStream),
@@ -40,6 +42,8 @@ var Instances = {
   get timer() Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
   get wbp() Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
       .createInstance(Ci.nsIWebBrowserPersist),
+  get xfr() Cc["@mozilla.org/widget/transferable;1"]
+      .createInstance(Ci.nsITransferable),
   get xhr() Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
       .createInstance(Ci.nsIXMLHttpRequest)
 };
@@ -58,6 +62,9 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
     Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
     "nsIClipboardHelper");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Services, "cbs", "@mozilla.org/widget/clipboard;1", "nsIClipboard");
 
 XPCOMUtils.defineLazyServiceGetter(
     Services, "cs", "@mozilla.org/consoleservice;1", "nsIConsoleService");

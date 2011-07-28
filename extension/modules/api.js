@@ -218,7 +218,7 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 GM_API.prototype.GM_generateUUID = function GM_generateUUID() (
     Services.uuid.generateUUID().toString());
 
-GM_API.prototype.GM_setClipboard = function GM_setClipboard() {
+GM_API.prototype.GM_setClipboard = function() {
   if (!GM_apiLeakCheck("GM_setClipboard")) return;
   GM_setClipboard.apply(null, arguments);
 }
