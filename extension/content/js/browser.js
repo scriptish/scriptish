@@ -302,6 +302,7 @@ Scriptish_BrowserUI.viewContextItemClicked = function() {
 
 window.addEventListener("load", Scriptish_BrowserUI.chromeLoad.bind(Scriptish_BrowserUI), false);
 window.addEventListener("unload", Scriptish_BrowserUI.chromeUnload.bind(Scriptish_BrowserUI), false);
+window.addEventListener("aftercustomization", Scriptish_setupPopup, false);
 })(Components.utils.import, {})
 
 /**
