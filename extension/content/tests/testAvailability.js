@@ -13,7 +13,7 @@ Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_ExtendedStringBundle.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_findError.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getBinaryContents.js", tools);
-Cu.import("resource://scriptish/utils/Scriptish_getBrowserForContentWindow.js", tools);
+Cu.import("resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getContents.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getEditor.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getFirebugConsole.js", tools);
