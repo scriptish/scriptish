@@ -16,9 +16,9 @@ lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_sandboxSc
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
 lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
 lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
+lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_installUri.js", ["Scriptish_installUri"]);
 
-lazyUtil(this, "getBrowserForContentWindow");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
 
@@ -73,7 +73,7 @@ ScriptishService.prototype = {
     switch (aTopic) {
       case "chrome-document-global-created":
       case "content-document-global-created":
-        this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject));
+        this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject).wrappedJSObject);
         break;
       case "inner-window-destroyed":
         this.innerWinDestroyed(aSubject.QueryInterface(Components.interfaces.nsISupportsPRUint64).data);
