@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://scriptish/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scriptish/content/third-party/firebug/startButton.css" type="text/css"?>
 
 <overlay id="scriptish-browser-overlay"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -8,7 +9,10 @@
   <broadcasterset id="mainBroadcasterSet">
     <broadcaster id="scriptish-options-brd"/>
     <broadcaster id="scriptish-tb-popup-brd"/>
-    <broadcaster id="scriptish-button-brd"/>
+    <broadcaster id="scriptish-button-brd"
+      showScripts="true"
+      scriptCount="0"
+      persist="showScripts"/>
     <broadcaster id="scriptish-tb-cmds-brd"/>
     <broadcaster id="scriptish-tb-new-us-brd"/>
     <broadcaster id="scriptish-tb-show-us-brd"/>
@@ -16,7 +20,7 @@
   </broadcasterset>
 
   <menupopup id="menu_ToolsPopup">
-    <menu id="scriptish_general_menu" insertbefore="javascriptConsole"/>
+    <menu id="scriptish_general_menu"/>
   </menupopup>
   <menupopup id="taskPopup">
     <menu id="scriptish_general_menu" insertbefore="downloadMgr"/>

@@ -28,8 +28,22 @@ Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
 Scriptish_BrowserUI.tbBtnSetup = function() {
-  $("scriptish-button-brd").setAttribute(
-      "onclick", "Scriptish_BrowserUIM.onIconClick(event)");
+  function updateShowScripts() {
+    tbBtnBrd.setAttribute("showScripts",
+        Scriptish_prefRoot.getValue("toolbarbutton.showScripts")
+        && Scriptish_prefRoot.getValue("enabled")
+        );
+  }
+
+  var tbBtnBrd = $("scriptish-button-brd");
+  tbBtnBrd.setAttribute("onclick", "Scriptish_BrowserUIM.onIconClick(event)");
+  updateShowScripts();
+  Scriptish_prefRoot.watch("enabled", updateShowScripts);
+  Scriptish_prefRoot.watch("toolbarbutton.showScripts", updateShowScripts);
+  window.addEventListener("unload", function() {
+    Scriptish_prefRoot.unwatch("enabled", updateShowScripts);
+    Scriptish_prefRoot.unwatch("toolbarbutton.showScripts", updateShowScripts);
+  }, false);
 
   var sbCmdsEle = $("scriptish-tb-cmds-brd");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
@@ -51,12 +65,19 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   var sbPopUp = $("scriptish-tb-popup-brd");
   sbPopUp.setAttribute("onclick",
       "Scriptish_popupClicked(event);event.stopPropagation();");
-  sbPopUp.setAttribute("onpopupshowing", "Scriptish_showPopup(event);");
+  sbPopUp.setAttribute("onpopupshowing", "Scriptish_setupPopup();");
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
 
   delete Scriptish_BrowserUI["tbBtnSetup"];
+
+  Scriptish_setupPopup();
+  gBrowser.addProgressListener({
+    onLocationChange: function(aProgress, aRequest, aURI) {
+      Scriptish_setupPopup();
+    }
+  });
 }
 
 /**
@@ -228,7 +249,6 @@ Scriptish_BrowserUI.reattachMenuCmds = function() {
  * leak it's memory.
  */
 Scriptish_BrowserUI.chromeUnload = function() {
-  Scriptish_prefRoot.unwatch("enabled", this.statusWatcher);
   gBrowser.removeProgressListener(this);
   delete this.menuCommanders;
 }
@@ -307,8 +327,10 @@ function Scriptish_popupClicked(aEvt) {
 /**
  * Handles a Scriptish menu popup event
  */
-function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
+function Scriptish_setupPopup() Scriptish.getConfig(function(config) {
   var $ = function(aID) document.getElementById(aID);
+  var popup = $("scriptish-tb-popup");
+  if (!popup) return;
   Scriptish_BrowserUI.reattachMenuCmds();
 
   function okURL(url) (
@@ -334,11 +356,10 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
     popup.insertBefore(mi, tail);
   }
 
-  var popup = aEvent.target;
   var tail = $("scriptish-tb-no-scripts-sep");
 
   // remove all the scripts from the list
-  for (var i = popup.childNodes.length - 1; i >= 0; i--) {
+  for (var i = popup.childNodes.length - 1; ~i; i--) {
     var node = popup.childNodes[i];
     if (node.script || node.getAttribute("value") == "hack")
       popup.removeChild(node);
@@ -374,8 +395,13 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   }
   runsOnTop.forEach(appendScriptToPopup);
 
+  var totalScriptCount = frameScriptLen + runsOnTop.length;
+  function isEnabled(aScript) aScript.enabled;
+  var enabledScriptCount = runsOnTop.filter(isEnabled).length + runsFramed.filter(isEnabled).length;
+  $("scriptish-button").setAttribute("scriptCount", enabledScriptCount);
+
   let (menuitem = $("scriptish-tb-no-scripts")) {
-    let collapsed = menuitem.collapsed = !!(frameScriptLen + runsOnTop.length);
+    let collapsed = menuitem.collapsed = !!totalScriptCount;
     if (collapsed) return;
 
     // determine the correct label
@@ -388,4 +414,4 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
       label = Scriptish_stringBundle("statusbar.noScripts.notfound");
     menuitem.setAttribute("label", label);
   }
-})
+});

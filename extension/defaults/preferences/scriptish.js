@@ -2,7 +2,7 @@ pref("extensions.scriptish@erikvold.com.description", "chrome://scriptish/locale
 pref("extensions.scriptish.blocklist.enabled", true);
 pref("extensions.scriptish.blocklist.interval", 86400);
 pref("extensions.scriptish.blocklist.lastFetch", 0);
-pref("extensions.scriptish.blocklist.url", "https://github.com/erikvold/scriptish/raw/master/blocklist.json");
+pref("extensions.scriptish.blocklist.url", "https://github.com/scriptish/scriptish/raw/master/blocklist.json");
 pref("extensions.scriptish.cache.enabled", true);
 pref("extensions.scriptish.enabled", true);
 pref("extensions.scriptish.enabledSchemes.about", false);
@@ -19,6 +19,7 @@ pref("extensions.scriptish.enableScriptRefreshing", true);
 pref("extensions.scriptish.logChrome", false);
 pref("extensions.scriptish.logToErrorConsole", true);
 pref("extensions.scriptish.optimizingRegexpMerge", false);
+pref("extensions.scriptish.toolbarbutton.showScripts", true);
 pref("extensions.scriptish.uninstallPreferences", true);
 pref("extensions.scriptish.update.requireBuiltInCerts", true);
 pref("extensions.scriptish.update.requireSecured", true);

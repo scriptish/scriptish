@@ -6,17 +6,6 @@ Components.utils.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
 Components.utils.import("resource://scriptish/utils/Scriptish_mergeRegExps.js");
 
 const FAKE_REGEXP = {test: function() false};
-const REG_TAINTED = /\\[ux]?\d/;
-const REG_TAINTED_ESCAPES = /\\\\/g;
-
-function tainted_filter(r) {
-  // No negative lookbehind in js :p
-  if (REG_TAINTED.test(r.source.replace(REG_TAINTED_ESCAPES, ""))) {
-    this.push(r);
-    return false;
-  }
-  return true;
-}
 
 function merge(regs, flags) {
   if (!regs.length) {
@@ -25,25 +14,7 @@ function merge(regs, flags) {
     // that will always test |true|
     return FAKE_REGEXP;
   }
-
-  // Split the regs into "tainted" ones and those we can merge
-  // Tainted:
-  // - contains back refs /(["']).+?\1/
-  // - contains string escapes /\x00\u0000/
-  let tainted = [];
-  regs = regs.filter(tainted_filter, tainted);
-
-  // merge what we can
-  regs = Scriptish_mergeRegExps(regs, flags);
-
-  if (tainted.length) {
-    // we need to test regs individually
-    tainted.unshift(regs);
-    return {test: function(s) tainted.some(function(r) r.test(s))};
-  }
-
-  // no tainted regs
-  return regs;
+  return Scriptish_mergeRegExps(regs, flags);
 }
 
 function PatternCollection() {

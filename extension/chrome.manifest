@@ -9,6 +9,7 @@ content    scriptish    content/
 resource   scriptish    modules/
 skin       scriptish    classic/1.0 skin/
 style      chrome://global/content/customizeToolbar.xul chrome://scriptish/skin/browser.css
+style      chrome://global/content/customizeToolbar.xul chrome://scriptish/content/third-party/firebug/startButton.css
 
 overlay    chrome://browser/content/browser.xul chrome://scriptish/content/browser.xul
 overlay    chrome://browser/content/scratchpad.xul chrome://scriptish/content/scratchpad.xul

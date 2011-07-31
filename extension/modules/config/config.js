@@ -139,7 +139,7 @@ Config.prototype = {
           function() writeStream.finish()
           );
 
-      Scriptish_log("Updated Scriptish blocklist " + SCRIPTISH_BLOCKLIST, true);
+      Scriptish_log("Updated Scriptish blocklist " + SCRIPTISH_BLOCKLIST);
 
       self._blocklist = blocklist;
       self._blocklistHash = hash;
@@ -337,7 +337,7 @@ Config.prototype = {
     (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON);
 
     Scriptish_log(
-        Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG_JSON, true);
+        Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG_JSON);
 
     let converter = Instances.suc;
     converter.charset = "UTF-8";

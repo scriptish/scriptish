@@ -2,6 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
+    <em:type>2</em:type>
     <em:id>scriptish@erikvold.com</em:id>
 
     <em:name>Scriptish</em:name>
@@ -10,7 +11,7 @@
     <em:version>0.1.4a1pre</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
-    <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
+    <em:homepageURL>http://scriptish.org</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://scriptish/skin/scriptish32.png</em:iconURL>
     <em:icon64URL>chrome://scriptish/skin/scriptish64.png</em:icon64URL>
@@ -49,6 +50,7 @@
     <em:translator>Mikael Hiort af Ornäs (sv-SE)</em:translator>
     <em:translator>Nils Maier (de)</em:translator>
     <em:translator>nishikawasasaki (kohsei yamamoto) (ja-JP)</em:translator>
+    <em:translator>shyangs (林郁翔) (zh-TW)</em:translator>
     <em:translator>strel (es-ES)</em:translator>
     <em:translator>yfdyh000 (zh-CN); mailto:yfdyh000@gmail.com</em:translator>
 

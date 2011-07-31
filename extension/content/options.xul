@@ -51,16 +51,21 @@
       <preference id="pref-enablePopupNotifications" name="extensions.scriptish.enabledNotifications.popup" type="bool"/>
       <preference id="pref-enableSlidingNotifications" name="extensions.scriptish.enabledNotifications.sliding" type="bool"/>
       <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
+      <preference id="pref-toolbarbutton-showScripts" name="extensions.scriptish.toolbarbutton.showScripts" type="bool"/>
       <preference id="pref-useDefaultLocale" name="extensions.scriptish.useDefaultLocale" type="bool"/>
     </preferences>
+    <groupbox>
+      <caption label="options.translation" localize="label"/>
+      <checkbox preference="pref-useDefaultLocale" label="options.translation.useEnglish" localize="label"/>
+    </groupbox>
+    <groupbox>
+      <caption label="options.toolbarbutton" localize="label"/>
+      <checkbox preference="pref-toolbarbutton-showScripts" label="options.toolbarbutton.showScripts" localize="label"/>
+    </groupbox>
     <groupbox>
       <caption label="options.notifications" localize="label"/>
       <checkbox preference="pref-enablePopupNotifications" label="options.notifications.popup.enable" tooltiptext="options.notifications.whenDisabled" localize="label,tooltiptext"/>
       <checkbox preference="pref-enableSlidingNotifications" label="options.notifications.sliding.enable" tooltiptext="options.notifications.whenDisabled" localize="label,tooltiptext"/>
-    </groupbox>
-    <groupbox>
-      <caption label="options.translation" localize="label"/>
-      <checkbox preference="pref-useDefaultLocale" label="options.translation.useEnglish" localize="label"/>
     </groupbox>
     <groupbox>
       <caption label="options.addonsManager" localize="label"/>
