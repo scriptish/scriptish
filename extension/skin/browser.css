@@ -1,7 +1,9 @@
 #scriptish-button {
   -moz-box-orient: horizontal;
-  -moz-binding: url("chrome://scriptish/content/third-party/firebug/startButton.xml#scriptish-button");
   list-style-image: url("chrome://scriptish/skin/scriptish24.png");
+}
+toolbar #scriptish-button {
+  -moz-binding: url("chrome://scriptish/content/third-party/firebug/startButton.xml#scriptish-button");
 }
 
 toolbar[iconsize="small"] #scriptish-button {
