@@ -1,12 +1,12 @@
 var EXPORTED_SYMBOLS = ["ScriptDependency"];
-(function(inc) {
-inc("resource://scriptish/constants.js");
-inc("resource://scriptish/logging.js");
-inc("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-inc("resource://scriptish/utils/Scriptish_getContents.js");
-inc("resource://scriptish/utils/Scriptish_stringBundle.js");
-inc("resource://scriptish/script/cachedresource.js");
-})(Components.utils.import)
+const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
+lazyImport(this, "resource://scriptish/script/cachedresource.js", ["CachedResource"]);
+
+lazyUtil(this, "getUriFromFile");
+lazyUtil(this, "getContents");
+lazyUtil(this, "stringBundle");
 
 function ScriptDependency(aScript) {
   this._script = aScript;
@@ -52,7 +52,7 @@ ScriptDependency.prototype = {
     this._filename = file.leafName;
 
     Scriptish_log(Scriptish_stringBundle("moving.dependency") + " "
-        + this._tempFile.path + " --> " + file.path, true);
+        + this._tempFile.path + " --> " + file.path);
 
     file.remove(true);
     this._tempFile.moveTo(file.parent, file.leafName);

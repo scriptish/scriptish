@@ -7,21 +7,26 @@
     style="width: 42em; height:32em;"
     persist="width,height"
     buttons="accept,cancel"
+    title="install.title"
+    localize="title"
     defaultButton="cancel">
   <script type="text/javascript" src="chrome://scriptish/content/js/install.js"/>
   <hbox align="start" id="xpinstallheader">
     <image class="alert-icon"/>
     <vbox flex="1">
-      <description id="warning1" class="warning"/>
-      <description id="warning2"/>
+      <description id="warning1" class="warning" localize="#text">install.warning1</description>
+      <description id="warning2" localize="#text">install.warning2</description>
     </vbox>
   </hbox>
   <vbox id="installBox" flex="1">
     <hbox id="script-desc-vbox">
-      <vbox pack="start">
+      <vbox pack="start" align="center" id="scriptIconBox">
         <image id="scriptIcon"/>
       </vbox>
-      <description id="scriptDescription" flex="1"/>
+      <vbox flex="1">
+        <description id="scriptTitle"/>
+        <description id="scriptDescription"/>
+      </vbox>
     </hbox>
     <vbox id="itemBox" flex="1">
       <vbox id="domains">
@@ -50,7 +55,7 @@
       </vbox>
     </vbox>
     <hbox id="showSource-box" flex="1" pack="end" align="end">
-      <label id="showSource" class="text-link"/>
+      <label id="showSource" class="text-link" value="install.showScriptSource" localize="value"/>
     </hbox>
   </vbox>
 </dialog>

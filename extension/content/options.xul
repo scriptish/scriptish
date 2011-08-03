@@ -20,7 +20,6 @@
       <preference id="pref-editor" name="extensions.scriptish.editor" type="unichar"/>
       <preference id="pref-uninstallPreferences" name="extensions.scriptish.uninstallPreferences" type="bool"/>
       <preference id="pref-useDownloadURLForUpdateURL" name="extensions.scriptish.useDownloadURLForUpdateURL" type="bool"/>
-      <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
     </preferences>
 
     <groupbox>
@@ -45,7 +44,29 @@
       <caption label="Update" localize="label"/>
       <checkbox preference="pref-useDownloadURLForUpdateURL" label="options.useDownloadURL" localize="label"/>
     </groupbox>
+  </prefpane>
 
+  <prefpane id="pane-ui" label="options.pane.ui" localize="label">
+    <preferences>
+      <preference id="pref-enablePopupNotifications" name="extensions.scriptish.enabledNotifications.popup" type="bool"/>
+      <preference id="pref-enableSlidingNotifications" name="extensions.scriptish.enabledNotifications.sliding" type="bool"/>
+      <preference id="pref-enableCopyDownloadURL" name="extensions.scriptish.enableCopyDownloadURL" type="bool"/>
+      <preference id="pref-toolbarbutton-showScripts" name="extensions.scriptish.toolbarbutton.showScripts" type="bool"/>
+      <preference id="pref-useDefaultLocale" name="extensions.scriptish.useDefaultLocale" type="bool"/>
+    </preferences>
+    <groupbox>
+      <caption label="options.translation" localize="label"/>
+      <checkbox preference="pref-useDefaultLocale" label="options.translation.useEnglish" localize="label"/>
+    </groupbox>
+    <groupbox>
+      <caption label="options.toolbarbutton" localize="label"/>
+      <checkbox preference="pref-toolbarbutton-showScripts" label="options.toolbarbutton.showScripts" localize="label"/>
+    </groupbox>
+    <groupbox>
+      <caption label="options.notifications" localize="label"/>
+      <checkbox preference="pref-enablePopupNotifications" label="options.notifications.popup.enable" tooltiptext="options.notifications.whenDisabled" localize="label,tooltiptext"/>
+      <checkbox preference="pref-enableSlidingNotifications" label="options.notifications.sliding.enable" tooltiptext="options.notifications.whenDisabled" localize="label,tooltiptext"/>
+    </groupbox>
     <groupbox>
       <caption label="options.addonsManager" localize="label"/>
       <checkbox preference="pref-enableCopyDownloadURL" label="options.enableCopyDownloadURL" localize="label"/>
@@ -63,60 +84,49 @@
   <prefpane id="pane-advanced" label="options.pane.advanced" localize="label">
     <preferences>
       <preference id="pref-cache-enabled" name="extensions.scriptish.cache.enabled" type="bool"/>
-      <preference id="pref-disableNotifications" name="extensions.scriptish.disableNotifications" type="bool"/>
-      <preference id="pref-useDefaultLocale" name="extensions.scriptish.useDefaultLocale" type="bool"/>
       <preference id="pref-enabledSchemes-file" name="extensions.scriptish.enabledSchemes.file" type="bool"/>
       <preference id="pref-enabledSchemes-chrome" name="extensions.scriptish.enabledSchemes.chrome" type="bool"/>
       <preference id="pref-enabledSchemes-unmht" name="extensions.scriptish.enabledSchemes.unmht" type="bool"/>
       <preference id="pref-enabledSchemes-about" name="extensions.scriptish.enabledSchemes.about" type="bool"/>
       <preference id="pref-logChrome" name="extensions.scriptish.logChrome" type="bool"/>
+      <preference id="pref-logToErrorConsole" name="extensions.scriptish.logToErrorConsole" type="bool"/>
       <preference id="pref-update-requireSecured" name="extensions.scriptish.update.requireSecured" type="bool"/>
       <preference id="pref-update-requireBuiltInCerts" name="extensions.scriptish.update.requireBuiltInCerts" type="bool"/>
     </preferences>
 
-    <groupbox>
-      <caption label="options.cache" localize="label"/>
-      <checkbox preference="pref-cache-enabled" label="options.cache.enabled" localize="label"/>
-    </groupbox>
-    <groupbox>
-      <caption label="options.notifications" localize="label"/>
-      <checkbox preference="pref-disableNotifications" label="options.notifications.disable" localize="label"/>
-    </groupbox>
-    <groupbox>
-      <caption label="options.translation" localize="label"/>
-      <checkbox preference="pref-useDefaultLocale" label="options.translation.useEnglish" localize="label"/>
-    </groupbox>
-    <groupbox id="enabledschemes-advanced">
-      <caption label="options.enabledSchemes.advanced" localize="label"/>
-      <grid>
-        <columns>
-          <column flex="1"/>
-          <column flex="1"/>
-        </columns>
-        <rows>
-          <row>
-            <checkbox preference="pref-enabledSchemes-file" label="options.enabledSchemes.file" localize="label"/>
-            <checkbox preference="pref-enabledSchemes-chrome" label="options.enabledSchemes.chrome" localize="label"/>
-          </row>
-          <row>
-            <checkbox preference="pref-enabledSchemes-unmht" label="options.enabledSchemes.unmht" localize="label"/>
-            <checkbox preference="pref-enabledSchemes-about" label="options.enabledSchemes.about" localize="label"/>
-          </row>
-        </rows>
-      </grid>
-      <separator class="thin"/>
-      <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark" localize="value"/>
-      <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark2" localize="value"/>
-    </groupbox>
-    <groupbox>
-      <caption label="options.logging" localize="label"/>
-      <checkbox preference="pref-logChrome" label="options.logChrome" localize="label"/>
-    </groupbox>
-    <groupbox>
-      <caption label="options.update.security" localize="label"/>
-      <checkbox preference="pref-update-requireSecured" label="options.requireSecured" localize="label"/>
-      <checkbox preference="pref-update-requireBuiltInCerts" label="options.requireBuiltInCerts" localize="label"/>
-    </groupbox>
+    <tabbox>
+      <tabs>
+        <tab label="options.pane.main" localize="label"/>
+        <tab label="options.enabledSchemes.advanced" localize="label" />
+        <tab label="options.update.security" localize="label"/>
+      </tabs>
+      <tabpanels>
+        <tabpanel>
+          <groupbox>
+          <caption label="options.cache" localize="label" />
+            <checkbox preference="pref-cache-enabled" label="options.cache.enabled" localize="label"/>
+          </groupbox>
+          <groupbox>
+            <caption label="options.logging" localize="label" />
+            <checkbox preference="pref-logChrome" label="options.logChrome" localize="label"/>
+            <checkbox preference="pref-logToErrorConsole" label="options.logToErrorConsole" localize="label"/>
+          </groupbox>
+        </tabpanel>
+        <tabpanel>
+          <checkbox preference="pref-enabledSchemes-file" label="options.enabledSchemes.file" localize="label"/>
+          <checkbox preference="pref-enabledSchemes-chrome" label="options.enabledSchemes.chrome" localize="label"/>
+          <checkbox preference="pref-enabledSchemes-unmht" label="options.enabledSchemes.unmht" localize="label"/>
+          <checkbox preference="pref-enabledSchemes-about" label="options.enabledSchemes.about" localize="label"/>
+          <separator class="thin"/>
+          <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark" localize="value"/>
+          <label class="remark" control="enabledschemes-advanced" value="options.enabledSchemes.securityRemark2" localize="value"/>
+        </tabpanel>
+        <tabpanel>
+          <checkbox preference="pref-update-requireSecured" label="options.requireSecured" localize="label"/>
+          <checkbox preference="pref-update-requireBuiltInCerts" label="options.requireBuiltInCerts" localize="label"/>
+        </tabpanel>
+      </tabpanels>
+    </tabbox>
   </prefpane>
 
   <script type="application/x-javascript" src="chrome://scriptish/content/js/options.js"/>

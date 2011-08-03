@@ -1,5 +1,5 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getWindowIDs"];
-Components.utils.import("resource://scriptish/constants.js");
+const Ci = Components.interfaces;
 
 function Scriptish_getWindowIDs(aWin) {
   let utils = aWin.QueryInterface(Ci.nsIInterfaceRequestor)

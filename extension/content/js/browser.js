@@ -2,21 +2,23 @@ var Scriptish_BrowserUI = {
   menuCommanders: [],
   currentMenuCommander: null
 };
-var Scriptish_BrowserUIM;
 
 (function(inc, tools){
-inc("resource://scriptish/content/browser.js");
-inc("resource://scriptish/prefmanager.js");
-inc("resource://scriptish/scriptish.js");
-inc("resource://scriptish/utils/Scriptish_installUri.js");
-inc("resource://scriptish/utils/Scriptish_openInEditor.js");
-inc("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js");
-inc("resource://scriptish/utils/Scriptish_getWindowIDs.js");
-inc("resource://scriptish/utils/Scriptish_stringBundle.js");
-inc("resource://scriptish/config/configdownloader.js");
-inc("resource://scriptish/menucommander.js");
-inc("resource://scriptish/logging.js");
 inc("resource://scriptish/constants.js", tools);
+const {lazyImport, lazyUtil} = tools;
+
+lazyImport(window, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(window, "resource://scriptish/content/browser.js", ["Scriptish_BrowserUIM"]);
+lazyImport(window, "resource://scriptish/menucommander.js", ["Scriptish_MenuCommander"]);
+lazyImport(window, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(window, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
+
+lazyUtil(window, "installUri");
+lazyUtil(window, "openInEditor");
+lazyUtil(window, "stringBundle");
+lazyUtil(window, "getURLsForContentWindow");
+lazyUtil(window, "getWindowIDs");
+
 var Ci = tools.Ci;
 var Services = tools.Services;
 var gmSvc = Services.scriptish;
@@ -26,11 +28,22 @@ Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
     Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIWebProgressListener]);
 
 Scriptish_BrowserUI.tbBtnSetup = function() {
-  $("scriptish-button-brd").setAttribute(
-      "onclick", "Scriptish_BrowserUIM.onIconClick(event)");
+  function updateShowScripts() {
+    tbBtnBrd.setAttribute("showScripts",
+        Scriptish_prefRoot.getValue("toolbarbutton.showScripts")
+        && Scriptish_prefRoot.getValue("enabled")
+        );
+  }
 
-  $("scriptish-tb-no-scripts-brd").setAttribute(
-      "label", Scriptish_stringBundle("statusbar.noScripts"));
+  var tbBtnBrd = $("scriptish-button-brd");
+  tbBtnBrd.setAttribute("onclick", "Scriptish_BrowserUIM.onIconClick(event)");
+  updateShowScripts();
+  Scriptish_prefRoot.watch("enabled", updateShowScripts);
+  Scriptish_prefRoot.watch("toolbarbutton.showScripts", updateShowScripts);
+  window.addEventListener("unload", function() {
+    Scriptish_prefRoot.unwatch("enabled", updateShowScripts);
+    Scriptish_prefRoot.unwatch("toolbarbutton.showScripts", updateShowScripts);
+  }, false);
 
   var sbCmdsEle = $("scriptish-tb-cmds-brd");
   sbCmdsEle.setAttribute("label", Scriptish_stringBundle("menu.commands"));
@@ -52,12 +65,19 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   var sbPopUp = $("scriptish-tb-popup-brd");
   sbPopUp.setAttribute("onclick",
       "Scriptish_popupClicked(event);event.stopPropagation();");
-  sbPopUp.setAttribute("onpopupshowing", "Scriptish_showPopup(event);");
+  sbPopUp.setAttribute("onpopupshowing", "Scriptish_setupPopup();");
 
   // update enabled icon
   Scriptish_BrowserUIM.refreshStatus();
 
   delete Scriptish_BrowserUI["tbBtnSetup"];
+
+  Scriptish_setupPopup();
+  gBrowser.addProgressListener({
+    onLocationChange: function(aProgress, aRequest, aURI) {
+      Scriptish_setupPopup();
+    }
+  });
 }
 
 /**
@@ -229,7 +249,6 @@ Scriptish_BrowserUI.reattachMenuCmds = function() {
  * leak it's memory.
  */
 Scriptish_BrowserUI.chromeUnload = function() {
-  Scriptish_prefRoot.unwatch("enabled", this.statusWatcher);
   gBrowser.removeProgressListener(this);
   delete this.menuCommanders;
 }
@@ -283,6 +302,7 @@ Scriptish_BrowserUI.viewContextItemClicked = function() {
 
 window.addEventListener("load", Scriptish_BrowserUI.chromeLoad.bind(Scriptish_BrowserUI), false);
 window.addEventListener("unload", Scriptish_BrowserUI.chromeUnload.bind(Scriptish_BrowserUI), false);
+window.addEventListener("aftercustomization", Scriptish_setupPopup, false);
 })(Components.utils.import, {})
 
 /**
@@ -305,16 +325,22 @@ function Scriptish_popupClicked(aEvt) {
   }
 }
 
-function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
+/**
+ * Handles a Scriptish menu popup event
+ */
+function Scriptish_setupPopup() Scriptish.getConfig(function(config) {
   var $ = function(aID) document.getElementById(aID);
+  var popup = $("scriptish-tb-popup");
+  if (!popup) return;
   Scriptish_BrowserUI.reattachMenuCmds();
 
-  function scriptsMatching(urls) {
-    function testMatchURLs(script) {
-      return urls.some(function(url) script.matchesURL(url));
-    }
+  function okURL(url) (
+      (Scriptish.isGreasemonkeyable(url) && !config.isURLExcluded(url)));
 
-    return config.getMatchingScripts(testMatchURLs, urls).sort(function(a,b) {
+  function scriptsMatching(urls) {
+    return config.getMatchingScripts(function testMatchURLs(script) {
+      return urls.some(function(url) okURL(url) && script.matchesURL(url));
+    }).sort(function(a,b) {
       a = a.name.toLocaleLowerCase(), b = b.name.toLocaleLowerCase();
       return a.localeCompare(b);
     });
@@ -331,19 +357,23 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
     popup.insertBefore(mi, tail);
   }
 
-  var popup = aEvent.target;
   var tail = $("scriptish-tb-no-scripts-sep");
 
   // remove all the scripts from the list
-  for (var i = popup.childNodes.length - 1; i >= 0; i--) {
+  for (var i = popup.childNodes.length - 1; ~i; i--) {
     var node = popup.childNodes[i];
     if (node.script || node.getAttribute("value") == "hack")
       popup.removeChild(node);
   }
 
   var urls = Scriptish_getURLsForContentWindow(getBrowser().contentWindow);
-  var runsOnTop = scriptsMatching([urls.shift()]); // first url = top window
-  var runsFramed = scriptsMatching(urls); // remainder are all its subframes
+  var url = urls.shift();
+
+  // first url = top window
+  var runsOnTop = scriptsMatching([url]);
+
+  // remainder are all its subframes
+  var runsFramed = scriptsMatching(urls);
 
   // drop all runsFramed scripts already present in runsOnTop
   for (var i = 0; i < runsOnTop.length; i++) {
@@ -355,7 +385,8 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   }
 
   // build the new list of scripts
-  if (runsFramed.length) {
+  var frameScriptLen = runsFramed.length;
+  if (frameScriptLen) {
     runsFramed.forEach(appendScriptToPopup);
     if (runsOnTop.length) { // only add the separator if there is stuff below
       var separator = document.createElement("menuseparator");
@@ -365,6 +396,23 @@ function Scriptish_showPopup(aEvent) Scriptish.getConfig(function(config) {
   }
   runsOnTop.forEach(appendScriptToPopup);
 
-  $("scriptish-tb-no-scripts").collapsed =
-      !!(runsFramed.length + runsOnTop.length);
-})
+  var totalScriptCount = frameScriptLen + runsOnTop.length;
+  function isEnabled(aScript) aScript.enabled;
+  var enabledScriptCount = runsOnTop.filter(isEnabled).length + runsFramed.filter(isEnabled).length;
+  $("scriptish-button").setAttribute("scriptCount", enabledScriptCount);
+
+  let (menuitem = $("scriptish-tb-no-scripts")) {
+    let collapsed = menuitem.collapsed = !!totalScriptCount;
+    if (collapsed) return;
+
+    // determine the correct label
+    let label;
+    if (config.isURLExcluded(url))
+      label = Scriptish_stringBundle("statusbar.noScripts.excluded");
+    else if (!Scriptish.isGreasemonkeyable(url))
+      label = Scriptish_stringBundle("statusbar.noScripts.scheme");
+    else
+      label = Scriptish_stringBundle("statusbar.noScripts.notfound");
+    menuitem.setAttribute("label", label);
+  }
+});

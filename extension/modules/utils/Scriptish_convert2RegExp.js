@@ -1,49 +1,23 @@
 var EXPORTED_SYMBOLS = ["Scriptish_convert2RegExp"];
 
-// Mighty TLD Check
-const tldChk = new RegExp("^(\\^(?:[^/]*)(?://)?(?:[^/]*))(\\\\\\.tld)((?:/.*)?)$");
+const RE_REGEXP = /^\/(.*)\/(i)?$/;
+const RE_ESCAPE = /[{}()\[\]\\^$.?]/g;
+const RE_WILD = /\*+/g;
+const RE_TLD = /^\^[^\/]*(?:\/\/)?[^\/]*\\\.tld(?:\/.*)?\$$/;
 
-// Converts simple pattern notation to a regular expression.
-// thanks AdBlock! http://www.mozdev.org/source/browse/adblock/adblock/
-function Scriptish_convert2RegExp(aPattern, aNoTLD) {
-  var s = aPattern+"";
-  var res = "^";
+function Scriptish_convert2RegExp(aPattern, aNoTLD, forceString) {
+  var s = aPattern.toString().trim(), m;
 
-  var regExpChk = /^\/(.*)\/(i)?\n?$/.exec(s);
-  if (regExpChk) return new RegExp(regExpChk[1], regExpChk[2]);
-
-  for (var i = 0 ; i < s.length; i++) {
-    switch(s[i]) {
-      case "*":
-        res += ".*";
-        break;
-      case ".":
-      case "?":
-      case "^":
-      case "$":
-      case "+":
-      case "{":
-      case "}":
-      case "[":
-      case "]":
-      case "|":
-      case "(":
-      case ")":
-      case "\\":
-        res += "\\" + s[i];
-        break;
-      case " ":
-      case "\n":
-        break;
-      default:
-        res += s[i];
-        break;
-    }
+  // Already a regexp?
+  if (!forceString && (m = s.match(RE_REGEXP))) {
+    return new RegExp(m[1], m[2]);
   }
 
-  var regExp = new RegExp(res+"$", "i");
-  if (!aNoTLD && tldChk.test(res))
-    regExp.isTLD = true;
-
+  var res = "^" + s
+    .replace(RE_ESCAPE, "\\$&")
+    .replace(RE_WILD, ".*")
+    + "$";
+  var regExp = new RegExp(res, "i");
+  regExp.isTLD = !aNoTLD && RE_TLD.test(res);
   return regExp;
 }

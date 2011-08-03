@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "Cr", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
-    "Services", "Instances", "timeout"];
+    "Services", "Instances", "lazyImport", "lazyUtil", "timeout"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
 const global = this;
@@ -25,8 +25,12 @@ var Instances = {
       .createInstance(Ci.nsIDOMSerializer),
   get fos() Cc["@mozilla.org/network/file-output-stream;1"]
       .createInstance(Ci.nsIFileOutputStream),
+  get ftc() Cc["@mozilla.org/feed-textconstruct;1"]
+      .createInstance(Ci.nsIFeedTextConstruct),
+  get sfos() Cc["@mozilla.org/network/safe-file-output-stream;1"]
+      .createInstance(Ci.nsIFileOutputStream)
+      .QueryInterface(Ci.nsISafeOutputStream),
   get fp() Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker),
-  get json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
   get lf() Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile),
   get process() Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess),
   get se() Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError)
@@ -38,6 +42,8 @@ var Instances = {
   get timer() Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
   get wbp() Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
       .createInstance(Ci.nsIWebBrowserPersist),
+  get xfr() Cc["@mozilla.org/widget/transferable;1"]
+      .createInstance(Ci.nsITransferable),
   get xhr() Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
       .createInstance(Ci.nsIXMLHttpRequest)
 };
@@ -56,6 +62,9 @@ XPCOMUtils.defineLazyServiceGetter(
 XPCOMUtils.defineLazyServiceGetter(
     Services, "cb", "@mozilla.org/widget/clipboardhelper;1",
     "nsIClipboardHelper");
+
+XPCOMUtils.defineLazyServiceGetter(
+    Services, "cbs", "@mozilla.org/widget/clipboard;1", "nsIClipboard");
 
 XPCOMUtils.defineLazyServiceGetter(
     Services, "cs", "@mozilla.org/consoleservice;1", "nsIConsoleService");
@@ -88,6 +97,35 @@ XPCOMUtils.defineLazyServiceGetter(
     Services, "uuid", "@mozilla.org/uuid-generator;1",
     "nsIUUIDGenerator");
 
+const _lazyModules = {};
+function lazyImport(obj, resource, symbols) {
+  if (!(resource in _lazyModules)) {
+    XPCOMUtils.defineLazyGetter(
+      _lazyModules,
+      resource,
+      function() {
+        let _m = {};
+        try {
+          Components.utils.import(resource, _m);
+        }
+        catch (ex) {
+          Components.utils.reportError("Failed to import resource: " + resource);
+          throw ex;
+        }
+        return _m;
+      });
+  }
+  for (let i = symbols.length; ~--i;) {
+    let s = symbols[i];
+    XPCOMUtils.defineLazyGetter(obj, s, function() _lazyModules[resource][s]);
+  }
+}
+function lazyUtil(obj, name) lazyImport(obj,
+                                        "resource://scriptish/utils/Scriptish_" + name + ".js",
+                                        ["Scriptish_" + name]
+                                        );
+
+lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 function timeout(cb, delay) {
   var callback = function() cb.call(null);
   delay = delay || 0;
@@ -97,9 +135,7 @@ function timeout(cb, delay) {
   }
 
   if (!global.setTimeout) {
-    let tools = {};
-    Components.utils.import("resource://scriptish/third-party/Timer.js", tools);
-    global.setTimeout = (new tools.Timer()).setTimeout;
+    global.setTimeout = (new Timer()).setTimeout;
   }
 
   setTimeout(callback, delay);

@@ -1,10 +1,8 @@
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
-(function(inc){
-  inc("resource://scriptish/constants.js");
-  inc("resource://scriptish/logging.js");
-  inc("resource://scriptish/utils/Scriptish_stringBundle.js");
-  inc("resource://scriptish/api.js");
-})(Components.utils.import)
+
+Components.utils.import("resource://scriptish/constants.js");
+lazyImport(this, "resource://scriptish/api.js", ["GM_apiSafeCallback"]);
+lazyUtil(this, "stringBundle");
 
 const MIME_JSON = /^(application|text)\/(?:x-)?json/i;
 
@@ -139,7 +137,12 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
   if (details.mozBackgroundRequest) req.mozBackgroundRequest = true;
 
   req.open(
-      details.method, safeUrl, true, details.user || "", details.password || "");
+      details.method || "GET",
+      safeUrl,
+      true,
+      details.user || "",
+      details.password || ""
+      );
 
   if (details.overrideMimeType) req.overrideMimeType(details.overrideMimeType);
 
@@ -188,6 +191,7 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
 GM_xmlhttpRequester.prototype.setupRequestEvent =
     function(unsafeContentWin, req, event, details) {
   var origMimeType = details.overrideMimeType;
+  var script = this.script;
 
   if (details[event]) {
     req[event] = function() {
@@ -209,7 +213,7 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
             || MIME_JSON.test(details.overrideMimeType)
             || MIME_JSON.test(req.channel.contentType)) {
           try {
-            responseState.responseJSON = Instances.json.decode(req.responseText);
+            responseState.responseJSON = JSON.parse(req.responseText);
           } catch (e) {
             responseState.responseJSON = {};
           }
@@ -218,7 +222,7 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
       }
 
       GM_apiSafeCallback(
-          unsafeContentWin, details, details[event], [responseState]);
+          unsafeContentWin, script, details, details[event], [responseState]);
     }
   }
 }

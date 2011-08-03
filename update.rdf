@@ -6,23 +6,23 @@
       <RDF:Seq>
         <RDF:li>
           <RDF:Description>
-            <em:version>0.1.3</em:version>
+            <em:version>0.1.4a1</em:version>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                 <em:minVersion>4.0</em:minVersion>
-                <em:maxVersion>7.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1.3.xpi</em:updateLink>
-                <em:updateHash>sha1:310fc77a9fe8ef89adb6cbfa6cb2914c9381536b</em:updateHash>
+                <em:maxVersion>8.*</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.4a1.xpi</em:updateLink>
+                <em:updateHash>sha1:d36eafaeaac0a08ffeac68e67a4348aa6cddc115</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
-                <em:minVersion>2.1a3</em:minVersion>
-                <em:maxVersion>2.2.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/erikvold/scriptish/scriptish-0.1.3.xpi</em:updateLink>
-                <em:updateHash>sha1:310fc77a9fe8ef89adb6cbfa6cb2914c9381536b</em:updateHash>
+                <em:minVersion>2.1</em:minVersion>
+                <em:maxVersion>2.3.*</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.4a1.xpi</em:updateLink>
+                <em:updateHash>sha1:d36eafaeaac0a08ffeac68e67a4348aa6cddc115</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>
@@ -30,6 +30,6 @@
       </RDF:Seq>
     </em:updates>
 
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBADKiVpuXGg62/aYVOBJbNhkNMD2t2baNcxQJPMLitMArMrlOVyvFF9nbOrbeS+sa9RRgo4HLvC5LW4ZgaNIwGxFRMDDEttQ3rueZ1ZYK3EZ8PK8TjiwRh+/s+uyMaFz7i+hSzSoPAzDTe21wTebWMwwteKKmomT3Sa29wPOM4KUQ</em:signature>
+    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAA/qE0SLB4yRVQ/z69KsDvdJN+qka9UIkuzOWooUQb953lVEOwb0G2beubxUOuTvn8t3uMoHCS7eKmbRgD10wFCSHDl2NDK9Zw/Vja/R12BDeVzufTDx974pTSuO4wkWDtOAnA/KbGvqeJQW4OWyC0qnSTnuIhccny4f1BZLLiyU</em:signature>
   </RDF:Description>
 </RDF:RDF>

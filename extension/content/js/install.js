@@ -4,8 +4,12 @@ const valueSplitter = /(\S+)\s+([^\r\f\n]+)/;
 
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://scriptish/logging.js");
-Components.utils.import("resource://scriptish/scriptish.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Scriptish_localizeOnLoad"]);
+lazyUtil(this, "stringBundle");
+
+Scriptish_localizeOnLoad(this);
 
 function $(id) document.getElementById(id);
 function $t(text) document.createTextNode(text);
@@ -40,10 +44,6 @@ function cleanup() scriptDownloader.cleanupTempFiles();
 function delayedClose() timeout(close);
 
 
-/* Main */
-document.title = Scriptish_stringBundle("install.title");
-
-
 on("load", function() {
   let script = scriptDownloader.script;
   let headers = script.getScriptHeader();
@@ -64,10 +64,6 @@ on("load", function() {
   });
   dialog.getButton("cancel").focus();
 
-  // setup other l10n
-  $("warning1").appendChild($t(Scriptish_stringBundle("install.warning1")));
-  $("warning2").appendChild($t(Scriptish_stringBundle("install.warning2")));
-
   // setup script info
   let icon = $("scriptIcon");
   if (script.icon.tempFile) {
@@ -79,10 +75,12 @@ on("load", function() {
   }
   if (!icon.src) icon.src = script.iconURL;
 
-  let desc = $("scriptDescription");
-  desc.appendChild($nHTML("strong", script.name + " " + script.version));
-  desc.appendChild($nHTML("br"));
-  desc.appendChild($t(script.description));
+  let title = (script.name || Scriptish_stringBundle("untitledScript"));
+  if (script.version) {
+    title += " " + script.version;
+  }
+  $("scriptTitle").textContent = title;
+  $("scriptDescription").textContent = script.description;
 
   // setup action event listeners
   on("dialogaccept", function() {
@@ -93,8 +91,6 @@ on("load", function() {
   on("dialogcancel", delayedClose, false);
 
   let showSource = $("showSource");
-  showSource.setAttribute("value",
-      Scriptish_stringBundle("install.showScriptSource"));
   showSource.addEventListener("click", function() {
     removeEventListener("unload", cleanup, false);
     scriptDownloader.showScriptView();

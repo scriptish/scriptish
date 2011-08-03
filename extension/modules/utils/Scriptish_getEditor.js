@@ -2,10 +2,10 @@ var EXPORTED_SYMBOLS = ["Scriptish_getEditor"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/utils/Scriptish_alert.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
+lazyUtil(this, "alert");
+lazyUtil(this, "stringBundle");
 
 const Scriptish_getEditor = function(parentWindow, change) {
   var editorPath = Scriptish_prefRoot.getValue("editor");
@@ -32,25 +32,22 @@ const Scriptish_getEditor = function(parentWindow, change) {
   while (true) {
     Scriptish_log("Asking user to choose editor...");
     var nsIFilePicker = Ci.nsIFilePicker;
-    var filePicker = Instances.fp;
-    filePicker.init(
+    var fp = Instances.fp;
+    fp.init(
         parentWindow,
         Scriptish_stringBundle("editor.prompt"),
         nsIFilePicker.modeOpen);
-    filePicker.appendFilters(nsIFilePicker.filterApplication);
-    filePicker.appendFilters(nsIFilePicker.filterAll);
+    fp.appendFilters(nsIFilePicker.filterApplication);
+    fp.appendFilters(nsIFilePicker.filterAll);
 
-    if (filePicker.show() != nsIFilePicker.returnOK) {
-      // The user canceled, return null.
-      Scriptish_log("User canceled file picker dialog");
+    if (fp.show() != nsIFilePicker.returnOK)
       return null;
-    }
 
-    Scriptish_log("User selected: " + filePicker.file.path);
+    Scriptish_log("User selected: " + fp.file.path);
 
-    if (filePicker.file.exists() && filePicker.file.isExecutable()) {
-      Scriptish_prefRoot.setValue("editor", filePicker.file.path);
-      return filePicker.file;
+    if (fp.file.exists() && fp.file.isExecutable()) {
+      Scriptish_prefRoot.setValue("editor", fp.file.path);
+      return fp.file;
     } else {
       Scriptish_alert(Scriptish_stringBundle("editor.pleasePickExecutable"));
     }

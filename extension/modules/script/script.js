@@ -5,21 +5,22 @@ const valueSplitter = /(\S+)(?:\s+([^\r\f\n]+))?/;
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/CertUtils.jsm");
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
-Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js");
-Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Cu.import("resource://scriptish/script/cachedresource.js");
-Cu.import("resource://scriptish/script/scriptinstaller.js");
-Cu.import("resource://scriptish/script/scripticon.js");
-Cu.import("resource://scriptish/script/scriptrequire.js");
-Cu.import("resource://scriptish/script/scriptresource.js");
-Cu.import("resource://scriptish/third-party/MatchPattern.js");
-Cu.import("resource://scriptish/config/configdownloader.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/script/cachedresource.js", ["CachedResource"]);
+lazyImport(this, "resource://scriptish/utils/PatternCollection.js", ["PatternCollection"]);
+lazyImport(this, "resource://scriptish/script/scriptinstaller.js", ["ScriptInstall"]);
+lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
+lazyImport(this, "resource://scriptish/script/scriptrequire.js", ["ScriptRequire"]);
+lazyImport(this, "resource://scriptish/script/scriptresource.js", ["ScriptResource"]);
+lazyImport(this, "resource://scriptish/third-party/MatchPattern.js", ["MatchPattern"]);
+lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
+
+lazyUtil(this, "getUriFromFile");
+lazyUtil(this, "getContents");
+lazyUtil(this, "memoize");
+lazyUtil(this, "stringBundle");
 
 const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
@@ -29,15 +30,18 @@ const runAtValues = ["document-start", "document-end", "document-idle", "window-
 const defaultRunAt = runAtValues[1];
 const defaultAutoUpdateState = AddonManager.AUTOUPDATE_DISABLE;
 const usoURLChk = /^https?:\/\/userscripts\.org\/scripts\/[^\d]+(\d+)/i;
+const RE_USERSCRIPT_HEADER_START = /\/\/[ \t]*==UserScript==/i;
+const RE_USERSCRIPT_HEADER_END = /\/\/[ \t]*==\/UserScript==/i;
 
 function noUpdateFound(aListener, aReason) {
-  aListener.onNoUpdateAvailable(this);
+  if (aListener.onNoUpdateAvailable)
+    aListener.onNoUpdateAvailable(this);
   if (aListener.onUpdateFinished)
     aListener.onUpdateFinished(this, aReason || AddonManager.UPDATE_STATUS_NO_ERROR);
 }
 function updateFound(aListener, aReason) {
   var AddonInstall = new ScriptInstall(this);
-  this.updateAvailable = true;
+  this.updateAvailable = AddonInstall;
   AddonManagerPrivate.callAddonListeners("onNewInstall", AddonInstall);
   aListener.onUpdateAvailable(this, AddonInstall);
   if (aListener.onUpdateFinished)
@@ -50,6 +54,8 @@ function Script(config) {
   this._observers = [];
 
   this._homepageURL = null;
+  this._contributionURL = null;
+  this._contributionAmount = null;
   this._downloadURL = null;
   this._updateURL = null;
   this._tempFile = null; // Only for scripts not installed
@@ -64,6 +70,7 @@ function Script(config) {
   this._prefroot = null;
   this._author = null;
   this._applyBackgroundUpdates = defaultAutoUpdateState;
+  this._developers = [];
   this._contributors = [];
   this._description = null;
   this._version = null;
@@ -72,13 +79,11 @@ function Script(config) {
   this._enabled = true;
   this.needsUninstall = false;
   this.domains = [];
-  this._includes = [];
-  this._excludes = [];
+  this._includes = new PatternCollection();
+  this._excludes = new PatternCollection();
   this._matches = [];
-  this._includeRegExps = [];
-  this._excludeRegExps = [];
-  this.user_includes = [];
-  this.user_excludes = [];
+  this._user_includes = new PatternCollection();
+  this._user_excludes = new PatternCollection();
   this._delay = null;
   this.priority = 0;
   this._requires = [];
@@ -320,26 +325,32 @@ Script.prototype = {
     return false;
   },
 
-  matchesURL: function(aURL) {
-    function testI(regExp) (
-        (regExp.isTLD) ? regExp.test(Scriptish_getTLDURL(aURL)) : regExp.test(aURL));
-    function testII(aMatchPattern) aMatchPattern.doMatch(aURL);
-
+  matchesURL: null,
+  _matchesURL_noincludes: function(aURL) {
     // check if the domain is ok
     if (!this.matchesDomain(aURL)) return false;
 
-    // check if script @includes/@excludes are disabled
-    if (this.includesDisabled)
-      return this._user_includeRegExps.some(testI)
-          && !this._user_excludeRegExps.some(testI);
+    return this._user_includes.test(aURL)
+        && !this._user_excludes.test(aURL);
+  },
+  _matchesURL_includes: function(aURL) {
+    // check if the domain is ok
+    if (!this.matchesDomain(aURL)) return false;
 
-    let includes = this._user_includeRegExps.concat(this._includeRegExps);
-    let excludes = this._user_excludeRegExps.concat(this._excludeRegExps);
-
-    return (includes.some(testI) || this._matches.some(testII))
-        && !excludes.some(testI);
+    return (this._all_includes.test(aURL)
+      || this._matches.some(function(m) m.doMatch(aURL)))
+      && !this._all_excludes.test(aURL);
   },
 
+  _make_matchesURL: function() {
+    if (this.includesDisabled) {
+      this.matchesURL = this._matchesURL_noincludes.bind(this);
+    }
+    else {
+      this.matchesURL = this._matchesURL_includes.bind(this);
+    }
+    this.matchesURL = Scriptish_memoize(this.matchesURL, 100);
+  },
   get id() {
     if (!this._id) this.id = this.name + "@" + this.namespace;
     return this._id;
@@ -347,7 +358,7 @@ Script.prototype = {
   set id(aId) {
     this._id = aId.replace(nonIdChars, ''); // remove unacceptable chars
   },
-  get name() this._name,
+  get name() this._name || Scriptish_stringBundle("untitledScript"),
   get namespace() this._namespace,
   get prefroot() {
     if (!this._prefroot) this._prefroot = ["scriptvals.", this.id, "."].join("");
@@ -378,14 +389,25 @@ Script.prototype = {
       this._creator = this._author;
     }
   },
+  get developers() {
+    var devs = this._developers;
+    if (!AddonManagerPrivate.AddonAuthor) return devs;
+    var ary = [];
+    for (var i = devs.length-1; ~i; i--)
+      ary.unshift(new AddonManagerPrivate.AddonAuthor(devs[i]));
+    return ary;
+  },
   get contributors() {
-    if (!AddonManagerPrivate.AddonAuthor) return this._contributors;
-    var contributors = [];
-    for (var i = this._contributors.length-1; i >= 0; i--) {
-      contributors.unshift(
-          new AddonManagerPrivate.AddonAuthor(this._contributors[i]));
-    }
-    return contributors;
+    var contribs = this._contributors;
+    if (!AddonManagerPrivate.AddonAuthor) return contribs;
+    var ary = [];
+    for (var i = contribs.length-1; ~i; i--)
+      ary.unshift(new AddonManagerPrivate.AddonAuthor(contribs[i]));
+    return ary;
+  },
+  addDeveloper: function(aVal) {
+    if (!aVal) return;
+    this._developers.push(aVal);
   },
   addContributor: function(aContributor) {
     if (!aContributor) return;
@@ -393,7 +415,11 @@ Script.prototype = {
   },
   get description() this._description,
   get version() this._version,
-  get optionsURL() "chrome://scriptish/content/script-options.xul?id=" + this.id,
+  get optionsURL() {
+    if (this.enabled)
+      return "chrome://scriptish/content/script-options.xul?id=" + this.id;
+    return null;
+  },
   get icon() this._icon,
   set icon(aIcon) this._icon = aIcon,
   get icon64() this._icon64,
@@ -413,35 +439,44 @@ Script.prototype = {
     this._delay = ((val || val === 0) && val > 0) ? val : null;
   },
 
-  get includes() this._includes.concat(),
-  get excludes() this._excludes.concat(),
-  get user_includes() this._user_includes.concat(),
-  getUserIncStr: function(type) this["_user_" + (type || "include") + "s"].join("\n"),
-  get user_excludes() this._user_excludes.concat(),
+  get includes() this._includes.patterns,
+  get excludes() this._excludes.patterns,
+  get user_includes() this._user_includes.patterns,
+  get user_excludes() this._user_excludes.patterns,
+  getUserIncStr: function(type) this["_user_" + (type || "include") + "s"].patterns.join("\n"),
   set user_includes(aPatterns) {
-    this._user_includes = [];
-    this._user_includeRegExps = [];
-    this.addInclude(aPatterns, true)
+    this._user_includes.clear();
+    this.addInclude(aPatterns, true);
   },
   set user_excludes(aPatterns) {
-    this._user_excludes = [];
-    this._user_excludeRegExps = [];
+    this._user_excludes.clear();
     this.addExclude(aPatterns, true)
   },
   get matches() this._matches.concat(),
-  addInclude: function(aPattern, aUserVal) (
-    this.addPattern(((aUserVal) ? "_user" : "") + "_include", aPattern)),
-  addExclude: function(aPattern, aUserVal) (
-    this.addPattern(((aUserVal) ? "_user" : "") + "_exclude", aPattern)),
-  addPattern: function(aPrefix, aPattern) {
-    if (!aPattern) return;
-    var patterns = (typeof aPattern == "string") ? [aPattern] : aPattern;
-    for (let [, pattern] in Iterator(patterns)) {
-      this[aPrefix + "s"].push(pattern);
-      this[aPrefix + "RegExps"].push(Scriptish_convert2RegExp(pattern));
-    }
+  addInclude: function(aPattern, aUserVal) {
+    this[aUserVal ? "_user_includes" : "_includes"].addPatterns(aPattern);
+    this.__all_includes = null;
   },
-
+  addExclude: function(aPattern, aUserVal) {
+    this[aUserVal ? "_user_excludes" : "_excludes"].addPatterns(aPattern);
+    this.__all_excludes = null;
+  },
+  get _all_includes() {
+    if (!this.__all_includes) {
+      this.__all_includes = new PatternCollection();
+      this.__all_includes.addPatterns(this._includes.patterns);
+      this.__all_includes.addPatterns(this._user_includes.patterns);
+    }
+    return this.__all_includes;
+  },
+  get _all_excludes() {
+    if (!this.__all_excludes) {
+      this.__all_excludes = new PatternCollection();
+      this.__all_excludes.addPatterns(this._excludes.patterns);
+      this.__all_excludes.addPatterns(this._user_excludes.patterns);
+    }
+    return this.__all_excludes;
+  },
   get requires() this._requires.concat(),
   get resources() this._resources.concat(),
   get noframes() this._noframes,
@@ -476,7 +511,12 @@ Script.prototype = {
     }
     return this._homepageURL = url;
   },
+
+  get contributionURL() this._contributionURL,
+  get contributionAmount() this._contributionAmount,
+
   supportURL: "",
+
   get updateURL() {
     if (!this.version) return null;
     if (Scriptish_prefRoot.getValue("useDownloadURLForUpdateURL"))
@@ -573,7 +613,7 @@ Script.prototype = {
     this._filename = file.leafName;
 
     Scriptish_log(Scriptish_stringBundle("moving.script") + " "
-        + tempFile.path + " --> " + file.path, true);
+        + tempFile.path + " --> " + file.path);
 
     file.remove(true);
     tempFile.moveTo(file.parent, file.leafName);
@@ -621,39 +661,44 @@ Script.prototype = {
     }
   },
 
+  update: function() {
+    this.clearResourceCaches();
+    this._make_matchesURL();
+  },
+
   replaceScriptWith: function(aNewScript) {
     this.removeFiles();
     this.updateFromNewScript(aNewScript.installProcess());
     Scriptish.notify(
         this, "scriptish-script-updated", {saved: true, reloadUI: true});
   },
+
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
     var oldPriority = this.priority;
     var newPriority = newScript.priority;
 
-    this.clearResourceCaches();
-
     // Copy new values.
     this.blocked = newScript.blocked;
-    this.updateAvailable = false;
     this.domains = newScript.domains;
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
-    this._includeRegExps = newScript._includeRegExps;
-    this._excludeRegExps = newScript._excludeRegExps;
+    delete this.__all_includes;
+    delete this.__all_excludes;
     this._matches = newScript._matches;
     this._delay = newScript._delay;
     this.priority = newPriority;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
-    this._updateURL = newScript._updateURL;
-    this._applyBackgroundUpdates = newScript._applyBackgroundUpdates;
+    this._contributionURL = newScript.contributionURL;
+    this._contributionAmount = newScript.contributionAmount;
     this.supportURL = newScript.supportURL;
+    this._updateURL = newScript._updateURL;
     this._name = newScript._name;
     this._namespace = newScript._namespace;
     this.author = newScript._author;
+    this._developers = newScript._developers;
     this._contributors = newScript._contributors;
     this._description = newScript._description;
     this._jsversion = newScript._jsversion;
@@ -700,17 +745,19 @@ Script.prototype = {
         Scriptish.notify(this, "scriptish-script-modified", {saved: true, reloadUI: true});
       }
     }
+
+    this.update();
+
     if (oldPriority != newPriority) this._config.sortScripts();
   },
 
   toJSON: function() ({
-    contributors: this._contributors,
     domains: this.domains,
-    includes: this._includes,
-    excludes: this._excludes,
+    includes: this._includes.patterns,
+    excludes: this._excludes.patterns,
     matches: this._matches.map(function(match) match.pattern),
-    user_includes: this._user_includes,
-    user_excludes: this._user_excludes,
+    user_includes: this._user_includes.patterns,
+    user_excludes: this._user_excludes.patterns,
     screenshots: this._screenshots.map(function(screenshot) ({
       url: screenshot.url,
       thumbnailURL: screenshot.thumbnailURL
@@ -728,6 +775,8 @@ Script.prototype = {
     name: this.name,
     namespace: this.namespace,
     author: this._author,
+    developers: this._developers,
+    contributors: this._contributors,
     blocklistState: this.blocklistState,
     description: this._description,
     version: this._version,
@@ -743,6 +792,8 @@ Script.prototype = {
     "run-at": this["_run-at"],
     includesDisabled: this.includesDisabled,
     homepageURL: this.homepageURL,
+    contributionURL: this._contributionURL,
+    contributionAmount: this._contributionAmount,
     downloadURL: this._downloadURL,
     updateURL: this._updateURL,
     supportURL: this.supportURL,
@@ -774,68 +825,47 @@ Script.prototype = {
     // set up _modified and stat thrashing stuff
     this.isModified();
 
+    this.update();
+
     this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
   }
 };
 
 Script.parseVersion = function Script_parseVersion(aSrc) {
-  var lines = aSrc.match(/\s*\/\/ [=@].*/g);
-  if (!lines) return null;
-  var lnIdx = 0;
-  var result = {};
-  var foundMeta = false;
-  var start = "// ==UserScript==";
-  var end = "// ==/UserScript==";
-  var version = /\/\/ \@version\s+([^\s]+)/;
-
-  while ((result = lines[lnIdx++])) {
-    if (result.indexOf(start) != 0) continue;
-    foundMeta = true;
-    break;
-  }
-  if (!foundMeta) return;
-  while ((result = lines[lnIdx++])) {
-    if (result.indexOf(end) == 0) break;
-    var match = result.match(version);
-    if (match !== null) return match[1];
-  }
+  var parsed = Script.header_parse(aSrc);
+  if (parsed.version) return parsed.version.pop();
   return null;
 }
 
 // TODO: DRY this by combining it with Script.parse some way..
 Script.header_parse = function(aSource) {
   var headers = {};
+  var foundMeta = false;
+  var line;
+
+  // do not 'optimize' by reusing this reg exp! it should not be reused!
+  var metaRegExp = /\/\/[ \t]*(?:==(\/?UserScript)==|\@(\S+)(?:[ \t]+([^\r\f\n]+))?)/g;
 
   // read one line at a time looking for start meta delimiter or EOF
-  var lines = aSource.match(metaRegExp);
-  var i = 0;
-  var result;
-  var foundMeta = false;
-
-  // used for duplicate resource name detection
-  var previousResourceNames = {};
-
-  if (!lines) lines = [""];
-  while (result = lines[i++]) {
-    if (!foundMeta) {
-      if (result.indexOf("// ==UserScript==") == 0) foundMeta = true;
-      continue;
+  while (line = metaRegExp.exec(aSource)) {
+    if (line[1]) {
+      if ("userscript" == line[1].toLowerCase()) {
+        foundMeta = true; // start
+        continue;
+      } else {
+        break; // done
+      }
     }
+    if (!foundMeta) continue;
 
-    if (result.indexOf("// ==/UserScript==") == 0) {
-      // done gathering up meta lines
-      break;
-    }
-
-    var match = result.match(/\/\/ \@(\S+)(?:\s+([^\r\f\n]+))?/);
-    if (match === null) continue;
-    var header = match[1];
-    var value = match[2];
+    var header = line[2].toLowerCase();
+    var value = line[3];
 
     if (!headers[header]) headers[header] = [value];
-    else headers[header].push(value)
+    else headers[header].push(value);
   }
+
   return headers;
 }
 
@@ -858,11 +888,11 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   if (!lines) lines = [""];
   while (result = lines[i++]) {
     if (!foundMeta) {
-      if (result.match(/\/\/[ \t]*==UserScript==/i)) foundMeta = true;
+      if (result.match(RE_USERSCRIPT_HEADER_START)) foundMeta = true;
       continue;
     }
 
-    if (result.match(/\/\/[ \t]*==\/UserScript==/i))
+    if (result.match(RE_USERSCRIPT_HEADER_END))
       break; // done gathering up meta lines
 
     var match = result.match(/\/\/[ \t]*\@(\S+)(?:\s+([^\r\f\n]+))?/);
@@ -891,6 +921,10 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
             script.author = value;
             continue;
           }
+          // nobreak
+        case "developer":
+          script.addDeveloper(value);
+          continue;
         case "contributor":
           script.addContributor(value);
           continue;
@@ -926,6 +960,17 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
             break;
           }
           script._homepageURL = uri.spec;
+          break;
+        case "contributionurl":
+          try {
+            var uri = NetUtil.newURI(value);
+          } catch (e) {
+            break;
+          }
+          script._contributionURL = uri.spec;
+          break;
+        case "contributionamount":
+          script._contributionAmount = value;
           break;
         case "supporturl":
           try {
@@ -1089,6 +1134,8 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script._downloadURL = aSkeleton.downloadURL;
   script._updateURL = aSkeleton.updateURL;
   script._homepageURL = aSkeleton.homepageURL;
+  script._contributionURL = aSkeleton.contributionURL;
+  script._contributionAmount = aSkeleton.contributionAmount;
   script.supportURL = aSkeleton.supportURL;
   script._jsversion = aSkeleton.jsversion;
   script["_run-at"] = aSkeleton["run-at"];
@@ -1105,11 +1152,14 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script._noframes = aSkeleton.noframes;
 
   script.domains = aSkeleton.domains;
-  aSkeleton.contributors.forEach(script.addContributor.bind(script));
-  aSkeleton.includes.forEach(function(i) script.addInclude(i));
-  aSkeleton.excludes.forEach(function(i) script.addExclude(i));
-  aSkeleton.user_includes.forEach(function(i) script.addInclude(i, true));
-  aSkeleton.user_excludes.forEach(function(i) script.addExclude(i, true));
+  if (aSkeleton.developers)
+    aSkeleton.developers.forEach(script.addDeveloper.bind(script));
+  if (aSkeleton.contributors)
+    aSkeleton.contributors.forEach(script.addContributor.bind(script));
+  script.addInclude(aSkeleton.includes);
+  script.addExclude(aSkeleton.excludes);
+  script.addInclude(aSkeleton.user_includes, true);
+  script.addExclude(aSkeleton.user_excludes, true);
   aSkeleton.matches.forEach(function(i) script._matches.push(new MatchPattern(i)));
   aSkeleton.requires.forEach(function(i) {
     var scriptRequire = new ScriptRequire(script);
@@ -1144,6 +1194,8 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script.reviewCount = aSkeleton.reviewCount;
   script.totalDownloads = aSkeleton.totalDownloads;
   script._applyBackgroundUpdates = aSkeleton.applyBackgroundUpdates
+
+  script.update();
 
   aConfig.addScript(script);
   return false;
@@ -1265,6 +1317,8 @@ Script.loadFromXML = function(aConfig, aNode) {
     script.reviewCount = aNode.getAttribute("reviewCount") * 1;
   if (aNode.getAttribute("totalDownloads"))
     script.totalDownloads = aNode.getAttribute("totalDownloads") * 1;
+
+  script.update();
 
   aConfig.addScript(script);
   return fileModified;

@@ -4,20 +4,21 @@ const SCRIPTISH_CONFIG_XML = "scriptish-config.xml";
 const SCRIPTISH_CONFIG_JSON = "scriptish-config.json";
 const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 
-(function(inc) {
-inc("resource://scriptish/constants.js");
-inc("resource://scriptish/logging.js");
-inc("resource://scriptish/prefmanager.js");
-inc("resource://scriptish/scriptish.js");
-inc("resource://scriptish/utils/Scriptish_getContents.js");
-inc("resource://scriptish/utils/Scriptish_getWriteStream.js");
-inc("resource://scriptish/utils/Scriptish_getProfileFile.js");
-inc("resource://scriptish/utils/Scriptish_stringBundle.js");
-inc("resource://scriptish/utils/Scriptish_convert2RegExp.js");
-inc("resource://scriptish/utils/Scriptish_cryptoHash.js");
-inc("resource://scriptish/third-party/Timer.js");
-inc("resource://scriptish/script/script.js");
-})(Components.utils.import);
+const Cu = Components.utils;
+Cu.import("resource://scriptish/constants.js");
+
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/utils/PatternCollection.js", ["PatternCollection"]);
+lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
+lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
+
+lazyUtil(this, "cryptoHash");
+lazyUtil(this, "getContents");
+lazyUtil(this, "getProfileFile");
+lazyUtil(this, "getWriteStream");
+lazyUtil(this, "stringBundle");
 
 function Config(aBaseDir) {
   var self = this;
@@ -25,8 +26,7 @@ function Config(aBaseDir) {
   this.timer = new Timer();
   this._observers = [];
   this._saveTimer = null;
-  this._excludes = [];
-  this._excludeRegExps = [];
+  this._excludes = new PatternCollection();
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
 
@@ -69,7 +69,7 @@ Config.prototype = {
     switch(aTopic) {
     case "scriptish-script-user-prefs-change":
       Scriptish.notify(
-          aSubject, "scriptish-script-modified", {saved:false, reloadUI:false});
+          aSubject, "scriptish-script-modified", {saved:true, reloadUI:false});
     case "scriptish-script-prefs-change":
     case "scriptish-script-installed":
     case "scriptish-script-modified":
@@ -118,7 +118,7 @@ Config.prototype = {
     req.onload = function() {
       var json = req.responseText;
       try {
-        var blocklist = Instances.json.decode(json);
+        var blocklist = JSON.parse(json);
       } catch (e) {
         return;
       }
@@ -132,11 +132,14 @@ Config.prototype = {
       // write blocklist
       let converter = Instances.suc;
       converter.charset = "UTF-8";
+      let writeStream = Scriptish_getWriteStream(file, {defer:true, safe:true});
       NetUtil.asyncCopy(
-          converter.convertToInputStream(json),
-          Scriptish_getWriteStream(file, true));
+          converter.convertToInputStream(json), // source must be buffered!
+          writeStream,
+          function() writeStream.finish()
+          );
 
-      Scriptish_log("Updated Scriptish blocklist " + SCRIPTISH_BLOCKLIST, true);
+      Scriptish_log("Updated Scriptish blocklist " + SCRIPTISH_BLOCKLIST);
 
       self._blocklist = blocklist;
       self._blocklistHash = hash;
@@ -152,9 +155,9 @@ Config.prototype = {
       var file = self._blocklistFile;
       if (file.exists()) {
         Scriptish_getContents(file, 0, function(str) {
-          self._blocklist = Instances.json.decode(str);
+          self._blocklist = JSON.parse(str);
           self._blocklistHash = Scriptish_cryptoHash(str);
-      
+
           // block scripts
           self._blockScripts();
         });
@@ -266,7 +269,7 @@ Config.prototype = {
 
     // Load the config (trying from various sources)
     var configFile;
-    // source: Scriptish JSON tmp
+    // source: Scriptish JSON tmp; for pre-nsISafeOutputStream compatiblity
     self._loadJSON(self._tempFile, function(aSuccess) {
       if (aSuccess) return callback(true);
 
@@ -325,40 +328,32 @@ Config.prototype = {
     }
     delete this["_saveTimer"];
 
-    var self = this;
-
     if (this._isSaving)
       return (this._pendingSave = true);
 
     this._isSaving = true;
 
-    let tempFile = self._tempFile;
-
     // make sure that the configFile is SCRIPTISH_CONFIG_JSON
     (this._configFile = this._scriptDir).append(SCRIPTISH_CONFIG_JSON);
 
     Scriptish_log(
-        Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG_JSON, true);
+        Scriptish_stringBundle("saving") + " " + SCRIPTISH_CONFIG_JSON);
 
     let converter = Instances.suc;
     converter.charset = "UTF-8";
     let json = JSON.stringify(this.toJSON());
+    let writeStream = Scriptish_getWriteStream(this._configFile, {defer:true, safe:true});
     NetUtil.asyncCopy(
-        converter.convertToInputStream(json),
-        Scriptish_getWriteStream(tempFile, true),
-        function() {
-          NetUtil.asyncCopy(
-                converter.convertToInputStream(json),
-                Scriptish_getWriteStream(self._configFile, true),
-                function() {
-                  tempFile.remove(true);
-                  delete self["_isSaving"];
-                  if (self._pendingSave) {
-                    delete self["_pendingSave"];
-                    self._save();
-                  }
-                });
-        });
+      converter.convertToInputStream(json), // source must be buffered!
+      writeStream,
+      function() {
+        writeStream.finish();
+        delete this._isSaving;
+        if (this._pendingSave) {
+          delete this._pendingSave;
+          this._save();
+        }
+      }.bind(this));
   },
 
   parse: function(source, uri, aUpdateScript) (
@@ -371,6 +366,7 @@ Config.prototype = {
       this._scripts[existingIndex].replaceScriptWith(aNewScript);
     } else {
       aNewScript.installProcess();
+      timeout(aNewScript.updateUSOData.bind(aNewScript));
       this.addScript(aNewScript);
 
       Scriptish.notify(aNewScript, "scriptish-script-installed", true);
@@ -380,7 +376,7 @@ Config.prototype = {
 
   uninstallScripts: function() {
     let scripts = this._scripts;
-    for (var i = scripts.length - 1; i >= 0; i--) {
+    for (var i = scripts.length; ~--i;) {
       let script = scripts[i];
       if (script.needsUninstall) {
         this._scripts.splice(i, 1);
@@ -409,32 +405,15 @@ Config.prototype = {
     }
   },
 
-  get excludes() this._excludes.concat(),
+  get excludes() this._excludes.patterns,
   set excludes(excludes) {
-    this._excludes = [];
-    this._excludeRegExps = [];
-    this.addExclude(excludes)
+    this._excludes.clear();
+    this._excludes.addPatterns(excludes);
   },
-  get excludeRegExps() this._excludeRegExps.concat(),
-  addExclude: function(excludes) {
-    if (!excludes) return;
-    excludes = (typeof excludes == "string") ? [excludes] : excludes;
-    for (let [, exclude] in Iterator(excludes)) {
-      this._excludes.push(exclude);
-      this._excludeRegExps.push(Scriptish_convert2RegExp(exclude));
-    }
-  },
-
+  addExclude: function(excludes) this._excludes.addPatterns(excludes),
   get scripts() this._scripts.concat(),
-  getMatchingScripts: function(testFunc, urls) {
-    var globalExcludes = this._excludeRegExps;
-    for (var i = urls.length - 1; ~i; i--) {
-      let url = urls[i];
-      if (globalExcludes.some(function(reg) reg.test(url)))
-        return [];
-    }
-    return this.scripts.filter(testFunc);
-  },
+  isURLExcluded: function(url) this._excludes.test(url),
+  getMatchingScripts: function(testFunc) this.scripts.filter(testFunc),
   sortScripts: function() this._scripts.sort(function(a, b) b.priority - a.priority),
   injectScript: function(script) {
     var unsafeWin = this.wrappedContentWin.wrappedJSObject;
@@ -457,10 +436,11 @@ Config.prototype = {
       if (!script.isModified()) continue;
 
       let theScript = script;
-      theScript.getTextContent(function(content) {
+      Scriptish_getContents(script._file, 0, function(content) {
         let parsedScript = self.parse(
             content,
-            theScript._downloadURL && NetUtil.newURI(theScript._downloadURL), theScript);
+            theScript._downloadURL && NetUtil.newURI(theScript._downloadURL),
+            theScript);
         theScript.updateFromNewScript(parsedScript, scriptInjector);
       });
     }

@@ -1,8 +1,8 @@
 var EXPORTED_SYMBOLS = ["Scriptish_getContents"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/logging.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_getUriFromFile.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError"]);
+lazyUtil(this, "getUriFromFile");
+lazyUtil(this, "stringBundle");
 
 try {
   // only available when the HUD console is shipped

@@ -7,6 +7,9 @@ radio[pane] {
 radio[pane="pane-main"] {
   -moz-image-region: rect(0px, 32px, 32px, 0px);
 }
+radio[pane="pane-ui"] {
+  -moz-image-region: rect(0px, 128px, 32px, 96px);
+}
 radio[pane="pane-excludes"] {
   -moz-image-region: rect(0px, 64px, 32px, 32px);
 }
@@ -22,4 +25,8 @@ description {
 .remark {
   font-style: italic;
   font-size: x-small;
+}
+
+tabpanel {
+  -moz-box-orient: vertical;
 }

@@ -1,27 +1,31 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://scriptish/skin/install.css" type="text/css"?>
 <?xul-overlay href="chrome://scriptish/content/closewindow.xul"?>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     buttons="accept"
     id="scriptish-script-options-dialog"
-    width="500"
-    height="400"
-    persist="screenX screenY">
+    style="width: 45em; height: 32em;"
+    persist="screenX screenY"
+    >
   <script type="application/x-javascript" src="chrome://scriptish/content/js/script-options.js"/>
 
-  <dialogheader id="header"/>
+  <hbox>
+    <vbox pack="start" align="center" id="scriptIconBox">
+      <image id="scriptIcon"/>
+    </vbox>
+    <vbox flex="1">
+      <description id="scriptTitle"/>
+      <label control="includes" value="scriptOptions.includes" localize="value"/>
+      <textbox id="includes" multiline="true" rows="4" cols="50"/>
 
-  <vbox>
-    <label id="includes-label" control="includes"/>
-    <textbox id="includes" multiline="true" rows="4" cols="60"/>
+      <separator class="thin"/>
 
-    <separator class="thin"/>
+      <label control="excludes" value="scriptOptions.excludes" localize="value"/>
+      <textbox id="excludes" multiline="true" rows="4" cols="50"/>
 
-    <label id="excludes-label" control="excludes"/>
-    <textbox id="excludes" multiline="true" rows="4" cols="60"/>
+      <separator class="thin"/>
 
-    <separator class="thin"/>
-
-    <checkbox id="disableScriptIncludes"/>
-  </vbox>
+      <checkbox id="disableScriptIncludes" label="scriptOptions.disableScriptIncludes" localize="label"/>
+    </vbox>
+  </hbox>
 </dialog>

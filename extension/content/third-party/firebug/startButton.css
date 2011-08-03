@@ -1,0 +1,29 @@
+#scriptish-button .badge > .label {
+  font-size: 9px;
+  padding: 0 3px;
+  color: white;
+  border-radius: 5px;
+  background-color: rgb(51,171,51);
+  border: 1px solid rgba(0,90,0,0.5);
+  margin: 0;
+  margin-left: -3px;
+  margin-right: -5px;
+}
+
+/* Slightly different sizes for "small" toolbars */
+toolbar[defaulticonsize="small"] #scriptish-button .badge > .label {
+  margin-left: 2px;
+  margin-right: 1px;
+  border: 1px solid rgb(0,80,0);
+
+}
+
+/* Error badge (displays an error counter). The badge is only visible if error count
+   should be displayed */
+#scriptish-button:not([showScripts="true"]) .badge {
+  display: none;
+}
+
+#CustomizeToolbarWindow #wrapper-scriptish-button #scriptish-button .badge {
+  display: none;
+}

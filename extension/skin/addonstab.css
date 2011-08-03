@@ -9,6 +9,18 @@ page.scriptish #addon-list-empty, #scriptish-list-empty {
   display: none;
 }
 
+page.scriptish #scriptish-detail-contrib-description {
+  font-style: italic;
+  margin-bottom: 1em;
+  color: #373D48; /* color not set in gnomestripe... */
+}
+page.scriptish #scriptish-detail-contrib-description, #detail-contrib-description {
+  display: inline;
+}
+page.scriptish #detail-contrib-description, #scriptish-detail-contrib-description {
+  display: none;
+}
+
 /* Hide the 'restart now' link for user scripts. */
 page.scriptish #addon-list button[command=cmd_restartApp] {
   display: none;

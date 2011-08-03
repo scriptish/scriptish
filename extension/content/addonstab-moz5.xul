@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <richlistbox id="categories">
+    <richlistitem id="category-userscript"
+        class="category"
+        insertafter="category-plugins"
+        value="addons://list/userscript">
+    </richlistitem>
+  </richlistbox>
+  <script type="text/javascript"><![CDATA[
+    addEventListener("DOMContentLoaded", function scriptish_dcl() {
+      removeEventListener("DOMContentLoaded", scriptish_dcl, false);
+
+      var sb = {};
+      Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js", sb);
+      document.getElementById("category-userscript")
+        .setAttribute("name", sb.Scriptish_stringBundle("userscripts"));
+    }, false);
+  ]]></script>
+</overlay>

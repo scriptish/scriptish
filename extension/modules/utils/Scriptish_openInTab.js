@@ -2,7 +2,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_openInTab"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/scriptish.js");
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 
 function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
   aChromeWin = aChromeWin || Scriptish.getMostRecentWindow();
@@ -32,9 +32,16 @@ function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
 
   // Opening a new tab
   var browser = aChromeWin.gBrowser;
-  return getWindowForBrowser(browser.getBrowserForTab(browser.loadOneTab(aURL, {
-    "inBackground": !!aLoadInBackground
-  })));
+  var selectedTab = browser.selectedTab;
+  var newTab = browser.loadOneTab(aURL, {"inBackground": !!aLoadInBackground});
+  var afterCurrent = Services.prefs
+      .getBranch("browser.tabs.")
+      .getBoolPref("insertRelatedAfterCurrent");
+
+  if (afterCurrent)
+    browser.moveTabTo(newTab, selectedTab._tPos + 1);
+
+  return getWindowForBrowser(browser.getBrowserForTab(newTab));
 }
 
 function getWindowForBrowser(browser) browser.docShell
