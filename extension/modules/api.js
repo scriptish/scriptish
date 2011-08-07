@@ -55,16 +55,12 @@ function GM_apiSafeCallback(aWindow, aScript, aThis, aCb, aArgs) {
 
 function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var document = aSafeWin.document;
-  var _xmlhttpRequester = null;
-  var _storage = null;
-  var _resources = null;
-  var _logger = null;
   var menuCmdIDs = [];
   var Scriptish_BrowserUI = aChromeWin.Scriptish_BrowserUI;
   var windowID = aWinID;
 
   var lazyLoaders = {};
-  XPCOMUtils.defineLazyGetter(lazyLoaders, "xmlhttpRequester", function() {
+  XPCOMUtils.defineLazyGetter(lazyLoaders, "xhr", function() {
     return new GM_xmlhttpRequester(aUnsafeContentWin, aURL, aScript);
   });
   XPCOMUtils.defineLazyGetter(lazyLoaders, "storage", function() {
@@ -160,7 +156,7 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
     if (!GM_apiLeakCheck("GM_xmlhttpRequest")) return;
-    let xhr = lazyLoaders.xmlhttpRequester;
+    let xhr = lazyLoaders.xhr;
     return xhr.contentStartRequest.apply(xhr, arguments);
   }
 
