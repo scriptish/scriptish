@@ -297,10 +297,7 @@ ScriptishService.prototype = {
 
   shouldProcess: function(ct, cl, org, ctx, mt, ext) CP.ACCEPT,
 
-  ignoreNextScript: function() {
-    dump("ignoring next script...\n");
-    this.ignoreNextScript_ = true;
-  },
+  ignoreNextScript: function() this.ignoreNextScript_ = true,
 
   _tmpDir: Services.dirsvc.get("TmpD", Ci.nsILocalFile),
   isTempScript: function(uri) {
