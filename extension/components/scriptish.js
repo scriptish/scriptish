@@ -282,8 +282,6 @@ ScriptishService.prototype = {
     // don't interrupt the view-source: scheme
     if ("view-source" == cl.scheme) return CP.ACCEPT;
 
-    this.ignoreNextScript_ = false;
-
     // CP.TYPE is not binary, so do not use bitwise logic tricks
     if ((ct == CP.TYPE_DOCUMENT || ct == CP.TYPE_SUBDOCUMENT)
         && this._reg_userjs.test(cl.spec)
