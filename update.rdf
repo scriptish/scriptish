@@ -6,14 +6,14 @@
       <RDF:Seq>
         <RDF:li>
           <RDF:Description>
-            <em:version>0.1.4a1</em:version>
+            <em:version>0.1.4</em:version>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                 <em:minVersion>4.0</em:minVersion>
                 <em:maxVersion>8.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.4a1.xpi</em:updateLink>
-                <em:updateHash>sha1:d36eafaeaac0a08ffeac68e67a4348aa6cddc115</em:updateHash>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.4.xpi</em:updateLink>
+                <em:updateHash>sha1:9ce9888d2d61e7179d9c2ef28bbf0c39af542f80</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
             <em:targetApplication>
@@ -21,8 +21,8 @@
                 <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
                 <em:minVersion>2.1</em:minVersion>
                 <em:maxVersion>2.3.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.4a1.xpi</em:updateLink>
-                <em:updateHash>sha1:d36eafaeaac0a08ffeac68e67a4348aa6cddc115</em:updateHash>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.4.xpi</em:updateLink>
+                <em:updateHash>sha1:9ce9888d2d61e7179d9c2ef28bbf0c39af542f80</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>
@@ -30,6 +30,6 @@
       </RDF:Seq>
     </em:updates>
 
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAA/qE0SLB4yRVQ/z69KsDvdJN+qka9UIkuzOWooUQb953lVEOwb0G2beubxUOuTvn8t3uMoHCS7eKmbRgD10wFCSHDl2NDK9Zw/Vja/R12BDeVzufTDx974pTSuO4wkWDtOAnA/KbGvqeJQW4OWyC0qnSTnuIhccny4f1BZLLiyU</em:signature>
+    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAHCyTQGatSyu4NSPEHRVwxspBgKiWANjfX0DeH/XdeTkLDSYMFsCC5X3GS70KechHXo9BQpT+w4kyC9NEHM3I0sXXm30RP8YvNrUVPK8gIsZV9UVe2itCyx0YVD6oCrWsmhta03dnEv0mwYtUGJ+RHgVVydGAHldXtHQZOITsuf2</em:signature>
   </RDF:Description>
 </RDF:RDF>
