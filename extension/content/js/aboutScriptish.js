@@ -25,7 +25,6 @@ Cu.import("resource://scriptish/constants.js");
       $("test").style.display = "block";
       runTests();
     });
-    return;
   }
 
   // Show about:scriptish
