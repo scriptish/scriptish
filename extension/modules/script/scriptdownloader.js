@@ -3,14 +3,16 @@ var EXPORTED_SYMBOLS = ["ScriptDownloader"];
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/CertUtils.jsm");
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/script/script.js");
-Cu.import("resource://scriptish/script/scripticon.js");
-Cu.import("resource://scriptish/utils/Scriptish_alert.js");
-Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
+lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
+
+lazyUtil(this, "alert");
+lazyUtil(this, "getWriteStream");
+lazyUtil(this, "stringBundle");
 
 function ScriptDownloader(uri, contentWin) {
   this.uri_ = uri || null;
@@ -50,6 +52,9 @@ ScriptDownloader.prototype.startDownload = function(bypassCache) {
     // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
     req.channel.notificationCallbacks =
         new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+  }
+  if (req.channel instanceof Ci.nsIHttpChannelInternal) {
+    req.channel.forceAllowThirdPartyCookie = true;
   }
   req.onerror = this.handleErr.bind(this);
   req.onreadystatechange = this.chkContentTypeB4DL.bind(this);
@@ -199,6 +204,9 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
     }
 
     var sourceChannel = Services.io.newChannelFromURI(sourceUri);
+    if (sourceChannel instanceof Ci.nsIHttpChannelInternal) {
+      sourceChannel.forceAllowThirdPartyCookie = true;
+    }
     sourceChannel.notificationCallbacks = (this.secure)
         ? new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"))
         : new NotificationCallbacks();
@@ -323,7 +331,7 @@ ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
 }
 ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
-    Scriptish_alert(this.dependencyError, 0);
+    Scriptish_alert(this.dependencyError, null, 0);
     return false;
   } else if (this.scriptInstaller && this.dependenciesLoaded_) {
     this.scriptInstaller._script.replaceScriptWith(this.script);

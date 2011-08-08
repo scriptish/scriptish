@@ -21,6 +21,9 @@ try {
 addEventListener("DOMContentLoaded", function init() {
   removeEventListener("DOMContentLoaded", init, false);
 
+  // remove focus from the first textbox
+  $("scriptish").focus();
+
   $("scriptish").addEventListener("dialogaccept", function(evt) {
     try {
       if (doInstall()) {
@@ -119,11 +122,13 @@ function createScriptSource() {
   var header = {
     id: $("id").value,
     name: $("name").value,
+    version: $("version").value,
     namespace: $("namespace").value,
     author: $("author").value,
     description: $("description").value,
     include: $("includes").value ? $("includes").value.match(/.+/g) : [],
-    exclude: $("excludes").value ? $("excludes").value.match(/.+/g) : []
+    exclude: $("excludes").value ? $("excludes").value.match(/.+/g) : [],
+    "run-at": $("run-at").value
   }
   try {
     return Scriptish_createUserScriptSource(header, scriptContent);

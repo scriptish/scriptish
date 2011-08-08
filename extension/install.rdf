@@ -2,36 +2,16 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
+    <em:type>2</em:type>
     <em:id>scriptish@erikvold.com</em:id>
-    <em:localized>
-      <Description>
-        <em:locale>ja-JP</em:locale>
-        <em:name>Scriptish</em:name>
-        <em:description>Firefox用のスクリプトマネージャ</em:description>
-      </Description>
-    </em:localized>
-    <em:localized>
-      <Description>
-        <em:locale>ru-RU</em:locale>
-        <em:name>Scriptish</em:name>
-        <em:description>Управление пользовательских скриптов для Firefox</em:description>
-      </Description>
-    </em:localized>
-    <em:localized>
-      <Description>
-        <em:locale>es-ES</em:locale>
-        <em:name>Scriptish</em:name>
-        <em:description>Un gestor de scripts de usuario para aplicaciones Mozilla</em:description>
-      </Description>
-    </em:localized>
 
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
 
-    <em:version>0.1.3</em:version>
+    <em:version>0.1.4</em:version>
     <em:creator>Erik Vold; http://erikvold.com/</em:creator>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
-    <em:homepageURL>http://github.com/erikvold/scriptish</em:homepageURL>
+    <em:homepageURL>http://scriptish.org</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://scriptish/skin/scriptish32.png</em:iconURL>
     <em:icon64URL>chrome://scriptish/skin/scriptish64.png</em:icon64URL>
@@ -70,8 +50,11 @@
     <em:translator>Mikael Hiort af Ornäs (sv-SE)</em:translator>
     <em:translator>Nils Maier (de)</em:translator>
     <em:translator>nishikawasasaki (kohsei yamamoto) (ja-JP)</em:translator>
+    <em:translator>shyangs (林郁翔) (zh-TW)</em:translator>
+    <em:translator>strel (es-ES)</em:translator>
+    <em:translator>yfdyh000 (zh-CN); mailto:yfdyh000@gmail.com</em:translator>
 
-    <em:updateURL>http://github.com/downloads/erikvold/scriptish/update.rdf</em:updateURL>
+    <em:updateURL>http://github.com/downloads/scriptish/scriptish/update.rdf</em:updateURL>
     <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDjEA/hqcsMgPctoWvqJFfjtNcQbfBi1uP3zoWR3PPMRSXnpBJv/5Kb5lJD9HJ+963CFQ3oFvkgO9+oEWisiKBjxhx94Bynl0Ym2sZ1DdEzTsH9kV4HGFLjeYTix5WkQqdoswyM32ebtDSYrFbSqxpBrgHwVLELfFYM1qZsnWpJKwIDAQAB</em:updateKey>
 
     <!-- Firefox -->
@@ -79,15 +62,15 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>4.0</em:minVersion>
-        <em:maxVersion>7.*</em:maxVersion>
+        <em:maxVersion>8.*</em:maxVersion>
       </Description>
     </em:targetApplication>
     <!-- SeaMonkey -->
     <em:targetApplication>
       <Description>
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
-        <em:minVersion>2.1a3</em:minVersion>
-        <em:maxVersion>2.2.*</em:maxVersion>
+        <em:minVersion>2.1</em:minVersion>
+        <em:maxVersion>2.3.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>

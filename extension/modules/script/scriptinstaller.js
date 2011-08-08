@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = ["ScriptInstall"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/logging.js");
+lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
 
 // Implements https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonInstall
 function ScriptInstall(aScript) {
@@ -51,7 +51,7 @@ ScriptInstall.prototype = {
   get icon64URL() this._script.icon64URL,
   releaseNotesURI: null,
   type: "userscript",
-  state: AddonManager.STATE_DOWNLOADING,
+  state: AddonManager.STATE_AVAILABLE,
   error: null,
   sourceURI: null,
   file: null,
@@ -62,11 +62,9 @@ ScriptInstall.prototype = {
   get existingAddon() this._script,
   addon: null,
   install: function() {
-    var tools = {};
-    Components.utils.import("resource://scriptish/config/configdownloader.js", tools);
     this.changed("DownloadStarted");
     this.scriptDownloader =
-        tools.Scriptish_configDownloader.startUpdateScript(
+        Scriptish_configDownloader.startUpdateScript(
             this._script.cleanUpdateURL, this);
   },
   cancel: function() {

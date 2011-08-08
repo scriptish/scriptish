@@ -1,10 +1,9 @@
 var EXPORTED_SYMBOLS = [];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/scriptish.js");
-Components.utils.import("resource://scriptish/logging.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_notification.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_popupNotification.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyUtil(this, "popupNotification");
+lazyUtil(this, "stringBundle");
 
 const Scriptish_ScriptProvider = {
   observe: function(aSubject, aTopic, aData) Scriptish.getConfig(function(config) {
@@ -25,9 +24,13 @@ const Scriptish_ScriptProvider = {
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
-          label: "Open User Scripts Manager",
-          accessKey: "O",
+          label: Scriptish_stringBundle("openUserScriptsManager"),
+          accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
           callback: callback
+        },
+        options: {
+          removeOnDismissal: true,
+          persistWhileVisible: true
         }
       });
       break;
@@ -59,9 +62,13 @@ const Scriptish_ScriptProvider = {
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
-          label: "Open User Scripts Manager",
-          accessKey: "O",
+          label: Scriptish_stringBundle("openUserScriptsManager"),
+          accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
           callback: callback
+        },
+        options: {
+          removeOnDismissal: true,
+          persistWhileVisible: true
         }
       });
       break;
@@ -93,10 +100,29 @@ AddonManagerPrivate.registerProvider({
     });
   },
   getAddonsByTypes: function(aTypes, aCallback) {
-    if (aTypes && aTypes.indexOf("userscript") < 0) aCallback([]);
-    else Scriptish.getConfig(function(config) {
-      aCallback(config.scripts);
-    });
+    if (aTypes && aTypes.indexOf("userscript") < 0) {
+      aCallback([]);
+    } else {
+      Scriptish.getConfig(function(config) {
+        aCallback(config.scripts);
+      });
+    }
+  },
+
+  getInstallsByTypes: function(aTypes, aCallback) {
+    if (aTypes && aTypes.indexOf("userscript") < 0) {
+      aCallback([]);
+    } else {
+      Scriptish.getConfig(function(config) {
+        let updates = [];
+        config.scripts.forEach(function(script) {
+          if (script.updateAvailable
+              && script.updateAvailable.state == AddonManager.STATE_AVAILABLE)
+            updates.push(script.updateAvailable);
+        });
+        aCallback(updates);
+      });
+    }
   }
 }, types);
 [

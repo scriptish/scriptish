@@ -1,20 +1,31 @@
 #scriptish-button {
-	-moz-box-orient: horizontal;
-	list-style-image: url("chrome://scriptish/skin/scriptish24.png");
+  -moz-box-orient: horizontal;
+  list-style-image: url("chrome://scriptish/skin/scriptish24.png");
+}
+toolbar #scriptish-button {
+  -moz-binding: url("chrome://scriptish/content/third-party/firebug/startButton.xml#scriptish-button");
 }
 
 toolbar[iconsize="small"] #scriptish-button {
-	list-style-image: url("chrome://scriptish/skin/scriptish16.png");
+  list-style-image: url("chrome://scriptish/skin/scriptish16.png");
 }
 
 #scriptish-button[scriptish-disabled] {
-	list-style-image: url("chrome://scriptish/skin/scriptish24_disabled.png");
+  list-style-image: url("chrome://scriptish/skin/scriptish24_disabled.png");
 }
 
 toolbar[iconsize="small"] #scriptish-button[scriptish-disabled] {
-	list-style-image: url("chrome://scriptish/skin/scriptish16_disabled.png");
+  list-style-image: url("chrome://scriptish/skin/scriptish16_disabled.png");
+}
+
+#scriptish-notification-icon {
+  list-style-image: url("chrome://scriptish/skin/scriptish16.png");
 }
 
 .popup-notification-icon[popupid="scriptish-install-popup-notification"] {
   list-style-image: url("chrome://scriptish/skin/scriptish64.png");
+}
+
+#notification-popup-box[anchorid="scriptish-notification-icon"] > #scriptish-notification-icon {
+  display: -moz-box;
 }

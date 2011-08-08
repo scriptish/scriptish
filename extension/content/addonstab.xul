@@ -3,6 +3,9 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="chrome://scriptish/content/js/addonstab.js" />
 
+  <commandset id="globalCommandSet">
+    <command id="cmd_scriptish_installFromFile"/>
+  </commandset>
   <commandset id="viewCommandSet">
     <!-- looks a little convoluted, but is required for the list-view
          controls binding to work correctly.
@@ -30,13 +33,7 @@
         command="cmd_scriptish_userscript_dl_link" type="userscript"/>
   </menupopup>
 
-  <richlistbox id="categories">
-    <richlistitem id="category-scriptish"
-        class="category"
-        insertafter="category-plugins"
-        value="addons://list/userscript">
-    </richlistitem>
-  </richlistbox>
+  <richlistbox id="categories"/>
 
   <hbox id="detail-controls">
       <button class="addon-control button_scriptish_userscript_edit"
@@ -46,6 +43,11 @@
               command="cmd_scriptish_userscript_show"
               insertbefore="detail-prefs-btn" />
   </hbox>
+
+  <vbox id="detail-contributions">
+    <description id="scriptish-detail-contrib-description"
+                 insertbefore="detail-contrib-description"></description>
+  </vbox>
 
   <vbox id="list-view">
   <vbox id="scriptish-list-empty" insertbefore="addon-list-empty"
@@ -58,4 +60,10 @@
     <spacer class="alert-spacer-after"/>
   </vbox>
   </vbox>
+
+  <menupopup id="utils-menu">
+    <menuitem id="scriptish-installFromFile"
+          command="cmd_scriptish_installFromFile"
+          insertafter="utils-installFromFile"/>
+  </menupopup>
 </overlay>

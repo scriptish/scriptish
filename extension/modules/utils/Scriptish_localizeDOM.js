@@ -2,8 +2,10 @@
 
 const EXPORTED_SYMBOLS = ["Scriptish_localizeSubtree", "Scriptish_localizeOnLoad"];
 
-Components.utils.import("resource://scriptish/logging.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+Components.utils.import("resource://scriptish/constants.js");
+
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
+lazyUtil(this, "stringBundle");
 
 function Scriptish_localizeOnLoad(window) {
   window.addEventListener("DOMContentLoaded", function localize() {
@@ -22,6 +24,11 @@ function Scriptish_localizeSubtree(aNode) {
     let localized = n.getAttribute("localize").split(",");
     for each (let l in localized) {
       try {
+        if (l == "#text") {
+          let s = Scriptish_stringBundle(n.textContent);
+          n.textContent = s;
+          continue;
+        }
         let s = Scriptish_stringBundle(n.getAttribute(l));
         n.setAttribute(l, s);
 

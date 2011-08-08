@@ -1,5 +1,5 @@
 var EXPORTED_SYMBOLS = ["Scriptish_ExtendedStringBundle"];
-Components.utils.import("resource://scriptish/logging.js");
+
 function Scriptish_ExtendedStringBundle(aBase) {
   this.basebundle = aBase;
   this.strings = {};

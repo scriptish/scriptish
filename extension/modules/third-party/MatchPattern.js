@@ -21,6 +21,7 @@
  *   David Dahl <ddahl@mozilla.com>
  *   Drew Willcoxon <adw@mozilla.com>
  *   Erik Vold <erikvvold@gmail.com>
+ *   Nils Maier <maierman@web.de>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -42,16 +43,25 @@ Cu.import("resource://scriptish/constants.js");
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js");
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
 
-const validScheme = ['http', 'https', 'ftp', 'file'];
+const validSchemes = ['http', 'https', 'ftp', 'file'];
+const REG_HOST = /^(?:\*\.)?[^*\/]+$|^\*$|^$/;
 
-// matches *. or * or text of host
-const validateHost = /^(\*|\*\.[^/*]+|[^/*]+)$/;
-
-const validatePath = /^(\*|\/.*)$/;
-
-// create and return a match pattern obj validate match pattern!
-function MatchPattern(pattern){
+function MatchPattern(pattern) {
   this.pattern = pattern;
+
+  // special case "<all_urls>
+  if (pattern == "<all_urls>") {
+    this.all = true;
+    this.scheme = "all_urls";
+    return;
+  }
+
+  // special case wild scheme
+  if (pattern[0] == "*") {
+    this.wildScheme = true;
+    // use http, because we need to ensure we get a host
+    pattern = "http" + pattern.slice(1);
+  }
 
   try {
     var uri = NetUtil.newURI(pattern);
@@ -59,44 +69,43 @@ function MatchPattern(pattern){
     throw new Error(Scriptish_stringBundle("error.pattern.parsing") + ": " + e);
   }
 
-  var scheme = uri.scheme;
+  var scheme = this.wildScheme ? "all" : uri.scheme;
   var host = uri.host;
   var path = uri.path;
 
-  if (scheme === 'file') {
-    if (!validatePath.test(path)) {
-      throw new Error(Scriptish_stringBundle("error.matchPattern.rules.file"));
-    }
+  if (scheme != "all" && validSchemes.indexOf(scheme) == -1) {
+    throw new Error(Scriptish_stringBundle("error.matchPattern.rules"));
+  }
+  if (!REG_HOST.test(host)) {
+    throw new Error(Scriptish_stringBundle("error.matchPattern.rules"));
+  }
+  if (path[0] !== "/") {
+    throw new Error(Scriptish_stringBundle("error.matchPattern.rules"));
+  }
+
+  this.scheme = scheme;
+  if (host) {
+    this.hostExpr = Scriptish_convert2RegExp(host.replace(/^\*\./, "*"));
   }
   else {
-    if (validScheme.indexOf(scheme) < 0 || !validateHost.test(host) ||
-        !validatePath.test(path)) {
-      throw new Error(Scriptish_stringBundle("error.matchPattern.rules"));
-    }
-
-    if (host == "*" && uri.path == "/") path = host;
+    // if omitted, then it means "", an alias for localhost
+    this.hostExpr = /^$/;
   }
-
-  var regexs = {};
-  regexs.scheme = scheme;
-  regexs.host = (scheme !== 'file') ? Scriptish_convert2RegExp(host) : null;
-  regexs.path = Scriptish_convert2RegExp(path, true);
-
-  this.regexs = regexs;
-  return this;
+  this.pathExpr = Scriptish_convert2RegExp(path, false, true);
 }
 
 MatchPattern.prototype.doMatch = function (uriSpec) {
   var matchURI = NetUtil.newURI(uriSpec);
-  var regexs = this.regexs;
 
-  if (regexs.host === null){
-    return (regexs.scheme === matchURI.scheme &&
-        regexs.path.test(matchURI.path));
-  } else {
-    return (regexs.scheme === matchURI.scheme &&
-        regexs.path.test(matchURI.path) &&
-        regexs.host.test(matchURI.host));
-
+  if (validSchemes.indexOf(matchURI.scheme) == -1) {
+    return false;
   }
+
+  if (this.all) {
+    return true;
+  }
+  if (!this.wildScheme && this.scheme != matchURI.scheme) {
+    return false;
+  }
+  return this.hostExpr.test(matchURI.host) && this.pathExpr.test(matchURI.path);
 };

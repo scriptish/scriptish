@@ -1,8 +1,8 @@
 var EXPORTED_SYMBOLS = ["Scriptish"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/logging.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
 function setStatus() (enabled = Scriptish_prefRoot.getValue("enabled", true));
 function notifyStatusChg(aVal) (

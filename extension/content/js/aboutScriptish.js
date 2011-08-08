@@ -1,8 +1,5 @@
 const Cu = Components.utils;
 
-QUnit.config.urlbase = "about:scriptish";
-QUnit.config.autostart = false; // prevents QUnit from auto starting onload
-
 function $(aID) document.getElementById(aID);
 function include(aSrc) {
   var deferred = Q.defer();
@@ -21,14 +18,13 @@ Cu.import("resource://scriptish/constants.js");
 
   // Show about:scriptish?test
   var params = window.location.href.split("?")[1];
-  if (/(?:^|&)test(?:&|=|$)/i.test(params)) {
+  if (/(?:^|&)tests?(?:&|=|$)/i.test(params)) {
     Cu.import("resource://scriptish/utils/q.js");
     include("tests/runTests.js").then(function() {
       $("main").style.display = "none";
       $("test").style.display = "block";
       runTests();
     });
-    return;
   }
 
   // Show about:scriptish

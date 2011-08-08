@@ -1,8 +1,8 @@
 var EXPORTED_SYMBOLS = ["CachedResource"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/utils/Scriptish_getContents.js");
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyUtil(this, "getContents");
 
 var useCache = Scriptish_prefRoot.getValue("cache.enabled");
 Scriptish_prefRoot.watch("cache.enabled", function() {

@@ -38,10 +38,14 @@ fi
  mv install.rdf.$$ install.rdf)
 
 if [ "test" != "$1" ]; then
-  echo "Cleaning up unwanted files ..."
   find . -depth -name '*~' -exec rm -rf "{}" \;
   find . -depth -name '#*' -exec rm -rf "{}" \;
   find . -depth -name '.DS_Store' -exec rm "{}" \;
+
+  if [ "amo" = "$1" ]; then
+    rm -rf content/tests
+    rm -rf content/js/third-party/qunit
+  fi
 fi
 
 echo "Creating $XPI ..."

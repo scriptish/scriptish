@@ -1,6 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_cryptoHash"];
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+lazyUtil(this, "stringBundle");
 
 // this tells updateFromStream to read the entire string 
 const PR_UINT32_MAX = 0xffffffff;

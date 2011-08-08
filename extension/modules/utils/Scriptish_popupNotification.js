@@ -1,30 +1,31 @@
 
 var EXPORTED_SYMBOLS = ["Scriptish_popupNotification"];
-Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/scriptish.js");
-Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/logging.js");
 Components.utils.import("resource://gre/modules/PopupNotifications.jsm");
+Components.utils.import("resource://scriptish/constants.js");
+lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
-function Scriptish_popupNotification(options) {
-  if (Scriptish_prefRoot.getValue("disableNotifications"))
-    return Scriptish_log(aMsg);
+function Scriptish_popupNotification(details) {
+  if (!Scriptish_prefRoot.getValue("enabledNotifications.popup"))
+    return Scriptish_log(details.message);
 
   timeout(function() {
       var win = Scriptish.getMostRecentWindow();
       win.PopupNotifications.show(
         win.gBrowser.selectedBrowser,
-        options.id,
-        options.message,
-        null, /* anchor ID */
+        details.id,
+        details.message,
+        "scriptish-notification-icon",
         {
-          label: options.mainAction.label,
-          accessKey: options.mainAction.accessKey,
+          label: details.mainAction.label,
+          accessKey: details.mainAction.accessKey,
           callback: function() {
-            options.mainAction.callback();
+            details.mainAction.callback();
           }
         },
-        null  /* secondary action */
+        null  /* secondary action */,
+        details.options
       );
   });
 };
