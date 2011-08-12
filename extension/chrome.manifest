@@ -31,3 +31,4 @@ locale     scriptish  pt-BR  locale/pt-BR/
 locale     scriptish  ru-RU  locale/ru-RU/
 locale     scriptish  sv-SE  locale/sv-SE/
 locale     scriptish  zh-CN  locale/zh-CN/
+locale     scriptish  zh-TW  locale/zh-TW/
