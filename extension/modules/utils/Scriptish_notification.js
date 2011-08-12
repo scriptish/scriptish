@@ -17,10 +17,15 @@ function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
       callback || null
     ];
 
-    // if Growl is not installed or disabled on OSX, then this will error
+    // if Growl is not installed or disabled on OSX, then use a fallback
     try {
       Services.as.showAlertNotification.apply(null, args);
-    } catch (e) {}
+    } catch (e) {
+      let win = Services.ww.openWindow(
+          null, 'chrome://global/content/alerts/alert.xul',
+          '_blank', 'chrome,titlebar=no,popup=yes', null);
+      win.arguments = args;
+    }
   });
 };
 
