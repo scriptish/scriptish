@@ -81,6 +81,12 @@ if (Cc["@mozilla.org/privatebrowsing;1"]) {
   Services.pbs = {privateBrowsingEnabled: false};
 }
 
+if (Cc["@mozilla.org/globalmessagemanager;1"]) {
+  XPCOMUtils.defineLazyServiceGetter(
+      Services, "mm", "@mozilla.org/globalmessagemanager;1",
+      "nsIChromeFrameMessageManager");
+}
+
 XPCOMUtils.defineLazyServiceGetter(
     Services, "sis", "@mozilla.org/scriptableinputstream;1",
     "nsIScriptableInputStream");

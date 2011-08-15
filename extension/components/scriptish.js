@@ -29,6 +29,7 @@ const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "comp
 // .user, like gmScript.user-12.js
 const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
+const e10s = !!Services.mm;
 
 function isScriptRunnable(script, url, topWin) {
   return !(!topWin && script.noframes)
@@ -49,7 +50,8 @@ function ScriptishService() {
     delete this.updateChk;
   }
 
-  Services.obs.addObserver(this, "chrome-document-global-created", false);
+  if (!e10s)
+    Services.obs.addObserver(this, "chrome-document-global-created", false);
   Services.obs.addObserver(this, "content-document-global-created", false);
   Services.obs.addObserver(this, "inner-window-destroyed", false);
   Services.obs.addObserver(this, "install-userscript", false);
