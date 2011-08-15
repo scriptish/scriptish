@@ -30,7 +30,7 @@ function Config(aBaseDir) {
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
 
-  this._prettyPrint = Scriptish_prefRoot.getValue("config.prettyPrint");
+  this._prettyPrint = Scriptish_prefRoot.getValue("config.prettyPrint.enabled");
 
   this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
   this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
@@ -293,13 +293,11 @@ Config.prototype = {
       });
     });
 
-    // Listen for the blocklist pref being modified
-    Scriptish_prefRoot.watch("config.prettyPrint", function() {
-      self._prettyPrint = Scriptish_prefRoot.getValue("config.prettyPrint");
+    Scriptish_prefRoot.watch("config.prettyPrint.enabled", function() {
+      self._prettyPrint = Scriptish_prefRoot.getValue("config.prettyPrint.enabled");
       self._save();
     });
 
-    // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
       self._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
       if (self._useBlocklist) {

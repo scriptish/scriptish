@@ -4,7 +4,7 @@ pref("extensions.scriptish.blocklist.interval", 86400);
 pref("extensions.scriptish.blocklist.lastFetch", 0);
 pref("extensions.scriptish.blocklist.url", "https://github.com/scriptish/scriptish/raw/master/blocklist.json");
 pref("extensions.scriptish.cache.enabled", true);
-pref("extensions.scriptish.config.prettyPrint", false);
+pref("extensions.scriptish.config.prettyPrint.enabled", false);
 pref("extensions.scriptish.enabled", true);
 pref("extensions.scriptish.enabledSchemes.about", false);
 pref("extensions.scriptish.enabledSchemes.chrome", false);
