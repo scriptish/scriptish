@@ -30,6 +30,8 @@ function Config(aBaseDir) {
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
 
+  this._prettyPrint = Scriptish_prefRoot.getValue("config.prettyPrint");
+
   this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
   this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
   this._blocklist = {};
@@ -292,6 +294,12 @@ Config.prototype = {
     });
 
     // Listen for the blocklist pref being modified
+    Scriptish_prefRoot.watch("config.prettyPrint", function() {
+      self._prettyPrint = Scriptish_prefRoot.getValue("config.prettyPrint");
+      self._save();
+    });
+
+    // Listen for the blocklist pref being modified
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
       self._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
       if (self._useBlocklist) {
@@ -341,7 +349,7 @@ Config.prototype = {
 
     let converter = Instances.suc;
     converter.charset = "UTF-8";
-    let json = JSON.stringify(this.toJSON());
+    let json = JSON.stringify(this.toJSON(), null, this._prettyPrint ? "  " : null);
     let writeStream = Scriptish_getWriteStream(this._configFile, {defer:true, safe:true});
     NetUtil.asyncCopy(
       converter.convertToInputStream(json), // source must be buffered!
