@@ -1,8 +1,9 @@
 var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "Cr", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
-    "Services", "Instances", "lazyImport", "lazyUtil", "timeout"];
+    "Services", "Instances", "lazyImport", "lazyUtil", "timeout", "e10s"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
+const e10s = !!Cc["@mozilla.org/globalmessagemanager;1"];
 const global = this;
 var Services = {};
 (function(inc, tools){
@@ -81,7 +82,7 @@ if (Cc["@mozilla.org/privatebrowsing;1"]) {
   Services.pbs = {privateBrowsingEnabled: false};
 }
 
-if (Cc["@mozilla.org/globalmessagemanager;1"]) {
+if (e10s) {
   XPCOMUtils.defineLazyServiceGetter(
       Services, "mm", "@mozilla.org/globalmessagemanager;1",
       "nsIChromeFrameMessageManager");

@@ -29,7 +29,6 @@ const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "comp
 // .user, like gmScript.user-12.js
 const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
-const e10s = !!Services.mm;
 
 function isScriptRunnable(script, url, topWin) {
   return !(!topWin && script.noframes)
