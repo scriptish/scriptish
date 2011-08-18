@@ -181,11 +181,10 @@ Scriptish_BrowserUI.disableMenuCommand = function(commandUUID, aWinID) {
  * a user selects "show script source" in the install dialog.
  */
 Scriptish_BrowserUI.showInstallBanner = function(browser) {
-  var self = this;
   var notificationBox = gBrowser.getNotificationBox(browser);
   var greeting = Scriptish_stringBundle("greeting.msg");
   var btnLabel = Scriptish_stringBundle(
-      (Scriptish_config.installIsUpdate(self.scriptDownloader_.script) ? "re" : "")
+      (Scriptish_config.installIsUpdate(this.scriptDownloader_.script) ? "re" : "")
       + "install");
 
   // Remove existing notifications. Notifications get removed

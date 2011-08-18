@@ -80,7 +80,6 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   Scriptish_log("Scriptish ScriptDownloader.handleScriptDownloadComplete");
   let req = this.req_;
-  let self = this;
 
   try {
     // If loading from file, status might be zero on success
@@ -90,35 +89,35 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
       return;
     }
 
-    if (self.secure) {
+    if (this.secure) {
       // make sure that the final URI is a https url
       if ("https" != req.channel.URI.scheme)
-        return self.handleErr();
+        return this.handleErr();
 
       // make sure that the final URI's certificate is valid
       try {
         checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
       }
       catch (e) {
-        return self.handleErr();
+        return this.handleErr();
       }
     }
 
-    if (self.scriptInstaller) {
+    if (this.scriptInstaller) {
       // make sure that the new version is greater than the old version
       var remoteVersion = Script.parseVersion(req.responseText);
-      if (!remoteVersion || Services.vc.compare(self.scriptInstaller._script.version, remoteVersion) >= 0)
-        return self.handleErr();
+      if (!remoteVersion || Services.vc.compare(this.scriptInstaller._script.version, remoteVersion) >= 0)
+        return this.handleErr();
     }
 
     var source = req.responseText;
-    self.script = Scriptish_config.parse(source, self.uri_);
+    this.script = Scriptish_config.parse(source, this.uri_);
 
     var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
-    var base = self.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
+    var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
     file.append(base + ".user.js");
     file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
-    self.tempFiles_.push(file);
+    this.tempFiles_.push(file);
 
     var converter = Instances.suc;
     converter.charset = "UTF-8";
@@ -128,19 +127,19 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     ws.write(source, source.length);
     ws.close();
 
-    self.script.setDownloadedFile(file);
+    this.script.setDownloadedFile(file);
 
-    timeout(self.fetchDependencies.bind(self));
+    timeout(this.fetchDependencies.bind(this));
 
-    switch (self.type) {
+    switch (this.type) {
       case "install":
-        self._callback = function() {
-          self.showInstallDialog();
-          delete self._callback;
+        this._callback = function() {
+          this.showInstallDialog();
+          delete this._callback;
         }
         break;
       case "view":
-        self.showScriptView();
+        this.showScriptView();
         break;
     }
 
