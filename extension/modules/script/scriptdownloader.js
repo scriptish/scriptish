@@ -12,6 +12,7 @@ lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
 lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
 
 lazyUtil(this, "alert");
+lazyUtil(this, "getTempFile");
 lazyUtil(this, "getWriteStream");
 lazyUtil(this, "stringBundle");
 
@@ -185,9 +186,7 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
     return;
   }
 
-  var tools = {};
   var dep = this.depQueue_.pop();
-  Cu.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
   try {
     var persist = Instances.wbp;
     persist.persistFlags =
@@ -210,7 +209,7 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
         ? new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"))
         : new NotificationCallbacks();
 
-    var file = tools.Scriptish_getTempFile();
+    var file = Scriptish_getTempFile();
     this.tempFiles_.push(file);
 
     var progressListener = new PersistProgressListener(persist);
