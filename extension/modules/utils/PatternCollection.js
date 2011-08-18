@@ -26,6 +26,9 @@ function PatternCollection() {
 PatternCollection.prototype = {
   _hasTLD: false,
   addPattern: function(pattern) {
+    if (typeof(pattern) != "string") {
+      return;
+    }
     this._patterns.push(pattern);
     var r = Scriptish_convert2RegExp(pattern);
     if (r.isTLD) {
@@ -41,6 +44,9 @@ PatternCollection.prototype = {
     this._merged = this._mergedTLD = null;
   },
   addPatterns: function(patterns) {
+    if (!patterns) {
+      return;
+    }
     if (!patterns.forEach) {
       this.addPattern(patterns);
       return;
