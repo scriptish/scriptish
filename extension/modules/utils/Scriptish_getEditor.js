@@ -15,10 +15,14 @@ const Scriptish_getEditor = function(parentWindow, change) {
 
     var editor = Instances.lf;
     editor.followLinks = true;
-    editor.initWithPath(editorPath);
+    try {
+      editor.initWithPath(editorPath);
+    } catch (e) {
+      editor = null;
+    }
 
     // make sure the editor preference is still valid
-    if (editor.exists() && editor.isExecutable()) {
+    if (editor && editor.exists() && editor.isExecutable()) {
       return editor;
     } else {
       Scriptish_log("Editor preference either does not exist or is not executable");
