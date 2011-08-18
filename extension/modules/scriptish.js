@@ -3,6 +3,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
+lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 
 function setStatus() (enabled = Scriptish_prefRoot.getValue("enabled", true));
 function notifyStatusChg(aVal) (
@@ -15,9 +16,6 @@ Scriptish_prefRoot.watch("enabled", function() {
 });
 
 var global = this;
-
-// don't delay calling aCallback; keep script injection time consistent post load
-function getConfig(aCallback) aCallback(global.config);
 
 const Scriptish = {
   updateSecurely: Scriptish_prefRoot.getBoolValue("update.requireSecured"),
@@ -35,21 +33,8 @@ const Scriptish = {
     Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
   getConfig: function(aCallback) {
-    if (!global.configQueue) {
-      global.configQueue = [aCallback];
-      var tools = {};
-      Cu.import("resource://scriptish/config/config.js", tools);
-      let cf = new tools.Config("scriptish_scripts");
-      cf.load(function() {
-        Scriptish_log("Scriptish config loaded"); // TODO: force & l10n
-        global.config = cf;
-        Scriptish.getConfig = getConfig;
-        global.configQueue.forEach(function(f) f(cf));
-        delete global["configQueue"];
-      });
-    } else {
-      global.configQueue.push(aCallback);
-    }
+    aCallback(Scriptish_config);
+    return Scriptish_config;
   },
   get enabled() enabled,
   set enabled(aVal) {
