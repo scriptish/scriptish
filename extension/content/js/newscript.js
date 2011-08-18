@@ -1,5 +1,6 @@
 Components.utils.import("resource://scriptish/constants.js");
 
+lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Scriptish_localizeOnLoad"]);
@@ -90,29 +91,27 @@ function doInstall() {
   foStream.write(script, script.length);
   foStream.close();
 
-  Scriptish.getConfig(function(config) {
-    // create a script object with parsed metadata,
-    script = config.parse(script);
+  // create a script object with parsed metadata,
+  script = Scriptish_config.parse(script);
 
-    // make sure entered details will not ruin an existing file
-    if (config.installIsUpdate(script)) {
-      var overwrite = confirm(Scriptish_stringBundle("newscript.exists"));
-      if (!overwrite) return false;
-    }
+  // make sure entered details will not ruin an existing file
+  if (Scriptish_config.installIsUpdate(script)) {
+    var overwrite = confirm(Scriptish_stringBundle("newscript.exists"));
+    if (!overwrite) return false;
+  }
 
-    // finish making the script object ready to install
-    script.setDownloadedFile(tempFile);
+  // finish making the script object ready to install
+  script.setDownloadedFile(tempFile);
 
-    // install this script
-    config.install(script);
+  // install this script
+  Scriptish_config.install(script);
 
-    // and fire up the editor!
-    Scriptish_openInEditor(script, window);
+  // and fire up the editor!
+  Scriptish_openInEditor(script, window);
 
-    // persist values
-    Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
-    Scriptish_prefRoot.setValue("newscript_author", script.author);
-  })
+  // persist values
+  Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
+  Scriptish_prefRoot.setValue("newscript_author", script.author);
 
   return true;
 }
