@@ -2,7 +2,6 @@ Components.utils.import("resource://scriptish/constants.js");
 
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
-lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Scriptish_localizeOnLoad"]);
 
 lazyUtil(this, "createUserScriptSource");

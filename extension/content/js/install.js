@@ -3,10 +3,8 @@ const scriptDownloader = window.arguments[0];
 const valueSplitter = /(\S+)\s+([^\r\f\n]+)/;
 
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/logging.js");
 
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
-lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Scriptish_localizeOnLoad"]);
 lazyUtil(this, "stringBundle");
 
