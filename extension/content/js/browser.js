@@ -7,6 +7,7 @@ var Scriptish_BrowserUI = {
 inc("resource://scriptish/constants.js", tools);
 const {lazyImport, lazyUtil} = tools;
 
+lazyImport(window, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(window, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(window, "resource://scriptish/content/browser.js", ["Scriptish_BrowserUIM"]);
 lazyImport(window, "resource://scriptish/menucommander.js", ["Scriptish_MenuCommander"]);
@@ -183,12 +184,9 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
   var self = this;
   var notificationBox = gBrowser.getNotificationBox(browser);
   var greeting = Scriptish_stringBundle("greeting.msg");
-  var btnLabel;
-  Scriptish.getConfig(function(config) {
-    btnLabel = Scriptish_stringBundle(
-        (config.installIsUpdate(self.scriptDownloader_.script) ? "re" : "")
-        + "install");
-  });
+  var btnLabel = Scriptish_stringBundle(
+      (Scriptish_config.installIsUpdate(self.scriptDownloader_.script) ? "re" : "")
+      + "install");
 
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
@@ -328,17 +326,17 @@ function Scriptish_popupClicked(aEvt) {
 /**
  * Handles a Scriptish menu popup event
  */
-function Scriptish_setupPopup() Scriptish.getConfig(function(config) {
+function Scriptish_setupPopup() {
   var $ = function(aID) document.getElementById(aID);
   var popup = $("scriptish-tb-popup");
   if (!popup) return;
   Scriptish_BrowserUI.reattachMenuCmds();
 
   function okURL(url) (
-      (Scriptish.isGreasemonkeyable(url) && !config.isURLExcluded(url)));
+      (Scriptish.isGreasemonkeyable(url) && !Scriptish_config.isURLExcluded(url)));
 
   function scriptsMatching(urls) {
-    return config.getMatchingScripts(function testMatchURLs(script) {
+    return Scriptish_config.getMatchingScripts(function testMatchURLs(script) {
       return urls.some(function(url) okURL(url) && script.matchesURL(url));
     }).sort(function(a,b) {
       a = a.name.toLocaleLowerCase(), b = b.name.toLocaleLowerCase();
@@ -407,7 +405,7 @@ function Scriptish_setupPopup() Scriptish.getConfig(function(config) {
 
     // determine the correct label
     let label;
-    if (config.isURLExcluded(url))
+    if (Scriptish_config.isURLExcluded(url))
       label = Scriptish_stringBundle("statusbar.noScripts.excluded");
     else if (!Scriptish.isGreasemonkeyable(url))
       label = Scriptish_stringBundle("statusbar.noScripts.scheme");
@@ -415,4 +413,4 @@ function Scriptish_setupPopup() Scriptish.getConfig(function(config) {
       label = Scriptish_stringBundle("statusbar.noScripts.notfound");
     menuitem.setAttribute("label", label);
   }
-});
+}
