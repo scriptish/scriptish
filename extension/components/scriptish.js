@@ -11,6 +11,7 @@ Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
 lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_sandboxScripts"]);
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
@@ -106,7 +107,7 @@ ScriptishService.prototype = {
     delete windows[aWinID];
   },
 
-  docReady: function(safeWin, chromeWin) Scriptish.getConfig((function(config) {
+  docReady: function(safeWin, chromeWin) {
     if (!Scriptish.enabled || !chromeWin) return;
 
     let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
@@ -145,7 +146,7 @@ ScriptishService.prototype = {
 
     // check if there are any modified scripts
     if (Scriptish_prefRoot.getValue("enableScriptRefreshing")) {
-       config.updateModifiedScripts(function(script) {
+       Scriptish_config.updateModifiedScripts(function(script) {
         if (shouldNotRun()
             || !isScriptRunnable(script, href, safeWin === safeWin.top))
           return;
@@ -189,7 +190,7 @@ ScriptishService.prototype = {
     }
 
     // if the url is a excluded url then stop
-    if (config.isURLExcluded(href)) return;
+    if (Scriptish_config.isURLExcluded(href)) return;
 
     // find matching scripts
     this.initScripts(href, safeWin, function(scripts) {
@@ -226,7 +227,7 @@ ScriptishService.prototype = {
         self.docUnload(currentInnerWindowID, gmBrowserUI);
       });
     });
-  }).bind(this)),
+  },
 
   docUnload: function(aWinID, aGMBrowserUI) {
     let menuCmders = aGMBrowserUI.menuCommanders;
@@ -317,15 +318,13 @@ ScriptishService.prototype = {
     };
 
     let isTopWin = wrappedContentWin === wrappedContentWin.top;
-    Scriptish.getConfig(function(config) {
-      config.getMatchingScripts(function(script) {
-        let chk = isScriptRunnable(script, url, isTopWin);
-        if (chk) scripts[script.runAt].push(script);
-        return chk;
-      }, [url]);
+    Scriptish_config.getMatchingScripts(function(script) {
+      let chk = isScriptRunnable(script, url, isTopWin);
+      if (chk) scripts[script.runAt].push(script);
+      return chk;
+    }, [url]);
 
-      aCallback(scripts);
-    });
+    aCallback(scripts);
   },
 
   injectScripts: function(scripts, url, winID, wrappedContentWin, chromeWin) {
