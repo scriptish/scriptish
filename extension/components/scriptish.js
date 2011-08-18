@@ -193,7 +193,7 @@ ScriptishService.prototype = {
     if (Scriptish_config.isURLExcluded(href)) return;
 
     // find matching scripts
-    this.initScripts(href, safeWin, function(scripts) {
+    this.initScripts(href, (safeWin === safeWin.top), function(scripts) {
       if (scripts["document-end"].length || scripts["document-idle"].length) {
         safeWin.addEventListener("DOMContentLoaded", function() {
           if (shouldNotRun()) return;
@@ -309,7 +309,7 @@ ScriptishService.prototype = {
     return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
   },
 
-  initScripts: function(url, wrappedContentWin, aCallback) {
+  initScripts: function(url, isTopWin, aCallback) {
     let scripts = {
       "document-start": [],
       "document-end": [],
@@ -317,7 +317,6 @@ ScriptishService.prototype = {
       "window-load": []
     };
 
-    let isTopWin = wrappedContentWin === wrappedContentWin.top;
     Scriptish_config.getMatchingScripts(function(script) {
       let chk = isScriptRunnable(script, url, isTopWin);
       if (chk) scripts[script.runAt].push(script);
