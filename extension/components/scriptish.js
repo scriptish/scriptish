@@ -20,6 +20,7 @@ lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_installUri.js", ["Scriptish_installUri"]);
 
+lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
 
@@ -30,14 +31,6 @@ const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "comp
 // .user, like gmScript.user-12.js
 const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
-
-function isScriptRunnable(script, url, topWin) {
-  return !(!topWin && script.noframes)
-      && !script.delayInjection
-      && script.enabled
-      && !script.needsUninstall
-      && script.matchesURL(url);
-}
 
 let windows = {};
 
@@ -139,6 +132,7 @@ ScriptishService.prototype = {
     let unsafeWin = safeWin.wrappedJSObject;
     let self = this;
     let winClosed = false;
+    let isTop = (safeWin === safeWin.top);
 
     // rechecks values that can change at any moment
     function shouldNotRun() (
@@ -148,7 +142,7 @@ ScriptishService.prototype = {
     if (Scriptish_prefRoot.getValue("enableScriptRefreshing")) {
        Scriptish_config.updateModifiedScripts(function(script) {
         if (shouldNotRun()
-            || !isScriptRunnable(script, href, safeWin === safeWin.top))
+            || !Scriptish_isScriptRunnable(script, href, isTop))
           return;
 
         let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
@@ -193,7 +187,7 @@ ScriptishService.prototype = {
     if (Scriptish_config.isURLExcluded(href)) return;
 
     // find matching scripts
-    this.initScripts(href, (safeWin === safeWin.top), function(scripts) {
+    Scriptish_config.initScripts(href, isTop, function(scripts) {
       if (scripts["document-end"].length || scripts["document-idle"].length) {
         safeWin.addEventListener("DOMContentLoaded", function() {
           if (shouldNotRun()) return;
@@ -307,23 +301,6 @@ ScriptishService.prototype = {
 
     var file = uri.file;
     return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
-  },
-
-  initScripts: function(url, isTopWin, aCallback) {
-    let scripts = {
-      "document-start": [],
-      "document-end": [],
-      "document-idle": [],
-      "window-load": []
-    };
-
-    Scriptish_config.getMatchingScripts(function(script) {
-      let chk = isScriptRunnable(script, url, isTopWin);
-      if (chk) scripts[script.runAt].push(script);
-      return chk;
-    }, [url]);
-
-    aCallback(scripts);
   },
 
   injectScripts: function(scripts, url, winID, wrappedContentWin, chromeWin) {

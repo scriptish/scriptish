@@ -15,6 +15,7 @@ lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
 lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 
 lazyUtil(this, "cryptoHash");
+lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getContents");
 lazyUtil(this, "getProfileFile");
 lazyUtil(this, "getWriteStream");
@@ -453,3 +454,20 @@ Config.prototype = {
   },
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
 }
+
+Config.prototype.initScripts = function(url, isTopWin, aCallback) {
+  let scripts = {
+    "document-start": [],
+    "document-end": [],
+    "document-idle": [],
+    "window-load": []
+  };
+
+  this.getMatchingScripts(function(script) {
+    let chk = Scriptish_isScriptRunnable(script, url, isTopWin);
+    if (chk) scripts[script.runAt].push(script);
+    return chk;
+  }, [url]);
+
+  aCallback(scripts);
+};
