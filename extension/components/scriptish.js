@@ -11,6 +11,7 @@ Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/manager.js", ["Scriptish_manager"]);
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
 lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_sandboxScripts"]);
@@ -115,7 +116,7 @@ ScriptishService.prototype = {
         || "";
 
     if (!href && safeWin.frameElement) {
-      this.waitForFrame(safeWin, chromeWin);
+      Scriptish_manager.waitForFrame.call(this, safeWin, chromeWin);
       return;
     }
 
@@ -235,24 +236,6 @@ ScriptishService.prototype = {
       break;
     }
     return;
-  },
-
-  waitForFrame: function(safeWin, chromeWin) {
-    let self = this;
-    safeWin.addEventListener("DOMContentLoaded", function _frame_loader() {
-      // not perfect, but anyway
-      let href = (safeWin.location.href
-          || (safeWin.frameElement && safeWin.frameElement.src));
-
-      if (!href) return; // wait for it :p
-      safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
-      self.docReady(safeWin, chromeWin);
-
-      // fake DOMContentLoaded to get things rolling
-      var evt = safeWin.document.createEvent("Events");
-      evt.initEvent("DOMContentLoaded", true, true);
-      safeWin.dispatchEvent(evt);
-    }, false);
   },
 
   _test_org: {
