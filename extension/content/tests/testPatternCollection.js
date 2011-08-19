@@ -9,6 +9,18 @@ test("exports", function() checkExports(
     ["PatternCollection"]
     ));
 
+test("adding bad things", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern(null);
+  equal(pc.patterns.length, 0, "adding null does nothing");
+  pc.addPattern(undefined);
+  equal(pc.patterns.length, 0, "adding undefined does nothing");
+  pc.addPatterns([null]);
+  equal(pc.patterns.length, 0, "adding [null] does nothing");
+});
+
 test("empty", function() {
   var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
 

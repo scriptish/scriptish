@@ -1,15 +1,16 @@
 (function($, tools) {
-var Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js", tools);
-Cu.import("resource://scriptish/prefmanager.js");
-Cu.import("resource://scriptish/logging.js");
-Cu.import("resource://scriptish/scriptish.js");
-Cu.import("resource://scriptish/utils/Scriptish_ExtendedStringBundle.js");
-Cu.import("resource://scriptish/utils/Scriptish_installUri.js");
-Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js");
-Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js");
-Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js");
-Cu.import("resource://scriptish/addonprovider.js");
+Components.utils.import("resource://scriptish/addonprovider.js");
+Components.utils.import("resource://scriptish/constants.js", tools);
+const {lazyImport, lazyUtil} = tools;
+
+lazyImport(window, "resource://scriptish/config.js", ["Scriptish_config"]);
+lazyImport(window, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(window, "resource://scriptish/third-party/Scriptish_openFolder.js", ["Scriptish_openFolder"]);
+
+lazyUtil(window, "ExtendedStringBundle");
+lazyUtil(window, "installUri");
+lazyUtil(window, "openInEditor");
+lazyUtil(window, "stringBundle");
 
 const RE_USERSCRIPT = /^.*\.user(?:-\d+)?\.js$/i;
 
@@ -160,23 +161,19 @@ window.addEventListener("load", function() {
       case "list":
         if (view[2] != "userscript") return reset();
         de.classList.add("scriptish");
-        Scriptish.getConfig(function(config) {
-          if (!config.scripts.length)
-            $("scriptish-list-empty").style.display = "-moz-box";
-        });
+        if (!Scriptish_config.scripts.length)
+          $("scriptish-list-empty").style.display = "-moz-box";
         break;
       case "detail":
-        Scriptish.getConfig(function(config) {
-          let script = config.getScriptById(decodeURIComponent(view[2]));
-          if (script == null || !script.contributionURL) return reset();
-          de.classList.add("scriptish");
-        });
+        let script = Scriptish_config.getScriptById(decodeURIComponent(view[2]));
+        if (script == null || !script.contributionURL) return reset();
+        de.classList.add("scriptish");
         break;
       default:
         reset();
     }
   }
-  window.addEventListener('ViewChanged', onViewChanged, false);
+  window.addEventListener("ViewChanged", onViewChanged, false);
   onViewChanged(); // initialize on load as well as when it changes later
 
   var needToRemoveObserver = true;
@@ -194,7 +191,7 @@ window.addEventListener("load", function() {
   window.addEventListener("unload", function() {
     if (needToRemoveObserver)
       Services.obs.removeObserver(installObserver, "scriptish-script-installed");
-    Scriptish.getConfig(function(config) config.uninstallScripts());
+    Scriptish_config.uninstallScripts();
   }, false);
 }, false);
 

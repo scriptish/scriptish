@@ -1,9 +1,14 @@
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/prefmanager.js");
-Components.utils.import("resource://scriptish/scriptish.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_createUserScriptSource.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_localizeDOM.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_stringBundle.js");
+
+lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
+lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Scriptish_localizeOnLoad"]);
+
+lazyUtil(this, "createUserScriptSource");
+lazyUtil(this, "getTempFile");
+lazyUtil(this, "getWriteStream");
+lazyUtil(this, "openInEditor");
+lazyUtil(this, "stringBundle");
 
 var $ = function(aID) document.getElementById(aID);
 var $$ = function(q) document.querySelector(q);
@@ -76,43 +81,36 @@ function doInstall() {
     return false;
   }
 
-  var tools = {};
-  Components.utils.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
-  Components.utils.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
-  Components.utils.import("resource://scriptish/utils/Scriptish_getWriteStream.js", tools);
-
   var script = createScriptSource();
   if (!script) return false;
 
   // put this created script into a file -- only way to install it
-  var tempFile = tools.Scriptish_getTempFile();
-  var foStream = tools.Scriptish_getWriteStream(tempFile);
+  var tempFile = Scriptish_getTempFile();
+  var foStream = Scriptish_getWriteStream(tempFile);
   foStream.write(script, script.length);
   foStream.close();
 
-  Scriptish.getConfig(function(config) {
-    // create a script object with parsed metadata,
-    script = config.parse(script);
+  // create a script object with parsed metadata,
+  script = Scriptish_config.parse(script);
 
-    // make sure entered details will not ruin an existing file
-    if (config.installIsUpdate(script)) {
-      var overwrite = confirm(Scriptish_stringBundle("newscript.exists"));
-      if (!overwrite) return false;
-    }
+  // make sure entered details will not ruin an existing file
+  if (Scriptish_config.installIsUpdate(script)) {
+    var overwrite = confirm(Scriptish_stringBundle("newscript.exists"));
+    if (!overwrite) return false;
+  }
 
-    // finish making the script object ready to install
-    script.setDownloadedFile(tempFile);
+  // finish making the script object ready to install
+  script.setDownloadedFile(tempFile);
 
-    // install this script
-    config.install(script);
+  // install this script
+  Scriptish_config.install(script);
 
-    // and fire up the editor!
-    tools.Scriptish_openInEditor(script, window);
+  // and fire up the editor!
+  Scriptish_openInEditor(script, window);
 
-    // persist values
-    Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
-    Scriptish_prefRoot.setValue("newscript_author", script.author);
-  })
+  // persist values
+  Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
+  Scriptish_prefRoot.setValue("newscript_author", script.author);
 
   return true;
 }
