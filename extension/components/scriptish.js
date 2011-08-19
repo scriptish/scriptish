@@ -219,23 +219,9 @@ ScriptishService.prototype = {
 
       windows[currentInnerWindowID].unloaders.push(function() {
         winClosed = true;
-        self.docUnload(currentInnerWindowID, gmBrowserUI);
+        gmBrowserUI.docUnload(currentInnerWindowID);
       });
     });
-  },
-
-  docUnload: function(aWinID, aGMBrowserUI) {
-    let menuCmders = aGMBrowserUI.menuCommanders;
-    if (!menuCmders || 0 == menuCmders.length) return;
-
-    let curMenuCmder = this.currentMenuCommander;
-    for (let [i, item] in Iterator(menuCmders)) {
-      if (item.winID !== aWinID) continue;
-      if (item.commander === curMenuCmder) curMenuCmder = curMenuCmder.detach();
-      menuCmders.splice(i, 1);
-      break;
-    }
-    return;
   },
 
   _test_org: {

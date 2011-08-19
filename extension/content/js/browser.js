@@ -292,6 +292,20 @@ Scriptish_BrowserUI.getCommander = function(aWinID) {
   return commander;
 }
 
+Scriptish_BrowserUI.docUnload = function(aWinID) {
+  let menuCmders = this.menuCommanders;
+  if (!menuCmders || 0 == menuCmders.length) return;
+
+  let curMenuCmder = this.currentMenuCommander;
+  for (let [i, item] in Iterator(menuCmders)) {
+    if (item.winID !== aWinID) continue;
+    if (item.commander === curMenuCmder) curMenuCmder = curMenuCmder.detach();
+    menuCmders.splice(i, 1);
+    break;
+  }
+  return;
+};
+
 Scriptish_BrowserUI.viewContextItemClicked = function() {
   Scriptish_configDownloader.startViewScript(
       Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
