@@ -32,10 +32,6 @@ const Scriptish = {
     if (aData && aSubject) aData.id = aSubject.id;
     Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
-  getConfig: function(aCallback) {
-    aCallback(Scriptish_config);
-    return Scriptish_config;
-  },
   get enabled() enabled,
   set enabled(aVal) {
     ignoreEnable = true;
