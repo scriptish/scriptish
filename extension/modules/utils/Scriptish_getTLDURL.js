@@ -9,5 +9,5 @@ const Scriptish_getTLDURL = Scriptish_memoize(function(aURL) {
     return uri.spec;
   } catch (e) {}
 
-  return aURL	;
+  return aURL;
 }, 200);
