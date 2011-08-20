@@ -5,6 +5,7 @@ Cu.import("resource://scriptish/constants.js");
 
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_evalInSandbox.js", ["Scriptish_evalInSandbox_filename"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_injectScripts.js", ["Scriptish_injectScripts_filename"]);
 
 lazyUtil(this, "alert");
 lazyUtil(this, "cryptoHash");
@@ -31,6 +32,7 @@ function GM_apiLeakCheck(apiName) {
     if (2 == stack.language &&
         stack.filename != moduleFilename &&
         stack.filename != Scriptish_evalInSandbox_filename &&
+        stack.filename != Scriptish_injectScripts_filename &&
         stack.filename != Services.scriptish.filename &&
         stack.filename.substr(0, 6) != "chrome") {
       Scriptish_logError(new Error(

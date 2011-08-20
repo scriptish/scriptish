@@ -12,21 +12,16 @@ lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/manager.js", ["Scriptish_manager"]);
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
-lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
-lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_sandboxScripts"]);
-lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
-lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
-lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 
-lazyUtil(this, "evalInSandbox");
+lazyUtil(this, "injectScripts");
 lazyUtil(this, "installUri");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
 lazyUtil(this, "windowUnloader");
 
-const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
+const {nsIContentPolicy: CP} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
 
 // If the file was previously cached it might have been given a number after
@@ -36,7 +31,6 @@ const RE_CONTENTTYPE = /text\/html/i;
 
 function ScriptishService() {
   this.wrappedJSObject = this;
-  this.timer = new Timer();
   this.updateChk = function() {
     Services.scriptloader
         .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
@@ -136,7 +130,7 @@ ScriptishService.prototype = {
         let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
         function inject() {
           if (shouldNotRun()) return;
-          self.injectScripts([script], href, currentInnerWindowID, safeWin, chromeWin);
+          Scriptish_injectScripts([script], href, currentInnerWindowID, safeWin, chromeWin);
         }
         switch (script.runAt) {
         case "document-end":
@@ -184,12 +178,12 @@ ScriptishService.prototype = {
           if (scripts["document-idle"].length)
             timeout(function() {
               if (shouldNotRun()) return;
-              self.injectScripts(
+              Scriptish_injectScripts(
                   scripts["document-idle"], href, currentInnerWindowID, safeWin, chromeWin);
             });
 
           // inject @run-at document-end scripts
-          self.injectScripts(scripts["document-end"], href, currentInnerWindowID, safeWin, chromeWin);
+          Scriptish_injectScripts(scripts["document-end"], href, currentInnerWindowID, safeWin, chromeWin);
         }, true);
       }
 
@@ -197,12 +191,12 @@ ScriptishService.prototype = {
         safeWin.addEventListener("load", function() {
           if (shouldNotRun()) return;
           // inject @run-at window-load scripts
-          self.injectScripts(scripts["window-load"], href, currentInnerWindowID, safeWin, chromeWin);
+          Scriptish_injectScripts(scripts["window-load"], href, currentInnerWindowID, safeWin, chromeWin);
         }, true);
       }
 
       // inject @run-at document-start scripts
-      self.injectScripts(scripts["document-start"], href, currentInnerWindowID, safeWin, chromeWin);
+      Scriptish_injectScripts(scripts["document-start"], href, currentInnerWindowID, safeWin, chromeWin);
 
       Scriptish_windowUnloader(function() {
         winClosed = true;
@@ -252,65 +246,6 @@ ScriptishService.prototype = {
 
     var file = uri.file;
     return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
-  },
-
-  injectScripts: function(scripts, url, winID, wrappedContentWin, chromeWin) {
-    if (0 >= scripts.length) return;
-    let self = this;
-    let unsafeContentWin = wrappedContentWin.wrappedJSObject;
-
-    let delays = [];
-    let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
-    Scriptish_windowUnloader(function() {
-      for (let [, id] in Iterator(delays)) self.timer.clearTimeout(id);
-    }, winID);
-
-    for (var i = 0, e = scripts.length; i < e; ++i) {
-      // Do not "optimize" |script| out of the loop block and into the loop
-      // declaration!
-      // Need to keep a valid reference to |script| around so that GM_log
-      // and the delay code (and probably other consumer work).
-      let script = scripts[i];
-      let sandbox = new Cu.Sandbox(wrappedContentWin);
-      Cu.evalInSandbox(GM_sandboxScripts, sandbox);
-
-      let GM_api = new GM_API(
-          script, url, winID, wrappedContentWin, unsafeContentWin, chromeWin);
-
-      // hack XPathResult since that is so commonly used
-      sandbox.XPathResult = XPATH_RESULT;
-
-      // add GM_* API to sandbox
-      for (var funcName in GM_api) {
-        sandbox[funcName] = GM_api[funcName];
-      }
-      XPCOMUtils.defineLazyGetter(sandbox, "console", function() {
-        return GM_console(script, wrappedContentWin, chromeWin);
-      });
-      XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
-        if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
-          var logger = new GM_ScriptLogger(script);
-          return function() {
-            logger.log(Array.slice(arguments).join(" "));
-            sandbox.console.log.apply(sandbox.console, arguments);
-          }
-        }
-        return sandbox.console.log.bind(sandbox.console);
-      });
-
-      sandbox.unsafeWindow = unsafeContentWin;
-      sandbox.__proto__ = wrappedContentWin;
-
-      let delay = script.delay;
-      if (delay || delay === 0) {
-        // don't use window's setTimeout, b/c then window could clearTimeout
-        delays.push(self.timer.setTimeout(function() {
-          Scriptish_evalInSandbox(script, sandbox, wrappedContentWin);
-        }, delay));
-      } else {
-        Scriptish_evalInSandbox(script, sandbox, wrappedContentWin);
-      }
-    }
   }
 }
 
