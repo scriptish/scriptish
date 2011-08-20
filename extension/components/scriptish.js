@@ -24,6 +24,7 @@ lazyUtil(this, "installUri");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
+lazyUtil(this, "windowUnloader");
 
 const {nsIContentPolicy: CP, nsIDOMXPathResult: XPATH_RESULT} = Ci;
 const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
@@ -32,8 +33,6 @@ const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "comp
 // .user, like gmScript.user-12.js
 const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
-
-let windows = {};
 
 function ScriptishService() {
   this.wrappedJSObject = this;
@@ -47,7 +46,6 @@ function ScriptishService() {
   if (!e10s)
     Services.obs.addObserver(this, "chrome-document-global-created", false);
   Services.obs.addObserver(this, "content-document-global-created", false);
-  Services.obs.addObserver(this, "inner-window-destroyed", false);
   Services.obs.addObserver(this, "install-userscript", false);
   Services.obs.addObserver(this, "scriptish-enabled", false);
 }
@@ -71,9 +69,6 @@ ScriptishService.prototype = {
       case "content-document-global-created":
         this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject).wrappedJSObject);
         break;
-      case "inner-window-destroyed":
-        this.innerWinDestroyed(aSubject.QueryInterface(Components.interfaces.nsISupportsPRUint64).data);
-        break;
       case "install-userscript":
         let win = Scriptish.getMostRecentWindow("navigator:browser");
         if (win) win.Scriptish_BrowserUI.installCurrentScript();
@@ -93,14 +88,6 @@ ScriptishService.prototype = {
 
   get filename() filename,
 
-  innerWinDestroyed: function(aWinID) {
-    let window = windows[aWinID];
-    if (!window || !window.unloaders || !window.unloaders.length) return;
-    for (var i = window.unloaders.length - 1; ~i; i--)
-      window.unloaders[i]();
-    delete windows[aWinID];
-  },
-
   docReady: function(safeWin, chromeWin) {
     if (!Scriptish.enabled || !chromeWin) return;
 
@@ -109,7 +96,6 @@ ScriptishService.prototype = {
     if (!gmBrowserUI || !gBrowser) return;
 
     let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
-    windows[currentInnerWindowID] = {unloaders: []};
 
     let href = (safeWin.location.href
         || (safeWin.frameElement && safeWin.frameElement.src))
@@ -218,10 +204,10 @@ ScriptishService.prototype = {
       // inject @run-at document-start scripts
       self.injectScripts(scripts["document-start"], href, currentInnerWindowID, safeWin, chromeWin);
 
-      windows[currentInnerWindowID].unloaders.push(function() {
+      Scriptish_windowUnloader(function() {
         winClosed = true;
         gmBrowserUI.docUnload(currentInnerWindowID);
-      });
+      }, currentInnerWindowID);
     });
   },
 
@@ -275,9 +261,9 @@ ScriptishService.prototype = {
 
     let delays = [];
     let winID = Scriptish_getWindowIDs(wrappedContentWin).innerID;
-    windows[winID].unloaders.push(function() {
+    Scriptish_windowUnloader(function() {
       for (let [, id] in Iterator(delays)) self.timer.clearTimeout(id);
-    });
+    }, winID);
 
     for (var i = 0, e = scripts.length; i < e; ++i) {
       // Do not "optimize" |script| out of the loop block and into the loop
