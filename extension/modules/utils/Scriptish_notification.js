@@ -8,13 +8,14 @@ function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
     return Scriptish_log(aMsg);
 
   timeout(function() {
-    if (aCallback) var callback = new Observer(aCallback);
+    var callback = (aCallback) ? new Observer(aCallback) : null;
     var args = [
       aIconURL || "chrome://scriptish/skin/scriptish32.png",
       aTitle || "Scriptish",
-      aMsg+"", !!callback,
+      aMsg+"",
+      !!callback,
       "",
-      callback || null
+      callback
     ];
 
     // if Growl is not installed or disabled on OSX, then use a fallback
@@ -24,6 +25,8 @@ function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
       let win = Services.ww.openWindow(
           null, 'chrome://global/content/alerts/alert.xul',
           '_blank', 'chrome,titlebar=no,popup=yes', null);
+      args[6] = callback;
+      args[5] = "";
       win.arguments = args;
     }
   });
