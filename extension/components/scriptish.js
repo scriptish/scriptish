@@ -122,7 +122,8 @@ ScriptishService.prototype = {
 
     // Show the scriptish install banner if the user is navigating to a .user.js
     // file in a top-level tab.
-    if (safeWin === safeWin.top && RE_USERSCRIPT.test(href)
+    if (gmBrowserUI.scriptDownloader_
+        && safeWin === safeWin.top && RE_USERSCRIPT.test(href)
         && !RE_CONTENTTYPE.test(safeWin.document.contentType)) {
       gmBrowserUI.showInstallBanner(
           gBrowser.getBrowserForDocument(safeWin.document));
@@ -244,25 +245,20 @@ ScriptishService.prototype = {
 
     // don't intercept anything when Scriptish is not enabled
     if (!Scriptish.enabled) return CP.ACCEPT;
+
     // don't interrupt the view-source: scheme
     if ("view-source" == cl.scheme) return CP.ACCEPT;
 
     // CP.TYPE is not binary, so do not use bitwise logic tricks
     if ((ct == CP.TYPE_DOCUMENT || ct == CP.TYPE_SUBDOCUMENT)
-        && this._reg_userjs.test(cl.spec)
-        && !this.ignoreNextScript_ && !this.isTempScript(cl)) {
-      this.ignoreNextScript_ = false;
-      Scriptish_installUri(cl, ctx.contentWindow);
-      return CP.REJECT_REQUEST;
+        && this._reg_userjs.test(cl.spec) && !this.isTempScript(cl)) {
+      Scriptish_installUri(cl);
     }
 
-    this.ignoreNextScript_ = false;
     return CP.ACCEPT;
   },
 
   shouldProcess: function(ct, cl, org, ctx, mt, ext) CP.ACCEPT,
-
-  ignoreNextScript: function() this.ignoreNextScript_ = true,
 
   _tmpDir: Services.dirsvc.get("TmpD", Ci.nsILocalFile),
   isTempScript: function(uri) {

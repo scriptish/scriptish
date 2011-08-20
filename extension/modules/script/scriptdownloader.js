@@ -16,7 +16,7 @@ lazyUtil(this, "getTempFile");
 lazyUtil(this, "getWriteStream");
 lazyUtil(this, "stringBundle");
 
-function ScriptDownloader(uri, contentWin) {
+function ScriptDownloader(uri) {
   this.uri_ = uri || null;
   this.req_ = null;
   this.script = null;
@@ -25,7 +25,6 @@ function ScriptDownloader(uri, contentWin) {
   this.installOnCompletion_ = false;
   this.tempFiles_ = [];
   this.updateScript = false;
-  this.contentWin = contentWin || null;
 }
 ScriptDownloader.prototype.startInstall = function() {
   this.type = "install";
@@ -72,10 +71,8 @@ ScriptDownloader.prototype.chkContentTypeB4DL = function() {
     return;
 
   // If there is a 'Content-Type' header and it contains 'text/html',
-  // then do not install the file, and display it instead.
+  // then do not attempt to install the file
   this.req_.abort();
-  Services.scriptish.ignoreNextScript();
-  if (this.contentWin) this.contentWin.location.href = this.uri_.spec;
 }
 ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   Scriptish_log("Scriptish ScriptDownloader.handleScriptDownloadComplete");

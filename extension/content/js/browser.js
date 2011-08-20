@@ -219,6 +219,7 @@ Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
 // Handles the install button getting clicked.
 Scriptish_BrowserUI.installCurrentScript = function() {
   this.scriptDownloader_.installScript();
+  delete this.scriptDownloader_;
 }
 
 /**
