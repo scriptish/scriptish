@@ -9,12 +9,17 @@ function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
 
   timeout(function() {
     if (aCallback) var callback = new Observer(aCallback);
+    var args = [
+      aIconURL || "chrome://scriptish/skin/scriptish32.png",
+      aTitle || "Scriptish",
+      aMsg+"", !!callback,
+      "",
+      callback || null
+    ];
 
     // if Growl is not installed or disabled on OSX, then this will error
     try {
-      Services.as.showAlertNotification(
-        aIconURL || "chrome://scriptish/skin/scriptish32.png",
-        aTitle || "Scriptish", aMsg+"", !!callback, "", callback || null);
+      Services.as.showAlertNotification.apply(null, args);
     } catch (e) {}
   });
 };
