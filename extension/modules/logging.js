@@ -57,7 +57,7 @@ function Scriptish_logScriptError(aError, aWindow, aFileURL, aId) {
       var {message:errorMessage, filename:sourceName, lineNumber, columnNumber} = aError;
     }
     // generic script error
-    else if ("message" in aError) {
+    else if (typeof aError.message !== "undefined") {
       // do not use aError.message, as this might hide the Error prefix
       // such as "SyntaxError: ..."
       errorMessage = aError.toString() || errorMessage;
