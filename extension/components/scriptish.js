@@ -3,7 +3,6 @@ const CONTRACTID = "@scriptish.erikvold.com/scriptish-service;1";
 const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
 
 const filename = Components.stack.filename;
-const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -19,8 +18,9 @@ lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
 lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
 lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
-lazyImport(this, "resource://scriptish/utils/Scriptish_installUri.js", ["Scriptish_installUri"]);
 
+lazyUtil(this, "evalInSandbox");
+lazyUtil(this, "installUri");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
@@ -323,71 +323,11 @@ ScriptishService.prototype = {
       if (delay || delay === 0) {
         // don't use window's setTimeout, b/c then window could clearTimeout
         delays.push(self.timer.setTimeout(function() {
-          self.evalInSandbox(script, sandbox, wrappedContentWin);
+          Scriptish_evalInSandbox(script, sandbox, wrappedContentWin);
         }, delay));
       } else {
-        this.evalInSandbox(script, sandbox, wrappedContentWin);
+        Scriptish_evalInSandbox(script, sandbox, wrappedContentWin);
       }
-    }
-  },
-
-  evalInSandbox: function(aScript, aSandbox, aWindow) {
-    const jsVer = aScript.jsversion;
-
-    try {
-      for (let [, req] in Iterator(aScript.requires)) {
-        var rfileURL = req.fileURL;
-        try {
-          Cu.evalInSandbox(
-            req.textContent + "\n",
-            aSandbox,
-            jsVer,
-            fileURLPrefix + rfileURL,
-            1
-            );
-        } catch (ex) {
-          Scriptish_logScriptError(ex, aWindow, rfileURL, aScript.id);
-        }
-      }
-    } catch (e) {
-      return Scriptish_logError(e, 0, aScript.fileURL, e.lineNumber);
-    }
-
-    try {
-      try {
-        Cu.evalInSandbox(
-          aScript.textContent + "\n",
-          aSandbox,
-          jsVer,
-          fileURLPrefix + aScript.fileURL,
-          1
-          );
-      }
-      catch (e if (e.message == "return not in function"
-          || /\(NS_ERROR_OUT_OF_MEMORY\) \[nsIXPCComponents_Utils.evalInSandbox\]/.test(e.message))) {
-        // catch errors when return is not in a function or when a window global
-        // is being overwritten (which throws NS_ERROR_OUT_OF_MEMORY..)
-        var sw = Instances.se;
-        sw.init(
-          Scriptish_stringBundle("warning.returnfrommain"),
-          aScript.fileURL,
-          "",
-          e.lineNumber || 0,
-          e.columnNumber || 0,
-          sw.warningFlag,
-          "scriptish userscript warnings"
-          );
-        Scriptish_logScriptError(sw, aWindow, aScript.fileURL, aScript.id);
-        Cu.evalInSandbox(
-          "(function(){" + aScript.textContent + "\n})()",
-          aSandbox,
-          jsVer,
-          fileURLPrefix + aScript.fileURL,
-          1
-          );
-      }
-    } catch (e) {
-      Scriptish_logScriptError(e, aWindow, aScript.fileURL, aScript.id);
     }
   }
 }

@@ -299,7 +299,8 @@ Scriptish_BrowserUI.docUnload = function(aWinID) {
   let curMenuCmder = this.currentMenuCommander;
   for (let [i, item] in Iterator(menuCmders)) {
     if (item.winID !== aWinID) continue;
-    if (item.commander === curMenuCmder) curMenuCmder = curMenuCmder.detach();
+    if (item.commander === curMenuCmder)
+      curMenuCmder = curMenuCmder.detach();
     menuCmders.splice(i, 1);
     break;
   }
