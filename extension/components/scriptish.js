@@ -7,13 +7,14 @@ const filename = Components.stack.filename;
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError", "Scriptish_log"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/manager.js", ["Scriptish_manager"]);
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 
+lazyUtil(this, "alert");
 lazyUtil(this, "injectScripts");
 lazyUtil(this, "installUri");
 lazyUtil(this, "isScriptRunnable");
@@ -37,9 +38,7 @@ function ScriptishService() {
     delete this.updateChk;
   }
 
-  if (!e10s)
-    Services.obs.addObserver(this, "chrome-document-global-created", false);
-  Services.obs.addObserver(this, "content-document-global-created", false);
+  Scriptish_manager.setup.call(this);
   Services.obs.addObserver(this, "install-userscript", false);
   Services.obs.addObserver(this, "scriptish-enabled", false);
 }
@@ -59,10 +58,6 @@ ScriptishService.prototype = {
 
   observe: function(aSubject, aTopic, aData) {
     switch (aTopic) {
-      case "chrome-document-global-created":
-      case "content-document-global-created":
-        this.docReady(aSubject);
-        break;
       case "install-userscript":
         let win = Scriptish.getMostRecentWindow("navigator:browser");
         if (win) win.Scriptish_BrowserUI.installCurrentScript();

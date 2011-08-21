@@ -1,4 +1,4 @@
-var EXPORTED_SYMBOLS = ["Scriptish_mananger"];
+var EXPORTED_SYMBOLS = ["Scriptish_manager"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -10,22 +10,21 @@ lazyUtil(this, "getWindowIDs");
 
 let windows = {};
 
-const Scriptish_mananger = {
+const Scriptish_manager = {
   setup: function(aContentScope) {
     var observer = {
-      observe: function(aSubject, aTopic, aData) {
+      observe: (function(aSubject, aTopic, aData) {
         switch (aTopic) {
-        //case "chrome-document-global-created":
+        case "chrome-document-global-created":
         case "content-document-global-created":
-          Scriptish_mananger.docReady(aSubject);
+          this.docReady(aSubject);
           break;
         }
-      }
+      }).bind(this)
     }
 
     Services.obs.addObserver(observer, "content-document-global-created", false);
-    //Services.obs.addObserver(observer, "chrome-document-global-created", false);
-    Services.obs.addObserver(observer, "inner-window-destroyed", false);
+    Services.obs.addObserver(observer, "chrome-document-global-created", false);
   },
 
   // TODO: remove chromeWin, or use it
