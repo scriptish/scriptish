@@ -61,7 +61,7 @@ ScriptishService.prototype = {
     switch (aTopic) {
       case "chrome-document-global-created":
       case "content-document-global-created":
-        this.docReady(aSubject, Scriptish_getBrowserForContentWindow(aSubject).wrappedJSObject);
+        this.docReady(aSubject);
         break;
       case "install-userscript":
         let win = Scriptish.getMostRecentWindow("navigator:browser");
@@ -82,7 +82,8 @@ ScriptishService.prototype = {
 
   get filename() filename,
 
-  docReady: function(safeWin, chromeWin) {
+  docReady: function(safeWin) {
+    var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
     if (!Scriptish.enabled || !chromeWin) return;
 
     let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
