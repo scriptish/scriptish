@@ -3,6 +3,7 @@ Components.utils.import("resource://scriptish/constants.js");
 
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
 lazyUtil(this, "popupNotification");
 lazyUtil(this, "stringBundle");

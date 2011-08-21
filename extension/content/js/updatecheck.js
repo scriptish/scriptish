@@ -2,6 +2,7 @@
 (function(inc, tools) {
   inc("resource://scriptish/prefmanager.js", tools);
   inc("resource://scriptish/constants.js", tools);
+  inc("resource://gre/modules/AddonManager.jsm", tools);
   var pref = tools.Scriptish_prefRoot;
   var currentVer = pref.getValue("version", "0.0");
 

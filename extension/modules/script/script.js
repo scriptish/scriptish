@@ -16,6 +16,7 @@ lazyImport(this, "resource://scriptish/script/scriptrequire.js", ["ScriptRequire
 lazyImport(this, "resource://scriptish/script/scriptresource.js", ["ScriptResource"]);
 lazyImport(this, "resource://scriptish/third-party/MatchPattern.js", ["MatchPattern"]);
 lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
+lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
 lazyUtil(this, "getUriFromFile");
 lazyUtil(this, "getContents");

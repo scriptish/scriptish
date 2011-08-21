@@ -1,5 +1,5 @@
 var EXPORTED_SYMBOLS = [
-    "Cc", "Ci", "Cr", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
+    "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils",
     "Services", "Instances", "lazyImport", "lazyUtil", "timeout", "e10s"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
@@ -9,7 +9,6 @@ var Services = {};
 (function(inc, tools){
   inc("resource://gre/modules/XPCOMUtils.jsm");
   inc("resource://gre/modules/NetUtil.jsm");
-  inc("resource://gre/modules/AddonManager.jsm");
   inc("resource://gre/modules/Services.jsm", tools);
 
   Services.__proto__ = tools.Services;
