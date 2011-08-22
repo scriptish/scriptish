@@ -141,7 +141,7 @@ function timeout(cb, delay) {
   }
 
   if (!global.setTimeout) {
-    global.setTimeout = (new Timer()).setTimeout;
+    global.setTimeout = (new Timer()).setTimeout; // see bug #252
   }
 
   setTimeout(callback, delay);
