@@ -38,9 +38,11 @@ function ScriptishService() {
     delete this.updateChk;
   }
 
-  Scriptish_manager.setup.call(this);
-  Services.obs.addObserver(this, "install-userscript", false);
-  Services.obs.addObserver(this, "scriptish-enabled", false);
+  if (!e10s) {
+    Scriptish_manager.setup.call(this);
+    Services.obs.addObserver(this, "install-userscript", false);
+    Services.obs.addObserver(this, "scriptish-enabled", false);
+  }
 }
 
 ScriptishService.prototype = {
