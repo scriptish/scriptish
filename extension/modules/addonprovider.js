@@ -5,6 +5,7 @@ lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
+lazyUtil(this, "openManager");
 lazyUtil(this, "popupNotification");
 lazyUtil(this, "stringBundle");
 
@@ -21,7 +22,7 @@ const Scriptish_ScriptProvider = {
       var msg = "'" + script.name;
       if (script.version) msg += " " + script.version;
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
-      var callback = function() Scriptish.openManager();
+      var callback = Scriptish_openManager;
 
       Scriptish_popupNotification({
         id: "scriptish-install-popup-notification",
@@ -59,7 +60,7 @@ const Scriptish_ScriptProvider = {
       msg += "' " + (("scriptish-script-updated" == aTopic)
           ? Scriptish_stringBundle("statusbar.updated")
           : Scriptish_stringBundle("statusbar.modified"));
-      var callback = function() Scriptish.openManager();
+      var callback = Scriptish_openManager;
 
       Scriptish_popupNotification({
         id: "scriptish-install-popup-notification",

@@ -39,13 +39,6 @@ const Scriptish = {
     notifyStatusChg(enabled);
     Scriptish_prefRoot.setValue("enabled", enabled);
   },
-  openManager: function Scriptish_openManager() {
-    var browserWin = Services.wm.getMostRecentWindow("navigator:browser");
-    if (browserWin.BrowserOpenAddonsMgr)
-      browserWin.BrowserOpenAddonsMgr("addons://list/userscript");
-    else if (browserWin.toEM)
-      browserWin.toEM("addons://list/userscript");
-  },
   isGreasemonkeyable: function Scriptish_isGreasemonkeyable(aURL) {
     if (!aURL) return false;
 
