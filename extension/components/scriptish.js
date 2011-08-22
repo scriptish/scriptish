@@ -38,7 +38,7 @@ function ScriptishService() {
     delete this.updateChk;
   }
 
-  if (!e10s) {
+  if ("Fennec" != Services.appinfo.name) {
     Scriptish_manager.setup.call(this);
     Services.obs.addObserver(this, "install-userscript", false);
     Services.obs.addObserver(this, "scriptish-enabled", false);
