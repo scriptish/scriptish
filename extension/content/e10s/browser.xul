@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<overlay id="scriptish-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/javascript" src="chrome://scriptish/content/e10s/browser.js"/>
+</overlay>

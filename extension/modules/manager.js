@@ -28,7 +28,7 @@ const Scriptish_manager = {
   },
 
   // TODO: remove chromeWin, or use it
-  docReady: function(safeWin, chromeWin) {
+  docReady: function(safeWin) {
     if (!Scriptish.enabled) return;
 
     let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
@@ -39,7 +39,7 @@ const Scriptish_manager = {
         || "";
 
     if (!href && safeWin.frameElement) {
-      Scriptish_mananger.waitForFrame(safeWin, chromeWin);
+      Scriptish_mananger.waitForFrame(safeWin);
       return;
     }
 
