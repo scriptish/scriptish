@@ -33,7 +33,6 @@ function GM_apiLeakCheck(apiName) {
         stack.filename != moduleFilename &&
         stack.filename != Scriptish_evalInSandbox_filename &&
         stack.filename != Scriptish_injectScripts_filename &&
-        stack.filename != Services.scriptish.filename &&
         stack.filename.substr(0, 6) != "chrome") {
       Scriptish_logError(new Error(
           Scriptish_stringBundle("error.api.unsafeAccess") + ": " + apiName));

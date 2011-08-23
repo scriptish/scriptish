@@ -20,6 +20,7 @@ lazyImport(this, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
 lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 
 lazyUtil(this, "cryptoHash");
+lazyUtil(this, "injectScripts");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getContents");
 lazyUtil(this, "getProfileFile");
@@ -425,7 +426,7 @@ Config.prototype = {
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
     if (script.enabled && !script.needsUninstall && script.matchesURL(href))
-      Services.scriptish.injectScripts([script], href, unsafeWin, this.chromeWin);
+      Scriptish_injectScripts([script], href, unsafeWin, this.chromeWin);
   },
 
   updateModifiedScripts: function(scriptInjector) {

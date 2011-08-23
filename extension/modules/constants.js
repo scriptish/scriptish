@@ -48,10 +48,6 @@ var Instances = {
       .createInstance(Ci.nsIXMLHttpRequest)
 };
 
-XPCOMUtils.defineLazyGetter(Services, "scriptish", function() (
-    Cc["@scriptish.erikvold.com/scriptish-service;1"]
-        .getService().wrappedJSObject));
-
 XPCOMUtils.defineLazyServiceGetter(
      Services, "as", "@mozilla.org/alerts-service;1", "nsIAlertsService");
 

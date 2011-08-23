@@ -2,8 +2,6 @@ const DESCRIPTION = "ScriptishService";
 const CONTRACTID = "@scriptish.erikvold.com/scriptish-service;1";
 const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
 
-const filename = Components.stack.filename;
-
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
@@ -21,10 +19,10 @@ lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
+lazyUtil(this, "updateModifiedScripts");
 lazyUtil(this, "windowUnloader");
 
 const {nsIContentPolicy: CP} = Ci;
-const docRdyStates = ["uninitialized", "loading", "loaded", "interactive", "complete"];
 
 // If the file was previously cached it might have been given a number after
 // .user, like gmScript.user-12.js
@@ -32,13 +30,6 @@ const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
 
 function ScriptishService() {
-  this.wrappedJSObject = this;
-  this.updateChk = function() {
-    Services.scriptloader
-        .loadSubScript("chrome://scriptish/content/js/updatecheck.js");
-    delete this.updateChk;
-  }
-
   if ("Fennec" != Services.appinfo.name) {
     Scriptish_manager.setup.call(this);
     Services.obs.addObserver(this, "install-userscript", false);
@@ -116,57 +107,20 @@ ScriptishService.prototype = {
     }
   },
 
-  get filename() filename,
-
   docReady: function(href, safeWin) {
     let unsafeWin = safeWin.wrappedJSObject;
     let self = this;
     let winClosed = false;
-    let isTop = (safeWin === safeWin.top);
 
     // rechecks values that can change at any moment
     function shouldNotRun() (
       winClosed || !Scriptish.enabled || !Scriptish_isGreasemonkeyable(href));
 
     // check if there are any modified scripts
-    if (Scriptish_prefRoot.getValue("enableScriptRefreshing")) {
-       Scriptish_config.updateModifiedScripts(function(script) {
-        if (shouldNotRun()
-            || !Scriptish_isScriptRunnable(script, href, isTop))
-          return;
-
-        let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
-        function inject() {
-          if (shouldNotRun()) return;
-          Scriptish_injectScripts([script], href, safeWin);
-        }
-        switch (script.runAt) {
-        case "document-end":
-          if (2 > rdyStateIdx) {
-            safeWin.addEventListener("DOMContentLoaded", inject, true);
-            return;
-          }
-          break;
-        case "document-idle":
-          if (2 > rdyStateIdx) {
-            safeWin.addEventListener(
-                "DOMContentLoaded", function() timeout(inject), true);
-            return;
-          }
-          break;
-        case "window-load":
-          if (4 > rdyStateIdx) {
-            safeWin.addEventListener("load", inject, true);
-            return;
-          }
-          break;
-        }
-        inject();
-      });
-    }
+    Scriptish_updateModifiedScripts(href, safeWin, shouldNotRun);
 
     // find matching scripts
-    Scriptish_config.initScripts(href, isTop, function(scripts) {
+    Scriptish_config.initScripts(href, (safeWin === safeWin.top), function(scripts) {
       if (scripts["document-end"].length || scripts["document-idle"].length) {
         safeWin.addEventListener("DOMContentLoaded", function() {
           if (shouldNotRun()) return;

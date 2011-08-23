@@ -4,7 +4,7 @@
   const {lazyImport, lazyUtil, Services} = tools;
   lazyImport(global, "resource://scriptish/logging.js", ["Scriptish_log"]);
   lazyImport(global, "resource://scriptish/manager.js", ["Scriptish_manager"]);
-  lazyImport(this, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
+  lazyImport(global, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
     "Scriptish_isURLExcluded",
     "Scriptish_addExcludes",
     "Scriptish_setExcludes",
@@ -14,9 +14,7 @@
   Scriptish_log("step 1a");
   addEventListener("load", function() {
     // Check if Scriptish has been updated/installed
-    Services.scriptish.updateChk && setTimeout(function() {
-      Services.scriptish.updateChk();
-    }, 750);
+    inc("resource://scriptish/utils/Scriptish_updateChk.js");
   }, false);
 
   var mm = messageManager;

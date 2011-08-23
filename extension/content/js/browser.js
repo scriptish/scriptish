@@ -24,7 +24,6 @@ lazyUtil(window, "getWindowIDs");
 
 var Ci = tools.Ci;
 var Services = tools.Services;
-var gmSvc = Services.scriptish;
 var $ = function(aID) document.getElementById(aID);
 
 Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
@@ -152,7 +151,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   Scriptish_BrowserUIM.refreshStatus();
 
   // Check if Scriptish has been updated/installed
-  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 1000);
+  Components.utils.import("resource://scriptish/utils/Scriptish_updateChk.js");
 }
 
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
