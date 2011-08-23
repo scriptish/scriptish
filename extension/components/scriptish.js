@@ -4,6 +4,7 @@ const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/addonprovider.js");
 
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError", "Scriptish_log"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);

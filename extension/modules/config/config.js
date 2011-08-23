@@ -60,8 +60,6 @@ function Config(aBaseDir) {
     "scriptish-preferences-change",
     "scriptish-config-saved"
   ].forEach(function(i) Services.obs.addObserver(self, i, false));
-
-  Components.utils.import("resource://scriptish/addonprovider.js");
 }
 Config.prototype = {
   get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),

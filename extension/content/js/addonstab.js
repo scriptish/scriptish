@@ -1,5 +1,4 @@
 (function($, tools) {
-Components.utils.import("resource://scriptish/addonprovider.js");
 Components.utils.import("resource://scriptish/constants.js", tools);
 const {lazyImport, lazyUtil} = tools;
 

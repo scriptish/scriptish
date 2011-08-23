@@ -78,7 +78,6 @@ Scriptish_BrowserUIM.prototype = {
     this._optionsWin.focus();
   },
   showUserscriptList: function() {
-    Cu.import("resource://scriptish/addonprovider.js");
     timeout(Scriptish_openManager);
   }
 }
