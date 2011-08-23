@@ -4,12 +4,7 @@
   const {lazyImport, lazyUtil, Services} = tools;
   lazyImport(global, "resource://scriptish/logging.js", ["Scriptish_log"]);
   lazyImport(global, "resource://scriptish/manager.js", ["Scriptish_manager"]);
-  lazyImport(global, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
-    "Scriptish_isURLExcluded",
-    "Scriptish_addExcludes",
-    "Scriptish_setExcludes",
-    "Scriptish_getExcludes"
-  ]);
+  lazyImport(global, "resource://scriptish/config.js", ["Scriptish_config"]);
 
   Scriptish_log("step 1a");
   addEventListener("load", function() {
@@ -19,7 +14,9 @@
 
   var mm = messageManager;
 
-  mm.addMessageListener("Scriptish:GlobalExcludesUpdate", Scriptish_getExcludes);
+  mm.addMessageListener("Scriptish:FrameSetup", function() {
+    return Scriptish_config.toJSON();
+  });
 
   mm.loadFrameScript(
       "chrome://scriptish/content/e10s/browser-content.js",

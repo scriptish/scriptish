@@ -24,7 +24,7 @@ const Scriptish_manager = {
           break;
         }
       }).bind(this)
-    }
+    };
 
     Services.obs.addObserver(observer, "content-document-global-created", false);
     Services.obs.addObserver(observer, "chrome-document-global-created", false);
