@@ -45,6 +45,8 @@ function ScriptishService() {
     Services.obs.addObserver(this, "scriptish-enabled", false);
     Services.obs.addObserver(this, "content-document-global-created", false);
     Services.obs.addObserver(this, "chrome-document-global-created", false);
+  } else {
+    //Services.mm.
   }
 }
 

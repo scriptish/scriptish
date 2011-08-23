@@ -13,6 +13,7 @@ lazyImport(this, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
 ]);
 
 lazyUtil(this, "getEditor");
+lazyUtil(this, "sendAsyncE10SMessage");
 lazyUtil(this, "stringBundle");
 
 function $(aID) document.getElementById(aID);
@@ -21,6 +22,8 @@ function changeEditor() Scriptish_getEditor(window, true);
 
 function saveExcludes() {
   Scriptish_setExcludes($("excludes").value.match(/.+/g));
+  if (e10s)
+    Scriptish_sendAsyncE10SMessage("Scriptish:GlobalExcludesUpdate", Scriptish_getExcludes());
   Scriptish.notify(null, "scriptish-preferences-change", true);
 }
 
