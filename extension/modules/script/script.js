@@ -18,6 +18,7 @@ lazyImport(this, "resource://scriptish/third-party/MatchPattern.js", ["MatchPatt
 lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
 lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
+lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "getUriFromFile");
 lazyUtil(this, "getContents");
 lazyUtil(this, "memoize");
@@ -317,7 +318,7 @@ Script.prototype = {
     } catch (e) {
       // If true, we're allowing a scheme that doesn't have a host.
       // i.e. "about:scriptish"
-      return Scriptish.isGreasemonkeyable(aURL);
+      return Scriptish_isGreasemonkeyable(aURL);
     }
 
     var i = this.domains.length - 1;

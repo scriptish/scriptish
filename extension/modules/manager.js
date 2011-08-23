@@ -6,7 +6,12 @@ Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+
+lazyUtil(this, "injectScripts");
+lazyUtil(this, "isGreasemonkeyable");
+lazyUtil(this, "isURLExcluded");
 lazyUtil(this, "getWindowIDs");
+lazyUtil(this, "windowUnloader");
 
 let windows = {};
 
@@ -17,7 +22,7 @@ const Scriptish_manager = {
         switch (aTopic) {
         case "chrome-document-global-created":
         case "content-document-global-created":
-          this.docReady(aSubject);
+          Scriptish_manager.docReady_start.call(this, aSubject, aContentScope);
           break;
         }
       }).bind(this)
@@ -27,28 +32,42 @@ const Scriptish_manager = {
     Services.obs.addObserver(observer, "chrome-document-global-created", false);
   },
 
-  // TODO: remove chromeWin, or use it
-  docReady: function(safeWin) {
+  docReady_start: function(safeWin, aContentScope) {
+    // TODO: disable observer that calls this when Scriptish is disabled
     if (!Scriptish.enabled) return;
 
-    let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
-    windows[currentInnerWindowID] = {unloaders: []};
-
+    // try to get the windows href..
     let href = (safeWin.location.href
         || (safeWin.frameElement && safeWin.frameElement.src))
         || "";
 
+    // if we don't have a href and the window is a frame, then wait until we do
     if (!href && safeWin.frameElement) {
-      Scriptish_mananger.waitForFrame(safeWin);
+      Scriptish_manager.waitForFrame.call(this, safeWin);
       return;
     }
 
-    if (!Scriptish.isGreasemonkeyable(href)) return;
+    if (!Scriptish_isGreasemonkeyable(href)) return;
 
-    
+    // if the url is a excluded url then stop
+    if (Scriptish_isURLExcluded(href)) return;
+
+    this.docReady(href, safeWin, aContentScope);
   },
 
-  waitForFrame: function(safeWin, chromeWin) {
+  docReady: function(href, safeWin, aContentScope) {
+    let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
+    windows[currentInnerWindowID] = {unloaders: []};
+
+    // ignore window if it is not the same window used by aContentScope
+    if (JSON.stringify(Scriptish_getWindowIDs(aContentScope)) != JSON.stringify(Scriptish_getWindowIDs(safeWin)))
+      return;
+    //Scriptish_log(JSON.stringify(Scriptish_getWindowIDs(safeWin)));
+
+    Scriptish_log("try to run something right here!!");
+  },
+
+  waitForFrame: function(safeWin) {
     let self = this;
     safeWin.addEventListener("DOMContentLoaded", function _frame_loader() {
       // not perfect, but anyway
@@ -57,7 +76,7 @@ const Scriptish_manager = {
 
       if (!href) return; // wait for it :p
       safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
-      self.docReady(safeWin, chromeWin);
+      Scriptish_manager.docReady_start.call(self, safeWin);
 
       // fake DOMContentLoaded to get things rolling
       var evt = safeWin.document.createEvent("Events");

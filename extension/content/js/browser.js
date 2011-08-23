@@ -15,6 +15,8 @@ lazyImport(window, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(window, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
 
 lazyUtil(window, "installUri");
+lazyUtil(window, "isGreasemonkeyable");
+lazyUtil(window, "isURLExcluded");
 lazyUtil(window, "openInEditor");
 lazyUtil(window, "stringBundle");
 lazyUtil(window, "getURLsForContentWindow");
@@ -348,7 +350,7 @@ function Scriptish_setupPopup() {
   Scriptish_BrowserUI.reattachMenuCmds();
 
   function okURL(url) (
-      (Scriptish.isGreasemonkeyable(url) && !Scriptish_config.isURLExcluded(url)));
+      (Scriptish_isGreasemonkeyable(url) && !Scriptish_isURLExcluded(url)));
 
   function scriptsMatching(urls) {
     return Scriptish_config.getMatchingScripts(function testMatchURLs(script) {
@@ -420,9 +422,9 @@ function Scriptish_setupPopup() {
 
     // determine the correct label
     let label;
-    if (Scriptish_config.isURLExcluded(url))
+    if (Scriptish_isURLExcluded(url))
       label = Scriptish_stringBundle("statusbar.noScripts.excluded");
-    else if (!Scriptish.isGreasemonkeyable(url))
+    else if (!Scriptish_isGreasemonkeyable(url))
       label = Scriptish_stringBundle("statusbar.noScripts.scheme");
     else
       label = Scriptish_stringBundle("statusbar.noScripts.notfound");

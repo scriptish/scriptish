@@ -17,6 +17,7 @@ lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForConten
 lazyUtil(this, "alert");
 lazyUtil(this, "injectScripts");
 lazyUtil(this, "installUri");
+lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
@@ -42,6 +43,8 @@ function ScriptishService() {
     Scriptish_manager.setup.call(this);
     Services.obs.addObserver(this, "install-userscript", false);
     Services.obs.addObserver(this, "scriptish-enabled", false);
+    Services.obs.addObserver(this, "content-document-global-created", false);
+    Services.obs.addObserver(this, "chrome-document-global-created", false);
   }
 }
 
@@ -60,6 +63,40 @@ ScriptishService.prototype = {
 
   observe: function(aSubject, aTopic, aData) {
     switch (aTopic) {
+      case "content-document-global-created":
+      case "chrome-document-global-created":
+        let safeWin = aSubject;
+        let chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
+        if (!chromeWin) return;
+
+        let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
+        let gBrowser = chromeWin.gBrowser;
+        if (!gmBrowserUI || !gBrowser) return;
+
+        // Show the scriptish install banner if the user is navigating to a .user.js
+        // file in a top-level tab.
+        if (gmBrowserUI.scriptDownloader_
+            && safeWin === safeWin.top
+            && RE_USERSCRIPT.test(safeWin.location.href)
+            && !RE_CONTENTTYPE.test(safeWin.document.contentType)) {
+          gmBrowserUI.showInstallBanner(
+              gBrowser.getBrowserForDocument(safeWin.document));
+        }
+
+        // if the focused tab's window is the one loading, then attach menuCommander
+        if (safeWin === gBrowser.selectedBrowser.contentWindow) {
+          if (gmBrowserUI.currentMenuCommander)
+            gmBrowserUI.currentMenuCommander.detach();
+
+          let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
+          gmBrowserUI.currentMenuCommander =
+              gmBrowserUI.getCommander(currentInnerWindowID).attach();
+
+          Scriptish_windowUnloader(function() {
+            gmBrowserUI.docUnload(currentInnerWindowID);
+          }, currentInnerWindowID);
+        }
+        break;
       case "install-userscript":
         let win = Scriptish.getMostRecentWindow("navigator:browser");
         if (win) win.Scriptish_BrowserUI.installCurrentScript();
@@ -79,36 +116,7 @@ ScriptishService.prototype = {
 
   get filename() filename,
 
-  docReady: function(safeWin) {
-    var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
-    if (!Scriptish.enabled || !chromeWin) return;
-
-    let gmBrowserUI = chromeWin.Scriptish_BrowserUI;
-    let gBrowser = chromeWin.gBrowser;
-    if (!gmBrowserUI || !gBrowser) return;
-
-    let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
-
-    let href = (safeWin.location.href
-        || (safeWin.frameElement && safeWin.frameElement.src))
-        || "";
-
-    if (!href && safeWin.frameElement) {
-      Scriptish_manager.waitForFrame.call(this, safeWin, chromeWin);
-      return;
-    }
-
-    // Show the scriptish install banner if the user is navigating to a .user.js
-    // file in a top-level tab.
-    if (gmBrowserUI.scriptDownloader_
-        && safeWin === safeWin.top && RE_USERSCRIPT.test(href)
-        && !RE_CONTENTTYPE.test(safeWin.document.contentType)) {
-      gmBrowserUI.showInstallBanner(
-          gBrowser.getBrowserForDocument(safeWin.document));
-    }
-
-    if (!Scriptish.isGreasemonkeyable(href)) return;
-
+  docReady: function(href, safeWin) {
     let unsafeWin = safeWin.wrappedJSObject;
     let self = this;
     let winClosed = false;
@@ -116,7 +124,7 @@ ScriptishService.prototype = {
 
     // rechecks values that can change at any moment
     function shouldNotRun() (
-      winClosed || !Scriptish.enabled || !Scriptish.isGreasemonkeyable(href));
+      winClosed || !Scriptish.enabled || !Scriptish_isGreasemonkeyable(href));
 
     // check if there are any modified scripts
     if (Scriptish_prefRoot.getValue("enableScriptRefreshing")) {
@@ -128,7 +136,7 @@ ScriptishService.prototype = {
         let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
         function inject() {
           if (shouldNotRun()) return;
-          Scriptish_injectScripts([script], href, currentInnerWindowID, safeWin, chromeWin);
+          Scriptish_injectScripts([script], href, safeWin);
         }
         switch (script.runAt) {
         case "document-end":
@@ -155,17 +163,6 @@ ScriptishService.prototype = {
       });
     }
 
-    // if the focused tab's window is the one loading, then attach menuCommander
-    if (safeWin === gBrowser.selectedBrowser.contentWindow) {
-      if (gmBrowserUI.currentMenuCommander)
-        gmBrowserUI.currentMenuCommander.detach();
-      gmBrowserUI.currentMenuCommander =
-          gmBrowserUI.getCommander(currentInnerWindowID).attach();
-    }
-
-    // if the url is a excluded url then stop
-    if (Scriptish_config.isURLExcluded(href)) return;
-
     // find matching scripts
     Scriptish_config.initScripts(href, isTop, function(scripts) {
       if (scripts["document-end"].length || scripts["document-idle"].length) {
@@ -177,11 +174,11 @@ ScriptishService.prototype = {
             timeout(function() {
               if (shouldNotRun()) return;
               Scriptish_injectScripts(
-                  scripts["document-idle"], href, currentInnerWindowID, safeWin, chromeWin);
+                  scripts["document-idle"], href, safeWin);
             });
 
           // inject @run-at document-end scripts
-          Scriptish_injectScripts(scripts["document-end"], href, currentInnerWindowID, safeWin, chromeWin);
+          Scriptish_injectScripts(scripts["document-end"], href, safeWin);
         }, true);
       }
 
@@ -189,17 +186,16 @@ ScriptishService.prototype = {
         safeWin.addEventListener("load", function() {
           if (shouldNotRun()) return;
           // inject @run-at window-load scripts
-          Scriptish_injectScripts(scripts["window-load"], href, currentInnerWindowID, safeWin, chromeWin);
+          Scriptish_injectScripts(scripts["window-load"], href, safeWin);
         }, true);
       }
 
       // inject @run-at document-start scripts
-      Scriptish_injectScripts(scripts["document-start"], href, currentInnerWindowID, safeWin, chromeWin);
+      Scriptish_injectScripts(scripts["document-start"], href, safeWin);
 
       Scriptish_windowUnloader(function() {
         winClosed = true;
-        gmBrowserUI.docUnload(currentInnerWindowID);
-      }, currentInnerWindowID);
+      }, Scriptish_getWindowIDs(safeWin).innerID);
     });
   },
 

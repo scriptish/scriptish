@@ -8,8 +8,6 @@ lazyImport(global, "resource://scriptish/manager.js", ["Scriptish_manager"]);
 
 Scriptish_log("step 1a");
 
-Scriptish_manager.setup(content);
-
 messageManager.loadFrameScript("chrome://scriptish/content/e10s/browser-content.js", true);
 
 addEventListener("load", function() {

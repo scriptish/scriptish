@@ -8,6 +8,8 @@ lazyImport(global, "resource://scriptish/manager.js", ["Scriptish_manager"]);
 
 Scriptish_log("step 2");
 
+Scriptish_manager.setup(content);
+
 })(Components.utils.import, {}, this);
 
 
