@@ -13,8 +13,6 @@ lazyUtil(this, "isURLExcluded");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "windowUnloader");
 
-let windows = {};
-
 const Scriptish_manager = {
   setup: function(aContentScope) {
     var observer = {
@@ -56,9 +54,6 @@ const Scriptish_manager = {
   },
 
   docReady: function(href, safeWin, aContentScope) {
-    let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
-    windows[currentInnerWindowID] = {unloaders: []};
-
     // ignore window if it is not the same window used by aContentScope
     if (JSON.stringify(Scriptish_getWindowIDs(aContentScope)) != JSON.stringify(Scriptish_getWindowIDs(safeWin)))
       return;
