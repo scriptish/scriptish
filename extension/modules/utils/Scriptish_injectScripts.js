@@ -24,8 +24,12 @@ const gTimer = new Timer();
 const {nsIDOMXPathResult: XPATH_RESULT} = Ci;
 
 function Scriptish_injectScripts(scripts, url, safeWin) {
+  // TODO: re-support below lines!
+  /*
   var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
   if (!chromeWin || !chromeWin.Scriptish_BrowserUI) return;
+  */
+
   if (0 >= scripts.length) return;
 
   let unsafeContentWin = safeWin.wrappedJSObject;
@@ -43,21 +47,25 @@ function Scriptish_injectScripts(scripts, url, safeWin) {
     // and the delay code (and probably other consumer work).
     let script = scripts[i];
     let sandbox = new Cu.Sandbox(safeWin);
-    Cu.evalInSandbox(GM_sandboxScripts, sandbox);
-
-    let GM_api = new GM_API(
-        script, url, winID, safeWin, unsafeContentWin, chromeWin);
 
     // hack XPathResult since that is so commonly used
     sandbox.XPathResult = XPATH_RESULT;
 
+    // TODO: re-support below lines!
+    /*
+    Cu.evalInSandbox(GM_sandboxScripts, sandbox);
+
+    let GM_api = new GM_API(
+        script, url, winID, safeWin, unsafeContentWin, chromeWin);
     // add GM_* API to sandbox
     for (var funcName in GM_api) {
       sandbox[funcName] = GM_api[funcName];
     }
+
     XPCOMUtils.defineLazyGetter(sandbox, "console", function() {
       return GM_console(script, safeWin, chromeWin);
     });
+
     XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
       if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
         var logger = new GM_ScriptLogger(script);
@@ -68,6 +76,7 @@ function Scriptish_injectScripts(scripts, url, safeWin) {
       }
       return sandbox.console.log.bind(sandbox.console);
     });
+    */
 
     sandbox.unsafeWindow = unsafeContentWin;
     sandbox.__proto__ = safeWin;
