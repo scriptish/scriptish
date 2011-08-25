@@ -107,6 +107,9 @@ function Scriptish_PrefManager(startPoint) {
   // deletes the named preference or subtree
   this.remove = function(prefName) { pref.deleteBranch(prefName); }
 
+  // resets the preference to the default, or removes if there is none
+  this.reset = function(prefName) { pref.clearUserPref(prefName); }
+
   // call a function whenever the named preference subtree changes
   this.watch = function(prefName, watcher) {
     // construct an observer
