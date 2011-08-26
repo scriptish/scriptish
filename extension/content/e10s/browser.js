@@ -18,6 +18,10 @@
     return Scriptish_config.toJSON();
   });
 
+  mm.addMessageListener("Scriptish:GetScriptContents", function({json}) {
+    return Scriptish_config.getScriptById(json).textContent;
+  });
+
   mm.loadFrameScript(
       "chrome://scriptish/content/e10s/browser-content.js",
       true); // no delay loading frame script

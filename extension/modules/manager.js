@@ -9,18 +9,21 @@ lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 
 lazyUtil(this, "injectScripts");
 lazyUtil(this, "isGreasemonkeyable");
+lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "isURLExcluded");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "windowUnloader");
 
 const Scriptish_manager = {
-  setup: function(aContentScope) {
+  setup: function(options) {
+    options = options || {};
+
     var observer = {
       observe: (function(aSubject, aTopic, aData) {
         switch (aTopic) {
         case "chrome-document-global-created":
         case "content-document-global-created":
-          Scriptish_manager.docReady_start.call(this, aSubject, aContentScope);
+          Scriptish_manager.docReady_start.call(this, aSubject, options);
           break;
         }
       }).bind(this)
@@ -30,7 +33,7 @@ const Scriptish_manager = {
     Services.obs.addObserver(observer, "chrome-document-global-created", false);
   },
 
-  docReady_start: function(safeWin, aContentScope) {
+  docReady_start: function(safeWin, options) {
     // TODO: disable observer that calls this when Scriptish is disabled
     if (!Scriptish.enabled) return;
 
@@ -50,16 +53,46 @@ const Scriptish_manager = {
     // if the url is a excluded url then stop
     if (Scriptish_isURLExcluded(href)) return;
 
-    this.docReady(href, safeWin, aContentScope);
+    this.docReady(href, safeWin, options);
   },
 
-  docReady: function(href, safeWin, aContentScope) {
-    // ignore window if it is not the same window used by aContentScope
-    if (JSON.stringify(Scriptish_getWindowIDs(aContentScope)) != JSON.stringify(Scriptish_getWindowIDs(safeWin)))
+  docReady: function(href, safeWin, options) {
+    // ignore window if it is not the same window used by options
+    if (JSON.stringify(Scriptish_getWindowIDs(options.content))
+        != JSON.stringify(Scriptish_getWindowIDs(safeWin)))
       return;
     //Scriptish_log(JSON.stringify(Scriptish_getWindowIDs(safeWin)));
 
-    Scriptish_log("try to run something right here!!");
+    var scripts = {
+      "document-start": [],
+      "document-end": [],
+      "document-idle": [],
+      "window-load": []
+    };
+
+    options.scripts.forEach(function(script) {
+      if (Scriptish_isScriptRunnable(script, href, (safeWin === safeWin.top))) {
+        scripts[script.runAt].push(script);
+      }
+    });
+
+    if (scripts["document-end"].length || scripts["document-idle"].length) {
+      safeWin.addEventListener("DOMContentLoaded", function() {
+        //if (shouldNotRun()) return;
+
+        // inject @run-at document-idle scripts
+        if (scripts["document-idle"].length) {
+          timeout(function() {
+            //if (shouldNotRun()) return;
+            Scriptish_injectScripts(
+                scripts["document-idle"], href, safeWin);
+          });
+        }
+
+        // inject @run-at document-end scripts
+        Scriptish_injectScripts(scripts["document-end"], href, safeWin);
+      }, true);
+    }
   },
 
   waitForFrame: function(safeWin) {

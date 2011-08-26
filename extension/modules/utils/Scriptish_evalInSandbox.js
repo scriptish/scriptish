@@ -15,6 +15,7 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow) {
   const jsVer = aScript.jsversion;
   const fileURL = aScript.fileURL;
 
+  /*
   try {
     for (let [, req] in Iterator(aScript.requires)) {
       var rfileURL = req.fileURL;
@@ -33,6 +34,7 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow) {
   } catch (e) {
     return Scriptish_logError(e, 0, fileURL, e.lineNumber);
   }
+  */
 
   try {
     try {
