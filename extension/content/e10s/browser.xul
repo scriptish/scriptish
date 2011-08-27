@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <overlay id="scriptish-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/javascript" src="chrome://scriptish/content/e10s/browser.js"/>
+
+  <richlistbox id="context-commands">
+    <richlistitem id="scriptish-userscript-install-context-command"
+                  class="context-command"
+                  type="userscript-install"
+                  onclick="Scriptish_installUri(ContextHelper.popupState.linkURL);">
+      <label value="Install User Script"/>
+    </richlistitem>
+  </richlistbox> 
 </overlay>

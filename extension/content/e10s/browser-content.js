@@ -1,5 +1,3 @@
-
-var erik = "";
 (function(inc, tools, global){
 
 inc("resource://scriptish/constants.js", tools);
@@ -11,13 +9,13 @@ lazyImport(global, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
   "Scriptish_setExcludes"
 ]);
 
-Scriptish_log("step 2a");
+lazyUtil(global, "installUri");
 
+Scriptish_log("step 2a");
 
 function updateExcludes({json}) {
   Scriptish_setExcludes(json);
 }
-
 
 var configJSON = sendSyncMessage("Scriptish:FrameSetup", "")[0];
 
@@ -43,6 +41,11 @@ Scriptish_log("step 2b");
 })(Components.utils.import, {}, this);
 
 
-addEventListener("DOMContentLoaded", function() {
-  //content.alert(erik);
+addEventListener("load", function() {
+  ContextHandler.registerType("userscript-install", function(popupState, element) {
+    if (/\.user\.js$/.test(element.href)) {
+      return true;
+    }
+    return false;
+  });
 }, true);

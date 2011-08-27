@@ -6,6 +6,8 @@
   lazyImport(global, "resource://scriptish/manager.js", ["Scriptish_manager"]);
   lazyImport(global, "resource://scriptish/config.js", ["Scriptish_config"]);
 
+  lazyUtil(global, "installUri");
+
   Scriptish_log("step 1a");
   addEventListener("load", function() {
     // Check if Scriptish has been updated/installed
