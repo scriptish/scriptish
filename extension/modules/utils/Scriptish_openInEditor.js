@@ -16,7 +16,9 @@ function Scriptish_openInEditor(script, parentWindow) {
 
   try {
     if ("Scratchpad" == editor) {
-      let spWin = parentWindow.Scratchpad.openScratchpad();
+      let spWin = (parentWindow.Scratchpad
+          || Services.wm.getMostRecentWindow("navigator:browser").Scratchpad)
+          .openScratchpad();
       spWin.addEventListener("load", function spWinLoaded() {
         spWin.removeEventListener("load", spWinLoaded, false);
         spWin.document.title = spWin.Scratchpad.filename = file.path;
