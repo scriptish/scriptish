@@ -51,10 +51,10 @@ function Scriptish_injectScripts(scripts, url, safeWin) {
     // hack XPathResult since that is so commonly used
     sandbox.XPathResult = XPATH_RESULT;
 
-    // TODO: re-support below lines!
-    /*
     Cu.evalInSandbox(GM_sandboxScripts, sandbox);
 
+    // TODO: re-support below lines!
+    /*
     let GM_api = new GM_API(
         script, url, winID, safeWin, unsafeContentWin, chromeWin);
     // add GM_* API to sandbox
