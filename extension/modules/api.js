@@ -119,12 +119,28 @@ function GM_API(options) {
     return lazyLoaders.storage.listValues.apply(lazyLoaders.storage, arguments);
   }
 
-  this.GM_getResourceURL = function GM_getResourceURL() {
+  this.GM_getResourceURL = function GM_getResourceURL(aName) {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
+
+    if (options.content) {
+      return options.content.sendSyncMessage("Scriptish:GetScriptResourceURL", {
+        scriptID: aScript.id,
+        resource: aName
+      });
+    }
+
     return lazyLoaders.resources.getResourceURL.apply(lazyLoaders.resources, arguments)
   }
-  this.GM_getResourceText = function GM_getResourceText() {
+  this.GM_getResourceText = function GM_getResourceText(aName) {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
+
+    if (options.content) {
+      return options.content.sendSyncMessage("Scriptish:GetScriptResourceText", {
+        scriptID: aScript.id,
+        resource: aName
+      });
+    }
+
     return lazyLoaders.resources.getResourceText.apply(lazyLoaders.resources, arguments)
   }
 

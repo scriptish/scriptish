@@ -130,12 +130,19 @@ ScriptishService.prototype = {
           if (scripts["document-idle"].length)
             timeout(function() {
               if (shouldNotRun()) return;
-              Scriptish_injectScripts(
-                  scripts["document-idle"], href, safeWin);
+              Scriptish_injectScripts({
+                scripts: scripts["document-idle"],
+                url: href,
+                safeWin: safeWin
+              });
             });
 
           // inject @run-at document-end scripts
-          Scriptish_injectScripts(scripts["document-end"], href, safeWin);
+          Scriptish_injectScripts({
+            scripts: scripts["document-end"],
+            url: href,
+            safeWin: safeWin
+          });
         }, true);
       }
 
@@ -143,12 +150,20 @@ ScriptishService.prototype = {
         safeWin.addEventListener("load", function() {
           if (shouldNotRun()) return;
           // inject @run-at window-load scripts
-          Scriptish_injectScripts(scripts["window-load"], href, safeWin);
+          Scriptish_injectScripts({
+            scripts: scripts["window-load"],
+            url: href,
+            safeWin: safeWin
+          });
         }, true);
       }
 
       // inject @run-at document-start scripts
-      Scriptish_injectScripts(scripts["document-start"], href, safeWin);
+      Scriptish_injectScripts({
+        scripts: scripts["document-start"],
+        url: href,
+        safeWin: safeWin
+      });
 
       Scriptish_windowUnloader(function() {
         winClosed = true;

@@ -5,6 +5,7 @@
   lazyImport(global, "resource://scriptish/logging.js", ["Scriptish_log"]);
   lazyImport(global, "resource://scriptish/manager.js", ["Scriptish_manager"]);
   lazyImport(global, "resource://scriptish/config.js", ["Scriptish_config"]);
+  lazyImport(this, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
 
   lazyUtil(global, "installUri");
 
@@ -22,6 +23,14 @@
 
   mm.addMessageListener("Scriptish:GetScriptContents", function({json}) {
     return Scriptish_config.getScriptById(json).textContent;
+  });
+
+  mm.addMessageListener("Scriptish:GetScriptResourceURL", function({json}) {
+    return new GM_Resources(Scriptish_config.getScriptById(json.scriptID)).getResourceURL(json.resource);
+  });
+
+  mm.addMessageListener("Scriptish:GetScriptResourceText", function({json}) {
+    return new GM_Resources(Scriptish_config.getScriptById(json.scriptID)).getResourceText(json.resource);
   });
 
   mm.loadFrameScript(

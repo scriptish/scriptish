@@ -44,7 +44,7 @@ const Scriptish_manager = {
 
     // if we don't have a href and the window is a frame, then wait until we do
     if (!href && safeWin.frameElement) {
-      Scriptish_manager.waitForFrame.call(this, safeWin);
+      Scriptish_manager.waitForFrame.call(this, safeWin, options);
       return;
     }
 
@@ -84,18 +84,25 @@ const Scriptish_manager = {
         if (scripts["document-idle"].length) {
           timeout(function() {
             //if (shouldNotRun()) return;
-            Scriptish_injectScripts(
-                scripts["document-idle"], href, safeWin);
+            Scriptish_injectScripts(extend(options, {
+              scripts: scripts["document-idle"],
+              url: href,
+              safeWin: safeWin
+            }));
           });
         }
 
         // inject @run-at document-end scripts
-        Scriptish_injectScripts(scripts["document-end"], href, safeWin);
+        Scriptish_injectScripts(extend(options, {
+          scripts: scripts["document-end"],
+          url: href,
+          safeWin: safeWin
+        }));
       }, true);
     }
   },
 
-  waitForFrame: function(safeWin) {
+  waitForFrame: function(safeWin, options) {
     let self = this;
     safeWin.addEventListener("DOMContentLoaded", function _frame_loader() {
       // not perfect, but anyway
@@ -104,7 +111,7 @@ const Scriptish_manager = {
 
       if (!href) return; // wait for it :p
       safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
-      Scriptish_manager.docReady_start.call(self, safeWin);
+      Scriptish_manager.docReady_start.call(self, safeWin, options);
 
       // fake DOMContentLoaded to get things rolling
       var evt = safeWin.document.createEvent("Events");

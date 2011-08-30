@@ -1,5 +1,5 @@
 var EXPORTED_SYMBOLS = [
-    "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils",
+    "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils", "extend",
     "Services", "Instances", "lazyImport", "lazyUtil", "timeout", "e10s"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
@@ -141,4 +141,11 @@ function timeout(cb, delay) {
   }
 
   setTimeout(callback, delay);
+}
+
+function extend(a, o) {
+  for (var k in a) {
+    o[k] = a[k];
+  }
+  return o;
 }

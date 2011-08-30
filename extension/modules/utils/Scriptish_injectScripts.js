@@ -23,7 +23,9 @@ const Scriptish_injectScripts_filename = Components.stack.filename;
 const gTimer = new Timer();
 const {nsIDOMXPathResult: XPATH_RESULT} = Ci;
 
-function Scriptish_injectScripts(scripts, url, safeWin) {
+function Scriptish_injectScripts(options) {
+  var {scripts, url, safeWin} = options;
+
   if ("Fennec" != Services.appinfo.name) {
     var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
     if (!chromeWin || !chromeWin.Scriptish_BrowserUI) return;
@@ -53,14 +55,14 @@ function Scriptish_injectScripts(scripts, url, safeWin) {
     Cu.evalInSandbox(GM_sandboxScripts, sandbox);
 
     // add GM_* API to sandbox
-    let (GM_api = new GM_API({
+    let (GM_api = new GM_API(extend(options, {
       script: script,
       url: url,
       winID: winID,
       safeWin: safeWin,
       unsafeWin: unsafeContentWin,
       chromeWin: chromeWin
-    })) {
+    }))) {
       for (var funcName in GM_api) {
         sandbox[funcName] = GM_api[funcName];
       }

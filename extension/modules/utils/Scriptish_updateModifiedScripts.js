@@ -15,37 +15,42 @@ function Scriptish_updateModifiedScripts(href, safeWin, shouldNotRun) {
     return;
 
   Scriptish_config.updateModifiedScripts(function(script) {
-   if (shouldNotRun()
-       || !Scriptish_isScriptRunnable(script, href, (safeWin === safeWin.top)))
-     return;
+    if (shouldNotRun()
+        || !Scriptish_isScriptRunnable(script, href, (safeWin === safeWin.top)))
+      return;
 
-   let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
-   function inject() {
-     if (shouldNotRun()) return;
-     Scriptish_injectScripts([script], href, safeWin);
-   }
+    let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
+    function inject() {
+      if (shouldNotRun()) return;
+      Scriptish_injectScripts({
+        scripts: [script],
+        url: href,
+        safeWin: safeWin
+      });
+    }
 
-   switch (script.runAt) {
-   case "document-end":
-     if (2 > rdyStateIdx) {
-       safeWin.addEventListener("DOMContentLoaded", inject, true);
-       return;
-     }
-     break;
-   case "document-idle":
-     if (2 > rdyStateIdx) {
-       safeWin.addEventListener(
-           "DOMContentLoaded", function() timeout(inject), true);
-       return;
-     }
-     break;
-   case "window-load":
-     if (4 > rdyStateIdx) {
-       safeWin.addEventListener("load", inject, true);
-       return;
-     }
-     break;
-   }
-   inject();
- });
+    switch (script.runAt) {
+    case "document-end":
+      if (2 > rdyStateIdx) {
+        safeWin.addEventListener("DOMContentLoaded", inject, true);
+        return;
+      }
+      break;
+    case "document-idle":
+      if (2 > rdyStateIdx) {
+        safeWin.addEventListener(
+            "DOMContentLoaded", function() timeout(inject), true);
+        return;
+      }
+      break;
+    case "window-load":
+      if (4 > rdyStateIdx) {
+        safeWin.addEventListener("load", inject, true);
+        return;
+      }
+      break;
+    }
+
+    inject();
+  });
 }
