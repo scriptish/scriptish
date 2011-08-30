@@ -56,10 +56,11 @@ function GM_apiSafeCallback(aWindow, aScript, aThis, aCb, aArgs) {
   }, 0);
 }
 
+// note: must not depend on aChromeWin below, it should always be optional!
 function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) {
   var document = aSafeWin.document;
   var menuCmdIDs = [];
-  var Scriptish_BrowserUI = aChromeWin.Scriptish_BrowserUI;
+  var Scriptish_BrowserUI = aChromeWin ? aChromeWin.Scriptish_BrowserUI : null;
   var windowID = aWinID;
 
   var lazyLoaders = {};
@@ -163,7 +164,7 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     return xhr.contentStartRequest.apply(xhr, arguments);
   }
 
-  if (aSafeWin !== aSafeWin.top) {
+  if (!Scriptish_BrowserUI || aSafeWin !== aSafeWin.top) {
     this.GM_unregisterMenuCommand = this.GM_registerMenuCommand
         = this.GM_disableMenuCommand = this.GM_enableMenuCommand = DOLITTLE;
   } else {
