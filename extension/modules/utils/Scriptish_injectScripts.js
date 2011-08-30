@@ -24,11 +24,10 @@ const gTimer = new Timer();
 const {nsIDOMXPathResult: XPATH_RESULT} = Ci;
 
 function Scriptish_injectScripts(scripts, url, safeWin) {
-  // TODO: re-support below lines!
-  /*
-  var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
-  if (!chromeWin || !chromeWin.Scriptish_BrowserUI) return;
-  */
+  if ("Fennec" != Services.appinfo.name) {
+    var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
+    if (!chromeWin || !chromeWin.Scriptish_BrowserUI) return;
+  }
 
   if (0 >= scripts.length) return;
 
@@ -53,15 +52,22 @@ function Scriptish_injectScripts(scripts, url, safeWin) {
 
     Cu.evalInSandbox(GM_sandboxScripts, sandbox);
 
-    // TODO: re-support below lines!
-    /*
-    let GM_api = new GM_API(
-        script, url, winID, safeWin, unsafeContentWin, chromeWin);
     // add GM_* API to sandbox
-    for (var funcName in GM_api) {
-      sandbox[funcName] = GM_api[funcName];
+    let (GM_api = new GM_API({
+      script: script,
+      url: url,
+      winID: winID,
+      safeWin: safeWin,
+      unsafeWin: unsafeContentWin,
+      chromeWin: chromeWin
+    })) {
+      for (var funcName in GM_api) {
+        sandbox[funcName] = GM_api[funcName];
+      }
     }
 
+    // TODO: re-support below lines!
+    /*
     XPCOMUtils.defineLazyGetter(sandbox, "console", function() {
       return GM_console(script, safeWin, chromeWin);
     });

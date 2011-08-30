@@ -57,7 +57,15 @@ function GM_apiSafeCallback(aWindow, aScript, aThis, aCb, aArgs) {
 }
 
 // note: must not depend on aChromeWin below, it should always be optional!
-function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) {
+function GM_API(options) {
+  var {
+    script: aScript,
+    url: aURL,
+    winID: aWinID,
+    safeWin: aSafeWin,
+    unsafeWin: aUnsafeContentWin,
+    chromeWin: aChromeWin
+  } = options;
   var document = aSafeWin.document;
   var menuCmdIDs = [];
   var Scriptish_BrowserUI = aChromeWin ? aChromeWin.Scriptish_BrowserUI : null;
