@@ -13,6 +13,10 @@ const Scriptish_getEditor = function(parentWindow, change) {
   if (!change && editorPath) {
     Scriptish_log("Found saved editor preference: " + editorPath);
 
+    // Check if Scratchpad
+    if ("Scratchpad" == editorPath)
+      return editorPath;
+
     var editor = Instances.lf;
     editor.followLinks = true;
     try {
@@ -26,7 +30,7 @@ const Scriptish_getEditor = function(parentWindow, change) {
       return editor;
     } else {
       Scriptish_log("Editor preference either does not exist or is not executable");
-      Scriptish_prefRoot.remove("editor");
+      Scriptish_prefRoot.reset("editor");
     }
   }
 
@@ -35,6 +39,31 @@ const Scriptish_getEditor = function(parentWindow, change) {
   // that we can give them an error and try again.
   while (true) {
     Scriptish_log("Asking user to choose editor...");
+
+    // Ask if the user wants to use Scratchpad
+    var sp = Services.prompt;
+    var flags = sp.BUTTON_POS_0 * sp.BUTTON_TITLE_IS_STRING
+        + sp.BUTTON_POS_1 * sp.BUTTON_TITLE_IS_STRING;
+
+    // Note: confirmEx always returns 1 if prompt is closed w/ the close button,
+    //       so we need to keep the negative answer at button index 1.
+    var answer = sp.confirmEx(
+        null,
+        Scriptish_stringBundle("editor.useScratchpad"),
+        Scriptish_stringBundle("editor.useScratchpad"),
+        flags,
+        Scriptish_stringBundle("editor.useScratchpad.yes"),
+        Scriptish_stringBundle("editor.useScratchpad.no"),
+        "",
+        null,
+        {value:false});
+
+    // The user answered Yes.  Set 'editor' back to the default ("Scratchpad").
+    if (0 === answer) {
+      Scriptish_prefRoot.reset("editor");
+      return Scriptish_prefRoot.getValue("editor");
+    }
+
     var nsIFilePicker = Ci.nsIFilePicker;
     var fp = Instances.fp;
     fp.init(

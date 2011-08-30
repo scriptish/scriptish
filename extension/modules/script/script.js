@@ -902,14 +902,18 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
     var header = match[1].toLowerCase();
     var value = match[2];
 
-    if (!value) {
-      switch (header) {
-        case "noframes":
-          script["_noframes"] = true;
-          continue;
-      }
-    } else {
+    if (value)
       value = value.trimRight();
+
+    // Keys with optional values
+    switch (header) {
+      case "noframes":
+        script["_noframes"] = (!value || "true" == value || "1" == value);
+        continue;
+    }
+
+    // Keys with required values
+    if (value) {
       switch (header) {
         case "id":
         case "delay":
