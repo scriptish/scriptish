@@ -26,10 +26,13 @@ const {nsIDOMXPathResult: XPATH_RESULT} = Ci;
 function Scriptish_injectScripts(options) {
   var {scripts, url, safeWin} = options;
 
+  try {
   if ("Fennec" != Services.appinfo.name) {
     var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
     if (!chromeWin || !chromeWin.Scriptish_BrowserUI) return;
   }
+  }
+  catch (e) {}
 
   if (0 >= scripts.length) return;
 
@@ -67,12 +70,10 @@ function Scriptish_injectScripts(options) {
         sandbox[funcName] = GM_api[funcName];
       }
     }
-
-    // TODO: re-support below lines!
-    /*
     XPCOMUtils.defineLazyGetter(sandbox, "console", function() {
       return GM_console(script, safeWin, chromeWin);
     });
+
 
     XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
       if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
@@ -84,7 +85,6 @@ function Scriptish_injectScripts(options) {
       }
       return sandbox.console.log.bind(sandbox.console);
     });
-    */
 
     sandbox.unsafeWindow = unsafeContentWin;
     sandbox.__proto__ = safeWin;
