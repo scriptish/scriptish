@@ -17,6 +17,10 @@
 
   var mm = messageManager;
 
+  mm.addMessageListener("Scriptish:InstallScriptURL", function({json}) {
+    return Scriptish_installUri(json);
+  });
+
   mm.addMessageListener("Scriptish:FrameSetup", function() {
     return Scriptish_config.toJSON();
   });

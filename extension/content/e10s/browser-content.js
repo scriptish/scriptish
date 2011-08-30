@@ -9,9 +9,11 @@ lazyImport(global, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
   "Scriptish_setExcludes"
 ]);
 
-lazyUtil(global, "installUri");
-
 Scriptish_log("step 2a");
+
+global.Scriptish_installUri = function(aURL) {
+  sendSyncMessage("Scriptish:InstallScriptURL", aURL);
+}
 
 function updateExcludes({json}) {
   Scriptish_setExcludes(json);
