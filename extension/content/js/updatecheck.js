@@ -14,11 +14,10 @@
 
   if (0 >= tools.Services.vc.compare(currentVer, "0.1b5")) {
     var chromeWin = tools.Services.wm.getMostRecentWindow("navigator:browser");
-    if ("Fennec" == tools.Services.appinfo.name) {
-      chromeWin.Browser.addTab("about:scriptish", false, chromeWin.Browser.selectedTab)
-    } else {
-      chromeWin.gBrowser.addTab("about:scriptish");
+    (chromeWin.Browser ? chromeWin.Browser : chromeWin.gBrowser)
+        .addTab("about:scriptish");
 
+    if ("Fennec" != tools.Services.appinfo.name) {
       // add toolbaritem to add-on bar
       var addToBar = chromeWin.document.getElementById("addon-bar");
       if (!addToBar || chromeWin.document.getElementById("scriptish-button"))
