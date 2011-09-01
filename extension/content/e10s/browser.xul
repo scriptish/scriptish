@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://scriptish/skin/browser-fennec.css" type="text/css"?>
 <overlay id="scriptish-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/javascript" src="chrome://scriptish/content/e10s/browser.js"/>
 
@@ -10,4 +11,10 @@
       <label value="Install User Script"/>
     </richlistitem>
   </richlistbox> 
+
+  <richlistbox id="addons-list">
+    <richlistitem id="addons-userscripts" insertbefore="addons-local" class="section-header" align="center">
+      <label value="Your User Scripts" flex="1"/>
+    </richlistitem>
+  </richlistbox>
 </overlay>

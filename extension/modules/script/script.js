@@ -279,7 +279,12 @@ Script.prototype = {
   uninstall: function() {
     Scriptish.notify(this, "scriptish-script-uninstalling");
     this.needsUninstall = true;
-    this.pendingOperations = AddonManager.PENDING_UNINSTALL;
+    if ("Fennec" == Services.appinfo.name) {
+      this._config.uninstallScripts();
+    }
+    else {
+      this.pendingOperations = AddonManager.PENDING_UNINSTALL;
+    }
     Scriptish.notify(this, "scriptish-script-uninstalled");
   },
   uninstallProcess: function() {
@@ -802,7 +807,8 @@ Script.prototype = {
     averageRating: this.averageRating,
     reviewCount: this.reviewCount,
     totalDownloads: this.totalDownloads,
-    applyBackgroundUpdates: this._applyBackgroundUpdates
+    applyBackgroundUpdates: this._applyBackgroundUpdates,
+    needsUninstall: this.needsUninstall
   }),
 
   // TODO: DRY
@@ -1199,7 +1205,7 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script.averageRating = aSkeleton.averageRating;
   script.reviewCount = aSkeleton.reviewCount;
   script.totalDownloads = aSkeleton.totalDownloads;
-  script._applyBackgroundUpdates = aSkeleton.applyBackgroundUpdates
+  script._applyBackgroundUpdates = aSkeleton.applyBackgroundUpdates;
 
   script.update();
 

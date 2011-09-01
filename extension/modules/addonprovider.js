@@ -15,6 +15,7 @@ const Scriptish_ScriptProvider = {
   observe: function(aSubject, aTopic, aData) {
     aData = JSON.parse(aData);
     let script = Scriptish_config.getScriptById(aData.id);
+
     switch(aTopic){
     case "scriptish-script-installed":
       AddonManagerPrivate.callInstallListeners(
