@@ -14,13 +14,14 @@ lazyImport(window, "resource://scriptish/menucommander.js", ["Scriptish_MenuComm
 lazyImport(window, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(window, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
 
+lazyUtil(window, "getURLsForContentWindow");
+lazyUtil(window, "getWindowIDs");
 lazyUtil(window, "installUri");
 lazyUtil(window, "isGreasemonkeyable");
 lazyUtil(window, "isURLExcluded");
 lazyUtil(window, "openInEditor");
+lazyUtil(window, "openInTab");
 lazyUtil(window, "stringBundle");
-lazyUtil(window, "getURLsForContentWindow");
-lazyUtil(window, "getWindowIDs");
 
 var Ci = tools.Ci;
 var Services = tools.Services;
@@ -214,7 +215,7 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
  */
 Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
   this.scriptDownloader_ = aSD;
-  gBrowser.selectedTab = gBrowser.addTab(aURL);
+  this.showInstallBanner(Scriptish_openInTab(aURL, false, true).contentWindow);
 }
 
 // Handles the install button getting clicked.

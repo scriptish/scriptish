@@ -365,7 +365,7 @@ ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
 }
 ScriptDownloader.prototype.showScriptView = function() {
   Services.wm.getMostRecentWindow("navigator:browser")
-      .Scriptish_BrowserUI.showScriptView(this, this.script.previewURL);
+      .Scriptish_BrowserUI.showScriptView(this, this.uri_.spec);
 }
 
 

@@ -629,8 +629,6 @@ Script.prototype = {
   get urlToDownload() this._downloadURL,
   setDownloadedFile: function(file) { this._tempFile = file; },
 
-  get previewURL() Services.io.newFileURI(this._tempFile).spec,
-
   isModified: function() {
     let now = Date.now();
     if (now - this._isModified_lastcheck < 1000) {
