@@ -14,6 +14,24 @@ lazyUtil(this, "isURLExcluded");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "windowUnloader");
 
+const tests = {
+  _test_org: {
+    "chrome": true,
+    "about": true
+  },
+  _test_cl: {
+    "chrome": true,
+    "resource": true
+  },
+  _reg_userjs: /\.user\.js$/,
+  isTempScript: function(uri) {
+    if (!(uri instanceof Ci.nsIFileURL)) return false;
+
+    var file = uri.file;
+    return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
+  }
+}
+
 const Scriptish_manager = {
   setup: function(options) {
     options = options || {};
@@ -62,6 +80,12 @@ const Scriptish_manager = {
         != JSON.stringify(Scriptish_getWindowIDs(safeWin)))
       return;
     //Scriptish_log(JSON.stringify(Scriptish_getWindowIDs(safeWin)));
+
+    var uri = Services.io.newURI(href, null, null);
+    if (tests._reg_userjs.test(href) && !tests.isTempScript(uri)
+        && "view-source" != uri.scheme) {
+      options.global.sendAsyncMessage("Scriptish:InstallScriptURL", href);
+    }
 
     var scripts = {
       "document-start": [],

@@ -12,7 +12,7 @@ lazyImport(global, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
 Scriptish_log("step 2a");
 
 global.Scriptish_installUri = function(aURL) {
-  sendSyncMessage("Scriptish:InstallScriptURL", aURL);
+  sendAsyncMessage("Scriptish:InstallScriptURL", aURL);
 }
 
 function updateExcludes({json}) {
@@ -31,6 +31,7 @@ var configJSON = sendSyncMessage("Scriptish:FrameSetup", "")[0];
   });
 
   Scriptish_manager.setup({
+    global: global,
     content: content,
     scripts: scripts
   });

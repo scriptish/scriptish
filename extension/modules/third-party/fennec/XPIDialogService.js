@@ -34,23 +34,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["WebInstallPrompt"];
+
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 
-// -----------------------------------------------------------------------
-// Web Install Prompt service
-// -----------------------------------------------------------------------
-
-function WebInstallPrompt() { }
-
-WebInstallPrompt.prototype = {
-  classID: Components.ID("{c1242012-27d8-477e-a0f1-0b098ffc329b}"),
-  QueryInterface: XPCOMUtils.generateQI([Ci.amIWebInstallPrompt]),
-
-  confirm: function(aWindow, aURL, aInstalls) {
+const WebInstallPrompt = {
+  confirm: function(aWindow, aInstalls) {
     // first check if the extensions panel is open : fast path to return true
     let browser = Services.wm.getMostRecentWindow("navigator:browser");
     if (browser.ExtensionsView.visible) {
@@ -59,13 +52,11 @@ WebInstallPrompt.prototype = {
       });
       return;
     }
-    
-    let bundle = Services.strings.createBundle("chrome://browser/locale/browser.properties");
 
     let prompt = Services.prompt;
     let flags = prompt.BUTTON_POS_0 * prompt.BUTTON_TITLE_IS_STRING + prompt.BUTTON_POS_1 * prompt.BUTTON_TITLE_CANCEL;
-    let title = bundle.GetStringFromName("addonsConfirmInstall.title");
-    let button = bundle.GetStringFromName("addonsConfirmInstall.install");
+    let title = "Installing User Script";
+    let button = "Install";
 
     aInstalls.forEach(function(install) {
       let result = (prompt.confirmEx(aWindow, title, install.name, flags, button, null, null, null, {value: false}) == 0);
@@ -76,5 +67,3 @@ WebInstallPrompt.prototype = {
     });
   }
 };
-
-const NSGetFactory = XPCOMUtils.generateNSGetFactory([WebInstallPrompt]);
