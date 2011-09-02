@@ -22,7 +22,7 @@
     Scriptish_config.scripts.forEach(function(script) {
       var ele = ExtensionsView._createItem(script, "userscript");
       ele.setAttribute("typeLabel", "User Script");
-      // TODO: implement for Fennec..
+      // TODO: implement for Fennec.. #517
       //ele.setAttribute("optionsURL", script.optionsURL);
       ele.setAttribute("isDisabled", !script.enabled);
       ele.setAttribute("data-scriptish-scriptid", script.id);
