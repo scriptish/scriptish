@@ -16,7 +16,9 @@ lazyImport(this, "resource://scriptish/script/scriptrequire.js", ["ScriptRequire
 lazyImport(this, "resource://scriptish/script/scriptresource.js", ["ScriptResource"]);
 lazyImport(this, "resource://scriptish/third-party/MatchPattern.js", ["MatchPattern"]);
 lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
+lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
+lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "getUriFromFile");
 lazyUtil(this, "getContents");
 lazyUtil(this, "memoize");
@@ -277,7 +279,12 @@ Script.prototype = {
   uninstall: function() {
     Scriptish.notify(this, "scriptish-script-uninstalling");
     this.needsUninstall = true;
-    this.pendingOperations = AddonManager.PENDING_UNINSTALL;
+    if ("Fennec" == Services.appinfo.name) {
+      this._config.uninstallScripts();
+    }
+    else {
+      this.pendingOperations = AddonManager.PENDING_UNINSTALL;
+    }
     Scriptish.notify(this, "scriptish-script-uninstalled");
   },
   uninstallProcess: function() {
@@ -316,7 +323,7 @@ Script.prototype = {
     } catch (e) {
       // If true, we're allowing a scheme that doesn't have a host.
       // i.e. "about:scriptish"
-      return Scriptish.isGreasemonkeyable(aURL);
+      return Scriptish_isGreasemonkeyable(aURL);
     }
 
     var i = this.domains.length - 1;
@@ -800,7 +807,8 @@ Script.prototype = {
     averageRating: this.averageRating,
     reviewCount: this.reviewCount,
     totalDownloads: this.totalDownloads,
-    applyBackgroundUpdates: this._applyBackgroundUpdates
+    applyBackgroundUpdates: this._applyBackgroundUpdates,
+    needsUninstall: this.needsUninstall
   }),
 
   // TODO: DRY
@@ -1197,7 +1205,7 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script.averageRating = aSkeleton.averageRating;
   script.reviewCount = aSkeleton.reviewCount;
   script.totalDownloads = aSkeleton.totalDownloads;
-  script._applyBackgroundUpdates = aSkeleton.applyBackgroundUpdates
+  script._applyBackgroundUpdates = aSkeleton.applyBackgroundUpdates;
 
   script.update();
 

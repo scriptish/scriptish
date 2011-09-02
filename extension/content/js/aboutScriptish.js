@@ -12,6 +12,7 @@ function include(aSrc) {
 
 
 Cu.import("resource://scriptish/constants.js");
+lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
 (function() {
   "use strict";

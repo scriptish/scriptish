@@ -33,7 +33,6 @@ function GM_apiLeakCheck(apiName) {
         stack.filename != moduleFilename &&
         stack.filename != Scriptish_evalInSandbox_filename &&
         stack.filename != Scriptish_injectScripts_filename &&
-        stack.filename != Services.scriptish.filename &&
         stack.filename.substr(0, 6) != "chrome") {
       Scriptish_logError(new Error(
           Scriptish_stringBundle("error.api.unsafeAccess") + ": " + apiName));
@@ -57,10 +56,19 @@ function GM_apiSafeCallback(aWindow, aScript, aThis, aCb, aArgs) {
   }, 0);
 }
 
-function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) {
+// note: must not depend on aChromeWin below, it should always be optional!
+function GM_API(options) {
+  var {
+    script: aScript,
+    url: aURL,
+    winID: aWinID,
+    safeWin: aSafeWin,
+    unsafeWin: aUnsafeContentWin,
+    chromeWin: aChromeWin
+  } = options;
   var document = aSafeWin.document;
   var menuCmdIDs = [];
-  var Scriptish_BrowserUI = aChromeWin.Scriptish_BrowserUI;
+  var Scriptish_BrowserUI = aChromeWin ? aChromeWin.Scriptish_BrowserUI : null;
   var windowID = aWinID;
 
   var lazyLoaders = {};
@@ -111,12 +119,28 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     return lazyLoaders.storage.listValues.apply(lazyLoaders.storage, arguments);
   }
 
-  this.GM_getResourceURL = function GM_getResourceURL() {
+  this.GM_getResourceURL = function GM_getResourceURL(aName) {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
+
+    if (options.content) {
+      return options.content.sendSyncMessage("Scriptish:GetScriptResourceURL", {
+        scriptID: aScript.id,
+        resource: aName
+      });
+    }
+
     return lazyLoaders.resources.getResourceURL.apply(lazyLoaders.resources, arguments)
   }
-  this.GM_getResourceText = function GM_getResourceText() {
+  this.GM_getResourceText = function GM_getResourceText(aName) {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
+
+    if (options.content) {
+      return options.content.sendSyncMessage("Scriptish:GetScriptResourceText", {
+        scriptID: aScript.id,
+        resource: aName
+      });
+    }
+
     return lazyLoaders.resources.getResourceText.apply(lazyLoaders.resources, arguments)
   }
 
@@ -164,7 +188,7 @@ function GM_API(aScript, aURL, aWinID, aSafeWin, aUnsafeContentWin, aChromeWin) 
     return xhr.contentStartRequest.apply(xhr, arguments);
   }
 
-  if (aSafeWin !== aSafeWin.top) {
+  if (!Scriptish_BrowserUI || aSafeWin !== aSafeWin.top) {
     this.GM_unregisterMenuCommand = this.GM_registerMenuCommand
         = this.GM_disableMenuCommand = this.GM_enableMenuCommand = DOLITTLE;
   } else {

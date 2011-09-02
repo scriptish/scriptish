@@ -1,6 +1,7 @@
 var EXPORTED_SYMBOLS = ["ScriptInstall"];
 Components.utils.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
+lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
 // Implements https://developer.mozilla.org/en/Addons/Add-on_Manager/AddonInstall
 function ScriptInstall(aScript) {

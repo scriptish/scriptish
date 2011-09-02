@@ -1,3 +1,4 @@
+"use strict";
 var EXPORTED_SYMBOLS = ["GM_ScriptLogger"];
 Components.utils.import("resource://scriptish/logging.js");
 

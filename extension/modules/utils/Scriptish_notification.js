@@ -3,6 +3,17 @@ Components.utils.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
+function showAlertNotification() {
+  if ("Fennec" == Services.appinfo.name) {
+    return showAlertNotification =
+        Cc["@mozilla.org/toaster-alerts-service;1"]
+        .getService(Ci.nsIAlertsService)
+        .showAlertNotification;
+  }
+
+  return Services.as.showAlertNotification;
+}
+
 function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
   if (!Scriptish_prefRoot.getValue("enabledNotifications.sliding"))
     return Scriptish_log(aMsg);
@@ -20,7 +31,7 @@ function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
 
     // if Growl is not installed or disabled on OSX, then use a fallback
     try {
-      Services.as.showAlertNotification.apply(null, args);
+      showAlertNotification().apply(null, args);
     } catch (e) {
       let win = Services.ww.openWindow(
           null, 'chrome://global/content/alerts/alert.xul',

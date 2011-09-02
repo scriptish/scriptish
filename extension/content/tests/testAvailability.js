@@ -37,12 +37,6 @@ Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js", tools);
 Cu.import("resource://scriptish/third-party/Timer.js", tools);
 })(Components.utils);
 
-test("Scriptish", function() {
-    expect(2);
-    equals(typeof(Services.scriptish), "object", "Scriptish service is available");
-    equals(typeof(Services.scriptish.shouldLoad), "function", "shouldLoad is available");
-  });
-
 test("Utils", function() {
   expect(28);
 

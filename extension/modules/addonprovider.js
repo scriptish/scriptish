@@ -2,8 +2,12 @@ var EXPORTED_SYMBOLS = [];
 Components.utils.import("resource://scriptish/constants.js");
 
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
+lazyUtil(this, "notification");
+lazyUtil(this, "openManager");
 lazyUtil(this, "popupNotification");
 lazyUtil(this, "stringBundle");
 
@@ -11,6 +15,7 @@ const Scriptish_ScriptProvider = {
   observe: function(aSubject, aTopic, aData) {
     aData = JSON.parse(aData);
     let script = Scriptish_config.getScriptById(aData.id);
+
     switch(aTopic){
     case "scriptish-script-installed":
       AddonManagerPrivate.callInstallListeners(
@@ -20,9 +25,9 @@ const Scriptish_ScriptProvider = {
       var msg = "'" + script.name;
       if (script.version) msg += " " + script.version;
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
-      var callback = function() Scriptish.openManager();
+      var callback = Scriptish_openManager;
 
-      Scriptish_popupNotification({
+      var showedMsg = Scriptish_popupNotification({
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
@@ -35,6 +40,11 @@ const Scriptish_ScriptProvider = {
           persistWhileVisible: true
         }
       });
+
+      if (!showedMsg) {
+        Scriptish_notification(msg, null, null, callback);
+      }
+
       break;
     case "scriptish-script-edit-enabling":
       AddonManagerPrivate.callAddonListeners(
@@ -58,9 +68,9 @@ const Scriptish_ScriptProvider = {
       msg += "' " + (("scriptish-script-updated" == aTopic)
           ? Scriptish_stringBundle("statusbar.updated")
           : Scriptish_stringBundle("statusbar.modified"));
-      var callback = function() Scriptish.openManager();
+      var callback = Scriptish_openManager;
 
-      Scriptish_popupNotification({
+      var showedMsg = Scriptish_popupNotification({
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
@@ -73,6 +83,11 @@ const Scriptish_ScriptProvider = {
           persistWhileVisible: true
         }
       });
+
+      if (!showedMsg) {
+        Scriptish_notification(msg, null, null, callback);
+      }
+
       break;
     case "scriptish-script-uninstalling":
       AddonManagerPrivate.callAddonListeners("onUninstalling", script, false);

@@ -54,7 +54,7 @@
         <description id="resources-desc"/>
       </vbox>
     </vbox>
-    <hbox id="showSource-box" flex="1" pack="end" align="end">
+    <hbox id="showSource-box">
       <label id="showSource" class="text-link" value="install.showScriptSource" localize="value"/>
     </hbox>
   </vbox>
