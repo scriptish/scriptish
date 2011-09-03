@@ -124,6 +124,25 @@ const Scriptish_manager = {
         }));
       }, true);
     }
+
+    if (scripts["window-load"].length) {
+      safeWin.addEventListener("load", function() {
+        if (shouldNotRun()) return;
+        // inject @run-at window-load scripts
+        Scriptish_injectScripts(extend(options, {
+          scripts: scripts["window-load"],
+          url: href,
+          safeWin: safeWin
+        }));
+      }, true);
+    }
+
+    // inject @run-at document-start scripts
+    Scriptish_injectScripts(extend(options, {
+      scripts: scripts["document-start"],
+      url: href,
+      safeWin: safeWin
+    }));
   },
 
   waitForFrame: function(safeWin, options) {
