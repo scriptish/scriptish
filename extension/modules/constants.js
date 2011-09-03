@@ -145,7 +145,9 @@ function timeout(cb, delay) {
 
 function extend(a, o) {
   for (var k in a) {
-    o[k] = a[k];
+    if (!o[k]) {
+      o[k] = a[k];
+    }
   }
   return o;
 }

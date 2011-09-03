@@ -28,12 +28,13 @@ function SimpleScript() {
   this.priority = 0;
   this._requires = [];
   this._resources = [];
-  this._noframes = false;
+  this.noframes = false;
   this._jsversion = null;
   this["_run-at"] = null;
 }
 
 SimpleScript.prototype = {
+  needsUninstall: false,
   get jsversion() this._jsversion || maxJSVer,
   get runAt() this["_run-at"] || defaultRunAt,
   get matches() this._matches.concat(),
@@ -114,7 +115,7 @@ SimpleScript.loadFromJSON = function(aSkeleton) {
   script._jsversion = aSkeleton.jsversion;
   script["_run-at"] = aSkeleton["run-at"];
   script.includesDisabled = aSkeleton.includesDisabled;
-  script._noframes = aSkeleton.noframes;
+  script.noframes = aSkeleton.noframes;
   script.addInclude(aSkeleton.includes);
   script.addExclude(aSkeleton.excludes);
   // TODO: need to have the below updated when they are changed...
