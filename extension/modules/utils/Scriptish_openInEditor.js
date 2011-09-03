@@ -22,7 +22,20 @@ function Scriptish_openInEditor(script, parentWindow) {
       spWin.addEventListener("load", function spWinLoaded() {
         spWin.removeEventListener("load", spWinLoaded, false);
         spWin.document.title = spWin.Scratchpad.filename = file.path;
-        spWin.Scratchpad.importFromFile(file);
+        spWin.Scratchpad.importFromFile(file, false, function() {
+          let spEditor = spWin.Scratchpad.editor;
+          if (spEditor._undoStack && spEditor._undoStack.reset) {
+            // Reset "undo/redo" for the Orion editor
+            spEditor._undoStack.reset();
+          } else if (spEditor._editor
+              && spEditor._editor.resetModificationCount
+              && spEditor._editor.transactionManager
+              && spEditor._editor.transactionManager.clear) {
+            // Reset "undo/redo" for the textarea editor
+            spEditor._editor.resetModificationCount();
+            spEditor._editor.transactionManager.clear();
+          }
+        });
       }, false);
     }
     else {
