@@ -30,38 +30,41 @@ const Scriptish_getEditor = function(parentWindow, change) {
       return editor;
     } else {
       Scriptish_log("Editor preference either does not exist or is not executable");
-      Scriptish_prefRoot.reset("editor");
+      Scriptish_prefRoot.remove("editor");
     }
   }
 
   // Ask the user to choose a new editor. Sometimes users get confused and
   // pick a non-executable file, so we set this up in a loop so that if they do
   // that we can give them an error and try again.
+  var hasScratchpad =
+      !!Services.wm.getMostRecentWindow("navigator:browser").Scratchpad;
+  var sp = Services.prompt;
+  var flags = sp.BUTTON_POS_0 * sp.BUTTON_TITLE_IS_STRING
+      + sp.BUTTON_POS_1 * sp.BUTTON_TITLE_IS_STRING;
+
   while (true) {
     Scriptish_log("Asking user to choose editor...");
 
-    // Ask if the user wants to use Scratchpad
-    var sp = Services.prompt;
-    var flags = sp.BUTTON_POS_0 * sp.BUTTON_TITLE_IS_STRING
-        + sp.BUTTON_POS_1 * sp.BUTTON_TITLE_IS_STRING;
-
+    // If available, ask if the user wants to use Scratchpad.
     // Note: confirmEx always returns 1 if prompt is closed w/ the close button,
     //       so we need to keep the negative answer at button index 1.
-    var answer = sp.confirmEx(
-        null,
-        Scriptish_stringBundle("editor.useScratchpad"),
-        Scriptish_stringBundle("editor.useScratchpad"),
-        flags,
-        Scriptish_stringBundle("editor.useScratchpad.yes"),
-        Scriptish_stringBundle("editor.useScratchpad.no"),
-        "",
-        null,
-        {value:false});
+    if (hasScratchpad) {
+      var answer = sp.confirmEx(
+          null,
+          Scriptish_stringBundle("editor.useScratchpad"),
+          Scriptish_stringBundle("editor.useScratchpad"),
+          flags,
+          Scriptish_stringBundle("editor.useScratchpad.yes"),
+          Scriptish_stringBundle("editor.useScratchpad.no"),
+          "",
+          null,
+          {value:false});
 
-    // The user answered Yes.  Set 'editor' back to the default ("Scratchpad").
-    if (0 === answer) {
-      Scriptish_prefRoot.reset("editor");
-      return Scriptish_prefRoot.getValue("editor");
+      // The user answered Yes.  Set Scratchpad as the editor.
+      if (0 === answer) {
+        return Scriptish_prefRoot.setValue("editor", "Scratchpad");
+      }
     }
 
     var nsIFilePicker = Ci.nsIFilePicker;
