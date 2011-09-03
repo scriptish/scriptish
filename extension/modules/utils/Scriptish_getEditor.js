@@ -38,7 +38,8 @@ const Scriptish_getEditor = function(parentWindow, change) {
   // pick a non-executable file, so we set this up in a loop so that if they do
   // that we can give them an error and try again.
   var hasScratchpad =
-      !!Services.wm.getMostRecentWindow("navigator:browser").Scratchpad;
+      !!Services.wm.getMostRecentWindow("navigator:browser").Scratchpad
+      && Services.prefs.getBoolPref("devtools.scratchpad.enabled");
   var sp = Services.prompt;
   var flags = sp.BUTTON_POS_0 * sp.BUTTON_TITLE_IS_STRING
       + sp.BUTTON_POS_1 * sp.BUTTON_TITLE_IS_STRING;
