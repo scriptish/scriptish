@@ -29,10 +29,9 @@ function Scriptish_openInEditor(script, parentWindow) {
       Scriptish_launchApplicationWithDoc(editor, file);
     }
   } catch (e) {
-    // Something may be wrong with the editor the user selected. Reset to
-    // the default ("Scratchpad").
+    // Something may be wrong with the editor the user selected. Remove it.
     Scriptish_alert(Scriptish_stringBundle("editor.couldNotLaunch") + "\n" + e);
-    Scriptish_prefRoot.reset("editor");
+    Scriptish_prefRoot.remove("editor");
     throw e;
   }
 }
