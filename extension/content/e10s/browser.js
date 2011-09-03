@@ -11,7 +11,6 @@
 
   var $ = function(id) document.getElementById(id);
 
-  Scriptish_log("step 1a");
   addEventListener("load", function() {
     // Check if Scriptish has been updated/installed
     inc("resource://scriptish/utils/Scriptish_updateChk.js");
@@ -53,8 +52,21 @@
     return new GM_Resources(Scriptish_config.getScriptById(json.scriptID)).getResourceText(json.resource);
   });
 
+  mm.addMessageListener("Scriptish:GetScriptRequires", function({json}) {
+    var script = Scriptish_config.getScriptById(json);
+    if (!script) return [];
+
+    var rtnAry = [];
+    script.requires.forEach(function(req) {
+      rtnAry.push({
+        fileURL: req.fileURL,
+        textContent: req.textContent
+      });
+    });
+    return rtnAry;
+  });
+
   mm.loadFrameScript(
       "chrome://scriptish/content/e10s/browser-content.js",
       true); // no delay loading frame script
-  Scriptish_log("step 1b");
 })(Components.utils.import, {}, this);

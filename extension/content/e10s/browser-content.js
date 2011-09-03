@@ -9,8 +9,6 @@ lazyImport(global, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
   "Scriptish_setExcludes"
 ]);
 
-Scriptish_log("step 2a");
-
 global.Scriptish_installUri = function(aURL) {
   sendAsyncMessage("Scriptish:InstallScriptURL", aURL);
 }
@@ -26,7 +24,7 @@ var configJSON = sendSyncMessage("Scriptish:FrameSetup", "")[0];
 
   var scripts = configJSON.scripts.map(function(i) {
     var script = SimpleScript.loadFromJSON(i);
-    script.textContent = sendSyncMessage("Scriptish:GetScriptContents", script.id);
+    script.textContent = sendSyncMessage("Scriptish:GetScriptContents", script.id)[0];
     return script;
   });
 
@@ -38,9 +36,6 @@ var configJSON = sendSyncMessage("Scriptish:FrameSetup", "")[0];
 })(configJSON);
 
 addMessageListener("Scriptish:GlobalExcludesUpdate", updateExcludes);
-
-
-Scriptish_log("step 2b");
 })(Components.utils.import, {}, this);
 
 

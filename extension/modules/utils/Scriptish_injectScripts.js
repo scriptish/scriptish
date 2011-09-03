@@ -93,10 +93,10 @@ function Scriptish_injectScripts(options) {
     if (delay || delay === 0) {
       // don't use window's setTimeout, b/c then window could clearTimeout
       delays.push(gTimer.setTimeout(function() {
-        Scriptish_evalInSandbox(script, sandbox, safeWin);
+        Scriptish_evalInSandbox(script, sandbox, safeWin, options);
       }, delay));
     } else {
-      Scriptish_evalInSandbox(script, sandbox, safeWin);
+      Scriptish_evalInSandbox(script, sandbox, safeWin, options);
     }
   }
 }

@@ -11,13 +11,22 @@ lazyUtil(this, "stringBundle");
 const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 const Scriptish_evalInSandbox_filename = Components.stack.filename;
 
-function Scriptish_evalInSandbox(aScript, aSandbox, aWindow) {
+function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
   const jsVer = aScript.jsversion;
   const fileURL = aScript.fileURL;
+  const id = aScript.id;
 
-  /*
+  // e10s
+  if (options && options.global && options.global.sendSyncMessage) {
+    var reqAry = options.global.sendSyncMessage("Scriptish:GetScriptRequires", id)[0];
+  }
+  else {
+    var reqAry = aScript.requires;
+  }
+
+  // eval script @requires
   try {
-    for (let [, req] in Iterator(aScript.requires)) {
+    for (let [, req] in Iterator(reqAry)) {
       var rfileURL = req.fileURL;
       try {
         Cu.evalInSandbox(
@@ -28,14 +37,14 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow) {
           1
           );
       } catch (ex) {
-        Scriptish_logScriptError(ex, aWindow, rfileURL, aScript.id);
+        Scriptish_logScriptError(ex, aWindow, rfileURL, id);
       }
     }
   } catch (e) {
     return Scriptish_logError(e, 0, fileURL, e.lineNumber);
   }
-  */
 
+  // eval script
   try {
     try {
       Cu.evalInSandbox(
@@ -60,7 +69,7 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow) {
         sw.warningFlag,
         "scriptish userscript warnings"
         );
-      Scriptish_logScriptError(sw, aWindow, fileURL, aScript.id);
+      Scriptish_logScriptError(sw, aWindow, fileURL, id);
       Cu.evalInSandbox(
         "(function(){" + aScript.textContent + "\n})()",
         aSandbox,
@@ -70,6 +79,6 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow) {
         );
     }
   } catch (e) {
-    Scriptish_logScriptError(e, aWindow, fileURL, aScript.id);
+    Scriptish_logScriptError(e, aWindow, fileURL, id);
   }
 }
