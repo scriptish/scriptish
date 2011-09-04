@@ -18,14 +18,13 @@ function updateExcludes({json}) {
 }
 
 var configJSON = sendSyncMessage("Scriptish:FrameSetup", "")[0];
+var scripts;
 
 (function(configJSON) {
   Scriptish_setExcludes(configJSON.excludes);
 
-  var scripts = configJSON.scripts.map(function(i) {
-    var script = SimpleScript.loadFromJSON(i);
-    script.textContent = sendSyncMessage("Scriptish:GetScriptContents", script.id)[0];
-    return script;
+  scripts = configJSON.scripts.map(function(i) {
+    return SimpleScript.loadFromJSON(i);
   });
 
   Scriptish_manager.setup({
@@ -36,6 +35,9 @@ var configJSON = sendSyncMessage("Scriptish:FrameSetup", "")[0];
 })(configJSON);
 
 addMessageListener("Scriptish:GlobalExcludesUpdate", updateExcludes);
+addMessageListener("Scriptish:ScriptInstalled", function(data) {
+  scripts.push(SimpleScript.loadFromJSON(data.json));
+});
 })(Components.utils.import, {}, this);
 
 

@@ -9,6 +9,7 @@ lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "Ad
 lazyUtil(this, "notification");
 lazyUtil(this, "openManager");
 lazyUtil(this, "popupNotification");
+lazyUtil(this, "sendAsyncE10SMessage");
 lazyUtil(this, "stringBundle");
 
 const Scriptish_ScriptProvider = {
@@ -43,6 +44,10 @@ const Scriptish_ScriptProvider = {
 
       if (!showedMsg) {
         Scriptish_notification(msg, null, null, callback);
+      }
+
+      if ("Fennec" == Services.appinfo.name) {
+        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptInstalled", script.toJSON());
       }
 
       break;

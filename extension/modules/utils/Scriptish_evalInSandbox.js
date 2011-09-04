@@ -19,9 +19,11 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
   // e10s
   if (options && options.global && options.global.sendSyncMessage) {
     var reqAry = options.global.sendSyncMessage("Scriptish:GetScriptRequires", id)[0];
+    var scriptText = options.global.sendSyncMessage("Scriptish:GetScriptContents", id)[0];
   }
   else {
     var reqAry = aScript.requires;
+    var scriptText = aScript.textContent;
   }
 
   // eval script @requires
@@ -48,7 +50,7 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
   try {
     try {
       Cu.evalInSandbox(
-        aScript.textContent + "\n",
+        scriptText + "\n",
         aSandbox,
         jsVer,
         fileURLPrefix + fileURL,
@@ -71,7 +73,7 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
         );
       Scriptish_logScriptError(sw, aWindow, fileURL, id);
       Cu.evalInSandbox(
-        "(function(){" + aScript.textContent + "\n})()",
+        "(function(){" + scriptText + "\n})()",
         aSandbox,
         jsVer,
         fileURLPrefix + fileURL,

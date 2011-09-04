@@ -16,9 +16,9 @@
     inc("resource://scriptish/utils/Scriptish_updateChk.js");
 
     var us_head = $("addons-userscripts");
-    var next = us_head.nextSibling;
     var parent = us_head.parentNode;
-    Scriptish_config.scripts.forEach(function(script) {
+
+    function createNode(script) {
       var ele = ExtensionsView._createItem(script, "userscript");
       ele.setAttribute("typeLabel", "User Script");
       // TODO: implement for Fennec.. #517
@@ -26,8 +26,23 @@
       ele.setAttribute("isDisabled", !script.enabled);
       ele.setAttribute("data-scriptish-scriptid", script.id);
       ele.addon = script;
-      parent.insertBefore(ele, next);
-    });
+      return ele;
+    }
+
+    function insertScript(script) {
+      parent.insertBefore(createNode(script), us_head.nextSibling);
+    }
+
+    // insert script nodes into the EM
+    Scriptish_config.scripts.forEach(insertScript);
+    Services.obs.addObserver({
+      observe: function(aSubject, aTopic, aData) {
+        tools.timeout(function() {
+          var script = Scriptish_config.getScriptById(JSON.parse(aData).id);
+          insertScript(script);
+        });
+      }
+    }, "scriptish-script-installed", false);
   }, false);
 
   var mm = messageManager;

@@ -123,7 +123,7 @@ function GM_API(options) {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
 
     if (options.content) {
-      return options.content.sendSyncMessage("Scriptish:GetScriptResourceURL", {
+      return options.global.sendSyncMessage("Scriptish:GetScriptResourceURL", {
         scriptID: aScript.id,
         resource: aName
       });
@@ -135,7 +135,7 @@ function GM_API(options) {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
 
     if (options.content) {
-      return options.content.sendSyncMessage("Scriptish:GetScriptResourceText", {
+      return options.global.sendSyncMessage("Scriptish:GetScriptResourceText", {
         scriptID: aScript.id,
         resource: aName
       });
