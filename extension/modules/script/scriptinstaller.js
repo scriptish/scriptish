@@ -27,12 +27,14 @@ ScriptInstall.prototype = {
         break;
       case "DownloadFailed":
         this.state = AddonManager.STATE_DOWNLOAD_FAILED;
+        delete this._script.updateAvailable;
         break;
       case "InstallStarted":
         this.state = AddonManager.STATE_INSTALLING;
         break;
       case "InstallEnded":
         this.state = AddonManager.STATE_INSTALLED;
+        delete this._script.updateAvailable;
         break;
       default:
         return;
