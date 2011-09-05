@@ -59,6 +59,12 @@ const Scriptish_ScriptProvider = {
     case "scriptish-script-edit-enabled":
       AddonManagerPrivate.callAddonListeners(
           aData.enabling ? "onEnabled" : "onDisabled", script);
+
+      // notify content processes that a script's enabled state changed
+      if ("Fennec" == Services.appinfo.name) {
+        // TODO: use a more intelligent custom message handler
+        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptChanged", script.toJSON());
+      }
       break;
     case "scriptish-script-modified":
     case "scriptish-script-updated":
