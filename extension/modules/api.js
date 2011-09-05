@@ -9,6 +9,7 @@ lazyImport(this, "resource://scriptish/utils/Scriptish_injectScripts.js", ["Scri
 
 lazyUtil(this, "alert");
 lazyUtil(this, "cryptoHash");
+lazyUtil(this, "getScriptHeader");
 lazyUtil(this, "notification");
 lazyUtil(this, "openInTab");
 lazyUtil(this, "stringBundle");
@@ -142,7 +143,7 @@ function GM_API(options) {
   this.GM_getResourceText = function GM_getResourceText(aName) {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
 
-    if (options.content) {
+    if (options.global && options.global.sendSyncMessage) {
       return options.global.sendSyncMessage("Scriptish:GetScriptResourceText", {
         scriptID: aScript.id,
         resource: aName
@@ -153,36 +154,17 @@ function GM_API(options) {
   }
 
   this.GM_getMetadata = function(aKey, aLocalVal) {
-    let key = aKey.toLowerCase().trim();
-    if (aLocalVal) {
-      switch (key) {
-      case "id":
-      case "name":
-      case "namespace":
-      case "creator":
-      case "author":
-      case "description":
-      case "version":
-      case "jsversion":
-      case "delay":
-      case "noframes":
-        return aScript[key];
-      case "homepage":
-      case "homepageurl":
-        return aScript.homepageURL;
-      case "updateurl":
-        return aScript.updateURL;
-      case "contributor":
-      case "include":
-      case "exclude":
-      case "screenshot":
-        return aScript[key + "s"];
-      case "match":
-        return aScript[key + "es"];
-      }
+    if (!GM_apiLeakCheck("GM_getMetadata")) return;
+
+    if (options.global && options.global.sendSyncMessage) {
+      return options.global.sendSyncMessage("Scriptish:GetScriptMetadata", {
+        id: aScript.id,
+        key: aKey, 
+        localVal: aLocalVal
+      })[0];
     }
 
-    return aScript.getScriptHeader(key);
+    return Scriptish_getScriptHeader(aScript, aKey, aLocalVal);
   }
 
   this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {

@@ -6,6 +6,8 @@ Components.utils.import("resource://scriptish/constants.js");
 
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Scriptish_localizeOnLoad"]);
+
+lazyUtil(this, "getScriptHeader");
 lazyUtil(this, "stringBundle");
 
 Scriptish_localizeOnLoad(this);
@@ -45,7 +47,7 @@ function delayedClose() timeout(close);
 
 on("load", function() {
   let script = scriptDownloader.script;
-  let headers = script.getScriptHeader();
+  let headers = Scriptish_getScriptHeader(script);
 
   // setup lists
   ["domains", "matches", "includes", "excludes"].forEach(function(i) {

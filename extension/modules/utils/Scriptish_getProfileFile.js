@@ -1,3 +1,4 @@
+"use strict";
 var EXPORTED_SYMBOLS = ["Scriptish_getProfileFile"];
 Components.utils.import("resource://scriptish/constants.js");
 

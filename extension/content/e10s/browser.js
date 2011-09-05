@@ -8,7 +8,8 @@
   lazyImport(this, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
 
   lazyUtil(global, "installUri");
-  lazyUtil(this, "notification");
+  lazyUtil(global, "getScriptHeader");
+  lazyUtil(global, "notification");
 
   var $ = function(id) document.getElementById(id);
 
@@ -84,6 +85,10 @@
 
   mm.addMessageListener("Scriptish:ScriptNotification", function({json}) {
     Scriptish_notification.apply(null, json);
+  });
+
+  mm.addMessageListener("Scriptish:GetScriptMetadata", function({json}) {
+    return Scriptish_getScriptHeader(Scriptish_config.getScriptById(json.id), json.key, json.localVal);
   });
 
   mm.loadFrameScript(
