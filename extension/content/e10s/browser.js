@@ -10,6 +10,7 @@
   lazyUtil(global, "installUri");
   lazyUtil(global, "getScriptHeader");
   lazyUtil(global, "notification");
+  lazyUtil(global, "openInTab");
 
   var $ = function(id) document.getElementById(id);
 
@@ -89,6 +90,11 @@
 
   mm.addMessageListener("Scriptish:GetScriptMetadata", function({json}) {
     return Scriptish_getScriptHeader(Scriptish_config.getScriptById(json.id), json.key, json.localVal);
+  });
+
+  mm.addMessageListener("Scriptish:OpenInTab", function({json}) {
+    json.push(global);
+    return Scriptish_openInTab.apply(null, json);
   });
 
   mm.loadFrameScript(

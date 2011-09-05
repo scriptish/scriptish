@@ -3,7 +3,7 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError", "Scriptish_log"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_evalInSandbox.js", ["Scriptish_evalInSandbox_filename"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_injectScripts.js", ["Scriptish_injectScripts_filename"]);
 
@@ -169,7 +169,17 @@ function GM_API(options) {
 
   this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-    return Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
+
+    if (options.global && options.global.sendSyncMessage) {
+      // TODO: implement aReuse for Fennec
+      options.global.sendAsyncMessage("Scriptish:OpenInTab", [
+          aURL, aLoadInBackground, false]);
+    }
+    else {
+      Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
+    }
+
+    return undefined; // can't return window object b/c of e10s, don't bother
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {
