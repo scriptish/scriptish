@@ -1,5 +1,4 @@
 (function(inc, tools, global){
-
 inc("resource://scriptish/constants.js", tools);
 const {lazyImport, lazyUtil} = tools;
 lazyImport(global, "resource://scriptish/logging.js", ["Scriptish_log"]);
@@ -18,14 +17,13 @@ function updateExcludes({json}) {
 }
 
 var configJSON = sendSyncMessage("Scriptish:FrameSetup", "")[0];
+var scripts;
 
 (function(configJSON) {
   Scriptish_setExcludes(configJSON.excludes);
 
-  var scripts = configJSON.scripts.map(function(i) {
-    var script = SimpleScript.loadFromJSON(i);
-    script.textContent = sendSyncMessage("Scriptish:GetScriptContents", script.id)[0];
-    return script;
+  scripts = configJSON.scripts.map(function(i) {
+    return SimpleScript.loadFromJSON(i);
   });
 
   Scriptish_manager.setup({
@@ -36,6 +34,18 @@ var configJSON = sendSyncMessage("Scriptish:FrameSetup", "")[0];
 })(configJSON);
 
 addMessageListener("Scriptish:GlobalExcludesUpdate", updateExcludes);
+addMessageListener("Scriptish:ScriptInstalled", function({json}) {
+  scripts.push(SimpleScript.loadFromJSON(json));
+});
+addMessageListener("Scriptish:ScriptChanged", function({json}) {
+  var script = SimpleScript.loadFromJSON(json);
+  for (var i = scripts.length - 1; ~i; i--) {
+    if (scripts[i].id == script.id) {
+      scripts[i] = script;
+      return;
+    }
+  }
+});
 })(Components.utils.import, {}, this);
 
 

@@ -8,6 +8,9 @@
   lazyImport(this, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
 
   lazyUtil(global, "installUri");
+  lazyUtil(global, "getScriptHeader");
+  lazyUtil(global, "notification");
+  lazyUtil(global, "openInTab");
 
   var $ = function(id) document.getElementById(id);
 
@@ -16,9 +19,9 @@
     inc("resource://scriptish/utils/Scriptish_updateChk.js");
 
     var us_head = $("addons-userscripts");
-    var next = us_head.nextSibling;
     var parent = us_head.parentNode;
-    Scriptish_config.scripts.forEach(function(script) {
+
+    function createNode(script) {
       var ele = ExtensionsView._createItem(script, "userscript");
       ele.setAttribute("typeLabel", "User Script");
       // TODO: implement for Fennec.. #517
@@ -26,8 +29,39 @@
       ele.setAttribute("isDisabled", !script.enabled);
       ele.setAttribute("data-scriptish-scriptid", script.id);
       ele.addon = script;
-      parent.insertBefore(ele, next);
-    });
+      return ele;
+    }
+
+    function insertScript(script) {
+      parent.insertBefore(createNode(script), us_head.nextSibling);
+    }
+
+    // insert script nodes into the EM
+    Scriptish_config.scripts.forEach(insertScript);
+    Services.obs.addObserver({
+      observe: function(aSubject, aTopic, aData) {
+        tools.timeout(function() {
+          var script = Scriptish_config.getScriptById(JSON.parse(aData).id);
+          insertScript(script);
+        });
+      }
+    }, "scriptish-script-installed", false);
+
+    // replace script nodes when there is a change to script
+    var updateObs = {
+      observe: function(aSubject, aTopic, aData) {
+        tools.timeout(function() {
+          var script = Scriptish_config.getScriptById(JSON.parse(aData).id);
+          var node = createNode(script);
+          var id = node.getAttribute("id");
+          var oldNode = $(id);
+          if (oldNode) parent.replaceChild(node, oldNode);
+          else insertScript(script); // jic
+        });
+      }
+    };
+    Services.obs.addObserver(updateObs, "scriptish-script-modified", false);
+    Services.obs.addObserver(updateObs, "scriptish-script-updated", false);
   }, false);
 
   var mm = messageManager;
@@ -64,6 +98,19 @@
       });
     });
     return rtnAry;
+  });
+
+  mm.addMessageListener("Scriptish:ScriptNotification", function({json}) {
+    Scriptish_notification.apply(null, json);
+  });
+
+  mm.addMessageListener("Scriptish:GetScriptMetadata", function({json}) {
+    return Scriptish_getScriptHeader(Scriptish_config.getScriptById(json.id), json.key, json.localVal);
+  });
+
+  mm.addMessageListener("Scriptish:OpenInTab", function({json}) {
+    json.push(global);
+    return Scriptish_openInTab.apply(null, json);
   });
 
   mm.loadFrameScript(

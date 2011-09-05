@@ -10,7 +10,7 @@ function Scriptish_popupNotification(details) {
     return Scriptish_log(details.message);
 
   var win = Scriptish.getMostRecentWindow();
-  if (win.PopupNotifications) {
+  if (win && win.PopupNotifications) {
     timeout(function() {
       win.PopupNotifications.show(
         win.gBrowser.selectedBrowser,

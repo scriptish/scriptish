@@ -22,6 +22,7 @@ lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "getUriFromFile");
 lazyUtil(this, "getContents");
 lazyUtil(this, "memoize");
+lazyUtil(this, "parser");
 lazyUtil(this, "stringBundle");
 
 const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
@@ -203,7 +204,7 @@ Script.prototype = {
       if (4 > req.readyState || (req.status != 200 && req.status != 0)
           || !req.responseText)
         return;
-      var data = Script.header_parse(req.responseText);
+      var data = Scriptish_parser(req.responseText);
       if (!data["uso:rating"] || !data["uso:script"] || data["uso:script"][0] != scriptID
           || !data["uso:reviews"] || !data["uso:installs"])
         return;
@@ -580,12 +581,6 @@ Script.prototype = {
     return this._size;
   },
 
-  getScriptHeader: function(aKey) {
-    // TODO: cache headers and clear cache when the script is modified..
-    var headers = Script.header_parse(Scriptish_getContents(this._tempFile || this._file));
-    return aKey ? headers[aKey] : headers;
-  },
-
   get screenshots() this._screenshots,
 
   _initFileName: function(name, useExt) {
@@ -678,6 +673,7 @@ Script.prototype = {
         this, "scriptish-script-updated", {saved: true, reloadUI: true});
   },
 
+  // Called directly when a local script is modified, and at the end of a upgrade
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
@@ -839,42 +835,12 @@ Script.prototype = {
 };
 
 Script.parseVersion = function Script_parseVersion(aSrc) {
-  var parsed = Script.header_parse(aSrc);
+  var parsed = Scriptish_parser(aSrc);
   if (parsed.version) return parsed.version.pop();
   return null;
 }
 
-// TODO: DRY this by combining it with Script.parse some way..
-Script.header_parse = function(aSource) {
-  var headers = {};
-  var foundMeta = false;
-  var line;
-
-  // do not 'optimize' by reusing this reg exp! it should not be reused!
-  var metaRegExp = /\/\/[ \t]*(?:==(\/?UserScript)==|\@(\S+)(?:[ \t]+([^\r\f\n]+))?)/g;
-
-  // read one line at a time looking for start meta delimiter or EOF
-  while (line = metaRegExp.exec(aSource)) {
-    if (line[1]) {
-      if ("userscript" == line[1].toLowerCase()) {
-        foundMeta = true; // start
-        continue;
-      } else {
-        break; // done
-      }
-    }
-    if (!foundMeta) continue;
-
-    var header = line[2].toLowerCase();
-    var value = line[3];
-
-    if (!headers[header]) headers[header] = [value];
-    else headers[header].push(value);
-  }
-
-  return headers;
-}
-
+// TODO: DRY this by combining this with Scriptish_parser some way..
 Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   var script = new Script(aConfig);
 

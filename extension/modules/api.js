@@ -3,12 +3,13 @@ var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError", "Scriptish_log"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_evalInSandbox.js", ["Scriptish_evalInSandbox_filename"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_injectScripts.js", ["Scriptish_injectScripts_filename"]);
 
 lazyUtil(this, "alert");
 lazyUtil(this, "cryptoHash");
+lazyUtil(this, "getScriptHeader");
 lazyUtil(this, "notification");
 lazyUtil(this, "openInTab");
 lazyUtil(this, "stringBundle");
@@ -96,10 +97,18 @@ function GM_API(options) {
     if (!GM_apiLeakCheck("GM_notification")) return;
     if (typeof aTitle != "string") aTitle = aScript.name;
     if (typeof aIcon != "string") aIcon = aScript.iconURL;
-    var callback = null;
-    if (typeof aCallback == "function")
-      callback = function() GM_apiSafeCallback(aSafeWin, aScript, null, aCallback);
-    Scriptish_notification(aMsg, aTitle, aIcon, callback);
+
+
+    if (options.global && options.global.sendAsyncMessage) {
+      options.global.sendAsyncMessage("Scriptish:ScriptNotification", [
+          aMsg, aTitle, aIcon]);
+    }
+    else {
+      var callback = null;
+      if (typeof aCallback == "function")
+        callback = function() GM_apiSafeCallback(aSafeWin, aScript, null, aCallback);
+      Scriptish_notification(aMsg, aTitle, aIcon, callback);
+    }
   }
 
   this.GM_setValue = function GM_setValue() {
@@ -123,7 +132,7 @@ function GM_API(options) {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
 
     if (options.content) {
-      return options.content.sendSyncMessage("Scriptish:GetScriptResourceURL", {
+      return options.global.sendSyncMessage("Scriptish:GetScriptResourceURL", {
         scriptID: aScript.id,
         resource: aName
       });
@@ -134,8 +143,8 @@ function GM_API(options) {
   this.GM_getResourceText = function GM_getResourceText(aName) {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
 
-    if (options.content) {
-      return options.content.sendSyncMessage("Scriptish:GetScriptResourceText", {
+    if (options.global && options.global.sendSyncMessage) {
+      return options.global.sendSyncMessage("Scriptish:GetScriptResourceText", {
         scriptID: aScript.id,
         resource: aName
       });
@@ -145,41 +154,32 @@ function GM_API(options) {
   }
 
   this.GM_getMetadata = function(aKey, aLocalVal) {
-    let key = aKey.toLowerCase().trim();
-    if (aLocalVal) {
-      switch (key) {
-      case "id":
-      case "name":
-      case "namespace":
-      case "creator":
-      case "author":
-      case "description":
-      case "version":
-      case "jsversion":
-      case "delay":
-      case "noframes":
-        return aScript[key];
-      case "homepage":
-      case "homepageurl":
-        return aScript.homepageURL;
-      case "updateurl":
-        return aScript.updateURL;
-      case "contributor":
-      case "include":
-      case "exclude":
-      case "screenshot":
-        return aScript[key + "s"];
-      case "match":
-        return aScript[key + "es"];
-      }
+    if (!GM_apiLeakCheck("GM_getMetadata")) return;
+
+    if (options.global && options.global.sendSyncMessage) {
+      return options.global.sendSyncMessage("Scriptish:GetScriptMetadata", {
+        id: aScript.id,
+        key: aKey, 
+        localVal: aLocalVal
+      })[0];
     }
 
-    return aScript.getScriptHeader(key);
+    return Scriptish_getScriptHeader(aScript, aKey, aLocalVal);
   }
 
   this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-    return Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
+
+    if (options.global && options.global.sendSyncMessage) {
+      // TODO: implement aReuse for Fennec
+      options.global.sendAsyncMessage("Scriptish:OpenInTab", [
+          aURL, aLoadInBackground, false]);
+    }
+    else {
+      Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
+    }
+
+    return undefined; // can't return window object b/c of e10s, don't bother
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {

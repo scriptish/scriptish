@@ -63,8 +63,18 @@ ScriptDownloader.prototype.startDownload = function(bypassCache) {
   req.onload = this.handleScriptDownloadComplete.bind(this);
   req.send(null);
 }
-ScriptDownloader.prototype.handleErr = function() {
-  if (this.scriptInstaller) this.scriptInstaller.changed("DownloadFailed");
+ScriptDownloader.prototype.handleErr = function(aEvent, aMsg) {
+  let errMsg = Scriptish_stringBundle("error.script.loading") + ":\n"
+      + this.uri_.spec;
+  if (aEvent) {
+    errMsg += "\nHTTP " + aEvent.target.status;
+  } else if (aMsg) {
+    errMsg += "\n" + aMsg;
+  }
+  Scriptish_log(errMsg);
+  if (this.scriptInstaller) {
+    this.scriptInstaller.changed("DownloadFailed");
+  }
 }
 ScriptDownloader.prototype.chkContentTypeB4DL = function() {
   if (this.req_.readyState != 2
@@ -82,30 +92,32 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   try {
     // If loading from file, status might be zero on success
     if (req.status != 200 && req.status != 0) {
-      Scriptish_alert(Scriptish_stringBundle("error.script.loading") + ":\n" +
-      req.status + ": " + req.statusText);
+      Scriptish_alert(Scriptish_stringBundle("error.script.loading") + ":\n"
+          + req.status + ": " + req.statusText);
       return;
     }
 
     if (this.secure) {
       // make sure that the final URI is a https url
       if ("https" != req.channel.URI.scheme)
-        return this.handleErr();
+        return this.handleErr(null, Scriptish_stringBundle("error.notSecure"));
 
       // make sure that the final URI's certificate is valid
       try {
         checkCert(req.channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
       }
       catch (e) {
-        return this.handleErr();
+        return this.handleErr(null, Scriptish_stringBundle("error.invalidCert"));
       }
     }
 
     if (this.scriptInstaller) {
       // make sure that the new version is greater than the old version
       var remoteVersion = Script.parseVersion(req.responseText);
-      if (!remoteVersion || Services.vc.compare(this.scriptInstaller._script.version, remoteVersion) >= 0)
-        return this.handleErr();
+      if (!remoteVersion || Services.vc.compare(this.scriptInstaller._script.version, remoteVersion) >= 0) {
+        return this.handleErr(
+            null, Scriptish_stringBundle("error.remoteVersionOlder"));
+      }
     }
 
     var source = req.responseText;
@@ -195,7 +207,8 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
     if (this.secure) {
       // make sure that the dependency's URI is a https url
       if ("https" != sourceUri.scheme)
-        return this.errorInstallDependency(dep, "Insecure dependency URI");
+        return this.errorInstallDependency(
+            dep, Scriptish_stringBundle("error.notSecure"));
     }
 
     var sourceChannel = Services.io.newChannelFromURI(sourceUri);
@@ -230,15 +243,18 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
 
   if (this.secure) {
     // make sure that the final URI is a https url
-    if ("https" != channel.URI.scheme)
-      return this.errorInstallDependency(dep, "Insecure dependency URI");
+    if ("https" != channel.URI.scheme) {
+      return this.errorInstallDependency(
+          dep, Scriptish_stringBundle("error.notSecure"));
+    }
 
     // make sure that the final URI's certificate is valid
     try {
       checkCert(channel, !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
     }
     catch (e) {
-      return this.errorInstallDependency(dep, "Invalid dependency SSL certificate");
+      return this.errorInstallDependency(
+          dep, Scriptish_stringBundle("error.invalidCert"));
     }
   }
 
@@ -317,11 +333,15 @@ ScriptDownloader.prototype.finishInstall = function() {
   }
 }
 ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
-  this.dependencyError = Scriptish_stringBundle("error.dependency.loading") + ": "
-      + dep.urlToDownload + "\n" + msg;
+  this.dependencyError = Scriptish_stringBundle("error.dependency.loading")
+      + ": " + dep.urlToDownload + "\n" + msg;
   Scriptish_log(this.dependencyError);
-  if (this.scriptInstaller) return this.scriptInstaller.changed("DownloadFailed");
-  if (this.installOnCompletion_) Scriptish_alert(this.dependencyError);
+  if (this.scriptInstaller) {
+    return this.scriptInstaller.changed("DownloadFailed");
+  }
+  if (this.installOnCompletion_) {
+    Scriptish_alert(this.dependencyError);
+  }
   this._callback && this._callback();
 }
 ScriptDownloader.prototype.installScript = function() {

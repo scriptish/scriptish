@@ -1,5 +1,6 @@
 var EXPORTED_SYMBOLS = ["Scriptish_sendAsyncE10SMessage"];
 Components.utils.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/scriptish.js");
 
 function Scriptish_sendAsyncE10SMessage(aName, aJSON) {
   let bWins = Scriptish.getWindows();

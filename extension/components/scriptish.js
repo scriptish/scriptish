@@ -21,6 +21,7 @@ lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
 lazyUtil(this, "updateModifiedScripts");
+lazyUtil(this, "windowEventTracker");
 lazyUtil(this, "windowUnloader");
 
 const {nsIContentPolicy: CP} = Ci;
@@ -112,6 +113,7 @@ ScriptishService.prototype = {
     let unsafeWin = safeWin.wrappedJSObject;
     let self = this;
     let winClosed = false;
+    let tracker = Scriptish_windowEventTracker(safeWin);
 
     // rechecks values that can change at any moment
     function shouldNotRun() (
@@ -122,11 +124,22 @@ ScriptishService.prototype = {
 
     // find matching scripts
     Scriptish_config.initScripts(href, (safeWin === safeWin.top), function(scripts) {
+       let (windowLoaded = ("load" == tracker)) {
+         if (windowLoaded || "DOMContentLoaded" == tracker) {
+           scripts["document-start"] = scripts["document-start"].concat(scripts["document-end"], scripts["document-idle"]);
+           scripts["document-end"] = scripts["document-idle"] = [];
+         }
+
+         if (windowLoaded) {
+           scripts["document-start"] = scripts["document-start"].concat(scripts["window-load"]);
+           scripts["window-load"] = [];
+         }
+       }
+
       if (scripts["document-end"].length || scripts["document-idle"].length) {
         safeWin.addEventListener("DOMContentLoaded", function() {
           if (shouldNotRun()) return;
 
-          // inject @run-at document-idle scripts
           if (scripts["document-idle"].length)
             timeout(function() {
               if (shouldNotRun()) return;
@@ -137,7 +150,6 @@ ScriptishService.prototype = {
               });
             });
 
-          // inject @run-at document-end scripts
           Scriptish_injectScripts({
             scripts: scripts["document-end"],
             url: href,
@@ -158,7 +170,6 @@ ScriptishService.prototype = {
         }, true);
       }
 
-      // inject @run-at document-start scripts
       Scriptish_injectScripts({
         scripts: scripts["document-start"],
         url: href,
