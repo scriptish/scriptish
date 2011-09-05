@@ -25,6 +25,7 @@ lazyUtil(this, "memoize");
 lazyUtil(this, "parser");
 lazyUtil(this, "stringBundle");
 
+const MAX_NAME_LENGTH = 60;
 const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
@@ -595,6 +596,22 @@ Script.prototype = {
 
     name = name.replace(/[^-_A-Z0-9@]+/gi, "");
     ext = ext.replace(/\s+/g, "_").replace(/[^-_A-Z0-9]+/gi, "");
+
+    // Limit long names to a reasonable length
+    if (name.length > MAX_NAME_LENGTH) {
+      // Try to preserve the namespace
+      var atIndex = name.lastIndexOf("@");
+      var beforeAt = name;
+      var tail = "";
+
+      // 37 == "@".length + approximate_USO_namespace.length
+      if (atIndex >= 0) {
+        beforeAt = name.substring(0, atIndex - 1);
+        tail = name.substring(atIndex).substr(0, 37);
+      }
+
+      name = beforeAt.substr(0, MAX_NAME_LENGTH - tail.length) + tail;
+    }
 
     // If no Latin characters found - use default
     if (!name) name = "user_script";

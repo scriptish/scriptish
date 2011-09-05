@@ -46,6 +46,14 @@ addMessageListener("Scriptish:ScriptChanged", function({json}) {
     }
   }
 });
+addMessageListener("Scriptish:ScriptUninstalled", function({json}) {
+  for (var i = scripts.length - 1; ~i; i--) {
+    if (scripts[i].id == json) {
+      scripts.splice(i, 1);
+      return;
+    }
+  }
+});
 })(Components.utils.import, {}, this);
 
 
