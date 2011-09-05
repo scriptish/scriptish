@@ -8,6 +8,7 @@
   lazyImport(this, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
 
   lazyUtil(global, "installUri");
+  lazyUtil(this, "notification");
 
   var $ = function(id) document.getElementById(id);
 
@@ -79,6 +80,10 @@
       });
     });
     return rtnAry;
+  });
+
+  mm.addMessageListener("Scriptish:ScriptNotification", function({json}) {
+    Scriptish_notification.apply(null, json);
   });
 
   mm.loadFrameScript(

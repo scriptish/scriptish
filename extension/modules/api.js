@@ -96,10 +96,18 @@ function GM_API(options) {
     if (!GM_apiLeakCheck("GM_notification")) return;
     if (typeof aTitle != "string") aTitle = aScript.name;
     if (typeof aIcon != "string") aIcon = aScript.iconURL;
-    var callback = null;
-    if (typeof aCallback == "function")
-      callback = function() GM_apiSafeCallback(aSafeWin, aScript, null, aCallback);
-    Scriptish_notification(aMsg, aTitle, aIcon, callback);
+
+
+    if (options.global && options.global.sendAsyncMessage) {
+      options.global.sendAsyncMessage("Scriptish:ScriptNotification", [
+          aMsg, aTitle, aIcon]);
+    }
+    else {
+      var callback = null;
+      if (typeof aCallback == "function")
+        callback = function() GM_apiSafeCallback(aSafeWin, aScript, null, aCallback);
+      Scriptish_notification(aMsg, aTitle, aIcon, callback);
+    }
   }
 
   this.GM_setValue = function GM_setValue() {
