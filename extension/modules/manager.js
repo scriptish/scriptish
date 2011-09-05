@@ -56,14 +56,19 @@ const Scriptish_manager = {
     if (!Scriptish.enabled) return;
 
     // try to get the windows href..
-    let href = (safeWin.location.href
-        || (safeWin.frameElement && safeWin.frameElement.src))
-        || "";
+    let href = getURLForWin(safeWin);
 
     // if we don't have a href and the window is a frame, then wait until we do
     if (!href && safeWin.frameElement) {
       Scriptish_manager.waitForFrame.call(this, safeWin, options);
       return;
+    }
+
+    if (!href || "about:blank" == href) {
+      if ("complete" != safeWin.document.readyState) {
+        Scriptish_manager.waitForAboutBlank.call(this, safeWin, options);
+        return;
+      }
     }
 
     if (!Scriptish_isGreasemonkeyable(href)) return;
@@ -79,7 +84,6 @@ const Scriptish_manager = {
     if (JSON.stringify(Scriptish_getWindowIDs(options.content))
         != JSON.stringify(Scriptish_getWindowIDs(safeWin)))
       return;
-    //Scriptish_log(JSON.stringify(Scriptish_getWindowIDs(safeWin)));
 
     var uri = Services.io.newURI(href, null, null);
     if (tests._reg_userjs.test(href) && !tests.isTempScript(uri)
@@ -149,8 +153,7 @@ const Scriptish_manager = {
     let self = this;
     safeWin.addEventListener("DOMContentLoaded", function _frame_loader() {
       // not perfect, but anyway
-      let href = (safeWin.location.href
-          || (safeWin.frameElement && safeWin.frameElement.src));
+      let href = getURLForWin(safeWin);
 
       if (!href) return; // wait for it :p
       safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
@@ -162,4 +165,48 @@ const Scriptish_manager = {
       safeWin.dispatchEvent(evt);
     }, false);
   },
+
+  // not perfect, but anyway
+  waitForAboutBlank: function(safeWin, options) {
+    let self = this;
+
+    // check if we have a url @ DOMContentLoaded
+    function _loader1() {
+      safeWin.removeEventListener("DOMContentLoaded", _loader1, false);
+    
+      let href = getURLForWin(safeWin);
+    
+      if (!href || "about:blank" == href) return; 
+      Scriptish_manager.docReady_start.call(self, safeWin, options);
+      safeWin.document.removeEventListener("readystatechange", _loader2, false);
+    
+      // fake DOMContentLoaded to get things rolling
+      var evt = safeWin.document.createEvent("Events");
+      evt.initEvent("DOMContentLoaded", true, true);
+      safeWin.dispatchEvent(evt);
+    }
+    safeWin.addEventListener("DOMContentLoaded", _loader1, false);
+
+    // check if we have a url @ readyState == "complete" 
+    safeWin.document.addEventListener("readystatechange", function _loader2() {
+      if ("complete" != safeWin.document.readyState) return;
+
+      safeWin.removeEventListener("DOMContentLoaded", _loader1, false);
+      safeWin.document.removeEventListener("readystatechange", _loader2, false);
+
+      let href = getURLForWin(safeWin);
+      Scriptish_manager.docReady_start.call(self, safeWin, options);
+
+      // fake DOMContentLoaded to get things rolling
+      var evt = safeWin.document.createEvent("Events");
+      evt.initEvent("DOMContentLoaded", true, true);
+      safeWin.dispatchEvent(evt);
+    }, false);
+  }
 };
+
+function getURLForWin(safeWin) {
+  return (safeWin.location.href
+      || (safeWin.frameElement && safeWin.frameElement.src))
+      || "";
+}
