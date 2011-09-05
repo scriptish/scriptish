@@ -46,6 +46,7 @@ const Scriptish_ScriptProvider = {
         Scriptish_notification(msg, null, null, callback);
       }
 
+      // notify content processes that there is a new script
       if ("Fennec" == Services.appinfo.name) {
         Scriptish_sendAsyncE10SMessage("Scriptish:ScriptInstalled", script.toJSON());
       }
@@ -91,6 +92,11 @@ const Scriptish_ScriptProvider = {
 
       if (!showedMsg) {
         Scriptish_notification(msg, null, null, callback);
+      }
+
+      // notify content processes that a script has changed
+      if ("Fennec" == Services.appinfo.name) {
+        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptChanged", script.toJSON());
       }
 
       break;

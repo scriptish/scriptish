@@ -46,6 +46,22 @@
         });
       }
     }, "scriptish-script-installed", false);
+
+    // replace script nodes when there is a change to script
+    var updateObs = {
+      observe: function(aSubject, aTopic, aData) {
+        tools.timeout(function() {
+          var script = Scriptish_config.getScriptById(JSON.parse(aData).id);
+          var node = createNode(script);
+          var id = node.getAttribute("id");
+          var oldNode = $(id);
+          if (oldNode) parent.replaceChild(node, oldNode);
+          else insertScript(script); // jic
+        });
+      }
+    };
+    Services.obs.addObserver(updateObs, "scriptish-script-modified", false);
+    Services.obs.addObserver(updateObs, "scriptish-script-updated", false);
   }, false);
 
   var mm = messageManager;

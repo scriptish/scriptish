@@ -673,6 +673,7 @@ Script.prototype = {
         this, "scriptish-script-updated", {saved: true, reloadUI: true});
   },
 
+  // Called directly when a local script is modified, and at the end of a upgrade
   updateFromNewScript: function(newScript, scriptInjector) {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
