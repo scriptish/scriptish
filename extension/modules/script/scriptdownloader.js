@@ -71,7 +71,6 @@ ScriptDownloader.prototype.handleErr = function(aEvent, aMsg) {
   } else if (aMsg) {
     errMsg += "\n" + aMsg;
   }
-  Scriptish_alert(errMsg);
   Scriptish_log(errMsg);
   if (this.scriptInstaller) {
     this.scriptInstaller.changed("DownloadFailed");
@@ -93,7 +92,8 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   try {
     // If loading from file, status might be zero on success
     if (req.status != 200 && req.status != 0) {
-      this.handleErr(null, req.status + ": " + req.statusText);
+      Scriptish_alert(Scriptish_stringBundle("error.script.loading") + ":\n"
+          + req.status + ": " + req.statusText);
       return;
     }
 
@@ -337,7 +337,6 @@ ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
       + ": " + dep.urlToDownload + "\n" + msg;
   Scriptish_log(this.dependencyError);
   if (this.scriptInstaller) {
-    Scriptish_alert(this.dependencyError);
     return this.scriptInstaller.changed("DownloadFailed");
   }
   if (this.installOnCompletion_) {
