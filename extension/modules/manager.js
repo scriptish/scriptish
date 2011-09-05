@@ -12,6 +12,7 @@ lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "isURLExcluded");
 lazyUtil(this, "getWindowIDs");
+lazyUtil(this, "windowEventTracker");
 lazyUtil(this, "windowUnloader");
 
 const tests = {
@@ -54,6 +55,9 @@ const Scriptish_manager = {
   docReady_start: function(safeWin, options) {
     // TODO: disable observer that calls this when Scriptish is disabled
     if (!Scriptish.enabled) return;
+
+    // start tracking the window's progress
+    Scriptish_windowEventTracker(safeWin);
 
     // try to get the windows href..
     let href = getURLForWin(safeWin);
@@ -103,6 +107,19 @@ const Scriptish_manager = {
         scripts[script.runAt].push(script);
       }
     });
+
+    let tracker = Scriptish_windowEventTracker(safeWin);
+    let (windowLoaded = ("load" == tracker)) {
+      if (windowLoaded || "DOMContentLoaded" == tracker) {
+        scripts["document-start"] = scripts["document-start"].concat(scripts["document-end"], scripts["document-idle"]);
+        scripts["document-end"] = scripts["document-idle"] = [];
+      }
+
+      if (windowLoaded) {
+        scripts["document-start"] = scripts["document-start"].concat(scripts["window-load"]);
+        scripts["window-load"] = [];
+      }
+    }
 
     if (scripts["document-end"].length || scripts["document-idle"].length) {
       safeWin.addEventListener("DOMContentLoaded", function() {
@@ -158,11 +175,6 @@ const Scriptish_manager = {
       if (!href) return; // wait for it :p
       safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
       Scriptish_manager.docReady_start.call(self, safeWin, options);
-
-      // fake DOMContentLoaded to get things rolling
-      var evt = safeWin.document.createEvent("Events");
-      evt.initEvent("DOMContentLoaded", true, true);
-      safeWin.dispatchEvent(evt);
     }, false);
   },
 
@@ -173,22 +185,17 @@ const Scriptish_manager = {
     // check if we have a url @ DOMContentLoaded
     function _loader1() {
       safeWin.removeEventListener("DOMContentLoaded", _loader1, false);
-    
+
       let href = getURLForWin(safeWin);
-    
-      if (!href || "about:blank" == href) return; 
+
+      if (!href || "about:blank" == href) return; // not done yet..
       Scriptish_manager.docReady_start.call(self, safeWin, options);
       safeWin.document.removeEventListener("readystatechange", _loader2, false);
-    
-      // fake DOMContentLoaded to get things rolling
-      var evt = safeWin.document.createEvent("Events");
-      evt.initEvent("DOMContentLoaded", true, true);
-      safeWin.dispatchEvent(evt);
     }
     safeWin.addEventListener("DOMContentLoaded", _loader1, false);
 
-    // check if we have a url @ readyState == "complete" 
-    safeWin.document.addEventListener("readystatechange", function _loader2() {
+    // check if we have a url @ readyState == "complete"
+    function _loader2() {
       if ("complete" != safeWin.document.readyState) return;
 
       safeWin.removeEventListener("DOMContentLoaded", _loader1, false);
@@ -201,7 +208,8 @@ const Scriptish_manager = {
       var evt = safeWin.document.createEvent("Events");
       evt.initEvent("DOMContentLoaded", true, true);
       safeWin.dispatchEvent(evt);
-    }, false);
+    }
+    safeWin.document.addEventListener("readystatechange", _loader2, false);
   }
 };
 
