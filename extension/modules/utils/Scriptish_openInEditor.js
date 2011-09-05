@@ -42,9 +42,9 @@ function Scriptish_openInEditor(script, parentWindow) {
             spEditor = spEditor._editor;
           else if (spWin.Scratchpad.textbox)
             spEditor = spWin.Scratchpad.textbox.editor;
-          if (!spEditor) return;
 
-          if (spEditor.resetModificationCount
+          if (spEditor
+              && spEditor.resetModificationCount
               && spEditor.transactionManager
               && spEditor.transactionManager.clear) {
             spEditor.resetModificationCount();
