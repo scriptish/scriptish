@@ -8,6 +8,8 @@ lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "windowUnloader");
 
+const events = ["DOMContentLoaded", "load"];
+
 const trackers = {};
 
 function Scriptish_windowEventTracker(aWin) {
@@ -16,6 +18,9 @@ function Scriptish_windowEventTracker(aWin) {
   trackers[winID] = "start";
 
   aWin.addEventListener("DOMContentLoaded", function() {
+    // if the tracker event gte to this one has occurred then ignore
+    if (~events.indexOf(trackers[winID])) return;
+
     trackers[winID] = "DOMContentLoaded";
   }, false);
   /*
