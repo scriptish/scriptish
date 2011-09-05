@@ -22,16 +22,22 @@ function Scriptish_openInEditor(script, parentWindow) {
       spWin.addEventListener("load", function spWinLoaded() {
         spWin.removeEventListener("load", spWinLoaded, false);
         spWin.document.title = spWin.Scratchpad.filename = file.path;
+
+        // Open the user script in Scratchpad
+        // NOTE: Resetting the "undo/redo" state on our own until Scratchpad
+        // handles it.  We want to ensure user scripts don't get screwed up.
+        // See: https://bug684546.bugzilla.mozilla.org/
         spWin.Scratchpad.importFromFile(file, false, function() {
           let spEditor = spWin.Scratchpad.editor;
+          // For the Orion editor...
           if (spEditor._undoStack && spEditor._undoStack.reset) {
-            // Reset "undo/redo" for the Orion editor
             spEditor._undoStack.reset();
-          } else if (spEditor._editor
+          }
+          // For the older textarea editor...
+          else if (spEditor._editor
               && spEditor._editor.resetModificationCount
               && spEditor._editor.transactionManager
               && spEditor._editor.transactionManager.clear) {
-            // Reset "undo/redo" for the textarea editor
             spEditor._editor.resetModificationCount();
             spEditor._editor.transactionManager.clear();
           }
@@ -41,7 +47,8 @@ function Scriptish_openInEditor(script, parentWindow) {
     else {
       Scriptish_launchApplicationWithDoc(editor, file);
     }
-  } catch (e) {
+  }
+  catch (e) {
     // Something may be wrong with the editor the user selected. Remove it.
     Scriptish_alert(Scriptish_stringBundle("editor.couldNotLaunch") + "\n" + e);
     Scriptish_prefRoot.remove("editor");
