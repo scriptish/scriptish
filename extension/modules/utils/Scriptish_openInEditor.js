@@ -29,17 +29,26 @@ function Scriptish_openInEditor(script, parentWindow) {
         // See: https://bug684546.bugzilla.mozilla.org/
         spWin.Scratchpad.importFromFile(file, false, function() {
           let spEditor = spWin.Scratchpad.editor;
+
           // For the Orion editor...
-          if (spEditor._undoStack && spEditor._undoStack.reset) {
+          if (spEditor && spEditor._undoStack && spEditor._undoStack.reset) {
             spEditor._undoStack.reset();
+            return;
           }
-          // For the older textarea editor...
-          else if (spEditor._editor
-              && spEditor._editor.resetModificationCount
-              && spEditor._editor.transactionManager
-              && spEditor._editor.transactionManager.clear) {
-            spEditor._editor.resetModificationCount();
-            spEditor._editor.transactionManager.clear();
+
+          // If not using Orion, pick out the proper editor
+          // Scratchpad in FF6 still uses 'textbox'
+          if (spEditor && spEditor._editor)
+            spEditor = spEditor._editor;
+          else if (spWin.Scratchpad.textbox)
+            spEditor = spWin.Scratchpad.textbox.editor;
+          if (!spEditor) return;
+
+          if (spEditor.resetModificationCount
+              && spEditor.transactionManager
+              && spEditor.transactionManager.clear) {
+            spEditor.resetModificationCount();
+            spEditor.transactionManager.clear();
           }
         });
       }, false);
