@@ -111,6 +111,11 @@ const Scriptish_ScriptProvider = {
       break;
     case "scriptish-script-uninstalled":
       AddonManagerPrivate.callAddonListeners("onUninstalled", script);
+
+      // notify content processes that a script is uninstalled
+      if ("Fennec" == Services.appinfo.name) {
+        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptUninstalled", script.id);
+      }
       break;
     }
   },
