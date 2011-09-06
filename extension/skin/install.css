@@ -47,7 +47,12 @@
   margin-bottom: 1ex;
 }
 
-#showSource-box{margin: 1ex;}
+#showSource-box{
+  margin: 1ex;
+  -moz-box-flex: 1;
+  -moz-box-pack: end;
+  -moz-box-align: end;
+}
 
 #itemBox vbox:not(#script-desc-vbox){
   margin:0 0 1em 1em;

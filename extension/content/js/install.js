@@ -3,10 +3,11 @@ const scriptDownloader = window.arguments[0];
 const valueSplitter = /(\S+)\s+([^\r\f\n]+)/;
 
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/logging.js");
 
-lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Scriptish_localizeOnLoad"]);
+
+lazyUtil(this, "getScriptHeader");
 lazyUtil(this, "stringBundle");
 
 Scriptish_localizeOnLoad(this);
@@ -46,7 +47,7 @@ function delayedClose() timeout(close);
 
 on("load", function() {
   let script = scriptDownloader.script;
-  let headers = script.getScriptHeader();
+  let headers = Scriptish_getScriptHeader(script);
 
   // setup lists
   ["domains", "matches", "includes", "excludes"].forEach(function(i) {
@@ -57,11 +58,10 @@ on("load", function() {
 
   // setup buttons
   let dialog = document.documentElement;
-  Scriptish.getConfig(function(config) {
-    dialog.getButton("accept").setAttribute("label",
-        Scriptish_stringBundle(
-        (config.installIsUpdate(scriptDownloader.script) ? "re" : "") + "install"));
-  });
+  dialog.getButton("accept").setAttribute("label",
+      Scriptish_stringBundle(
+      (Scriptish_config.installIsUpdate(scriptDownloader.script) ? "re" : "")
+      + "install"));
   dialog.getButton("cancel").focus();
 
   // setup script info

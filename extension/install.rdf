@@ -4,20 +4,20 @@
   <Description about="urn:mozilla:install-manifest">
     <em:type>2</em:type>
     <em:id>scriptish@erikvold.com</em:id>
-
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
-
-    <em:version>0.1.4</em:version>
-    <em:creator>Erik Vold; http://erikvold.com/</em:creator>
+    <em:version>0.1.5</em:version>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
     <em:homepageURL>http://scriptish.org</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://scriptish/skin/scriptish32.png</em:iconURL>
     <em:icon64URL>chrome://scriptish/skin/scriptish64.png</em:icon64URL>
 
+    <em:creator>Erik Vold; http://erikvold.com/</em:creator>
+
     <em:developer>Greg Parris; http://phob.net/</em:developer>
     <em:developer>Nils Maier; https://tn123.org/</em:developer>
+
     <em:contributor>Aaron Boodman; http://youngpup.net/</em:contributor>
     <em:contributor>Anthony Lieuallen; http://arantius.com/</em:contributor>
     <em:contributor>Chris Feldmann; http://axlotl.net/</em:contributor>
@@ -40,6 +40,7 @@
     <em:contributor>Nikolas Coukouma; http://atrus.org/</em:contributor>
     <em:contributor>Ori Avtallon</em:contributor>
     <em:contributor>Pak Kei (logo); http://arkidect.com/</em:contributor>
+    <em:contributor>Sam Larison; http://samlarison.com/</em:contributor>
     <em:contributor>Sergio Abreu; http://sitedosergio.sitesbr.net/</em:contributor>
     <em:contributor>Slowpoke</em:contributor>
     <em:contributor>Tommi Rautava</em:contributor>
@@ -62,7 +63,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>4.0</em:minVersion>
-        <em:maxVersion>8.*</em:maxVersion>
+        <em:maxVersion>9.*</em:maxVersion>
       </Description>
     </em:targetApplication>
     <!-- SeaMonkey -->
@@ -71,6 +72,14 @@
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.1</em:minVersion>
         <em:maxVersion>2.3.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+    <!-- Fennec -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{a23983c0-fd0e-11dc-95ff-0800200c9a66}</em:id>
+        <em:minVersion>4.0</em:minVersion>
+        <em:maxVersion>6.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>

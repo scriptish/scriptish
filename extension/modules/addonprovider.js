@@ -1,14 +1,22 @@
 var EXPORTED_SYMBOLS = [];
 Components.utils.import("resource://scriptish/constants.js");
 
+lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
+
+lazyUtil(this, "notification");
+lazyUtil(this, "openManager");
 lazyUtil(this, "popupNotification");
+lazyUtil(this, "sendAsyncE10SMessage");
 lazyUtil(this, "stringBundle");
 
 const Scriptish_ScriptProvider = {
-  observe: function(aSubject, aTopic, aData) Scriptish.getConfig(function(config) {
+  observe: function(aSubject, aTopic, aData) {
     aData = JSON.parse(aData);
-    let script = config.getScriptById(aData.id);
+    let script = Scriptish_config.getScriptById(aData.id);
+
     switch(aTopic){
     case "scriptish-script-installed":
       AddonManagerPrivate.callInstallListeners(
@@ -18,9 +26,9 @@ const Scriptish_ScriptProvider = {
       var msg = "'" + script.name;
       if (script.version) msg += " " + script.version;
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
-      var callback = function() Scriptish.openManager();
+      var callback = Scriptish_openManager;
 
-      Scriptish_popupNotification({
+      var showedMsg = Scriptish_popupNotification({
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
@@ -33,6 +41,16 @@ const Scriptish_ScriptProvider = {
           persistWhileVisible: true
         }
       });
+
+      if (!showedMsg) {
+        Scriptish_notification(msg, null, null, callback);
+      }
+
+      // notify content processes that there is a new script
+      if ("Fennec" == Services.appinfo.name) {
+        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptInstalled", script.toJSON());
+      }
+
       break;
     case "scriptish-script-edit-enabling":
       AddonManagerPrivate.callAddonListeners(
@@ -41,6 +59,12 @@ const Scriptish_ScriptProvider = {
     case "scriptish-script-edit-enabled":
       AddonManagerPrivate.callAddonListeners(
           aData.enabling ? "onEnabled" : "onDisabled", script);
+
+      // notify content processes that a script's enabled state changed
+      if ("Fennec" == Services.appinfo.name) {
+        // TODO: use a more intelligent custom message handler
+        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptChanged", script.toJSON());
+      }
       break;
     case "scriptish-script-modified":
     case "scriptish-script-updated":
@@ -56,9 +80,9 @@ const Scriptish_ScriptProvider = {
       msg += "' " + (("scriptish-script-updated" == aTopic)
           ? Scriptish_stringBundle("statusbar.updated")
           : Scriptish_stringBundle("statusbar.modified"));
-      var callback = function() Scriptish.openManager();
+      var callback = Scriptish_openManager;
 
-      Scriptish_popupNotification({
+      var showedMsg = Scriptish_popupNotification({
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
@@ -71,15 +95,30 @@ const Scriptish_ScriptProvider = {
           persistWhileVisible: true
         }
       });
+
+      if (!showedMsg) {
+        Scriptish_notification(msg, null, null, callback);
+      }
+
+      // notify content processes that a script has changed
+      if ("Fennec" == Services.appinfo.name) {
+        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptChanged", script.toJSON());
+      }
+
       break;
     case "scriptish-script-uninstalling":
       AddonManagerPrivate.callAddonListeners("onUninstalling", script, false);
       break;
     case "scriptish-script-uninstalled":
       AddonManagerPrivate.callAddonListeners("onUninstalled", script);
+
+      // notify content processes that a script is uninstalled
+      if ("Fennec" == Services.appinfo.name) {
+        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptUninstalled", script.id);
+      }
       break;
     }
-  }),
+  },
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
 };
 
@@ -95,17 +134,13 @@ if (AddonManagerPrivate.AddonType) {
 
 AddonManagerPrivate.registerProvider({
   getAddonByID: function(aId, aCallback) {
-    Scriptish.getConfig(function(config) {
-      aCallback(config.getScriptById(aId));
-    });
+    aCallback(Scriptish_config.getScriptById(aId));
   },
   getAddonsByTypes: function(aTypes, aCallback) {
     if (aTypes && aTypes.indexOf("userscript") < 0) {
       aCallback([]);
     } else {
-      Scriptish.getConfig(function(config) {
-        aCallback(config.scripts);
-      });
+      aCallback(Scriptish_config.scripts);
     }
   },
 
@@ -113,15 +148,13 @@ AddonManagerPrivate.registerProvider({
     if (aTypes && aTypes.indexOf("userscript") < 0) {
       aCallback([]);
     } else {
-      Scriptish.getConfig(function(config) {
-        let updates = [];
-        config.scripts.forEach(function(script) {
-          if (script.updateAvailable
-              && script.updateAvailable.state == AddonManager.STATE_AVAILABLE)
-            updates.push(script.updateAvailable);
-        });
-        aCallback(updates);
+      let updates = [];
+      Scriptish_config.scripts.forEach(function(script) {
+        if (script.updateAvailable
+            && script.updateAvailable.state == AddonManager.STATE_AVAILABLE)
+          updates.push(script.updateAvailable);
       });
+      aCallback(updates);
     }
   }
 }, types);

@@ -16,14 +16,15 @@ const aux_functions = ["assert", "dir", "dirxml", "group", "groupEnd", "time",
                         ];
 
 function getConsoleFor(contentWindow, chromeWindow) {
+  // we dont have a chromeWindow for e10s atm, see Scriptish_injectScripts impl
+  if (chromeWindow) {
+    let (rv = Scriptish_getFirebugConsole(contentWindow, chromeWindow)) {
+      if (rv) return rv;
+    }
 
-  let rv = Scriptish_getFirebugConsole(contentWindow, chromeWindow);
-  if (rv) {
-    return rv;
-  }
-
-  if (contentWindow.console) {
-    return contentWindow.console;
+    if (contentWindow.console) {
+      return contentWindow.console;
+    }
   }
 
   return {

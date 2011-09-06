@@ -1,3 +1,4 @@
+"use strict";
 var EXPORTED_SYMBOLS = ["Scriptish_getFirebugConsole"];
 
 function Scriptish_getFirebugConsole(win, chromeWin) {

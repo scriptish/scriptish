@@ -3,19 +3,42 @@ Components.utils.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
+function showAlertNotification() {
+  if ("Fennec" == Services.appinfo.name) {
+    return Cc["@mozilla.org/toaster-alerts-service;1"]
+        .getService(Ci.nsIAlertsService)
+        .showAlertNotification;
+  }
+
+  return Services.as.showAlertNotification;
+}
+
 function Scriptish_notification(aMsg, aTitle, aIconURL, aCallback) {
   if (!Scriptish_prefRoot.getValue("enabledNotifications.sliding"))
     return Scriptish_log(aMsg);
 
   timeout(function() {
-    if (aCallback) var callback = new Observer(aCallback);
+    var callback = (aCallback) ? new Observer(aCallback) : null;
+    var args = [
+      aIconURL || "chrome://scriptish/skin/scriptish32.png",
+      aTitle || "Scriptish",
+      aMsg+"",
+      !!callback,
+      "",
+      callback
+    ];
 
-    // if Growl is not installed or disabled on OSX, then this will error
+    // if Growl is not installed or disabled on OSX, then use a fallback
     try {
-      Services.as.showAlertNotification(
-        aIconURL || "chrome://scriptish/skin/scriptish32.png",
-        aTitle || "Scriptish", aMsg+"", !!callback, "", callback || null);
-    } catch (e) {}
+      showAlertNotification().apply(null, args);
+    } catch (e) {
+      let win = Services.ww.openWindow(
+          null, 'chrome://global/content/alerts/alert.xul',
+          '_blank', 'chrome,titlebar=no,popup=yes', null);
+      args[6] = callback;
+      args[5] = "";
+      win.arguments = args;
+    }
   });
 };
 

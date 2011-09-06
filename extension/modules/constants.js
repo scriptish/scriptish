@@ -1,14 +1,14 @@
 var EXPORTED_SYMBOLS = [
-    "Cc", "Ci", "Cr", "AddonManager", "AddonManagerPrivate", "NetUtil", "XPCOMUtils",
-    "Services", "Instances", "lazyImport", "lazyUtil", "timeout"];
+    "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils", "extend",
+    "Services", "Instances", "lazyImport", "lazyUtil", "timeout", "e10s"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
+const e10s = !!Cc["@mozilla.org/globalmessagemanager;1"];
 const global = this;
 var Services = {};
 (function(inc, tools){
   inc("resource://gre/modules/XPCOMUtils.jsm");
   inc("resource://gre/modules/NetUtil.jsm");
-  inc("resource://gre/modules/AddonManager.jsm");
   inc("resource://gre/modules/Services.jsm", tools);
 
   Services.__proto__ = tools.Services;
@@ -48,10 +48,6 @@ var Instances = {
       .createInstance(Ci.nsIXMLHttpRequest)
 };
 
-XPCOMUtils.defineLazyGetter(Services, "scriptish", function() (
-    Cc["@scriptish.erikvold.com/scriptish-service;1"]
-        .getService().wrappedJSObject));
-
 XPCOMUtils.defineLazyServiceGetter(
      Services, "as", "@mozilla.org/alerts-service;1", "nsIAlertsService");
 
@@ -79,6 +75,12 @@ if (Cc["@mozilla.org/privatebrowsing;1"]) {
       "nsIPrivateBrowsingService");
 } else {
   Services.pbs = {privateBrowsingEnabled: false};
+}
+
+if (e10s) {
+  XPCOMUtils.defineLazyServiceGetter(
+      Services, "mm", "@mozilla.org/globalmessagemanager;1",
+      "nsIChromeFrameMessageManager");
 }
 
 XPCOMUtils.defineLazyServiceGetter(
@@ -135,8 +137,17 @@ function timeout(cb, delay) {
   }
 
   if (!global.setTimeout) {
-    global.setTimeout = (new Timer()).setTimeout;
+    global.setTimeout = (new Timer()).setTimeout; // see bug #252
   }
 
   setTimeout(callback, delay);
+}
+
+function extend(a, o) {
+  for (var k in a) {
+    if (!o[k]) {
+      o[k] = a[k];
+    }
+  }
+  return o;
 }

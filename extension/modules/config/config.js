@@ -10,11 +10,18 @@ Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
-lazyImport(this, "resource://scriptish/utils/PatternCollection.js", ["PatternCollection"]);
 lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
+  "Scriptish_isURLExcluded",
+  "Scriptish_addExcludes",
+  "Scriptish_setExcludes",
+  "Scriptish_getExcludes"
+]);
 lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
 
 lazyUtil(this, "cryptoHash");
+lazyUtil(this, "injectScripts");
+lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getContents");
 lazyUtil(this, "getProfileFile");
 lazyUtil(this, "getWriteStream");
@@ -26,9 +33,10 @@ function Config(aBaseDir) {
   this.timer = new Timer();
   this._observers = [];
   this._saveTimer = null;
-  this._excludes = new PatternCollection();
   this._scripts = [];
   this._scriptFoldername = aBaseDir;
+
+  this._prettyPrint = Scriptish_prefRoot.getValue("config.prettyPrint.enabled");
 
   this._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
   this._blocklistURL = Scriptish_prefRoot.getValue("blocklist.url");
@@ -52,8 +60,6 @@ function Config(aBaseDir) {
     "scriptish-preferences-change",
     "scriptish-config-saved"
   ].forEach(function(i) Services.obs.addObserver(self, i, false));
-
-  Components.utils.import("resource://scriptish/addonprovider.js");
 }
 Config.prototype = {
   get _scriptDir() Scriptish_getProfileFile(this._scriptFoldername),
@@ -192,7 +198,7 @@ Config.prototype = {
           break;
         }
       }
-      self.addExclude(excludes);
+      Scriptish_addExcludes(excludes);
 
       return aCallback(true);
     }
@@ -222,7 +228,7 @@ Config.prototype = {
         fileModified = Script.loadFromJSON(self, scripts[i]) || fileModified;
 
       // load global excludes
-      config.excludes.forEach(function(i) self.addExclude(i));
+      Scriptish_addExcludes(config.excludes);
 
       return aCallback(true, fileModified);
     }
@@ -291,7 +297,11 @@ Config.prototype = {
       });
     });
 
-    // Listen for the blocklist pref being modified
+    Scriptish_prefRoot.watch("config.prettyPrint.enabled", function() {
+      self._prettyPrint = Scriptish_prefRoot.getValue("config.prettyPrint.enabled");
+      self._save();
+    });
+
     Scriptish_prefRoot.watch("blocklist.enabled", function() {
       self._useBlocklist = Scriptish_prefRoot.getValue("blocklist.enabled");
       if (self._useBlocklist) {
@@ -305,7 +315,7 @@ Config.prototype = {
   },
 
   toJSON: function() ({
-    excludes: this.excludes,
+    excludes: Scriptish_getExcludes(),
     scripts: this.scripts.map(function(script) script.toJSON())
   }),
 
@@ -341,7 +351,7 @@ Config.prototype = {
 
     let converter = Instances.suc;
     converter.charset = "UTF-8";
-    let json = JSON.stringify(this.toJSON());
+    let json = JSON.stringify(this.toJSON(), null, this._prettyPrint ? "  " : null);
     let writeStream = Scriptish_getWriteStream(this._configFile, {defer:true, safe:true});
     NetUtil.asyncCopy(
       converter.convertToInputStream(json), // source must be buffered!
@@ -405,23 +415,22 @@ Config.prototype = {
     }
   },
 
-  get excludes() this._excludes.patterns,
-  set excludes(excludes) {
-    this._excludes.clear();
-    this._excludes.addPatterns(excludes);
-  },
-  addExclude: function(excludes) this._excludes.addPatterns(excludes),
   get scripts() this._scripts.concat(),
-  isURLExcluded: function(url) this._excludes.test(url),
   getMatchingScripts: function(testFunc) this.scripts.filter(testFunc),
   sortScripts: function() this._scripts.sort(function(a, b) b.priority - a.priority),
   injectScript: function(script) {
-    var unsafeWin = this.wrappedContentWin.wrappedJSObject;
+    var safeWin = this.wrappedContentWin;
+    var unsafeWin = safeWin.wrappedJSObject;
     var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
     var href = new XPCNativeWrapper(unsafeLoc, "href").href;
 
-    if (script.enabled && !script.needsUninstall && script.matchesURL(href))
-      Services.scriptish.injectScripts([script], href, unsafeWin, this.chromeWin);
+    if (script.enabled && !script.needsUninstall && script.matchesURL(href)) {
+      Scriptish_injectScripts({
+        scripts: [script],
+        url: href,
+        safeWin: safeWin
+      });
+    }
   },
 
   updateModifiedScripts: function(scriptInjector) {
@@ -447,3 +456,20 @@ Config.prototype = {
   },
   QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports, Ci.nsIObserver])
 }
+
+Config.prototype.initScripts = function(url, isTopWin, aCallback) {
+  let scripts = {
+    "document-start": [],
+    "document-end": [],
+    "document-idle": [],
+    "window-load": []
+  };
+
+  this.getMatchingScripts(function(script) {
+    let chk = Scriptish_isScriptRunnable(script, url, isTopWin);
+    if (chk) scripts[script.runAt].push(script);
+    return chk;
+  }, [url]);
+
+  aCallback(scripts);
+};

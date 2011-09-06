@@ -2,13 +2,13 @@
 
 const GM_updatingEnabled = true;
 
-function GM_addStyle(css) {
-  var head = document.getElementsByTagName("head")[0];
-  if (head) {
+function GM_addStyle(css, node) {
+  node = node || document.getElementsByTagName("head")[0];
+  if (node) {
     var style = document.createElement("style");
     style.textContent = css;
     style.type = "text/css";
-    head.appendChild(style);
+    node.appendChild(style);
   }
   return style;
 }
