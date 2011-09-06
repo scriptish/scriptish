@@ -69,7 +69,6 @@ function runTests() {
     function() include("tests/testScriptHeaderParse.js"),
     function() include("tests/testScriptParseVersion.js"),
     function() include("tests/testToolsMenuItem.js"),
-    function() include("tests/testGetConfig.js"),
     function() include("tests/testIsGMable.js"),
     function() include("tests/testMatchPattern.js"),
     function() include("tests/testPatternCollection.js"),

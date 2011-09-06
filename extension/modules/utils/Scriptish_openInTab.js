@@ -7,6 +7,11 @@ lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
   aChromeWin = aChromeWin || Scriptish.getMostRecentWindow();
 
+  if ("Fennec" == Services.appinfo.name) {
+    aChromeWin.Browser.addTab(aURL);
+    return;
+  }
+
   // Try to reuse an existing tab
   if (aReuse) {
     let browserEnumerator = Services.wm.getEnumerator("navigator:browser");

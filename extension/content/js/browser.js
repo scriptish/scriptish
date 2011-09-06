@@ -7,21 +7,24 @@ var Scriptish_BrowserUI = {
 inc("resource://scriptish/constants.js", tools);
 const {lazyImport, lazyUtil} = tools;
 
+lazyImport(window, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(window, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(window, "resource://scriptish/content/browser.js", ["Scriptish_BrowserUIM"]);
 lazyImport(window, "resource://scriptish/menucommander.js", ["Scriptish_MenuCommander"]);
 lazyImport(window, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(window, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
 
-lazyUtil(window, "installUri");
-lazyUtil(window, "openInEditor");
-lazyUtil(window, "stringBundle");
 lazyUtil(window, "getURLsForContentWindow");
 lazyUtil(window, "getWindowIDs");
+lazyUtil(window, "installUri");
+lazyUtil(window, "isGreasemonkeyable");
+lazyUtil(window, "isURLExcluded");
+lazyUtil(window, "openInEditor");
+lazyUtil(window, "openInTab");
+lazyUtil(window, "stringBundle");
 
 var Ci = tools.Ci;
 var Services = tools.Services;
-var gmSvc = Services.scriptish;
 var $ = function(aID) document.getElementById(aID);
 
 Scriptish_BrowserUI.QueryInterface = tools.XPCOMUtils.generateQI([
@@ -149,7 +152,7 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   Scriptish_BrowserUIM.refreshStatus();
 
   // Check if Scriptish has been updated/installed
-  gmSvc.updateChk && setTimeout(function() gmSvc.updateChk(), 1000);
+  Components.utils.import("resource://scriptish/utils/Scriptish_updateChk.js");
 }
 
 Scriptish_BrowserUI.registerMenuCommand = function(menuCommand) {
@@ -180,15 +183,11 @@ Scriptish_BrowserUI.disableMenuCommand = function(commandUUID, aWinID) {
  * a user selects "show script source" in the install dialog.
  */
 Scriptish_BrowserUI.showInstallBanner = function(browser) {
-  var self = this;
   var notificationBox = gBrowser.getNotificationBox(browser);
   var greeting = Scriptish_stringBundle("greeting.msg");
-  var btnLabel;
-  Scriptish.getConfig(function(config) {
-    btnLabel = Scriptish_stringBundle(
-        (config.installIsUpdate(self.scriptDownloader_.script) ? "re" : "")
-        + "install");
-  });
+  var btnLabel = Scriptish_stringBundle(
+      (Scriptish_config.installIsUpdate(this.scriptDownloader_.script) ? "re" : "")
+      + "install");
 
   // Remove existing notifications. Notifications get removed
   // automatically onclick and on page navigation, but we need to remove
@@ -216,12 +215,13 @@ Scriptish_BrowserUI.showInstallBanner = function(browser) {
  */
 Scriptish_BrowserUI.showScriptView = function(aSD, aURL) {
   this.scriptDownloader_ = aSD;
-  gBrowser.selectedTab = gBrowser.addTab(aURL);
+  this.showInstallBanner(Scriptish_openInTab(aURL, false, true).contentWindow);
 }
 
 // Handles the install button getting clicked.
 Scriptish_BrowserUI.installCurrentScript = function() {
   this.scriptDownloader_.installScript();
+  delete this.scriptDownloader_;
 }
 
 /**
@@ -295,6 +295,21 @@ Scriptish_BrowserUI.getCommander = function(aWinID) {
   return commander;
 }
 
+Scriptish_BrowserUI.docUnload = function(aWinID) {
+  let menuCmders = this.menuCommanders;
+  if (!menuCmders || 0 == menuCmders.length) return;
+
+  let curMenuCmder = this.currentMenuCommander;
+  for (let [i, item] in Iterator(menuCmders)) {
+    if (item.winID !== aWinID) continue;
+    if (item.commander === curMenuCmder)
+      curMenuCmder = curMenuCmder.detach();
+    menuCmders.splice(i, 1);
+    break;
+  }
+  return;
+};
+
 Scriptish_BrowserUI.viewContextItemClicked = function() {
   Scriptish_configDownloader.startViewScript(
       Scriptish_BrowserUI.getUserScriptLinkUnderPointer());
@@ -328,17 +343,17 @@ function Scriptish_popupClicked(aEvt) {
 /**
  * Handles a Scriptish menu popup event
  */
-function Scriptish_setupPopup() Scriptish.getConfig(function(config) {
+function Scriptish_setupPopup() {
   var $ = function(aID) document.getElementById(aID);
   var popup = $("scriptish-tb-popup");
   if (!popup) return;
   Scriptish_BrowserUI.reattachMenuCmds();
 
   function okURL(url) (
-      (Scriptish.isGreasemonkeyable(url) && !config.isURLExcluded(url)));
+      (Scriptish_isGreasemonkeyable(url) && !Scriptish_isURLExcluded(url)));
 
   function scriptsMatching(urls) {
-    return config.getMatchingScripts(function testMatchURLs(script) {
+    return Scriptish_config.getMatchingScripts(function testMatchURLs(script) {
       return urls.some(function(url) okURL(url) && script.matchesURL(url));
     }).sort(function(a,b) {
       a = a.name.toLocaleLowerCase(), b = b.name.toLocaleLowerCase();
@@ -407,12 +422,12 @@ function Scriptish_setupPopup() Scriptish.getConfig(function(config) {
 
     // determine the correct label
     let label;
-    if (config.isURLExcluded(url))
+    if (Scriptish_isURLExcluded(url))
       label = Scriptish_stringBundle("statusbar.noScripts.excluded");
-    else if (!Scriptish.isGreasemonkeyable(url))
+    else if (!Scriptish_isGreasemonkeyable(url))
       label = Scriptish_stringBundle("statusbar.noScripts.scheme");
     else
       label = Scriptish_stringBundle("statusbar.noScripts.notfound");
     menuitem.setAttribute("label", label);
   }
-});
+}

@@ -5,8 +5,8 @@
   function $(aID) document.getElementById(aID);
 
   this.saveAsUserscript = function() {
-    let content = $('scratchpad-textbox').value;
-    this.browserWindow.Scriptish_BrowserUIM.newUserScript(content);
+    let txt = (this.getText && this.getText()) || $("scratchpad-textbox").value;
+    this.browserWindow.Scriptish_BrowserUIM.newUserScript(txt);
   };
 
   window.addEventListener("DOMContentLoaded", function init() {

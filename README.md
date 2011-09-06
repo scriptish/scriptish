@@ -3,10 +3,11 @@
 Scriptish is a userscript manager for Firefox, forked from Greasemonkey.
 
 
-# Requirements
+# Browsers Supported
 
-* Using Scriptish: Firefox 4+
-* Building an XPI: Unix shell
+* Firefox 4+
+* Fennec 4+
+* Seamonkey 2.1+
 
 
 # Links

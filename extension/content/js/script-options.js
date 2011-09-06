@@ -1,6 +1,9 @@
 Components.utils.import("resource://scriptish/constants.js");
-Components.utils.import("resource://scriptish/utils/Scriptish_localizeDOM.js");
+
+lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Scriptish_localizeOnLoad"]);
+
 lazyUtil(this, "stringBundle");
 
 var $ = function(aID) document.getElementById(aID);
@@ -16,28 +19,26 @@ window.addEventListener("DOMContentLoaded", function() {
   }
 
   scriptID = scriptID[1];
-  Scriptish.getConfig(function(config) {
-    script = config.getScriptById(scriptID);
+  script = Scriptish_config.getScriptById(scriptID);
 
-    let options = Scriptish_stringBundle("options");
-    let dialog = $("scriptish-script-options-dialog");
-    dialog.setAttribute("title", script.name + " - " + options);
-    dialog.setAttribute("ondialogaccept", "return doSave();");
+  let options = Scriptish_stringBundle("options");
+  let dialog = $("scriptish-script-options-dialog");
+  dialog.setAttribute("title", script.name + " - " + options);
+  dialog.setAttribute("ondialogaccept", "return doSave();");
 
-    // setup script info
-    $("scriptIcon").src = script.iconURL;
+  // setup script info
+  $("scriptIcon").src = script.iconURL;
 
-    let title = (script.name || Scriptish_stringBundle("untitledScript"));
-    if (script.version) {
-      title += " " + script.version;
-    }
-    $("scriptTitle").textContent = title;
+  let title = (script.name || Scriptish_stringBundle("untitledScript"));
+  if (script.version) {
+    title += " " + script.version;
+  }
+  $("scriptTitle").textContent = title;
 
-    $("includes").value = script.getUserIncStr();
-    $("excludes").value = script.getUserIncStr("exclude");
+  $("includes").value = script.getUserIncStr();
+  $("excludes").value = script.getUserIncStr("exclude");
 
-    $("disableScriptIncludes").checked = script.includesDisabled;
-  });
+  $("disableScriptIncludes").checked = script.includesDisabled;
 
   return true;
 }, false);

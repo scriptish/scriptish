@@ -1,7 +1,7 @@
-module("Script.header_parse");
+module("Scriptish_parser");
 
 test("normal @keys (with space b4 @)", function() {
-  var parser = importModule("resource://scriptish/script/script.js").Script.header_parse;
+  var parser = importModule("resource://scriptish/utils/Scriptish_parser.js").Scriptish_parser;
   var header = (<><![CDATA[
   // ==UserScript==
   // @id test-id
@@ -22,7 +22,7 @@ test("normal @keys (with space b4 @)", function() {
 });
 
 test("normal @keys and following @fail", function() {
-  var parser = importModule("resource://scriptish/script/script.js").Script.header_parse;
+  var parser = importModule("resource://scriptish/utils/Scriptish_parser.js").Scriptish_parser;
   var header = (<><![CDATA[
   // ==UserScript==
   // @id test-id
@@ -41,7 +41,7 @@ test("normal @keys and following @fail", function() {
 });
 
 test("normal @keys and leading @fail", function() {
-  var parser = importModule("resource://scriptish/script/script.js").Script.header_parse;
+  var parser = importModule("resource://scriptish/utils/Scriptish_parser.js").Scriptish_parser;
   var header = (<><![CDATA[
   // @fail test-fail
   // ==UserScript==
@@ -60,7 +60,7 @@ test("normal @keys and leading @fail", function() {
 });
 
 test("two sets of normal @keys", function() {
-  var parser = importModule("resource://scriptish/script/script.js").Script.header_parse;
+  var parser = importModule("resource://scriptish/utils/Scriptish_parser.js").Scriptish_parser;
   var header = (<><![CDATA[
   // ==UserScript==
   // @id test-id
@@ -81,7 +81,7 @@ test("two sets of normal @keys", function() {
 });
 
 test("@keys without space b4 @", function() {
-  var parser = importModule("resource://scriptish/script/script.js").Script.header_parse;
+  var parser = importModule("resource://scriptish/utils/Scriptish_parser.js").Scriptish_parser;
   var header = (<><![CDATA[
   //==UserScript==
   //@id test-id
@@ -103,7 +103,7 @@ test("@keys without space b4 @", function() {
 });
 
 test("normal @keys case check", function() {
-  var parser = importModule("resource://scriptish/script/script.js").Script.header_parse;
+  var parser = importModule("resource://scriptish/utils/Scriptish_parser.js").Scriptish_parser;
   var header = (<><![CDATA[
   // ==UserScript==
   // @Key v1

@@ -12,4 +12,5 @@ build
 *.rb
 *.sh
 node_modules
+*.komodoproject
 

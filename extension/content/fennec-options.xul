@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <setting pref="extensions.scriptish.enabled" type="bool" title="Scripts Enabled"/>
+  <setting pref="extensions.scriptish.cache.enabled" type="bool" title="Cache Enabled"/>
+  <setting pref="extensions.scriptish.uninstallPreferences" type="bool" title="Remove Script Preferences">
+    Remove preferences associated with a user script when the script is uninstalled.
+  </setting>
+</vbox>

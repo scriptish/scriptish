@@ -3,6 +3,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_BrowserUIM"];
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyUtil(this, "openManager");
 
 const ICON_16_ON = "chrome://scriptish/skin/scriptish16.png";
 const ICON_16_OFF = "chrome://scriptish/skin/scriptish16_disabled.png";
@@ -23,7 +24,7 @@ Scriptish_BrowserUIM.prototype = {
         this.onToggleStatus();
         break;
       case 1:
-        Scriptish.openManager();
+        Scriptish_openManager();
         break;
       case 2:
         this.$("scriptish-tb-popup").openPopup(this.$("scriptish-button"), "before_end", 0, 0, false, false);
@@ -77,7 +78,6 @@ Scriptish_BrowserUIM.prototype = {
     this._optionsWin.focus();
   },
   showUserscriptList: function() {
-    Cu.import("resource://scriptish/addonprovider.js");
-    timeout(Scriptish.openManager);
+    timeout(Scriptish_openManager);
   }
 }

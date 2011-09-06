@@ -3,8 +3,8 @@ Components.utils.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/script/scriptdownloader.js", ["ScriptDownloader"]);
 
 var Scriptish_configDownloader = {
-  startInstall: function(aURI, aWin) {
-    new ScriptDownloader(aURI, aWin).startInstall();
+  startInstall: function(aURI) {
+    new ScriptDownloader(aURI).startInstall();
   },
   startViewScript: function(aURI) {
     new ScriptDownloader(aURI).startViewScript();
