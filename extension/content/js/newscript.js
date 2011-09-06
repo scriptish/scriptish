@@ -109,8 +109,10 @@ function doInstall() {
   Scriptish_openInEditor(script, window);
 
   // persist values
-  Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
-  Scriptish_prefRoot.setValue("newscript_author", script.author);
+  if (script.namespace)
+    Scriptish_prefRoot.setValue("newscript_namespace", script.namespace);
+  if (script.author)
+    Scriptish_prefRoot.setValue("newscript_author", script.author);
 
   return true;
 }
