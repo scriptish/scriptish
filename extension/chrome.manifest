@@ -26,6 +26,8 @@ overlay    chrome://scriptish/content/install.xul chrome://scriptish/content/clo
 overlay    chrome://scriptish/content/options.xul chrome://scriptish/content/closewindow.xul
 overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/closewindow.xul
 
+override chrome://scriptish/content/options.xul chrome://scriptish/content/fennec-options.xul application={a23983c0-fd0e-11dc-95ff-0800200c9a66}
+
 locale     scriptish  en-US  locale/en-US/
 locale     scriptish  de  locale/de/
 locale     scriptish  es-ES  locale/es-ES/
