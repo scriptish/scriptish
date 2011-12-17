@@ -98,35 +98,47 @@ function GM_API(options) {
     if (typeof aTitle != "string") aTitle = aScript.name;
     if (typeof aIcon != "string") aIcon = aScript.iconURL;
 
-
+    // e10s
     if (options.global && options.global.sendAsyncMessage) {
       options.global.sendAsyncMessage("Scriptish:ScriptNotification", [
           aMsg, aTitle, aIcon]);
     }
+    // old school
     else {
       var callback = null;
       if (typeof aCallback == "function")
         callback = function() GM_apiSafeCallback(aSafeWin, aScript, null, aCallback);
       Scriptish_notification(aMsg, aTitle, aIcon, callback);
     }
-  }
+  };
 
-  this.GM_setValue = function GM_setValue() {
+  this.GM_setValue = function GM_setValue(aName, aValue) {
     if (!GM_apiLeakCheck("GM_setValue")) return;
-    return lazyLoaders.storage.setValue.apply(lazyLoaders.storage, arguments);
-  }
+
+    // e10s
+    if (options.global && options.global.sendAsyncMessage) {
+        return options.global.sendSyncMessage("Scriptish:ScriptSetValue", {
+          scriptID: aScript.id,
+          args: [aName, aValue]
+        });
+    }
+    // old school
+    else {
+      return lazyLoaders.storage.setValue.apply(lazyLoaders.storage, arguments);
+    }
+  };
   this.GM_getValue = function GM_getValue() {
     if (!GM_apiLeakCheck("GM_getValue")) return;
     return lazyLoaders.storage.getValue.apply(lazyLoaders.storage, arguments);
-  }
+  };
   this.GM_deleteValue = function GM_deleteValue() {
     if (!GM_apiLeakCheck("GM_deleteValue")) return;
     return lazyLoaders.storage.deleteValue.apply(lazyLoaders.storage, arguments);
-  }
+  };
   this.GM_listValues = function GM_listValues() {
     if (!GM_apiLeakCheck("GM_listValues")) return;
     return lazyLoaders.storage.listValues.apply(lazyLoaders.storage, arguments);
-  }
+  };
 
   this.GM_getResourceURL = function GM_getResourceURL(aName) {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;

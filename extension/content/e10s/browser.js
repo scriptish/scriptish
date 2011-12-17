@@ -5,7 +5,8 @@
   lazyImport(global, "resource://scriptish/logging.js", ["Scriptish_log"]);
   lazyImport(global, "resource://scriptish/manager.js", ["Scriptish_manager"]);
   lazyImport(global, "resource://scriptish/config.js", ["Scriptish_config"]);
-  lazyImport(this, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
+  lazyImport(global, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
+  lazyImport(global, "resource://scriptish/api/GM_ScriptStorage.js", ["GM_ScriptStorage"]);
 
   lazyUtil(global, "installUri");
   lazyUtil(global, "getScriptHeader");
@@ -102,6 +103,12 @@
 
   mm.addMessageListener("Scriptish:ScriptNotification", function({json}) {
     Scriptish_notification.apply(null, json);
+  });
+
+  mm.addMessageListener("Scriptish:ScriptSetValue", function({json}) {
+    var script = Scriptish_config.getScriptById(json.scriptID);
+    var storage = new GM_ScriptStorage(script);
+    return storage.setValue.apply(storage, json.args);
   });
 
   mm.addMessageListener("Scriptish:GetScriptMetadata", function({json}) {
