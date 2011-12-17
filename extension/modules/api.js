@@ -207,6 +207,7 @@ function GM_API(options) {
     this.GM_registerMenuCommand = function GM_registerMenuCommand(
         aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
       if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;
+
       var uuid = Scriptish_BrowserUI.registerMenuCommand({
         name: aCmdName,
         accelKey: aAccelKey,
@@ -214,7 +215,9 @@ function GM_API(options) {
         accessKey: aAccessKey,
         doCommand: aCmdFunc,
         winID: windowID});
+
       menuCmdIDs.push(uuid);
+
       return uuid;
     }
 
