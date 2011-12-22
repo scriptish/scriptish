@@ -139,15 +139,18 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 
     this.script.setDownloadedFile(file);
 
+    // start async download of dependencies
     timeout(this.fetchDependencies.bind(this));
 
     switch (this.type) {
+      // show install dialog
       case "install":
         this._callback = function() {
           this.showInstallDialog();
           delete this._callback;
         }
         break;
+      // show script in tab with install banner
       case "view":
         this.showScriptView();
         break;
@@ -188,9 +191,10 @@ ScriptDownloader.prototype.fetchDependencies = function() {
   this.downloadNextDependency();
 }
 ScriptDownloader.prototype.downloadNextDependency = function() {
+  // When the last dependency has been fetched..
   if (!this.depQueue_.length) {
     this.dependenciesLoaded_ = true;
-    this._callback && this._callback();
+    this._callback && this._callback(); // show install dialog
     this.finishInstall();
     return;
   }
@@ -283,11 +287,13 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
 
       dep.setDownloadedFile(file, channel.contentType, channel.contentCharset ? channel.contentCharset : null);
       this.downloadNextDependency();
-    } else {
+    }
+    else {
       try {
         var responseStatus = httpChannel.responseStatus + ": "
             + httpChannel.responseStatusText;
-      } catch(e) {
+      }
+      catch(e) {
         var responseStatus = Scriptish_stringBundle("nothing.timedOut");
       }
       let errMsg = Scriptish_stringBundle("error.dependency.serverReturned") + ": "
@@ -298,15 +304,18 @@ ScriptDownloader.prototype.handleDependencyDownloadComplete =
         dep.reset();
         Scriptish_logError(new Error(errMsgStart + errMsg));
         this.downloadNextDependency();
-      } else {
+      }
+      else {
         this.errorInstallDependency(dep, errMsg);
       }
     }
-  } else {
+  }
+  else {
     dep.setDownloadedFile(file);
     this.downloadNextDependency();
   }
 }
+
 ScriptDownloader.prototype.checkDependencyURL = function(url) {
   var scheme = Services.io.extractScheme(url);
 
@@ -323,38 +332,63 @@ ScriptDownloader.prototype.checkDependencyURL = function(url) {
   }
 }
 ScriptDownloader.prototype.finishInstall = function() {
+  // if this install was for a manual script update..
   if (this.updateScript) {
     // Inject the script now that we have the new dependencies
     this.script.useDelayedInjectors();
-  } else if (this.installOnCompletion_) {
+  }
+  // if the user has clicked a 'install'/'upgrade' button (not related to EM)
+  else if (this.installOnCompletion_) {
     this.installScript();
-  } else if (this.scriptInstaller) {
+  }
+  // note: this.scriptInstaller exists for EM script updates
+  else if (this.scriptInstaller) {
     this.scriptInstaller.changed("DownloadEnded");
   }
 }
 ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
   this.dependencyError = Scriptish_stringBundle("error.dependency.loading")
       + ": " + dep.urlToDownload + "\n" + msg;
+
   Scriptish_log(this.dependencyError);
+
+  // note: scriptInstaller exists for script updates that come thru EM
   if (this.scriptInstaller) {
     return this.scriptInstaller.changed("DownloadFailed");
   }
+
+  // if the user has already clicked a nonEM 'install'/'upgrade' button
   if (this.installOnCompletion_) {
     Scriptish_alert(this.dependencyError);
   }
-  this._callback && this._callback();
+
+  this._callback && this._callback(); // show install dialog
 }
+
+// initially called when a user is ready to install or upgrade,
+// and again after dependencies are download if there are any that still need
+// to be fetched.
 ScriptDownloader.prototype.installScript = function() {
+  // Was there a dependency error? if so, then alert the stored error message.
   if (this.dependencyError) {
-    Scriptish_alert(this.dependencyError, null, 0);
+    // use timeout to avoid race condition that causes install window to fail
+    // to be closed..
+    Scriptish_alert(this.dependencyError, null, 100); 
     return false;
-  } else if (this.scriptInstaller && this.dependenciesLoaded_) {
+  }
+
+  // note: script installers exist for script updates
+  if (this.scriptInstaller && this.dependenciesLoaded_) {
     this.scriptInstaller._script.replaceScriptWith(this.script);
     this.scriptInstaller.changed("InstallEnded");
-  } else if (this.dependenciesLoaded_) {
+  }
+  // for a normal install do this..
+  else if (this.dependenciesLoaded_) {
     var script = this.script;
     Scriptish_config.install(script);
-  } else {
+  }
+  // if the dependencies are still being downloaded then wait for that.
+  else {
     this.installOnCompletion_ = true;
   }
   return true;

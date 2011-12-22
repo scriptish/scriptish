@@ -78,19 +78,19 @@ ScriptishService.prototype = {
               gBrowser.getBrowserForDocument(safeWin.document));
         }
 
+        let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
         // if the focused tab's window is the one loading, then attach menuCommander
         if (safeWin === gBrowser.selectedBrowser.contentWindow) {
           if (gmBrowserUI.currentMenuCommander)
             gmBrowserUI.currentMenuCommander.detach();
 
-          let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
           gmBrowserUI.currentMenuCommander =
               gmBrowserUI.getCommander(currentInnerWindowID).attach();
-
-          Scriptish_windowUnloader(function() {
-            gmBrowserUI.docUnload(currentInnerWindowID);
-          }, currentInnerWindowID);
         }
+
+        Scriptish_windowUnloader(function() {
+          gmBrowserUI.docUnload(currentInnerWindowID);
+        }, currentInnerWindowID);
         break;
       case "install-userscript":
         let win = Scriptish.getMostRecentWindow("navigator:browser");

@@ -29,9 +29,10 @@ overlay    chrome://scriptish/content/newscript.xul chrome://scriptish/content/c
 override chrome://scriptish/content/options.xul chrome://scriptish/content/fennec-options.xul application={a23983c0-fd0e-11dc-95ff-0800200c9a66}
 
 locale     scriptish  en-US  locale/en-US/
-locale     scriptish  de  locale/de/
+locale     scriptish  de     locale/de/
 locale     scriptish  es-ES  locale/es-ES/
 locale     scriptish  ja-JP  locale/ja-JP/
+locale     scriptish  pl     locale/pl/
 locale     scriptish  pt-BR  locale/pt-BR/
 locale     scriptish  ru-RU  locale/ru-RU/
 locale     scriptish  sv-SE  locale/sv-SE/

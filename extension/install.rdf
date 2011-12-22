@@ -6,7 +6,7 @@
     <em:id>scriptish@erikvold.com</em:id>
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
-    <em:version>0.1.5</em:version>
+    <em:version>0.1.6</em:version>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
     <em:homepageURL>http://scriptish.org</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
@@ -46,6 +46,7 @@
     <em:contributor>Tommi Rautava</em:contributor>
 
     <em:translator>Alfredo Fernández Díaz (es-ES)</em:translator>
+    <em:translator>allertec (pl)</em:translator>
     <em:translator>k2jp (ja-JP)</em:translator>
     <em:translator>Mauro José da Silva (pt-BR)</em:translator>
     <em:translator>Mikael Hiort af Ornäs (sv-SE)</em:translator>
@@ -63,7 +64,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>4.0</em:minVersion>
-        <em:maxVersion>9.*</em:maxVersion>
+        <em:maxVersion>12.0a1</em:maxVersion>
       </Description>
     </em:targetApplication>
     <!-- SeaMonkey -->
@@ -71,7 +72,7 @@
       <Description>
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.1</em:minVersion>
-        <em:maxVersion>2.3.*</em:maxVersion>
+        <em:maxVersion>2.7.*</em:maxVersion>
       </Description>
     </em:targetApplication>
     <!-- Fennec -->
@@ -79,7 +80,7 @@
       <Description>
         <em:id>{a23983c0-fd0e-11dc-95ff-0800200c9a66}</em:id>
         <em:minVersion>4.0</em:minVersion>
-        <em:maxVersion>6.*</em:maxVersion>
+        <em:maxVersion>10.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>
