@@ -372,15 +372,18 @@ Config.prototype = {
   install: function(aNewScript) {
     var existingIndex = this._find(aNewScript.id);
     var exists = existingIndex > -1;
+
     if (exists) {
       this._scripts[existingIndex].replaceScriptWith(aNewScript);
-    } else {
+    }
+    else {
       aNewScript.installProcess();
       timeout(aNewScript.updateUSOData.bind(aNewScript));
       this.addScript(aNewScript);
 
       Scriptish.notify(aNewScript, "scriptish-script-installed", true);
     }
+
     this.sortScripts();
   },
 

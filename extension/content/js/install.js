@@ -42,7 +42,7 @@ function setupIncludes(type, items) {
 }
 
 function cleanup() scriptDownloader.cleanupTempFiles();
-function delayedClose() timeout(close);
+function delayedClose() timeout(close, 1);
 
 
 on("load", function() {
