@@ -112,7 +112,6 @@ asyncTest("null char removed", 1, function() {
 asyncTest("logScriptError: js error", 9, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
-    ok(message instanceof Ci.nsIScriptError2);
 
     equal(message.errorMessage, "[baz] Error: foo");
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
@@ -128,7 +127,6 @@ asyncTest("logScriptError: js error", 9, function() {
 asyncTest("logScriptError: nsIScriptError", 9, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
-    ok(message instanceof Ci.nsIScriptError2);
 
     equal(message.errorMessage, "[baz] foo");
     equal(message.sourceName, "source");
@@ -146,7 +144,6 @@ asyncTest("logScriptError: nsIScriptError", 9, function() {
 asyncTest("logScriptError: nsIScriptError; omit id", 9, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
-    ok(message instanceof Ci.nsIScriptError2);
 
     equal(message.errorMessage, "[Scriptish] foo");
     equal(message.sourceName, "source");
@@ -165,7 +162,6 @@ asyncTest("test nsIScriptError; omit optionals", function() {
   expect(9);
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
-    ok(message instanceof Ci.nsIScriptError2);
 
     equal(message.errorMessage, "[Scriptish] foo");
     equal(message.sourceName, "[user.js]");
@@ -184,7 +180,6 @@ asyncTest("test nsIException", function() {
   expect(9);
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
-    ok(message instanceof Ci.nsIScriptError2);
 
     equal(message.errorMessage, "[baz] foo");
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
@@ -202,7 +197,6 @@ asyncTest("test TypeError", function() {
   expect(9);
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
-    ok(message instanceof Ci.nsIScriptError2);
 
     equal(message.errorMessage, "[baz] TypeError: f is undefined");
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
