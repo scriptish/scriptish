@@ -6,7 +6,7 @@
     <em:id>scriptish@erikvold.com</em:id>
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
-    <em:version>0.1.6</em:version>
+    <em:version>0.1.7</em:version>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
     <em:homepageURL>http://scriptish.org</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
@@ -72,7 +72,7 @@
       <Description>
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.1</em:minVersion>
-        <em:maxVersion>2.7.*</em:maxVersion>
+        <em:maxVersion>2.8.*</em:maxVersion>
       </Description>
     </em:targetApplication>
     <!-- Fennec -->

@@ -136,6 +136,7 @@ AddonManagerPrivate.registerProvider({
   getAddonByID: function(aId, aCallback) {
     aCallback(Scriptish_config.getScriptById(aId));
   },
+
   getAddonsByTypes: function(aTypes, aCallback) {
     if (aTypes && aTypes.indexOf("userscript") < 0) {
       aCallback([]);
@@ -158,6 +159,7 @@ AddonManagerPrivate.registerProvider({
     }
   }
 }, types);
+
 [
   "scriptish-script-installed",
   "scriptish-script-edit-enabling",

@@ -6,23 +6,23 @@
       <RDF:Seq>
         <RDF:li>
           <RDF:Description>
-            <em:version>0.1.6</em:version>
+            <em:version>0.1.7</em:version>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                 <em:minVersion>4.0</em:minVersion>
-                <em:maxVersion>11.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.6.xpi</em:updateLink>
-                <em:updateHash>sha1:c526c8377988e1d6e3e48fe2dff6d3574d037ff8</em:updateHash>
+                <em:maxVersion>12.0a1</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.7.xpi</em:updateLink>
+                <em:updateHash>sha1:1f098ee6a55778e00f057826d39b6fabecd0b8d4</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
                 <em:minVersion>2.1</em:minVersion>
-                <em:maxVersion>2.7.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.6.xpi</em:updateLink>
-                <em:updateHash>sha1:c526c8377988e1d6e3e48fe2dff6d3574d037ff8</em:updateHash>
+                <em:maxVersion>2.8.*</em:maxVersion>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.7.xpi</em:updateLink>
+                <em:updateHash>sha1:1f098ee6a55778e00f057826d39b6fabecd0b8d4</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
             <em:targetApplication>
@@ -30,8 +30,8 @@
                 <em:id>{a23983c0-fd0e-11dc-95ff-0800200c9a66}</em:id>
                 <em:minVersion>4.0</em:minVersion>
                 <em:maxVersion>10.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.6.xpi</em:updateLink>
-                <em:updateHash>sha1:c526c8377988e1d6e3e48fe2dff6d3574d037ff8</em:updateHash>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.7.xpi</em:updateLink>
+                <em:updateHash>sha1:1f098ee6a55778e00f057826d39b6fabecd0b8d4</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>
@@ -39,6 +39,6 @@
       </RDF:Seq>
     </em:updates>
 
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAJZhVqf5WIxVW8MTdm08ToHGPbXMegI6hGmhDyryy28fozh1ZvXYl5SN0/U9c7sVbgxwaMqEHG01Y82sbDZu0REE3kXXWjlRJSMJFIz4IXJ8nTxwI+6qnCgNzVKxMoVEs4x7uGH4ETQD/X3PgTEAT+nC3+KvdzPqntyMgAzz67CD</em:signature>
+    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAFxIbXsnLRKFaXW4ebxmIM7rl1dVY1LLIYiygy1LAk50d71NRTh0Sk02zsykZ+/sPIxwaK4giAO/kOQxgkUGlFGk4itCGyhaHr0lAwCVoAL8O+BewwFB48hxFZvu+QRq1QTlPcxHT7RU+bZWYtxGOJhlET5bz68jczYMcDCeDj9w</em:signature>
   </RDF:Description>
 </RDF:RDF>
