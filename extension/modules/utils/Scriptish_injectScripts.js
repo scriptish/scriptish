@@ -50,7 +50,11 @@ function Scriptish_injectScripts(options) {
     // Need to keep a valid reference to |script| around so that GM_log
     // and the delay code (and probably other consumer work).
     let script = scripts[i];
-    let sandbox = new Cu.Sandbox(safeWin);
+    let sandbox = new Cu.Sandbox(safeWin, {
+      sandboxName: script.fileURL,
+      //sandboxPrototype: safeWin,
+      wantXrays: true
+    });
 
     // hack XPathResult since that is so commonly used
     sandbox.XPathResult = XPATH_RESULT;

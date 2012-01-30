@@ -851,6 +851,19 @@ Script.prototype = {
   }
 };
 
+Script.prototype.addScreenShot = function(aURL, aThumbURL) {
+  if (!AddonManagerPrivate.AddonScreenshot) return;
+
+  var ss = new AddonManagerPrivate.AddonScreenshot(aURL);
+
+  if (aThumbURL) {
+    ss.thumbnailURL = aThumbURL;
+  }
+
+  this._screenshots.push(ss);
+  return;
+}
+
 Script.parseVersion = function Script_parseVersion(aSrc) {
   var parsed = Scriptish_parser(aSrc);
   if (parsed.version) return parsed.version.pop();
@@ -1005,14 +1018,15 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
           script._matches.push(new MatchPattern(value));
           continue;
         case 'screenshot':
-          if (!AddonManagerPrivate.AddonScreenshot) continue;
           var splitValue = value.match(valueSplitter);
+
+          // if there is a thumb url provided
           if (splitValue) {
-            script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
-                splitValue[1], splitValue[2]));
-          } else {
-            script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
-                value));
+            script.addScreenShot(splitValue[1], splitValue[2]);
+          }
+          // no thumb url is provided
+          else {
+            script.addScreenShot(value);
           }
           continue;
         case "defaulticon":
@@ -1168,8 +1182,7 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
     script._resources.push(scriptResource);
   });
   aSkeleton.screenshots.forEach(function(i) {
-    script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
-        i.url, i.thumbnailURL));
+    script.addScreenShot(i.url, i.thumbnailURL);
   });
 
   script.id = aSkeleton.id;
@@ -1283,8 +1296,8 @@ Script.loadFromXML = function(aConfig, aNode) {
         var thumb = "";
         if (childNode.hasAttribute("thumb"))
           thumb = childNode.getAttribute("thumb");
-        script._screenshots.push(new AddonManagerPrivate.AddonScreenshot(
-            childNode.firstChild.nodeValue.trim(), thumb));
+
+        script.addScreenShot(childNode.firstChild.nodeValue.trim(), thumb);
         break;
       case "Noframes":
         script["_" + childNode.nodeName.toLowerCase()] = true;

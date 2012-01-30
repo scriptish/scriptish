@@ -50,7 +50,7 @@ function Scriptish_logScriptError(aError, aWindow, aFileURL, aId) {
     var category = "scriptish userscript error";
 
     // get what we can
-    if ((aError instanceof Ci.nsIScriptError) || (aError instanceof Ci.nsIScriptError2)) {
+    if (aError instanceof Ci.nsIScriptError) {
       var {errorMessage, sourceName, sourceLine, lineNumber, columnNumber, flags, category} = aError;
     }
     else if (aError instanceof Ci.nsIException) {
