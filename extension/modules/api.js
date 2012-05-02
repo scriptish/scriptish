@@ -183,8 +183,18 @@ function GM_API(options) {
 
   this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
+
+    // fix relative links
     aURL = NetUtil.newURI(
         aURL, null, NetUtil.newURI(aSafeWin.location.href, null, null)).spec;
+
+    // open new tab as a child tab of the caller if Tree Style Tab
+    // ( https://addons.mozilla.org/firefox/addon/tree-style-tab/ ) there.
+    if (aChromeWin.TreeStyleTabService &&
+        aChromeWin.TreeStyleTabService.readyToOpenChildTabNow) {
+      aChromeWin.TreeStyleTabService.readyToOpenChildTabNow(aSafeWin);
+    }
+
     Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
     return undefined; // don't return the window, this is intentional
   }
