@@ -129,6 +129,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
     this.tempFiles_.push(file);
 
+    // sync save file
     var converter = Instances.suc;
     converter.charset = "UTF-8";
     source = converter.ConvertFromUnicode(source);
