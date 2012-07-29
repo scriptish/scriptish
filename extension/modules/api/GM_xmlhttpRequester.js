@@ -144,7 +144,7 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
       details.user || "",
       details.password || ""
       );
-
+  if (details.onprogress) req.onprogress = details.onprogress;
   if (details.overrideMimeType) req.overrideMimeType(details.overrideMimeType);
 
   if (details.ignoreCache)
