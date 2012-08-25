@@ -38,6 +38,8 @@ var Instances = {
       .createInstance(Ci.nsISupportsString),
   get suc() Cc["@mozilla.org/intl/scriptableunicodeconverter"]
       .createInstance(Ci.nsIScriptableUnicodeConverter),
+  get cos() Cc["@mozilla.org/intl/converter-output-stream;1"]  
+       .createInstance(Ci.nsIConverterOutputStream),
   get timer() Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
   get wbp() Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
       .createInstance(Ci.nsIWebBrowserPersist),
