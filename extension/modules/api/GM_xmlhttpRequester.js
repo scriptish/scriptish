@@ -132,8 +132,8 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
     function(safeUrl, details, req) {
   this.setupRequestEvent(this.unsafeContentWin, req, "onload", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onerror", details);
-  this.setupRequestEvent(
-      this.unsafeContentWin, req, "onreadystatechange", details);
+  this.setupRequestEvent(this.unsafeContentWin, req, "onprogress", details);
+  this.setupRequestEvent(this.unsafeContentWin, req, "onreadystatechange", details);
 
   if (details.mozBackgroundRequest) req.mozBackgroundRequest = true;
 
@@ -195,7 +195,7 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
   var script = this.script;
 
   if (details[event]) {
-    req[event] = function() {
+    req[event] = function(ev) {
       var responseState = {
         // can't support responseXML because security won't
         // let the browser call properties on it
@@ -214,7 +214,15 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
         statusText: null,
         finalUrl: null
       };
-      if (4 == req.readyState && 'onerror' != event) {
+      if ("onprogress" == event) {
+        responseState.__exposedProps__.lengthComputable = "r";
+        responseState.__exposedProps__.loaded = "r";
+        responseState.__exposedProps__.total = "r";
+        responseState.lengthComputable = ev.lengthComputable;
+        responseState.loaded = ev.loaded;
+        responseState.total = ev.total;
+      }
+      else if (4 == req.readyState && "onerror" != event) {
         responseState.responseHeaders = req.getAllResponseHeaders();
         responseState.status = req.status;
         responseState.statusText = req.statusText;
