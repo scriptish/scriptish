@@ -199,6 +199,14 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
       var responseState = {
         // can't support responseXML because security won't
         // let the browser call properties on it
+        __exposedProps__: {
+          responseText: "r",
+          readyState: "r",
+          responseHeaders: "r",
+          status: "r",
+          statusText: "r",
+          finalUrl: "r"
+        },
         responseText: req.responseText,
         readyState: req.readyState,
         responseHeaders: null,
