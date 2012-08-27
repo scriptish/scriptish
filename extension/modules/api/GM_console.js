@@ -80,7 +80,7 @@ function GM_console(script, contentWindow, chromeWindow) {
         let fn = _console[id] || (function() {});
         return fn.apply(_console, args);
       }
-      throw new Error("No such method");
+      console.log("No such method in console", id);
     }
   });
 
