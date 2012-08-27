@@ -74,12 +74,12 @@ function Scriptish_injectScripts(options) {
         sandbox[funcName] = GM_api[funcName];
       }
     }
-    XPCOMUtils.defineLazyGetter(sandbox, "console", function() {
+    lazy(sandbox, "console", function() {
       return GM_console(script, safeWin, chromeWin);
     });
 
 
-    XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
+    lazy(sandbox, "GM_log", function() {
       if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
         var logger = new GM_ScriptLogger(script);
         return function() {
