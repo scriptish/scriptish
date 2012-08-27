@@ -83,8 +83,9 @@ function Scriptish_injectScripts(options) {
       if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
         var logger = new GM_ScriptLogger(script);
         return function() {
-          logger.log(Array.slice(arguments).join(" "));
-          sandbox.console.log.apply(sandbox.console, arguments);
+          const args = Array.slice(arguments);
+          logger.log(args.join(" "));
+          sandbox.console.log.apply(sandbox.console, args);
         }
       }
       return sandbox.console.log.bind(sandbox.console);
