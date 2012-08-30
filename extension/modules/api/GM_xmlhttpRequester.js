@@ -120,6 +120,9 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
   }
 
   return {
+    __exposedProps__: {
+      abort: "r"
+    },
     abort: function() {
       req.abort();
     }
