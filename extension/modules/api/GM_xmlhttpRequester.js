@@ -201,6 +201,7 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
         // let the browser call properties on it
         __exposedProps__: {
           responseText: "r",
+          responseJSON: "r",
           readyState: "r",
           responseHeaders: "r",
           status: "r",
