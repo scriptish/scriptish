@@ -1,3 +1,4 @@
+"use strict";
 const DESCRIPTION = "ScriptishService";
 const CONTRACTID = "@scriptish.erikvold.com/scriptish-service;1";
 const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
@@ -190,7 +191,7 @@ ScriptishService.prototype = {
     "chrome": true,
     "resource": true
   },
-  _reg_userjs: /\.user\.js$/,
+  _reg_userjs: /^[^#\?=]+\.user\.js$/,
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     // block content detection of scriptish by denying it chrome: & resource:
     // content, unless loaded from chrome: or about:
