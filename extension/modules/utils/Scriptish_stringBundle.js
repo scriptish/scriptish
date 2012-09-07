@@ -12,7 +12,7 @@ const engBundle = Services.strings.createBundle((function(){
   return tmp.join("/")
 })());
 
-XPCOMUtils.defineLazyGetter(this, "Scriptish_getPref", function() {
+lazy(this, "Scriptish_getPref", function() {
   let tools = {};
   Components.utils.import("resource://scriptish/prefmanager.js", tools);
   return function(aVal) tools.Scriptish_prefRoot.getValue(aVal);

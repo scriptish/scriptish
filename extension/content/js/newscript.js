@@ -87,8 +87,10 @@ function doInstall() {
   // put this created script into a file -- only way to install it
   var tempFile = Scriptish_getTempFile();
   var foStream = Scriptish_getWriteStream(tempFile);
-  foStream.write(script, script.length);
-  foStream.close();
+  var converter = Instances.cos;
+	converter.init(foStream, "UTF-8", 0, 0);  
+	converter.writeString(script);  
+	converter.close(); // this closes foStream  
 
   // create a script object with parsed metadata,
   script = Scriptish_config.parse(script);

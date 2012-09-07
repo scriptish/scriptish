@@ -73,13 +73,13 @@ function GM_API(options) {
   var windowID = aWinID;
 
   var lazyLoaders = {};
-  XPCOMUtils.defineLazyGetter(lazyLoaders, "xhr", function() {
+  lazy(lazyLoaders, "xhr", function() {
     return new GM_xmlhttpRequester(aUnsafeContentWin, aURL, aScript);
   });
-  XPCOMUtils.defineLazyGetter(lazyLoaders, "storage", function() {
+  lazy(lazyLoaders, "storage", function() {
     return new GM_ScriptStorage(aScript);
   });
-  XPCOMUtils.defineLazyGetter(lazyLoaders, "resources", function() {
+  lazy(lazyLoaders, "resources", function() {
     return new GM_Resources(aScript);
   });
 
