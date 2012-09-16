@@ -87,6 +87,11 @@ if (e10s) {
       "nsIChromeFrameMessageManager");
 }
 
+if (Cc["@mozilla.org/parserutils;1"]) {
+  lazyService(
+      Services, "pu", "@mozilla.org/parserutils;1", "nsIParserUtils");
+}
+
 lazyService(
     Services, "sis", "@mozilla.org/scriptableinputstream;1",
     "nsIScriptableInputStream");

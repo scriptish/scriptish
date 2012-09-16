@@ -83,12 +83,38 @@ function GM_API(options) {
     return new GM_Resources(aScript);
   });
 
-  this.GM_safeHTMLParser = function GM_safeHTMLParser(aHTMLStr) {
+  this.GM_safeHTMLParser = function GM_safeHTMLParser(aHTMLStr, aBaseURL) {
     if (!GM_apiLeakCheck("GM_safeHTMLParser")) return;
+
     let doc = document.implementation.createDocument(NS_XHTML, "html", null);
     let body = document.createElementNS(NS_XHTML, "body");
+    let baseURI;
+    let frag;
+
     doc.documentElement.appendChild(body);
-    body.appendChild(Services.suhtml.parseFragment(aHTMLStr, false, null, body));
+
+    if ("undefined" !== typeof aBaseURL) {
+      try {
+        baseURI = NetUtil.newURI(aBaseURL);
+      }
+      catch(e) {
+        throw new Error(Scriptish_stringBundle("error.api.safeHTMLParser.url"));
+      }
+    }
+    else {
+      baseURI = null;
+    }
+
+    // Try to use the newer nsIParserUtils (Gecko >= 14)
+    if ("pu" in Services) {
+      frag = Services.pu.parseFragment(aHTMLStr, 0, false, baseURI, body);
+    }
+    // Otherwise fall back to deprecated nsIScriptableUnescapeHTML
+    else {
+      frag = Services.suhtml.parseFragment(aHTMLStr, false, baseURI, body);
+    }
+
+    body.appendChild(frag);
     return doc;
   }
 
