@@ -1,47 +1,18 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0/LGPL 2.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is DownThemAll! RegExp optimizing merger
- *
- * The Initial Developer of the Original Code is Nils Maier
- * Portions created by the Initial Developer are Copyright (C) 2011
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Nils Maier <MaierMan@web.de>
- *   Erik Vold <erikvvold@gmail.com>
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
- * in which case the provisions of the GPL or the LGPL are applicable instead
- * of those above. If you wish to allow use of your version of this file only
- * under the terms of either the GPL or the LGPL, and not to allow others to
- * use your version of this file under the terms of the MPL, indicate your
- * decision by deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL or the LGPL. If you do not delete
- * the provisions above, a recipient may use your version of this file under
- * the terms of any one of the MPL, the GPL or the LGPL.
- *
- * ***** END LICENSE BLOCK ***** */
-
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/ */
 "use strict";
-
-const EXPORTED_SYMBOLS = ['merge'];
 
 const REG_TAINTED = /\\[ux]?\d/;
 const REG_TAINTED_ESCAPES = /\\\\/g;
 
+/**
+ * Filter function - Split a group of patterns into processable and
+ * tainted ones. The |this| context must be set up to refer to an
+ * array that will receive the tainted patterns.
+ * @param {String} r A pattern
+ * @returns {Boolean} Filter pattern
+ */
 function tainted_filter(r) {
   // No negative lookbehind in js :p
   if (REG_TAINTED.test(r.replace(REG_TAINTED_ESCAPES, ""))) {
@@ -52,14 +23,13 @@ function tainted_filter(r) {
 }
 
 /**
- * Array filter function to create an unique array
+ * Filter function - Create an unique array
  * @usage arr.filter(unique_filter, Object.create(null));
  */
 function unique_filter(e) !((e in this) || (this[e] = null));
 
 /**
  * Return a good prefix, with no bracket mismatches
- *
  * @param {String} Calculate the prefix from
  * @return {String} Calculated safe prefix without bracket mismatches
  */
@@ -216,6 +186,26 @@ function splitAlternates(pattern, rv) {
 }
 
 /**
+ * Sanitizes (truncates) a prefix, so that it does not end with an escape
+ * character
+ * @param {String} prefix Prefix to sanitize
+ * @returns {String} Sanitized Prefix
+ */
+function sanitizePrefixTail(prefix) {
+  const pl = prefix.length;
+  if (!pl) {
+    return "";
+  }
+  if (pl > 1 && prefix[pl-1] == "\\" && prefix[pl-2] != "\\" ) {
+    return prefix.substr(0, pl-1);
+  }
+  else if (pl == 1 && prefix == "\\") {
+    return "";
+  }
+  return prefix;
+}
+
+/**
  * Recursively determine the the largest group with a common prefix
  * The group is guaranteed to contain at least 3 items
  *
@@ -303,7 +293,7 @@ function largestPrefixGroup(patterns, low, high, level) {
  *                  specified by the low & high params are merged.
  */
 function mergePatterns(patterns, low, high, prefix) {
-  let pl = prefix.length;
+  const pl = prefix.length;
 
   // splice the patterns to be merged, chop off their common prefix and join
   let tails = patterns.splice(low, high - low).map(function(p) p.substring(pl));
@@ -358,7 +348,6 @@ function merge(patterns) {
   let tainted = [];
   patterns = patterns.filter(tainted_filter, tainted);
 
-
   // split patterns into pieces by top-level alternates
   let newpatterns = [];
   for (let [,p] in Iterator(patterns)) {
@@ -378,7 +367,8 @@ function merge(patterns) {
       // no common prefix found in (remaining) patterns
       break;
     }
-    patterns = mergePatterns(patterns, i, e, prefix);
+    const sprefix = sanitizePrefixTail(prefix);
+    patterns = mergePatterns(patterns, i, e, sprefix);
   }
 
   let len = patterns.length;
@@ -390,4 +380,11 @@ function merge(patterns) {
   // not yet a single pattern (i.e. not all patterns shared a common prefix)
   // merge without a prefix to get single pattern
   return merge_finish(mergePatterns(patterns, 0, len, ""), tainted);
+}
+
+if ("exports" in this) {
+  exports.merge = merge;
+}
+else {
+  this.EXPORTED_SYMBOLS = ["merge"];
 }
