@@ -86,12 +86,13 @@ function GM_API(options) {
   this.GM_safeHTMLParser = function GM_safeHTMLParser(aHTMLStr, aBaseURL) {
     if (!GM_apiLeakCheck("GM_safeHTMLParser")) return;
 
-    let doc = document.implementation.createDocument(NS_XHTML, "html", null);
-    let body = document.createElementNS(NS_XHTML, "body");
+    let doc = document.implementation.createDocument("", "",
+        document.implementation.createDocumentType("html", "", ""));
+    doc.appendChild(doc.createElement("html"));
+    doc.documentElement.appendChild(doc.createElement("body"));
+
     let baseURI;
     let frag;
-
-    doc.documentElement.appendChild(body);
 
     if ("undefined" !== typeof aBaseURL) {
       try {
@@ -107,14 +108,14 @@ function GM_API(options) {
 
     // Try to use the newer nsIParserUtils (Gecko >= 14)
     if ("pu" in Services) {
-      frag = Services.pu.parseFragment(aHTMLStr, 0, false, baseURI, body);
+      frag = Services.pu.parseFragment(aHTMLStr, 0, false, baseURI, doc.body);
     }
     // Otherwise fall back to deprecated nsIScriptableUnescapeHTML
     else {
-      frag = Services.suhtml.parseFragment(aHTMLStr, false, baseURI, body);
+      frag = Services.suhtml.parseFragment(aHTMLStr, false, baseURI, doc.body);
     }
-
-    body.appendChild(frag);
+    doc.adoptNode(frag);
+    doc.body.appendChild(frag);
     return doc;
   }
 
