@@ -81,6 +81,21 @@
     </hbox>
   </prefpane>
 
+  <prefpane id="pane-sync" label="sync" localize="label">
+    <preferences>
+      <preference id="pref-syncScriptishPrefsCommon" name="extensions.scriptish.sync.ScriptishPrefs.common" type="bool"/>
+      <preference id="pref-syncScriptishPrefsEditor" name="extensions.scriptish.sync.ScriptishPrefs.editor" type="bool"/>
+    </preferences>
+
+    <description value="options.sync.desc" localize="value"/>
+
+    <groupbox>
+      <caption label="options.sync.ScriptishPrefs" localize="label"/>
+      <checkbox id="sync-common" preference="pref-syncScriptishPrefsCommon" label="options.sync.ScriptishPrefs.common" localize="label"/>
+      <checkbox preference="pref-syncScriptishPrefsEditor" label="options.sync.ScriptishPrefs.editor" localize="label"/>
+    </groupbox>
+  </prefpane>
+
   <prefpane id="pane-advanced" label="options.pane.advanced" localize="label">
     <preferences>
       <preference id="pref-cache-enabled" name="extensions.scriptish.cache.enabled" type="bool"/>
