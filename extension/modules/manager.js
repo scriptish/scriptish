@@ -31,7 +31,7 @@ const tests = {
     var file = uri.file;
     return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
   }
-}
+};
 
 const Scriptish_manager = {
   setup: function(options) {
