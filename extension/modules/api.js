@@ -28,9 +28,10 @@ function GM_apiLeakCheck(apiName) {
   let stack = Components.stack;
 
   do {
+    // TODO: do better protocol check below
     // Valid stack frames for GM api calls are: native and js when coming from
     // chrome:// URLs and any file name listed in _apiAcceptedFiles.
-    if (2 == stack.language &&
+    if (2 == stack.language && stack.filename &&
         stack.filename != moduleFilename &&
         stack.filename != Scriptish_evalInSandbox_filename &&
         stack.filename != Scriptish_injectScripts_filename &&
