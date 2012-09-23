@@ -31,6 +31,8 @@ override chrome://scriptish/content/options.xul chrome://scriptish/content/fenne
 locale     scriptish  en-US  locale/en-US/
 locale     scriptish  de     locale/de/
 locale     scriptish  es-ES  locale/es-ES/
+locale     scriptish  he     locale/he/
+locale     scriptish  hu     locale/hu/
 locale     scriptish  ja-JP  locale/ja-JP/
 locale     scriptish  pl     locale/pl/
 locale     scriptish  pt-BR  locale/pt-BR/
