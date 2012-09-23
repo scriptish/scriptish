@@ -123,12 +123,9 @@ const Scriptish_manager = {
 
     if (scripts["document-end"].length || scripts["document-idle"].length) {
       safeWin.addEventListener("DOMContentLoaded", function() {
-        //if (shouldNotRun()) return;
-
         // inject @run-at document-idle scripts
         if (scripts["document-idle"].length) {
           timeout(function() {
-            //if (shouldNotRun()) return;
             Scriptish_injectScripts(extend(options, {
               scripts: scripts["document-idle"],
               url: href,
@@ -148,7 +145,6 @@ const Scriptish_manager = {
 
     if (scripts["window-load"].length) {
       safeWin.addEventListener("load", function() {
-        if (shouldNotRun()) return;
         // inject @run-at window-load scripts
         Scriptish_injectScripts(extend(options, {
           scripts: scripts["window-load"],

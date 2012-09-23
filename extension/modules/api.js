@@ -142,18 +142,7 @@ function GM_API(options) {
 
   this.GM_setValue = function GM_setValue(aName, aValue) {
     if (!GM_apiLeakCheck("GM_setValue")) return;
-
-    // e10s
-    if (options.global && options.global.sendAsyncMessage) {
-        return options.global.sendSyncMessage("Scriptish:ScriptSetValue", {
-          scriptID: aScript.id,
-          args: [aName, aValue]
-        });
-    }
-    // old school
-    else {
-      return lazyLoaders.storage.setValue.apply(lazyLoaders.storage, arguments);
-    }
+    return lazyLoaders.storage.setValue.apply(lazyLoaders.storage, arguments);
   };
   this.GM_getValue = function GM_getValue() {
     if (!GM_apiLeakCheck("GM_getValue")) return;
@@ -170,56 +159,22 @@ function GM_API(options) {
 
   this.GM_getResourceURL = function GM_getResourceURL(aName) {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
-
-    if (options.content) {
-      return options.global.sendSyncMessage("Scriptish:GetScriptResourceURL", {
-        scriptID: aScript.id,
-        resource: aName
-      });
-    }
-
     return lazyLoaders.resources.getResourceURL.apply(lazyLoaders.resources, arguments)
   }
   this.GM_getResourceText = function GM_getResourceText(aName) {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
-
-    if (options.global && options.global.sendSyncMessage) {
-      return options.global.sendSyncMessage("Scriptish:GetScriptResourceText", {
-        scriptID: aScript.id,
-        resource: aName
-      });
-    }
-
     return lazyLoaders.resources.getResourceText.apply(lazyLoaders.resources, arguments)
   }
 
   this.GM_getMetadata = function(aKey, aLocalVal) {
     if (!GM_apiLeakCheck("GM_getMetadata")) return;
-
-    if (options.global && options.global.sendSyncMessage) {
-      return options.global.sendSyncMessage("Scriptish:GetScriptMetadata", {
-        id: aScript.id,
-        key: aKey, 
-        localVal: aLocalVal
-      })[0];
-    }
-
     return Scriptish_getScriptHeader(aScript, aKey, aLocalVal);
   }
 
   this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-
-    if (options.global && options.global.sendSyncMessage) {
-      // TODO: implement aReuse for Fennec
-      options.global.sendAsyncMessage("Scriptish:OpenInTab", [
-          aURL, aLoadInBackground, false]);
-    }
-    else {
-      Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
-    }
-
-    return undefined; // can't return window object b/c of e10s, don't bother
+    Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
+    return undefined; // don't return the window, this is intentional
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {

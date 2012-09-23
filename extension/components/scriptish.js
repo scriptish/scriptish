@@ -33,15 +33,11 @@ const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
 
 function ScriptishService() {
-  if ("Fennec" != Services.appinfo.name) {
-    Scriptish_manager.setup.call(this);
-    Services.obs.addObserver(this, "install-userscript", false);
-    Services.obs.addObserver(this, "scriptish-enabled", false);
-    Services.obs.addObserver(this, "content-document-global-created", false);
-    Services.obs.addObserver(this, "chrome-document-global-created", false);
-  } else {
-    //Services.mm.
-  }
+  Scriptish_manager.setup.call(this);
+  Services.obs.addObserver(this, "install-userscript", false);
+  Services.obs.addObserver(this, "scriptish-enabled", false);
+  Services.obs.addObserver(this, "content-document-global-created", false);
+  Services.obs.addObserver(this, "chrome-document-global-created", false);
 }
 
 ScriptishService.prototype = {

@@ -17,21 +17,19 @@
     (chromeWin.Browser ? chromeWin.Browser : chromeWin.gBrowser)
         .addTab("about:scriptish");
 
-    if ("Fennec" != tools.Services.appinfo.name) {
-      // add toolbaritem to add-on bar
-      var addToBar = chromeWin.document.getElementById("addon-bar");
-      if (!addToBar || chromeWin.document.getElementById("scriptish-button"))
-        return;
-      var addonSet = (addToBar.getAttribute("currentset") || addToBar.getAttribute("defaultset")).split(",");
-      var addonPos = addonSet.indexOf("status-bar");
-      if (addonPos == -1) addonPos = addonSet.length;
-      addonSet.splice(addonPos, 0, "scriptish-button");
-      addonSet = addonSet.join(",");
-      addToBar.setAttribute("currentset", addonSet);
-      addToBar.currentSet = addonSet;
-      chromeWin.BrowserToolboxCustomizeDone(true);
-      chromeWin.document.persist(addToBar.getAttribute("id"), "currentset");
-      if ("addon-bar" == addToBar.getAttribute("id")) addToBar.collapsed = false;
-    }
+    // add toolbaritem to add-on bar
+    var addToBar = chromeWin.document.getElementById("addon-bar");
+    if (!addToBar || chromeWin.document.getElementById("scriptish-button"))
+      return;
+    var addonSet = (addToBar.getAttribute("currentset") || addToBar.getAttribute("defaultset")).split(",");
+    var addonPos = addonSet.indexOf("status-bar");
+    if (addonPos == -1) addonPos = addonSet.length;
+    addonSet.splice(addonPos, 0, "scriptish-button");
+    addonSet = addonSet.join(",");
+    addToBar.setAttribute("currentset", addonSet);
+    addToBar.currentSet = addonSet;
+    chromeWin.BrowserToolboxCustomizeDone(true);
+    chromeWin.document.persist(addToBar.getAttribute("id"), "currentset");
+    if ("addon-bar" == addToBar.getAttribute("id")) addToBar.collapsed = false;
   }
 })(Components.utils.import, {})

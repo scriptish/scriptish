@@ -10,7 +10,6 @@ lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
 lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
-lazyImport(this, "resource://scriptish/third-party/fennec/XPIDialogService.js", ["WebInstallPrompt"]);
 
 lazyUtil(this, "alert");
 lazyUtil(this, "getTempFile");
@@ -400,23 +399,13 @@ ScriptDownloader.prototype.cleanupTempFiles = function() {
 }
 ScriptDownloader.prototype.showInstallDialog = function(aTimer) {
   let self = this;
-  if ("Fennec" == Services.appinfo.name) {
-    WebInstallPrompt.confirm(Scriptish.getMostRecentWindow(), [{
-      name: this.script.name,
-      install: function() {
-        self.installScript();
-      },
-      cancel: function() {}
-    }]);
-  }
-  else {
-    if (!aTimer)
-      return timeout(this.showInstallDialog.bind(this, 1));
 
-    Services.wm.getMostRecentWindow("navigator:browser").openDialog(
-        "chrome://scriptish/content/install.xul", "",
-        "chrome,centerscreen,modal,dialog,titlebar,resizable", this);
-  }
+  if (!aTimer)
+    return timeout(this.showInstallDialog.bind(this, 1));
+
+  Services.wm.getMostRecentWindow("navigator:browser").openDialog(
+      "chrome://scriptish/content/install.xul", "",
+      "chrome,centerscreen,modal,dialog,titlebar,resizable", this);
 }
 ScriptDownloader.prototype.showScriptView = function() {
   Services.wm.getMostRecentWindow("navigator:browser")
