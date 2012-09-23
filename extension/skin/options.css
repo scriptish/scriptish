@@ -13,6 +13,9 @@ radio[pane="pane-ui"] {
 radio[pane="pane-excludes"] {
   -moz-image-region: rect(0px, 64px, 32px, 32px);
 }
+radio[pane="pane-sync"] {
+  list-style-image: url(chrome://browser/skin/sync-32.png);
+}
 radio[pane="pane-advanced"] {
   -moz-image-region: rect(0px, 96px, 32px, 64px);
 }

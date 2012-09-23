@@ -4,6 +4,7 @@ lazyUtil(this, "stringBundle");
 
 const MIN_INT_32 = -0x80000000;
 const MAX_INT_32 = 0x7FFFFFFF;
+const SYNC_PREFIX = "services.sync.prefs.sync.";
 const Scriptish_prefRoot = new Scriptish_PrefManager();
 
 /**
@@ -11,11 +12,12 @@ const Scriptish_prefRoot = new Scriptish_PrefManager();
  * Construct an instance by passing the startPoint of a preferences subtree.
  * "extensions.scriptish." prefix is assumed.
  */
-function Scriptish_PrefManager(startPoint) {
+function Scriptish_PrefManager(startPoint, syncMode) {
   if (!startPoint) startPoint = "";
   startPoint = "extensions.scriptish." + startPoint;
 
-  var pref = Services.prefs.getBranch(startPoint);
+  var pref =
+      Services.prefs.getBranch((syncMode ? SYNC_PREFIX : "") + startPoint);
 
   var observers = {};
 
@@ -132,5 +134,20 @@ function Scriptish_PrefManager(startPoint) {
       pref.QueryInterface(Ci.nsIPrefBranch2)
           .removeObserver(prefName, observers[watcher]);
     }
+  }
+
+  // Determine if the preference is currently set to be synchronized
+  this.isSynced = function(prefName) {
+    return this.getValue(prefName, false);
+  }
+
+  // Set a preference to be synchronized
+  this.sync = function(prefName) {
+    this.setValue(prefName, true);
+  }
+
+  // Stop a preference from being synchronized
+  this.unsync = function(prefName) {
+    this.setValue(prefName, false);
   }
 }
