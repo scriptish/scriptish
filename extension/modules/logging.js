@@ -34,7 +34,7 @@ function Scriptish_logScriptError(aError, aWindow, aFileURL, aId) {
     try {
       windowId = aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
         .getInterface(Ci.nsIDOMWindowUtils)
-        .outerWindowID;
+        .currentInnerWindowID;
     }
     catch (ex) {
       throw new Error("failed to get window id");

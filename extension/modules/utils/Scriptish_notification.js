@@ -4,12 +4,6 @@ lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
 function showAlertNotification() {
-  if ("Fennec" == Services.appinfo.name) {
-    return Cc["@mozilla.org/toaster-alerts-service;1"]
-        .getService(Ci.nsIAlertsService)
-        .showAlertNotification;
-  }
-
   return Services.as.showAlertNotification;
 }
 

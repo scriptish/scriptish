@@ -6,7 +6,7 @@
     <em:id>scriptish@erikvold.com</em:id>
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
-    <em:version>0.1.7</em:version>
+    <em:version>0.1.8</em:version>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
     <em:homepageURL>http://scriptish.org</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
@@ -47,9 +47,13 @@
 
     <em:translator>Alfredo Fernández Díaz (es-ES)</em:translator>
     <em:translator>allertec (pl)</em:translator>
+    <em:translator>barryoni (he)</em:translator>
+    <em:translator>iHastr (ru-RU)</em:translator>
     <em:translator>k2jp (ja-JP)</em:translator>
+    <em:translator>Kozák (WonderCsabo) Csaba (hu)</em:translator>
     <em:translator>Mauro José da Silva (pt-BR)</em:translator>
     <em:translator>Mikael Hiort af Ornäs (sv-SE)</em:translator>
+    <em:translator>Noumi Ryoko (ja-JP); http://wiijpn.blog69.fc2.com</em:translator>
     <em:translator>Nils Maier (de)</em:translator>
     <em:translator>nishikawasasaki (kohsei yamamoto) (ja-JP)</em:translator>
     <em:translator>shyangs (林郁翔) (zh-TW)</em:translator>
@@ -64,7 +68,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>4.0</em:minVersion>
-        <em:maxVersion>12.0a1</em:maxVersion>
+        <em:maxVersion>18.0a1</em:maxVersion>
       </Description>
     </em:targetApplication>
     <!-- SeaMonkey -->
@@ -73,14 +77,6 @@
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.1</em:minVersion>
         <em:maxVersion>2.8.*</em:maxVersion>
-      </Description>
-    </em:targetApplication>
-    <!-- Fennec -->
-    <em:targetApplication>
-      <Description>
-        <em:id>{a23983c0-fd0e-11dc-95ff-0800200c9a66}</em:id>
-        <em:minVersion>4.0</em:minVersion>
-        <em:maxVersion>10.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>

@@ -6,7 +6,7 @@ var EXPORTED_SYMBOLS = [
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
-lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
 lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_sandboxScripts"]);
@@ -25,23 +25,21 @@ const {nsIDOMXPathResult: XPATH_RESULT} = Ci;
 
 function Scriptish_injectScripts(options) {
   var {scripts, url, safeWin} = options;
-
-  try {
-  if ("Fennec" != Services.appinfo.name) {
-    var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
-    if (!chromeWin || !chromeWin.Scriptish_BrowserUI) return;
-  }
-  }
-  catch (e) {}
+  var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
+  if (!chromeWin || !chromeWin.Scriptish_BrowserUI) return;
 
   if (0 >= scripts.length) return;
 
   let unsafeContentWin = safeWin.wrappedJSObject;
-  let delays = [];
   let winID = Scriptish_getWindowIDs(safeWin).innerID;
 
+  let delays = [];
+
+  // window destroyed handler
   Scriptish_windowUnloader(function() {
+    // destroy a possible inject @delay
     for (let [, id] in Iterator(delays)) gTimer.clearTimeout(id);
+    delays.length = 0;
   }, winID);
 
   for (var i = 0, e = scripts.length; i < e; ++i) {
@@ -74,17 +72,18 @@ function Scriptish_injectScripts(options) {
         sandbox[funcName] = GM_api[funcName];
       }
     }
-    XPCOMUtils.defineLazyGetter(sandbox, "console", function() {
+    lazy(sandbox, "console", function() {
       return GM_console(script, safeWin, chromeWin);
     });
 
 
-    XPCOMUtils.defineLazyGetter(sandbox, "GM_log", function() {
+    lazy(sandbox, "GM_log", function() {
       if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
         var logger = new GM_ScriptLogger(script);
         return function() {
-          logger.log(Array.slice(arguments).join(" "));
-          sandbox.console.log.apply(sandbox.console, arguments);
+          const args = Array.slice(arguments);
+          logger.log(args.join(" "));
+          sandbox.console.log.apply(sandbox.console, args);
         }
       }
       return sandbox.console.log.bind(sandbox.console);
@@ -99,8 +98,17 @@ function Scriptish_injectScripts(options) {
       delays.push(gTimer.setTimeout(function() {
         Scriptish_evalInSandbox(script, sandbox, safeWin, options);
       }, delay));
-    } else {
+    }
+    else {
       Scriptish_evalInSandbox(script, sandbox, safeWin, options);
+    }
+
+    // window destroyed handler
+    if ("nukeSandbox" in Cu) {
+      Scriptish_windowUnloader(function() {
+        // try to nuke the sandbox (FF 17+ see bug 769273)
+        Cu.nukeSandbox(sandbox);
+      }, winID);
     }
   }
 }

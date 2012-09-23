@@ -254,6 +254,9 @@ Scriptish_BrowserUI.reattachMenuCmds = function() {
  */
 Scriptish_BrowserUI.chromeUnload = function() {
   gBrowser.removeProgressListener(this);
+  // kill reference to this document
+  this.menuCommanders.forEach(function({commander}) commander.destroy());
+  // kill reference to menuCommanders
   delete this.menuCommanders;
 }
 

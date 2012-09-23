@@ -1,3 +1,4 @@
+"use strict";
 const DESCRIPTION = "ScriptishService";
 const CONTRACTID = "@scriptish.erikvold.com/scriptish-service;1";
 const CLASSID = Components.ID("{ca39e060-88ab-11df-a4ee-0800200c9a66}");
@@ -32,15 +33,11 @@ const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
 
 function ScriptishService() {
-  if ("Fennec" != Services.appinfo.name) {
-    Scriptish_manager.setup.call(this);
-    Services.obs.addObserver(this, "install-userscript", false);
-    Services.obs.addObserver(this, "scriptish-enabled", false);
-    Services.obs.addObserver(this, "content-document-global-created", false);
-    Services.obs.addObserver(this, "chrome-document-global-created", false);
-  } else {
-    //Services.mm.
-  }
+  Scriptish_manager.setup.call(this);
+  Services.obs.addObserver(this, "install-userscript", false);
+  Services.obs.addObserver(this, "scriptish-enabled", false);
+  Services.obs.addObserver(this, "content-document-global-created", false);
+  Services.obs.addObserver(this, "chrome-document-global-created", false);
 }
 
 ScriptishService.prototype = {
@@ -190,7 +187,7 @@ ScriptishService.prototype = {
     "chrome": true,
     "resource": true
   },
-  _reg_userjs: /\.user\.js$/,
+  _reg_userjs: /^[^#\?=]+\.user\.js$/,
   shouldLoad: function(ct, cl, org, ctx, mt, ext) {
     // block content detection of scriptish by denying it chrome: & resource:
     // content, unless loaded from chrome: or about:

@@ -34,13 +34,14 @@ function getConsoleFor(contentWindow, chromeWindow) {
 
 function GM_console(script, contentWindow, chromeWindow) {
   const _console = getConsoleFor(contentWindow, chromeWindow);
-  const console = {};
+  const console = { __exposedProps__: {__noSuchMethod__: "r"} };
   const prefix = "[" + (script.id || "Scriptish") + "]";
 
   // Wrap log functions
   // Redirect any missing log function to .log
   for (let i = 0, e = log_functions.length; i < e; ++i) {
     let fn = log_functions[i];
+    console.__exposedProps__[fn] = "r";
     if (fn in _console) {
       console[fn] = _console[fn].bind(_console, prefix);
     }
@@ -70,6 +71,7 @@ function GM_console(script, contentWindow, chromeWindow) {
     let fn = aux_functions[i];
     if (fn in console) {
       console[fn] = _console[fn].bind(_console);
+      console.__exposedProps__[fn] = "r";
     }
   }
   Object.defineProperty(console, "__noSuchMethod__", {
@@ -78,7 +80,7 @@ function GM_console(script, contentWindow, chromeWindow) {
         let fn = _console[id] || (function() {});
         return fn.apply(_console, args);
       }
-      throw new Error("No such method");
+      console.log("No such method in console", id);
     }
   });
 

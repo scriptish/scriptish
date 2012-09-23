@@ -56,3 +56,7 @@ if [ "test" != "$1" ]; then
 fi
 cd ..
 rm -rf build
+
+if [ "amo" == "$1" ] || [ "staging" == "$1" ]; then
+  openssl sha1 "$XPI"
+fi

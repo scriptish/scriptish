@@ -233,3 +233,15 @@ Scriptish_MenuCommander.prototype.setDisabled = function(aStatus) {
   setStatus(this.$("scriptish-tb-cmds"), aStatus);
   setStatus(this.toolsMenu, aStatus);
 }
+
+Scriptish_MenuCommander.prototype.destroy = function() {
+  this.doc = null;
+  this.$ = null;
+  this.keyset = null;
+  this.keys = [];
+  this.attached = null;
+  this.tbMenuItems = [];
+  this.toolsMenu = null;
+  this.toolsMenuPopup = null;
+  this.toolsMenuItems = [];
+};

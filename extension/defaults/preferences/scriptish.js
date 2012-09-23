@@ -20,6 +20,8 @@ pref("extensions.scriptish.enableScriptRefreshing", true);
 pref("extensions.scriptish.logChrome", false);
 pref("extensions.scriptish.logToErrorConsole", true);
 pref("extensions.scriptish.optimizingRegexpMerge", false);
+pref("extensions.scriptish.sync.ScriptishPrefs.common", false);
+pref("extensions.scriptish.sync.ScriptishPrefs.editor", false);
 pref("extensions.scriptish.toolbarbutton.showScripts", true);
 pref("extensions.scriptish.uninstallPreferences", true);
 pref("extensions.scriptish.update.requireBuiltInCerts", true);
