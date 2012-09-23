@@ -12,7 +12,7 @@
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                 <em:minVersion>4.0</em:minVersion>
                 <em:maxVersion>18.0a1</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.7.xpi</em:updateLink>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.8.xpi</em:updateLink>
                 <em:updateHash>sha1:ee95dd6c12695806daec6d178f8585c46d4e6231</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
@@ -21,7 +21,7 @@
                 <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
                 <em:minVersion>2.1</em:minVersion>
                 <em:maxVersion>2.8.*</em:maxVersion>
-                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.7.xpi</em:updateLink>
+                <em:updateLink>http://github.com/downloads/scriptish/scriptish/scriptish-0.1.8.xpi</em:updateLink>
                 <em:updateHash>sha1:ee95dd6c12695806daec6d178f8585c46d4e6231</em:updateHash>
               </RDF:Description>
             </em:targetApplication>
@@ -30,6 +30,6 @@
       </RDF:Seq>
     </em:updates>
 
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAHJ+H2ftD8lNU/6orhjTsH8KwJcJpJf3NhYlx1GHG4kmfiRWj+fHp+biDrPS6zxXuvUqzBA9X3UAivtkCkWcRHjZN0B0iNrPv4aWsB9i3L4hsdXXLjBJfOOZzuJE92qYUChXn8K5Q8EgeWSemPlTrvB22LvXWglGA2Lo+g70buIV</em:signature>
+    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBACaeJuUaRaUBeMEYqnW7QY40djS5WjUFT5iq6j2twbOO3GnmpuaWcFtUVCpvsdBA1e4shCgTYgRpx6Kid7aYVmCWvcu7hiWakfOZvRPLVBPmpN7/dXWvadldcnvduVQsPHxU3UUVqI3aj37V01po1P/44gGK4dvbmRM+Sp1/JImF</em:signature>
   </RDF:Description>
 </RDF:RDF>
