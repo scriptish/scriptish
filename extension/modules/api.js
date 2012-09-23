@@ -216,6 +216,11 @@ function GM_API(options) {
           aURL, aLoadInBackground, false]);
     }
     else {
+      // open new tab as a child tab of the caller if Tree Style Tab
+      // ( https://addons.mozilla.org/firefox/addon/tree-style-tab/ ) there.
+      if (aChromeWin.TreeStyleTabService &&
+          aChromeWin.TreeStyleTabService.readyToOpenChildTabNow)
+          aChromeWin.TreeStyleTabService.readyToOpenChildTabNow(aSafeWin);
       Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
     }
 
