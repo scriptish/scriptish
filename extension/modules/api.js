@@ -78,7 +78,7 @@ function GM_API(options) {
     return new GM_xmlhttpRequester(aUnsafeContentWin, aURL, aScript);
   });
   lazy(lazyLoaders, "storage", function() {
-    return new GM_ScriptStorage(aScript);
+    return new GM_ScriptStorage(aScript, aSafeWin);
   });
   lazy(lazyLoaders, "resources", function() {
     return new GM_Resources(aScript);
@@ -152,6 +152,20 @@ function GM_API(options) {
     if (!GM_apiLeakCheck("GM_deleteValue")) return;
     return lazyLoaders.storage.deleteValue.apply(lazyLoaders.storage, arguments);
   };
+  this.GM_watchValue = function GM_watchValue(aName, aListener) {
+    if (!GM_apiLeakCheck("GM_watchValue")) return;
+    let listener = null;
+    if ("function" === typeof aListener) {
+      listener = function(aEvent) {
+        GM_apiSafeCallback(aSafeWin, aScript, null, aListener, [aEvent]);
+      };
+    }
+    return lazyLoaders.storage.watchValue.call(lazyLoaders.storage, aName, listener);
+  }
+  this.GM_unwatchValue = function GM_unwatchValue() {
+    if (!GM_apiLeakCheck("GM_unwatchValue")) return;
+    return lazyLoaders.storage.unwatchValue.apply(lazyLoaders.storage, arguments);
+  }
   this.GM_listValues = function GM_listValues() {
     if (!GM_apiLeakCheck("GM_listValues")) return;
     return lazyLoaders.storage.listValues.apply(lazyLoaders.storage, arguments);
