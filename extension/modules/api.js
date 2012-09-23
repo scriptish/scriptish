@@ -28,9 +28,10 @@ function GM_apiLeakCheck(apiName) {
   let stack = Components.stack;
 
   do {
+    // TODO: do better protocol check below
     // Valid stack frames for GM api calls are: native and js when coming from
     // chrome:// URLs and any file name listed in _apiAcceptedFiles.
-    if (2 == stack.language &&
+    if (2 == stack.language && stack.filename &&
         stack.filename != moduleFilename &&
         stack.filename != Scriptish_evalInSandbox_filename &&
         stack.filename != Scriptish_injectScripts_filename &&
@@ -73,22 +74,49 @@ function GM_API(options) {
   var windowID = aWinID;
 
   var lazyLoaders = {};
-  XPCOMUtils.defineLazyGetter(lazyLoaders, "xhr", function() {
+  lazy(lazyLoaders, "xhr", function() {
     return new GM_xmlhttpRequester(aUnsafeContentWin, aURL, aScript);
   });
-  XPCOMUtils.defineLazyGetter(lazyLoaders, "storage", function() {
+  lazy(lazyLoaders, "storage", function() {
     return new GM_ScriptStorage(aScript);
   });
-  XPCOMUtils.defineLazyGetter(lazyLoaders, "resources", function() {
+  lazy(lazyLoaders, "resources", function() {
     return new GM_Resources(aScript);
   });
 
-  this.GM_safeHTMLParser = function GM_safeHTMLParser(aHTMLStr) {
+  this.GM_safeHTMLParser = function GM_safeHTMLParser(aHTMLStr, aBaseURL) {
     if (!GM_apiLeakCheck("GM_safeHTMLParser")) return;
-    let doc = document.implementation.createDocument(NS_XHTML, "html", null);
-    let body = document.createElementNS(NS_XHTML, "body");
-    doc.documentElement.appendChild(body);
-    body.appendChild(Services.suhtml.parseFragment(aHTMLStr, false, null, body));
+
+    let doc = document.implementation.createDocument("", "",
+        document.implementation.createDocumentType("html", "", ""));
+    doc.appendChild(doc.createElement("html"));
+    doc.documentElement.appendChild(doc.createElement("body"));
+
+    let baseURI;
+    let frag;
+
+    if ("undefined" !== typeof aBaseURL) {
+      try {
+        baseURI = NetUtil.newURI(aBaseURL);
+      }
+      catch(e) {
+        throw new Error(Scriptish_stringBundle("error.api.safeHTMLParser.url"));
+      }
+    }
+    else {
+      baseURI = null;
+    }
+
+    // Try to use the newer nsIParserUtils (Gecko >= 14)
+    if ("pu" in Services) {
+      frag = Services.pu.parseFragment(aHTMLStr, 0, false, baseURI, doc.body);
+    }
+    // Otherwise fall back to deprecated nsIScriptableUnescapeHTML
+    else {
+      frag = Services.suhtml.parseFragment(aHTMLStr, false, baseURI, doc.body);
+    }
+    doc.adoptNode(frag);
+    doc.body.appendChild(frag);
     return doc;
   }
 
@@ -114,18 +142,7 @@ function GM_API(options) {
 
   this.GM_setValue = function GM_setValue(aName, aValue) {
     if (!GM_apiLeakCheck("GM_setValue")) return;
-
-    // e10s
-    if (options.global && options.global.sendAsyncMessage) {
-        return options.global.sendSyncMessage("Scriptish:ScriptSetValue", {
-          scriptID: aScript.id,
-          args: [aName, aValue]
-        });
-    }
-    // old school
-    else {
-      return lazyLoaders.storage.setValue.apply(lazyLoaders.storage, arguments);
-    }
+    return lazyLoaders.storage.setValue.apply(lazyLoaders.storage, arguments);
   };
   this.GM_getValue = function GM_getValue() {
     if (!GM_apiLeakCheck("GM_getValue")) return;
@@ -142,56 +159,22 @@ function GM_API(options) {
 
   this.GM_getResourceURL = function GM_getResourceURL(aName) {
     if (!GM_apiLeakCheck("GM_getResourceURL")) return;
-
-    if (options.content) {
-      return options.global.sendSyncMessage("Scriptish:GetScriptResourceURL", {
-        scriptID: aScript.id,
-        resource: aName
-      });
-    }
-
     return lazyLoaders.resources.getResourceURL.apply(lazyLoaders.resources, arguments)
   }
   this.GM_getResourceText = function GM_getResourceText(aName) {
     if (!GM_apiLeakCheck("GM_getResourceText")) return;
-
-    if (options.global && options.global.sendSyncMessage) {
-      return options.global.sendSyncMessage("Scriptish:GetScriptResourceText", {
-        scriptID: aScript.id,
-        resource: aName
-      });
-    }
-
     return lazyLoaders.resources.getResourceText.apply(lazyLoaders.resources, arguments)
   }
 
   this.GM_getMetadata = function(aKey, aLocalVal) {
     if (!GM_apiLeakCheck("GM_getMetadata")) return;
-
-    if (options.global && options.global.sendSyncMessage) {
-      return options.global.sendSyncMessage("Scriptish:GetScriptMetadata", {
-        id: aScript.id,
-        key: aKey, 
-        localVal: aLocalVal
-      })[0];
-    }
-
     return Scriptish_getScriptHeader(aScript, aKey, aLocalVal);
   }
 
   this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
-
-    if (options.global && options.global.sendSyncMessage) {
-      // TODO: implement aReuse for Fennec
-      options.global.sendAsyncMessage("Scriptish:OpenInTab", [
-          aURL, aLoadInBackground, false]);
-    }
-    else {
-      Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
-    }
-
-    return undefined; // can't return window object b/c of e10s, don't bother
+    Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
+    return undefined; // don't return the window, this is intentional
   }
 
   this.GM_xmlhttpRequest = function GM_xmlhttpRequest() {

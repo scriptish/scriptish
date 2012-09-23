@@ -451,4 +451,32 @@ test("tainted \\u escape", function() {
   equal(pc.test("foobaz\u0025"), true, "test");
 });
 
+test("https://github.com/scriptish/scriptish/issues/19", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("http://tieba.baidu.com/*");
+  pc.addPattern("http://tieba.baidu.com.cn/*");
+  if (optimized) {
+    equal(pc.merged.source, "^http:\\/\\/tieba\\.baidu\\.com(?:\\.cn\\/.*$|\\/.*$)", "issue/19");
+  }
+  else {
+    equal(pc.merged.source, "(?:^http:\\/\\/tieba\\.baidu\\.com\\/.*$)|(?:^http:\\/\\/tieba\\.baidu\\.com\\.cn\\/.*$)", "issue/19");
+  }
+});
+
+test("https://github.com/scriptish/scriptish/issues/19 2", function() {
+  var PatternCollection = importModule("resource://scriptish/utils/PatternCollection.js").PatternCollection;
+
+  var pc = new PatternCollection();
+  pc.addPattern("abc\\de");
+  pc.addPattern("abc\\ef");
+  if (optimized) {
+    equal(pc.merged.source, "^abc\\\\(?:de$|ef$)", "issue/19 2");
+  }
+  else {
+    equal(pc.merged.source, "(?:^abc\\\\de$)|(?:^abc\\\\ef$)", "issue/19 2");
+  }
+});
+
 })();

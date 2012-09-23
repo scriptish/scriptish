@@ -46,11 +46,6 @@ const Scriptish_ScriptProvider = {
         Scriptish_notification(msg, null, null, callback);
       }
 
-      // notify content processes that there is a new script
-      if ("Fennec" == Services.appinfo.name) {
-        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptInstalled", script.toJSON());
-      }
-
       break;
     case "scriptish-script-edit-enabling":
       AddonManagerPrivate.callAddonListeners(
@@ -59,12 +54,6 @@ const Scriptish_ScriptProvider = {
     case "scriptish-script-edit-enabled":
       AddonManagerPrivate.callAddonListeners(
           aData.enabling ? "onEnabled" : "onDisabled", script);
-
-      // notify content processes that a script's enabled state changed
-      if ("Fennec" == Services.appinfo.name) {
-        // TODO: use a more intelligent custom message handler
-        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptChanged", script.toJSON());
-      }
       break;
     case "scriptish-script-modified":
     case "scriptish-script-updated":
@@ -100,22 +89,12 @@ const Scriptish_ScriptProvider = {
         Scriptish_notification(msg, null, null, callback);
       }
 
-      // notify content processes that a script has changed
-      if ("Fennec" == Services.appinfo.name) {
-        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptChanged", script.toJSON());
-      }
-
       break;
     case "scriptish-script-uninstalling":
       AddonManagerPrivate.callAddonListeners("onUninstalling", script, false);
       break;
     case "scriptish-script-uninstalled":
       AddonManagerPrivate.callAddonListeners("onUninstalled", script);
-
-      // notify content processes that a script is uninstalled
-      if ("Fennec" == Services.appinfo.name) {
-        Scriptish_sendAsyncE10SMessage("Scriptish:ScriptUninstalled", script.id);
-      }
       break;
     }
   },

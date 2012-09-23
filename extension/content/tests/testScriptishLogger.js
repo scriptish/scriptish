@@ -109,7 +109,7 @@ asyncTest("null char removed", 1, function() {
 
 // logScriptError
 
-asyncTest("logScriptError: js error", 9, function() {
+asyncTest("logScriptError: js error", 7, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
@@ -117,14 +117,13 @@ asyncTest("logScriptError: js error", 9, function() {
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
     equal(message.sourceLine, "");
     ok(message.lineNumber > 10);
-    equal(message.columnNumber, 0);
     equal(message.category, "scriptish userscript error");
     equal(message.flags, message.errorFlag);
   });
   Scriptish_logScriptError(new Error("foo"), window, "bar.js", "baz");
 });
 
-asyncTest("logScriptError: nsIScriptError", 9, function() {
+asyncTest("logScriptError: nsIScriptError", 8, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
@@ -141,7 +140,7 @@ asyncTest("logScriptError: nsIScriptError", 9, function() {
   Scriptish_logScriptError(se, window, "bar.js", "baz");
 });
 
-asyncTest("logScriptError: nsIScriptError; omit id", 9, function() {
+asyncTest("logScriptError: nsIScriptError; omit id", 8, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
@@ -158,8 +157,7 @@ asyncTest("logScriptError: nsIScriptError; omit id", 9, function() {
   Scriptish_logScriptError(se, window);
 });
 
-asyncTest("test nsIScriptError; omit optionals", function() {
-  expect(9);
+asyncTest("test nsIScriptError; omit optionals", 8, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
@@ -176,8 +174,7 @@ asyncTest("test nsIScriptError; omit optionals", function() {
   Scriptish_logScriptError(se, window);
 });
 
-asyncTest("test nsIException", function() {
-  expect(9);
+asyncTest("test nsIException", 7, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
@@ -185,7 +182,6 @@ asyncTest("test nsIException", function() {
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
     equal(message.sourceLine, "");
     ok(message.lineNumber > 10);
-    equal(message.columnNumber, 0);
     equal(message.category, "scriptish userscript error");
     equal(message.flags, message.errorFlag);
   });
@@ -193,8 +189,7 @@ asyncTest("test nsIException", function() {
   Scriptish_logScriptError(ex, window, "bar.js", "baz");
 });
 
-asyncTest("test TypeError", function() {
-  expect(9);
+asyncTest("test TypeError", 7, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
@@ -202,7 +197,6 @@ asyncTest("test TypeError", function() {
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
     equal(message.sourceLine, "");
     ok(message.lineNumber > 10);
-    equal(message.columnNumber, 0);
     equal(message.category, "scriptish userscript error");
     equal(message.flags, message.errorFlag);
   });

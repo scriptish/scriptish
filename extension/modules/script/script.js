@@ -281,12 +281,7 @@ Script.prototype = {
   uninstall: function() {
     Scriptish.notify(this, "scriptish-script-uninstalling");
     this.needsUninstall = true;
-    if ("Fennec" == Services.appinfo.name) {
-      this._config.uninstallScripts();
-    }
-    else {
-      this.pendingOperations = AddonManager.PENDING_UNINSTALL;
-    }
+    this.pendingOperations = AddonManager.PENDING_UNINSTALL;
     Scriptish.notify(this, "scriptish-script-uninstalled");
   },
   uninstallProcess: function() {
