@@ -214,7 +214,7 @@ ScriptishService.prototype = {
 
   shouldProcess: function(ct, cl, org, ctx, mt, ext) CP.ACCEPT,
 
-  _tmpDir: Services.dirsvc.get("TmpD", Ci.nsILocalFile),
+  _tmpDir: Services.dirsvc.get("TmpD", Ci.nsIFile),
   isTempScript: function(uri) {
     if (!(uri instanceof Ci.nsIFileURL)) return false;
 

@@ -122,10 +122,10 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     var source = req.responseText;
     this.script = Scriptish_config.parse(source, this.uri_);
 
-    var file = Services.dirsvc.get("TmpD", Ci.nsILocalFile);
+    var file = Services.dirsvc.get("TmpD", Ci.nsIFile);
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();
     file.append(base + ".user.js");
-    file.createUnique(Ci.nsILocalFile.NORMAL_FILE_TYPE, 0640);
+    file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0640);
     this.tempFiles_.push(file);
 
     // sync save file
