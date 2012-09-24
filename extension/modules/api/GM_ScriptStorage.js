@@ -53,9 +53,9 @@ GM_ScriptStorage.prototype._prefChanged = function(aName) {
         oldValue: "r",
         newValue: "r"
       },
-      "name": aName,
-      "oldValue": this._watchedPrefs[aName].currentValue,
-      "newValue": newValue
+      name: aName,
+      oldValue: this._watchedPrefs[aName].currentValue,
+      newValue: newValue
     });
   }
   this._watchedPrefs[aName].currentValue = newValue;
@@ -82,8 +82,8 @@ GM_ScriptStorage.prototype.watchValue = function(aName, aListener) {
   }
   else {
     this._watchedPrefs[aName] = {
-      "currentValue": this.getValue(aName),
-      "watchers": [watcher]
+      currentValue: this.getValue(aName),
+      watchers: [watcher]
     };
 
     // Start watching the pref
@@ -103,7 +103,7 @@ GM_ScriptStorage.prototype.unwatchValue = function(aName, aUUID) {
   let watchers = this._watchedPrefs[aName].watchers;
 
   // If given a UUID, only remove the specified watcher
-  if (aUUID) {
+  if ("string" === typeof aUUID) {
     for (let i = 0, e = watchers.length; i < e; ++i) {
       if (aUUID === watchers[i].uuid) {
         watchers.splice(i, 1);
