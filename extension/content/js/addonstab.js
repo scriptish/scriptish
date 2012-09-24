@@ -4,7 +4,6 @@ const {lazyImport, lazyUtil} = tools;
 
 lazyImport(window, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(window, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
-lazyImport(window, "resource://scriptish/third-party/Scriptish_openFolder.js", ["Scriptish_openFolder"]);
 
 lazyUtil(window, "ExtendedStringBundle");
 lazyUtil(window, "installUri");
@@ -94,7 +93,7 @@ window.addEventListener("load", function() {
   };
   gViewController.commands.cmd_scriptish_userscript_show = {
     isEnabled: addonIsInstalledScript,
-    doCommand: function(aAddon) Scriptish_openFolder(aAddon._file)
+    doCommand: function(aAddon) aAddon._file.reveal()
   };
   gViewController.commands.cmd_scriptish_userscript_dl_link = {
     isEnabled: function(aAddon) {

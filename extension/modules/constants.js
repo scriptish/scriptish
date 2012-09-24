@@ -69,10 +69,6 @@ lazyService(
 lazyService(
     Services, "cs", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 
-lazyService(
-    Services, "eps", "@mozilla.org/uriloader/external-protocol-service;1",
-    "nsIExternalProtocolService");
-
 if (Cc["@mozilla.org/privatebrowsing;1"]) {
   lazyService(
       Services, "pbs", "@mozilla.org/privatebrowsing;1",

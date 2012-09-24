@@ -27,7 +27,7 @@
           break;
 
           case "button_scriptish_userscript_show":
-            Scriptish_openFolder(addon._file);
+            addon._file.reveal();
           break;
         }
       ]]></handler>
