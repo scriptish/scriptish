@@ -9,7 +9,6 @@ lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "Ad
 lazyUtil(this, "notification");
 lazyUtil(this, "openManager");
 lazyUtil(this, "popupNotification");
-lazyUtil(this, "sendAsyncE10SMessage");
 lazyUtil(this, "stringBundle");
 
 const Scriptish_ScriptProvider = {
