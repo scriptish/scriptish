@@ -79,9 +79,6 @@
     <hbox pack="end">
       <label class="remark" control="excludes" value="options.excludes.remark" localize="value"/>
     </hbox>
-    <hbox>
-      <textbox id="excludesTest" flex="1" placeholder="options.excludes.test" localize="placeholder"/>
-    </hbox>
   </prefpane>
 
   <prefpane id="pane-sync" label="sync" localize="label">
