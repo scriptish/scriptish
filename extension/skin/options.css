@@ -30,6 +30,15 @@ description {
   font-size: x-small;
 }
 
+/* NOTE: If changing, keep in sync with newscript.css */
+.valid {
+  box-shadow: 0pt 0pt 1.5px 1px green;
+}
+
+.invalid {
+  box-shadow: 0pt 0pt 1.5px 1px red;
+}
+
 tabpanel {
   -moz-box-orient: vertical;
 }

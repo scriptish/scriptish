@@ -16,6 +16,7 @@ textbox {
   min-width: 35em;
 }
 
+/* NOTE: If changing, keep in sync with options.css */
 *[required][invalid="true"] {
   box-shadow: 0pt 0pt 1.5px 1px red;
 }

@@ -13,6 +13,12 @@ lazyImport(this, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
   "Scriptish_getExcludes"
 ]);
 
+let currentExcludes = {};
+lazyImport(currentExcludes, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
+  "Scriptish_isURLExcluded",
+  "Scriptish_setExcludes"
+]);
+
 lazyUtil(this, "getEditor");
 lazyUtil(this, "stringBundle");
 
@@ -25,6 +31,20 @@ function changeEditor() Scriptish_getEditor(window, true);
 function saveExcludes() {
   Scriptish_setExcludes($("excludes").value.match(/.+/g));
   Scriptish.notify(null, "scriptish-preferences-change", true);
+}
+
+function testExcludes() {
+  let excludesTest = $("excludesTest");
+  let url = excludesTest.value;
+
+  if (0 === url.length) {
+    excludesTest.className = "";
+    return;
+  }
+
+  currentExcludes.Scriptish_setExcludes($("excludes").value.match(/.+/g));
+  excludesTest.className =
+      currentExcludes.Scriptish_isURLExcluded(url) ? "valid" : "invalid";
 }
 
 function checkSync() {
@@ -102,6 +122,10 @@ addEventListener("load", function init() {
   else {
     addEventListener("dialogaccept", saveExcludes, true);
   }
+
+  // Re-test if either value changes
+  excludes.addEventListener("input", testExcludes, false);
+  $("excludesTest").addEventListener("input", testExcludes, false);
 
   // Check sync options to determine whether to add or remove sync service vals.
   // NOTE: Delaying to allow the sync-controlling prefs to update.
