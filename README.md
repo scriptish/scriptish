@@ -22,7 +22,7 @@ Scriptish is a userscript manager for Firefox, forked from Greasemonkey.
 
 ## IRC
 
-irc.mozilla.orc #scriptish
+irc.mozilla.org #scriptish
 
 # UserScripts
 
