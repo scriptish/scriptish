@@ -50,7 +50,7 @@ function Scriptish_injectScripts(options) {
     let script = scripts[i];
     let sandbox = new Cu.Sandbox(safeWin, {
       sandboxName: script.fileURL,
-      //sandboxPrototype: safeWin,
+      sandboxPrototype: safeWin,
       wantXrays: true
     });
 
@@ -90,7 +90,7 @@ function Scriptish_injectScripts(options) {
     });
 
     sandbox.unsafeWindow = unsafeContentWin;
-    sandbox.__proto__ = safeWin;
+    //sandbox.__proto__ = safeWin;
 
     let delay = script.delay;
     if (delay || delay === 0) {
