@@ -36,7 +36,7 @@ lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "Ad
       });
       return a < b ? -1 : (a > b ? 1 : 0);
     });
-    for each (var person in aPersons) {
+    for (var person of aPersons) {
       person = person.name.split(/; +/);
       if (!person[1]) {
         person = person[0];
