@@ -2,16 +2,17 @@
 <bindings xmlns="http://www.mozilla.org/xbl"
           xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <binding id="control-container">
-    <content>
-      <!-- do not use the commands, as the controller will check isEnabled with a null argument -->
-      <xul:button class="addon-control button_scriptish_userscript_edit"
-                  anonid="button_scriptish_userscript_edit"
-                  observes="br_scriptish_userscript_edit" />
-      <xul:button class="addon-control button_scriptish_userscript_show"
-                  anonid="button_scriptish_userscript_show"
-                  observes="br_scriptish_userscript_show" />
-      <children includes="button"/>
-    </content>
+    <implementation>
+      <constructor><![CDATA[
+        for (let b of ["edit", "show"]) {
+          let btn = document.createElement("button");
+          btn.setAttribute("class", "addon-control button_scriptish_userscript_" + b);
+          btn.setAttribute("anonid", "button_scriptish_userscript_" + b);
+          btn.setAttribute("observes", "br_scriptish_userscript_" + b);
+          this.insertBefore(btn, this.firstChild);
+        }
+      ]]></constructor>
+    </implementation>
     <handlers>
       <handler event="click" count="1"><![CDATA[
         let button = event.originalTarget;
