@@ -2,10 +2,41 @@
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 
 Components.utils.import("resource://scriptish/constants.js");
+try {
+  Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
+}
+catch (ex) {
+  this.PrivateBrowsingUtils = { isWindowPrivate: function() false };
+}
+
 lazyImport(this, "resource://scriptish/api.js", ["GM_apiSafeCallback"]);
 lazyUtil(this, "stringBundle");
 
 const MIME_JSON = /^(application|text)\/(?:x-)?json/i;
+const PRIVATE_CHANNELS = 'nsIPrivateBrowsingChannel' in Ci;
+
+/**
+ * Make a channel private as per pwpbm or LOAD_ANONYMOUS (legacy)
+ */
+function makeChannelPrivate(chan) {
+  if (PRIVATE_CHANNELS && chan instanceof Ci.nsIPrivateBrowsingChannel) {
+    chan.setPrivate(true);
+    return;
+  }
+
+  // legacy / non pbc
+  if (chan instanceof Ci.nsIHttpChannel) {
+    chan.setRequestHeader('Referer', '', false);
+    chan.setRequestHeader('Cookie', '', false);
+    try {
+      chan.referrer = null;
+    }
+    catch (ex) {
+      // ignore
+    }
+  }
+  chan.loadFlags |= Ci.nsIRequest.LOAD_ANONYMOUS;
+}
 
 /**
  * Abstract base class for (chained) request notification callback overrides
@@ -76,8 +107,9 @@ IgnoreRedirect.prototype = {
 };
 
 
-function GM_xmlhttpRequester(unsafeContentWin, originUrl, aScript) {
+function GM_xmlhttpRequester(unsafeContentWin, safeWin, originUrl, aScript) {
   this.unsafeContentWin = unsafeContentWin;
+  this.safeWin = safeWin;
   this.originUrl = originUrl;
   this.script = aScript;
 }
@@ -182,6 +214,12 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
       if (Object.prototype.hasOwnProperty.call(headers, prop))
         req.setRequestHeader(prop, headers[prop]);
     }
+  }
+
+  // Loads initiated from private windows should always be private as well.
+  let makePrivate = details.makePrivate || PrivateBrowsingUtils.isWindowPrivate(this.safeWin);
+  if (makePrivate) {
+    makeChannelPrivate(req.channel);
   }
 
   var body = details.data ? details.data : null;

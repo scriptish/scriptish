@@ -75,7 +75,7 @@ function GM_API(options) {
 
   var lazyLoaders = {};
   lazy(lazyLoaders, "xhr", function() {
-    return new GM_xmlhttpRequester(aUnsafeContentWin, aURL, aScript);
+    return new GM_xmlhttpRequester(aUnsafeContentWin, aSafeWin, aURL, aScript);
   });
   lazy(lazyLoaders, "storage", function() {
     return new GM_ScriptStorage(aScript, aSafeWin);
