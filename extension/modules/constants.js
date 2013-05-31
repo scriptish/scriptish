@@ -69,14 +69,6 @@ lazyService(
 lazyService(
     Services, "cs", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 
-if (Cc["@mozilla.org/privatebrowsing;1"]) {
-  lazyService(
-      Services, "pbs", "@mozilla.org/privatebrowsing;1",
-      "nsIPrivateBrowsingService");
-} else {
-  Services.pbs = {privateBrowsingEnabled: false};
-}
-
 if (e10s) {
   lazyService(
       Services, "mm", "@mozilla.org/globalmessagemanager;1",
