@@ -1,8 +1,13 @@
-var EXPORTED_SYMBOLS = ["Scriptish_alert"];
-Components.utils.import("resource://scriptish/constants.js");
+'use strict';
 
-function Scriptish_alert(aMsg, aTitle, aWait) {
+const { Cu } = require('chrome')
+const { setTimeout } = require('sdk/timers')
+
+const { Services } = Cu.import("resource://scriptish/constants.js", {});
+
+function alert(aMsg, aTitle, aWait) {
   if (typeof aWait == "number")
-    return timeout(function() Scriptish_alert(aMsg, aTitle), aWait);
+    return setTimeout(function() Scriptish_alert(aMsg, aTitle), aWait);
   Services.prompt.alert(null, aTitle || "Scriptish", aMsg+"");
 }
+exports.alert = alert;

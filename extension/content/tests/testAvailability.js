@@ -34,7 +34,6 @@ Cu.import("resource://scriptish/utils/Scriptish_openInTab.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js", tools);
 Cu.import("resource://scriptish/third-party/MatchPattern.js", tools);
 Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js", tools);
-Cu.import("resource://scriptish/third-party/Timer.js", tools);
 })(Components.utils);
 
 test("Utils", function() {
@@ -75,5 +74,4 @@ test("3rd Party", function() {
 
   equals(typeof(tools.MatchPattern), "function", "has MatchPattern");
   equals(typeof(tools.MatchPattern), "function", "has Scriptish_openFolder");
-  equals(typeof(tools.Timer), "function", "has Timer");
 });

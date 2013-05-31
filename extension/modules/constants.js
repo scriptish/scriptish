@@ -1,5 +1,5 @@
 var EXPORTED_SYMBOLS = [
-    "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils", "extend",
+    "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils", "extend", "jetpack",
     "Services", "Instances", "lazy", "lazyImport", "lazyUtil", "timeout", "e10s"];
 
 const {classes: Cc, interfaces: Ci, results: Cr} = Components;
@@ -121,22 +121,6 @@ function lazyUtil(obj, name) lazyImport(obj,
                                         ["Scriptish_" + name]
                                         );
 
-lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
-function timeout(cb, delay) {
-  var callback = function() cb.call(null);
-  delay = delay || 0;
-  if (0 >= delay) {
-    Services.tm.currentThread.dispatch(callback, Ci.nsIThread.DISPATCH_NORMAL);
-    return;
-  }
-
-  if (!global.setTimeout) {
-    global.setTimeout = (new Timer()).setTimeout; // see bug #252
-  }
-
-  setTimeout(callback, delay);
-}
-
 function extend(a, o) {
   for (var k in a) {
     if (!o[k]) {
@@ -145,3 +129,22 @@ function extend(a, o) {
   }
   return o;
 }
+
+var { Loader } = Components.utils.import("resource://gre/modules/commonjs/toolkit/loader.js", {});
+var loader = Loader.Loader({
+  paths: {
+    "sdk/": "resource://gre/modules/commonjs/sdk/",
+    "scriptish/": "resource://scriptish/",
+     "": "globals:///"
+  },
+  resolve: function(id, base) {
+    if (id == "chrome" || id.startsWith("@"))
+      return id;
+    return Loader.resolve(id, base);
+  }
+});
+// fake requirer uri scriptish:// (it's used for relative requires and error messages)
+var module = Loader.Module("main", "scriptish://");
+var jetpack = Loader.Require(loader, module);
+
+const { setTimeout: timeout } = jetpack('sdk/timers');

@@ -12,7 +12,7 @@ lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
 lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_sandboxScripts"]);
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
 lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
-lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
+
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 
 lazyUtil(this, "evalInSandbox");
@@ -20,7 +20,7 @@ lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "windowUnloader");
 
 const Scriptish_injectScripts_filename = Components.stack.filename;
-const gTimer = new Timer();
+const gTimer = jetpack('sdk/timers');
 const {nsIDOMXPathResult: XPATH_RESULT} = Ci;
 
 function Scriptish_injectScripts(options) {

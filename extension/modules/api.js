@@ -7,7 +7,7 @@ lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scri
 lazyImport(this, "resource://scriptish/utils/Scriptish_evalInSandbox.js", ["Scriptish_evalInSandbox_filename"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_injectScripts.js", ["Scriptish_injectScripts_filename"]);
 
-lazyUtil(this, "alert");
+const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
 lazyUtil(this, "cryptoHash");
 lazyUtil(this, "getScriptHeader");
 lazyUtil(this, "notification");

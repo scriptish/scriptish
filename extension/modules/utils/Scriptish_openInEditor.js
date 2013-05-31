@@ -7,7 +7,7 @@ Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyUtil(this, "getEditor");
 lazyUtil(this, "launchApplicationWithDoc");
-lazyUtil(this, "alert");
+const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
 lazyUtil(this, "stringBundle");
 
 function Scriptish_openInEditor(script, parentWindow) {

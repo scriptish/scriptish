@@ -11,7 +11,7 @@ lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
 lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
 
-lazyUtil(this, "alert");
+const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
 lazyUtil(this, "getTempFile");
 lazyUtil(this, "getWriteStream");
 lazyUtil(this, "stringBundle");

@@ -17,7 +17,7 @@ lazyImport(this, "resource://scriptish/utils/Scriptish_isURLExcluded.js", [
   "Scriptish_setExcludes",
   "Scriptish_getExcludes"
 ]);
-lazyImport(this, "resource://scriptish/third-party/Timer.js", ["Timer"]);
+const { setTimeout, clearTimeout } = jetpack('sdk/timers');
 
 lazyUtil(this, "cryptoHash");
 lazyUtil(this, "injectScripts");
@@ -30,7 +30,6 @@ lazyUtil(this, "stringBundle");
 function Config(aBaseDir) {
   var self = this;
   this.loaded = false;
-  this.timer = new Timer();
   this._observers = [];
   this._saveTimer = null;
   this._scripts = [];
@@ -331,9 +330,8 @@ Config.prototype = {
     // via a timer, to avoid locking up the UI.
     if (!aSaveNow) {
       // Reduce work in the case of many changes near to each other in time.
-      if (this._saveTimer) this.timer.clearTimeout(this._saveTimer);
-      this._saveTimer =
-          this.timer.setTimeout(this._save.bind(this, true), 250);
+      if (this._saveTimer) clearTimeout(this._saveTimer);
+      this._saveTimer = setTimeout(this._save.bind(this, true), 250);
       return;
     }
     delete this["_saveTimer"];

@@ -14,7 +14,7 @@ lazyImport(this, "resource://scriptish/manager.js", ["Scriptish_manager"]);
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 
-lazyUtil(this, "alert");
+const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
 lazyUtil(this, "injectScripts");
 lazyUtil(this, "installUri");
 lazyUtil(this, "isGreasemonkeyable");
