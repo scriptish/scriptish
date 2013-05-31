@@ -6,7 +6,7 @@
     <em:id>scriptish@erikvold.com</em:id>
     <em:name>Scriptish</em:name>
     <em:description>A Script Extension Manager for Firefox</em:description>
-    <em:version>0.1.9pre</em:version>
+    <em:version>0.1.9</em:version>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
     <em:homepageURL>http://scriptish.org</em:homepageURL>
     <em:optionsURL>chrome://scriptish/content/options.xul</em:optionsURL>
