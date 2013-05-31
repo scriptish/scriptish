@@ -834,7 +834,8 @@ Script.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
-    if (Services.pbs.privateBrowsingEnabled) this._downloadURL = null;
+    // TODO: see https://github.com/scriptish/scriptish/issues/94
+    if (true) this._downloadURL = null;
 
     // set up _modified and stat thrashing stuff
     this.isModified();
@@ -869,7 +870,8 @@ Script.parseVersion = function Script_parseVersion(aSrc) {
 Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
   var script = new Script(aConfig);
 
-  if (aURI && !Services.pbs.privateBrowsingEnabled)
+  // TODO: see https://github.com/scriptish/scriptish/issues/94
+  if (aURI && false)
     script._downloadURL = aURI.spec;
 
   // read one line at a time looking for start meta delimiter or EOF
