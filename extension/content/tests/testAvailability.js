@@ -30,7 +30,6 @@ Cu.import("resource://scriptish/utils/Scriptish_localizeDOM.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_memoize.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_notification.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_openInEditor.js", tools);
-Cu.import("resource://scriptish/utils/Scriptish_openInTab.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_stringBundle.js", tools);
 Cu.import("resource://scriptish/third-party/MatchPattern.js", tools);
 Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js", tools);
@@ -65,7 +64,6 @@ test("Utils", function() {
   equals(typeof(tools.Scriptish_memoize), "function", "has Scriptish_memoize");
   equals(typeof(tools.Scriptish_notification), "function", "has Scriptish_notification");
   equals(typeof(tools.Scriptish_openInEditor), "function", "has Scriptish_openInEditor");
-  equals(typeof(tools.Scriptish_openInTab), "function", "has Scriptish_openInTab");
   equals(typeof(tools.Scriptish_stringBundle), "function", "has Scriptish_stringBundle");
 });
 
