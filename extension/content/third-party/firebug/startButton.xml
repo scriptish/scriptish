@@ -6,18 +6,17 @@
   <binding id="scriptish-button" display="xul:menu"
       extends="chrome://global/content/bindings/toolbarbutton.xml#menu-button">
       <content>
-          <children includes="observes|template|menupopup|panel|tooltip"/>
           <xul:stack>
             <xul:hbox class="badge" pack="center" align="center">
               <xul:label class="label" value="0" xbl:inherits="value=scriptCount"/>
             </xul:hbox>
           </xul:stack>
 
-          <xul:toolbarbutton class="scriptish-button box-inherit toolbarbutton-menubutton-button"
-              anonid="button" flex="1" allowevents="true"
-              xbl:inherits="disabled,crop,image,label,accesskey,command,align,dir,pack,orient"/>
-          <xul:dropmarker type="menu-button" class="toolbarbutton-menubutton-dropmarker"
-              xbl:inherits="align,dir,pack,orient,disabled,label"/>
+          <xul:toolbarbutton class="scriptish-button toolbarbutton-1"
+              anonid="button" flex="1" allowevents="true" type="menu"
+              xbl:inherits="disabled,crop,image,label,accesskey,command,align,dir,pack,orient,scriptish-disabled">
+            <children includes="observes|template|menupopup|panel|tooltip"/>
+          </xul:toolbarbutton>
       </content>
   </binding>
 </bindings>
