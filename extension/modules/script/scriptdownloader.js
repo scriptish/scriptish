@@ -228,7 +228,7 @@ ScriptDownloader.prototype.downloadNextDependency = function() {
 
     var progressListener = new PersistProgressListener(persist);
     progressListener.onFinish =
-        this.handleDependencyDownloadComplete.bind(this, dep, file, sourceChannel);
+        this.handleDependencyDownloadComplete.bind(this, dep, file);
     persist.progressListener = progressListener;
     persist.saveChannel(sourceChannel, file);
   } catch (e) {
@@ -447,6 +447,6 @@ PersistProgressListener.prototype.onStateChange =
   function(aWebProgress, aRequest, aStateFlags, aStatus) {
     if (this.persist.currentState == this.persist.PERSIST_STATE_FINISHED) {
       Scriptish_log("Persister: Download complete " + aRequest.status);
-      this.onFinish();
+      this.onFinish(aRequest);
     }
   };
