@@ -2,7 +2,10 @@ var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils", "extend", "jetpack",
     "Services", "Instances", "lazy", "lazyImport", "lazyUtil", "timeout", "e10s"];
 
-const {classes: Cc, interfaces: Ci, results: Cr} = Components;
+const {classes: Cc, interfaces: Ci, results: Cr, utils: Cu, Constructor: CC} = Components;
+
+const systemPrincipal = CC('@mozilla.org/systemprincipal;1', 'nsIPrincipal')();
+
 const e10s = !!Cc["@mozilla.org/globalmessagemanager;1"];
 const global = this;
 var Services = {};
@@ -130,19 +133,34 @@ function extend(a, o) {
   return o;
 }
 
-var { Loader } = Components.utils.import("resource://gre/modules/commonjs/toolkit/loader.js", {});
-var loader = Loader.Loader({
+
+function descriptor(object) {
+  let value = {};
+  getOwnPropertyNames(object).forEach(function(name) {
+    value[name] = getOwnPropertyDescriptor(object, name)
+  });
+  return value;
+}
+
+const { Loader } = Components.utils.import("resource://gre/modules/commonjs/toolkit/loader.js", {});
+
+const loader = Loader.Loader({
+   modules: {
+     "toolkit/loader": Loader
+   },
   paths: {
-    "sdk/": "resource://gre/modules/commonjs/sdk/",
+    "devtools": "resource:///modules/devtools",
     "scriptish/": "resource://scriptish/",
-     "": "globals:///"
+    "": "resource://gre/modules/commonjs/"
   },
   resolve: function(id, base) {
     if (id == "chrome" || id.startsWith("@"))
       return id;
     return Loader.resolve(id, base);
-  }
+  },
+
 });
+
 // fake requirer uri scriptish:// (it's used for relative requires and error messages)
 var module = Loader.Module("main", "scriptish://");
 var jetpack = Loader.Require(loader, module);
