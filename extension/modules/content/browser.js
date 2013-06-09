@@ -18,17 +18,10 @@ function Scriptish_BrowserUIM(aWin, aBrowserUI) {
 }
 Scriptish_BrowserUIM.prototype = {
   onIconClick: function(aEvt) {
-    if ("menu-button" == aEvt.originalTarget.type) return;
-    switch (aEvt.button) {
-      case 0:
-        this.onToggleStatus();
-        break;
-      case 1:
-        Scriptish_openManager();
-        break;
-      case 2:
-        this.$("scriptish-tb-popup").openPopup(this.$("scriptish-button"), "before_end", 0, 0, false, false);
-        break;
+    if (aEvt.button === 1 && aEvt.target.id === "scriptish-button") {
+      Scriptish_openManager();
+      aEvt.preventDefault();
+      aEvt.stopPropagation();
     }
   },
   onToggleStatus: function() Scriptish.enabled = !Scriptish.enabled,

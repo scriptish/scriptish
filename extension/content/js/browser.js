@@ -39,6 +39,7 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   }
 
   var tbBtnBrd = $("scriptish-button-brd");
+  tbBtnBrd.setAttribute("onclick", "Scriptish_BrowserUIM.onIconClick(event)");
   updateShowScripts();
   Scriptish_prefRoot.watch("enabled", updateShowScripts);
   Scriptish_prefRoot.watch("toolbarbutton.showScripts", updateShowScripts);
