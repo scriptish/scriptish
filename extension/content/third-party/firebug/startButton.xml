@@ -12,8 +12,9 @@
             </xul:hbox>
           </xul:stack>
 
-          <xul:toolbarbutton class="scriptish-button toolbarbutton-1"
-              anonid="button" flex="1" allowevents="true" type="menu"
+          <xul:toolbarbutton id="scriptish-button-inner"
+              class="scriptish-button toolbarbutton-1" anonid="button" flex="1"
+              allowevents="true" type="menu"
               xbl:inherits="disabled,crop,image,label,accesskey,command,align,dir,pack,orient,scriptish-disabled">
             <children includes="observes|template|menupopup|panel|tooltip"/>
           </xul:toolbarbutton>
