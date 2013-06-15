@@ -6,10 +6,15 @@
   margin: 0;
 }
 
+/* Also set a default icon for the "outer" #scriptish-button.
+   It will be disabled while the binding is still loading.
+   See GH-108 */
+#scriptish-button,
 #scriptish-button-inner {
   -moz-box-orient: horizontal;
   list-style-image: url("chrome://scriptish/skin/scriptish24.png");
 }
+toolbar[iconsize="small"] #scriptish-button,
 toolbar[iconsize="small"] #scriptish-button-inner {
   list-style-image: url("chrome://scriptish/skin/scriptish16.png");
 }
