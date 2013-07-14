@@ -76,6 +76,7 @@ function Script(config) {
   this._applyBackgroundUpdates = defaultAutoUpdateState;
   this._developers = [];
   this._contributors = [];
+  this.grant = {};
   this._description = null;
   this._version = null;
   this._icon = new ScriptIcon(this);
@@ -695,6 +696,7 @@ Script.prototype = {
     // Copy new values.
     this.blocked = newScript.blocked;
     this.domains = newScript.domains;
+    this.grant = newScript.grant || {};
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
     delete this.__all_includes;
@@ -766,6 +768,7 @@ Script.prototype = {
 
   toJSON: function() ({
     domains: this.domains,
+    grant: this.grant,
     includes: this._includes.patterns,
     excludes: this._excludes.patterns,
     matches: this._matches.map(function(match) match.pattern),
@@ -1001,6 +1004,9 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
         case "domain":
           script.domains.push(value);
           continue;
+        case "grant":
+          script.grant[value] = true;
+          continue;
         case "include":
           script.addInclude(value);
           continue;
@@ -1152,6 +1158,7 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script._noframes = aSkeleton.noframes;
 
   script.domains = aSkeleton.domains;
+  script.grant = aSkeleton.grant || {};
   if (aSkeleton.developers)
     aSkeleton.developers.forEach(script.addDeveloper.bind(script));
   if (aSkeleton.contributors)
@@ -1259,6 +1266,9 @@ Script.loadFromXML = function(aConfig, aNode) {
       case "Domain":
           script.domains.push(childNode.firstChild.nodeValue.trim());
           break;
+      case "Grant":
+        script.grant[childNode.textContent] = true;
+        break;
       case "Include":
         script.addInclude(childNode.firstChild.nodeValue.trim());
         break;

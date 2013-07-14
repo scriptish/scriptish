@@ -1,17 +1,3 @@
-// These script bits will only run unprivileged in a sandbox
-
-const GM_updatingEnabled = true;
-
-function GM_addStyle(css, node) {
-  node = node || document.getElementsByTagName("head")[0];
-  if (node) {
-    var style = document.createElement("style");
-    style.textContent = css;
-    style.type = "text/css";
-    node.appendChild(style);
-  }
-  return style;
-}
 
 function GM_xpath(details) {
   var contextNode, contextDocument, paths, resolver, namespace, result;
@@ -72,7 +58,6 @@ function GM_xpath(details) {
     }
     return rv;
   }
-
 
   for (var [,path] in Iterator(paths)) {
      result = contextDocument.evaluate(

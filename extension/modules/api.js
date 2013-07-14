@@ -68,6 +68,7 @@ function GM_API(options) {
     unsafeWin: aUnsafeContentWin,
     chromeWin: aChromeWin
   } = options;
+
   var document = aSafeWin.document;
   var menuCmdIDs = [];
   var Scriptish_BrowserUI = aChromeWin ? aChromeWin.Scriptish_BrowserUI : null;
