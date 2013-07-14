@@ -117,13 +117,10 @@ function Scriptish_injectScripts(options) {
       Scriptish_evalInSandbox(script, sandbox, safeWin, options);
     }
 
-    // TODO: remove this if check
     // window destroyed handler
-    if ("nukeSandbox" in Cu) {
-      Scriptish_windowUnloader(function() {
-        // try to nuke the sandbox (FF 17+ see bug 769273)
-        Cu.nukeSandbox(sandbox);
-      }, winID);
-    }
+    Scriptish_windowUnloader(function() {
+      // try to nuke the sandbox (FF 17+ see bug 769273)
+      Cu.nukeSandbox(sandbox);
+    }, winID);
   }
 }
