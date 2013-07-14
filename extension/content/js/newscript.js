@@ -41,11 +41,6 @@ addEventListener("DOMContentLoaded", function init() {
     return false;
   }, false);
 
-  // load defaults
-  $("id").value = Scriptish_prefRoot.getValue("newscript_id", "");
-  $("namespace").value = Scriptish_prefRoot.getValue("newscript_namespace", "");
-  $("author").value = Scriptish_prefRoot.getValue("newscript_author", "");
-
   (function considerLocation() {
     if (!window.opener.gBrowser) {
       return;
@@ -57,15 +52,10 @@ addEventListener("DOMContentLoaded", function init() {
     }
     let host = contentLocation.host;
 
-    let generateIdButton = $('generate-id');
-    generateIdButton.hidden = false;
-    generateIdButton.addEventListener("command", function generateId() {
-      let gid = contentLocation.host;
-      gid += "-" + Services.uuid.generateUUID().toString().slice(1, -1);
-      gid += "@" + ($("namespace").value || "scriptish").replace(/^@/, "");
-      $("id").value = gid;
-    }, false);
-
+    // load defaults
+    $("namespace").value = Scriptish_prefRoot.getValue("newscript_namespace", "");
+    $("author").value = Scriptish_prefRoot.getValue("newscript_author", "");
+    $("id").value = Scriptish_prefRoot.getValue("newscript_id", "") || generateId(contentLocation);
   })();
 }, false);
 
@@ -137,4 +127,11 @@ function createScriptSource() {
   } catch (e) {
     alert(e.message);
   }
+}
+
+function generateId(contentLocation) {
+  let gid = contentLocation.host;
+  gid += "-" + Services.uuid.generateUUID().toString().slice(1, -1);
+  gid += "@" + ($("namespace").value || "scriptish").replace(/^@/, "");
+  return gid;
 }

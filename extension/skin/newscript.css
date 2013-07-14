@@ -19,7 +19,3 @@ textbox {
 *[required][invalid="true"] {
   box-shadow: 0pt 0pt 1.5px 1px red;
 }
-
-#generate-id {
-  list-style-image: url(generate.png);
-}

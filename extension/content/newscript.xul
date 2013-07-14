@@ -17,10 +17,7 @@
     <rows>
       <row>
         <label control="id" value="newscript.id" localize="value"/>
-        <hbox>
-          <textbox id="id" placeholder="newscript.missing.id" localize="placeholder" required="true"/>
-          <toolbarbutton id="generate-id" hidden="true"/>
-        </hbox>
+        <textbox id="id" placeholder="newscript.missing.id" localize="placeholder" required="true"/>
       </row>
       <row>
         <label control="name" value="newscript.name" localize="value"/>
