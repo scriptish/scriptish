@@ -46,7 +46,7 @@ window.addEventListener("load", function() {
       dt.mozClearDataAt(type, i);
     }
 
-    for (var i = dt.mozItemCount - 1; ~i; i--) {
+    for (let i = dt.mozItemCount - 1; ~i; i--) {
       if (handleStrType("text/uri-list", i)) continue;
       if (handleStrType("text/x-moz-url", i)) continue;
 

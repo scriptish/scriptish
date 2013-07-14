@@ -145,20 +145,27 @@ function descriptor(object) {
 const { Loader } = Components.utils.import("resource://gre/modules/commonjs/toolkit/loader.js", {});
 
 const loader = Loader.Loader({
-   modules: {
-     "toolkit/loader": Loader
-   },
+  modules: {
+    "toolkit/loader": Loader
+  },
   paths: {
-    "devtools": "resource:///modules/devtools",
+    "devtools": "resource:///modules/devtools/",
     "scriptish/": "resource://scriptish/",
+    "pathfinder/": "resource://scriptish/pathfinder/",
+    "sdk/": "resource://gre/modules/commonjs/sdk/",
     "": "resource://gre/modules/commonjs/"
+  },
+  rootURI: '',
+  metadata: {
+    'permissions': {
+      'private-browsing': true
+    }
   },
   resolve: function(id, base) {
     if (id == "chrome" || id.startsWith("@"))
       return id;
     return Loader.resolve(id, base);
-  },
-
+  }
 });
 
 // fake requirer uri scriptish:// (it's used for relative requires and error messages)

@@ -16,7 +16,7 @@ lazyUtil(this, "getTempFile");
 lazyUtil(this, "getWriteStream");
 lazyUtil(this, "stringBundle");
 
-function ScriptDownloader(uri) {
+function ScriptDownloader(uri, aPrivate) {
   this.uri_ = uri || null;
   this.req_ = null;
   this.script = null;
@@ -25,6 +25,7 @@ function ScriptDownloader(uri) {
   this.installOnCompletion_ = false;
   this.tempFiles_ = [];
   this.updateScript = false;
+  this._private = aPrivate;
 }
 ScriptDownloader.prototype.startInstall = function() {
   this.type = "install";
@@ -120,7 +121,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     }
 
     var source = req.responseText;
-    this.script = Scriptish_config.parse(source, this.uri_);
+    this.script = Scriptish_config.parse(source, this.uri_, undefined, this._private);
 
     var file = Services.dirsvc.get("TmpD", Ci.nsIFile);
     var base = this.script.name.replace(/[^A-Z0-9_]/gi, "").toLowerCase();

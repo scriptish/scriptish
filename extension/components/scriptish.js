@@ -25,7 +25,7 @@ lazyUtil(this, "updateModifiedScripts");
 lazyUtil(this, "windowEventTracker");
 lazyUtil(this, "windowUnloader");
 
-const {nsIContentPolicy: CP} = Ci;
+const CP = Ci.nsIContentPolicy;
 
 // If the file was previously cached it might have been given a number after
 // .user, like gmScript.user-12.js
@@ -206,7 +206,7 @@ ScriptishService.prototype = {
     // CP.TYPE is not binary, so do not use bitwise logic tricks
     if ((ct == CP.TYPE_DOCUMENT || ct == CP.TYPE_SUBDOCUMENT)
         && this._reg_userjs.test(cl.spec) && !this.isTempScript(cl)) {
-      Scriptish_installUri(cl);
+      Scriptish_installUri(cl, ctx);
     }
 
     return CP.ACCEPT;

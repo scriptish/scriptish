@@ -5,7 +5,7 @@ var Scriptish_BrowserUI = {
 
 (function(inc, tools){
 inc("resource://scriptish/constants.js", tools);
-const {lazyImport, lazyUtil} = tools;
+const { lazyImport, lazyUtil, jetpack } = tools;
 
 lazyImport(window, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(window, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
@@ -132,7 +132,8 @@ Scriptish_BrowserUI.chromeLoad = function(e) {
   this.contextItemInstall.setAttribute("accesskey", Scriptish_stringBundle("menu.install.ak"));
   this.contextItemInstall.addEventListener("command", function(aEvt) {
     Scriptish_installUri(
-        Scriptish_BrowserUI.getUserScriptLinkUnderPointer(), window);
+        Scriptish_BrowserUI.getUserScriptLinkUnderPointer(),
+        window);
   }, false)
 
   this.contextItemVS.setAttribute("label", Scriptish_stringBundle("menu.show"));

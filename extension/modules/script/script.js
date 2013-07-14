@@ -834,9 +834,6 @@ Script.prototype = {
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
 
-    // TODO: see https://github.com/scriptish/scriptish/issues/94
-    if (true) this._downloadURL = null;
-
     // set up _modified and stat thrashing stuff
     this.isModified();
 
@@ -867,11 +864,10 @@ Script.parseVersion = function Script_parseVersion(aSrc) {
 }
 
 // TODO: DRY this by combining this with Scriptish_parser some way..
-Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript) {
+Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPrivate) {
   var script = new Script(aConfig);
 
-  // TODO: see https://github.com/scriptish/scriptish/issues/94
-  if (aURI && false)
+  if (aURI && aPrivate === false)
     script._downloadURL = aURI.spec;
 
   // read one line at a time looking for start meta delimiter or EOF
@@ -1244,10 +1240,12 @@ Script.loadFromXML = function(aConfig, aNode) {
         aConfig, Scriptish_getContents(script._file),
         script._downloadURL && NetUtil.newURI(script._downloadURL),
         script);
+
     script._dependhash = tools.Scriptish_cryptoHash(parsedScript._rawMeta);
     script._version = parsedScript._version;
     fileModified = true;
-  } else {
+  }
+  else {
     script._modified = aNode.getAttribute("modified");
     script._dependhash = aNode.getAttribute("dependhash");
     script._version = aNode.getAttribute("version");
