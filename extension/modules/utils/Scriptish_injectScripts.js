@@ -9,7 +9,7 @@ Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
-lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_updatingEnabled", "GM_addStyle", "GM_xpath"]);
+lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_updatingEnabled", "GM_xpath"]);
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
 lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
 
@@ -60,9 +60,6 @@ function Scriptish_injectScripts(options) {
 
     Cu.evalInSandbox(GM_updatingEnabled, sandbox);
 
-    if (script.grant['GM_addStyle']) {
-      Cu.evalInSandbox(GM_addStyle, sandbox);
-    }
     if (script.grant['GM_xpath']) {
       Cu.evalInSandbox(GM_xpath, sandbox);
     }

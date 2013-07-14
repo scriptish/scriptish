@@ -7,7 +7,10 @@ lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scri
 lazyImport(this, "resource://scriptish/utils/Scriptish_evalInSandbox.js", ["Scriptish_evalInSandbox_filename"]);
 lazyImport(this, "resource://scriptish/utils/Scriptish_injectScripts.js", ["Scriptish_injectScripts_filename"]);
 
+const { Style } = jetpack("sdk/stylesheet/style");
+const { attach, detach } = jetpack("sdk/content/mod");
 const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
+
 lazyUtil(this, "cryptoHash");
 lazyUtil(this, "getScriptHeader");
 lazyUtil(this, "notification");
@@ -237,6 +240,11 @@ function GM_API(options) {
       if (!~i) return false; // check the uuid is for a cmd made by the same script
       return Scriptish_BrowserUI.disableMenuCommand(aUUID, windowID);
     }
+
+    this.GM_addStyle = function GM_addStyle(aSource) {
+      if (!GM_apiLeakCheck("GM_addStyle")) return;
+      attach(Style({ source: aSource }), aSafeWin);
+    }
   }
 
   this.GM_cryptoHash = function GM_cryptoHash() {
@@ -249,7 +257,6 @@ function GM_API(options) {
   this.alert = function alert(aMsg) {
     Scriptish_alert(aMsg, scriptName);
   }
-
 }
 
 GM_API.prototype.GM_generateUUID = function GM_generateUUID() (

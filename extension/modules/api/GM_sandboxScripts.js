@@ -18,10 +18,3 @@ const GM_xpath = (function(r) {
   r.send(null);
   return r.responseText;
 })(new XMLHttpRequest());
-
-const GM_addStyle = (function(r) {
-  r.overrideMimeType('text/javascript'); // don't try to parse as XML
-  r.open('GET', 'resource://scriptish/api/sandbox/GM_addStyle.js', false);
-  r.send(null);
-  return r.responseText;
-})(new XMLHttpRequest());
