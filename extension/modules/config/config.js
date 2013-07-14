@@ -170,41 +170,6 @@ Config.prototype = {
     });
   },
 
-  _loadXML: function(aFile, aCallback) {
-    Scriptish_log("Scriptish Config._loadXML");
-    var self = this;
-
-    if (aFile.exists()) {
-      var str = Scriptish_getContents(aFile);
-      if (!str) return aCallback(false);
-
-      var doc = Instances.dp.parseFromString(str, "text/xml");
-
-      // Stop if there was a parsing error
-      if (doc.documentElement.nodeName == "parsererror")
-        return aCallback(false);
-
-      var nodes = doc.evaluate("/UserScriptConfig/Script | /UserScriptConfig/Exclude", doc, null, 0, null);
-      let excludes = [];
-
-      for (var node; node = nodes.iterateNext();) {
-        switch (node.nodeName) {
-        case "Script":
-          Script.loadFromXML(self, node);
-          break;
-        case "Exclude":
-          excludes.push(node.firstChild.nodeValue.trim());
-          break;
-        }
-      }
-      Scriptish_addExcludes(excludes);
-
-      return aCallback(true);
-    }
-
-    aCallback(false);
-  },
-
   _loadJSON: function(aFile, aCallback) {
     Scriptish_log("Scriptish Config._loadJSON");
     var self = this;
@@ -274,6 +239,7 @@ Config.prototype = {
 
     // Load the config (trying from various sources)
     var configFile;
+
     // source: Scriptish JSON tmp; for pre-nsISafeOutputStream compatiblity
     self._loadJSON(self._tempFile, function(aSuccess) {
       if (aSuccess) return callback(true);
@@ -282,17 +248,9 @@ Config.prototype = {
       // NOTE: this is the only case where we care if the file was modified
       (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_JSON);
       self._loadJSON(configFile, function(aSuccess, aModified) {
-        if (aSuccess) return callback(aModified);
-
-        // source: Scriptish XML
-        (configFile = self._scriptDir).append(SCRIPTISH_CONFIG_XML);
-        self._loadXML(configFile, function(aSuccess) {
-          if (aSuccess) return callback(true);
-
-          // source: Older GM Style XML
-          (configFile = self._scriptDir).append("config.xml");
-          self._loadXML(configFile, function() callback(true));
-        });
+        if (aSuccess)
+          return callback(aModified);
+        callback(true);
       });
     });
 
