@@ -55,8 +55,8 @@ function GM_apiSafeCallback(aWindow, aScript, aThis, aCb, aArgs) {
     try {
       aCb.apply(aThis, aArgs);
     }
-    catch (ex) {
-      Scriptish_logScriptError(ex, aWindow, aScript.fileURL, aScript.id);
+    catch (e) {
+      Scriptish_logScriptError(e, aWindow, aScript.fileURL, aScript.id);
     }
   }, 0);
 }

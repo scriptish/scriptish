@@ -5,6 +5,7 @@ const valueSplitter = /(\S+)(?:\s+([^\r\f\n]+))?/;
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/CertUtils.jsm");
 Cu.import("resource://scriptish/constants.js");
+
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
@@ -14,6 +15,7 @@ lazyImport(this, "resource://scriptish/script/scriptinstaller.js", ["ScriptInsta
 lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
 lazyImport(this, "resource://scriptish/script/scriptrequire.js", ["ScriptRequire"]);
 lazyImport(this, "resource://scriptish/script/scriptresource.js", ["ScriptResource"]);
+lazyImport(this, "resource://scriptish/script/scriptcss.js", ["ScriptCSS"]);
 lazyImport(this, "resource://scriptish/third-party/MatchPattern.js", ["MatchPattern"]);
 lazyImport(this, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
 lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
@@ -93,6 +95,7 @@ function Script(config) {
   this.priority = 0;
   this._requires = [];
   this._resources = [];
+  this._css = [];
   this._screenshots = [];
   this._noframes = false;
   this._dependFail = false
@@ -484,6 +487,7 @@ Script.prototype = {
   },
   get requires() this._requires.concat(),
   get resources() this._resources.concat(),
+  get css() this._css.concat(),
   get noframes() this._noframes,
   get jsversion() this._jsversion || maxJSVer,
   get runAt() this["_run-at"] || defaultRunAt,
@@ -571,8 +575,9 @@ Script.prototype = {
   get size() {
     if (!this._size) {
       var size = this._file.fileSize;
-      for each (var r in this._requires) size += r._file.fileSize;
-      for each (var r in this._resources) size += r._file.fileSize;
+      for each (let r in this._requires) size += r._file.fileSize;
+      for each (let r in this._resources) size += r._file.fileSize;
+      for each (let r in this._css) size += r._file.fileSize;
       this._size = size;
     }
     return this._size;
@@ -729,10 +734,12 @@ Script.prototype = {
       this._icon64 = newScript._icon64;
       this._requires = newScript._requires;
       this._resources = newScript._resources;
+      this._css = newScript._css;
       this._modified = newScript._modified;
       this._dependhash = newScript._dependhash;
       if (newScript._downloadURL) this._downloadURL = newScript._downloadURL;
-    } else {
+    }
+    else {
       var dependhash = tools.Scriptish_cryptoHash(newScript._rawMeta);
       if (dependhash != this._dependhash && !newScript._dependFail) {
         this._dependhash = dependhash;
@@ -740,6 +747,7 @@ Script.prototype = {
         this._icon64 = newScript._icon64;
         this._requires = newScript._requires;
         this._resources = newScript._resources;
+        this._css = newScript._css;
 
         // Get rid of old dependencies.
         var dirFiles = this._basedirFile.directoryEntries;
@@ -785,6 +793,7 @@ Script.prototype = {
       mimetype: res._mimetype,
       charset: res._charset
     })),
+    css: this._css.map(function(req) req._filename),
     noframes: this._noframes,
     filename: this._filename,
     id: this.id,
@@ -828,11 +837,14 @@ Script.prototype = {
     if (this.icon.hasDownloadURL()) this.icon._initFile();
     if (this.icon64.hasDownloadURL()) this.icon64._initFile();
 
-    for (var i = 0; i < this._requires.length; i++)
+    for (let i = 0, l = this._requires.length; i < l; i++)
       this._requires[i]._initFile();
 
-    for (var i = 0; i < this._resources.length; i++)
+    for (let i = 0, l = this._resources.length; i < l; i++)
       this._resources[i]._initFile();
+
+    for (let i = 0, l = this._css.length; i < l; i++)
+      this._css[i]._initFile();
 
     var tools = {};
     Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
@@ -1068,16 +1080,19 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
           continue;
         case "require":
           try {
-            var reqUri = NetUtil.newURI(value, null, aURI);
-            var scriptRequire = new ScriptRequire(script);
+            let reqUri = NetUtil.newURI(value, null, aURI);
+            let scriptRequire = new ScriptRequire(script);
+
             scriptRequire._downloadURL = reqUri.spec;
             script._requires.push(scriptRequire);
             script._rawMeta += header + '\0' + value + '\0';
-          } catch (e) {
+          }
+          catch (e) {
             if (aUpdateScript) {
               script._dependFail = true;
-            } else {
-              throw new Error(Scriptish_stringBundle("error.retrieving") +
+            }
+            else {
+              throw Error(Scriptish_stringBundle("error.retrieving") +
                               " @require: '" + value + "'");
             }
           }
@@ -1085,31 +1100,55 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
         case "resource":
           var res = value.match(valueSplitter);
           if (res === null) {
-            throw new Error(Scriptish_stringBundle("error.resource.syntax") +
+            throw Error(Scriptish_stringBundle("error.resource.syntax") +
                             ": '" + value + "'");
           }
           var resName = res[1];
           if (previousResourceNames[resName]) {
-            throw new Error("'" + resName + "' " +
+            throw Error("'" + resName + "' " +
                             Scriptish_stringBundle("error.resource.dupName"));
-          } else {
+          }
+          else {
             previousResourceNames[resName] = true;
           }
+
           try {
-            var resUri = NetUtil.newURI(res[2], null, aURI);
-            var scriptResource = new ScriptResource(script);
+            let resUri = NetUtil.newURI(res[2], null, aURI);
+            let scriptResource = new ScriptResource(script);
+
             scriptResource._name = resName;
             scriptResource._downloadURL = resUri.spec;
             script._resources.push(scriptResource);
             script._rawMeta +=
                 header + '\0' + resName + '\0' + resUri.spec + '\0';
-          } catch (e) {
+          }
+          catch (e) {
             if (aUpdateScript) {
               script._dependFail = true;
-            } else {
-              throw new Error(
+            }
+            else {
+              throw Error(
                   Scriptish_stringBundle("error.retrieving") +
                   " @resource '" + resName + "' (" + res[2] + ")");
+            }
+          }
+          continue;
+        case "css":
+          try {
+            let reqUri = NetUtil.newURI(value, null, aURI);
+            let scriptCSS = new ScriptCSS(script);
+
+            scriptCSS._downloadURL = reqUri.spec;
+            script._css.push(scriptCSS);
+            script._rawMeta += header + '\0' + value + '\0';
+          }
+          catch (e) {
+            if (aUpdateScript) {
+              script._dependFail = true;
+            }
+            else {
+              throw Error(Scriptish_stringBundle("error.retrieving") +
+                              " @css: '" + value + "'");
             }
           }
           continue;
@@ -1168,11 +1207,13 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
   script.addInclude(aSkeleton.user_includes, true);
   script.addExclude(aSkeleton.user_excludes, true);
   aSkeleton.matches.forEach(function(i) script._matches.push(new MatchPattern(i)));
+
   aSkeleton.requires.forEach(function(i) {
     var scriptRequire = new ScriptRequire(script);
     scriptRequire._filename = i;
     script._requires.push(scriptRequire);
   });
+
   aSkeleton.resources.forEach(function(i) {
     var scriptResource = new ScriptResource(script);
     scriptResource._name = i.name;
@@ -1181,6 +1222,13 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
     scriptResource._charset = i.charset;
     script._resources.push(scriptResource);
   });
+
+  aSkeleton.css.forEach(function(i) {
+    let scriptCSS = new ScriptCSS(script);
+    scriptCSS._filename = i;
+    script._css.push(scriptCSS);
+  });
+
   aSkeleton.screenshots.forEach(function(i) {
     script.addScreenShot(i.url, i.thumbnailURL);
   });

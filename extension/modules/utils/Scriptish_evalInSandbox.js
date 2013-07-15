@@ -5,8 +5,12 @@ var EXPORTED_SYMBOLS = [
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError"]);
+lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError", "Scriptish_logScriptError"]);
 lazyUtil(this, "stringBundle");
+
+const { Style } = jetpack("sdk/stylesheet/style");
+const { attach, detach } = jetpack("sdk/content/mod");
+const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
 
 const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 const Scriptish_evalInSandbox_filename = Components.stack.filename;
@@ -15,20 +19,16 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
   const jsVer = aScript.jsversion;
   const fileURL = aScript.fileURL;
   const id = aScript.id;
+  const scriptText = aScript.textContent + "\n";
 
-  // e10s
-  if (options && options.global && options.global.sendSyncMessage) {
-    var reqAry = options.global.sendSyncMessage("Scriptish:GetScriptRequires", id)[0];
-    var scriptText = options.global.sendSyncMessage("Scriptish:GetScriptContents", id)[0];
-  }
-  else {
-    var reqAry = aScript.requires;
-    var scriptText = aScript.textContent;
-  }
+  // add script @css
+  aScript.css.forEach(function(aScriptCSS) {
+    attach(Style({ source: aScriptCSS.textContent }), aWindow);
+  });
 
   // eval script @requires
   try {
-    for (let [, req] in Iterator(reqAry)) {
+    for (let [, req] in Iterator(aScript.requires)) {
       var rfileURL = req.fileURL;
       try {
         Cu.evalInSandbox(
@@ -36,13 +36,14 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
           aSandbox,
           jsVer,
           fileURLPrefix + rfileURL,
-          1
-          );
-      } catch (ex) {
-        Scriptish_logScriptError(ex, aWindow, rfileURL, id);
+          1);
+      }
+      catch (e) {
+        Scriptish_logScriptError(e, aWindow, rfileURL, id);
       }
     }
-  } catch (e) {
+  }
+  catch (e) {
     return Scriptish_logError(e, 0, fileURL, e.lineNumber);
   }
 
@@ -50,12 +51,11 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
   try {
     try {
       Cu.evalInSandbox(
-        scriptText + "\n",
+        scriptText,
         aSandbox,
         jsVer,
         fileURLPrefix + fileURL,
-        1
-        );
+        1);
     }
     catch (e if (e.message == "return not in function"
         || /\(NS_ERROR_OUT_OF_MEMORY\) \[nsIXPCComponents_Utils.evalInSandbox\]/.test(e.message))) {
@@ -69,18 +69,17 @@ function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
         e.lineNumber || 0,
         e.columnNumber || 0,
         sw.warningFlag,
-        "scriptish userscript warnings"
-        );
+        "scriptish userscript warnings");
       Scriptish_logScriptError(sw, aWindow, fileURL, id);
       Cu.evalInSandbox(
-        "(function(){" + scriptText + "\n})()",
+        "(function(){" + scriptText + "})()",
         aSandbox,
         jsVer,
         fileURLPrefix + fileURL,
-        1
-        );
+        1);
     }
-  } catch (e) {
+  }
+  catch (e) {
     Scriptish_logScriptError(e, aWindow, fileURL, id);
   }
 }

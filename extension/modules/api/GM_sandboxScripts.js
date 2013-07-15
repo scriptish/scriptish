@@ -1,5 +1,5 @@
 "use strict";
-const EXPORTED_SYMBOLS = ["GM_updatingEnabled", "GM_addStyle", "GM_xpath"];
+const EXPORTED_SYMBOLS = ["GM_updatingEnabled", "GM_xpath"];
 
 if (!('XMLHttpRequest' in this))
   this.XMLHttpRequest = Components.Constructor(

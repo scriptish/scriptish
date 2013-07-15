@@ -47,17 +47,21 @@ ScriptDownloader.prototype.startDownload = function(bypassCache) {
   let req = this.req_ = Instances.xhr;
   req.overrideMimeType("text/plain");
   req.open("GET", this.uri_.spec, true);
+
   if (bypassCache && (req.channel instanceof Ci.nsIRequest)) {
     req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
   }
+
   if (this.secure) {
     // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
     req.channel.notificationCallbacks =
         new BadCertHandler(!Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
   }
+
   if (req.channel instanceof Ci.nsIHttpChannelInternal) {
     req.channel.forceAllowThirdPartyCookie = true;
   }
+
   req.onerror = this.handleErr.bind(this);
   req.onreadystatechange = this.chkContentTypeB4DL.bind(this);
   req.onload = this.handleScriptDownloadComplete.bind(this);
@@ -156,8 +160,8 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
         this.showScriptView();
         break;
     }
-
-  } catch (e) {
+  }
+  catch (e) {
     Scriptish_alert(Scriptish_stringBundle("error.script.installing") + ": " + e);
     throw e;
   }
@@ -166,24 +170,33 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
 ScriptDownloader.prototype.fetchDependencies = function() {
   Scriptish_log("Fetching Dependencies");
 
-  var deps = this.script.requires.concat(this.script.resources);
+  let { script } = this;
+  Scriptish_log(script.requires.join(',,'));
+
+  const deps = script.requires.
+               concat(script.resources).
+               concat(script.css);
+
   // if this.script.icon._filename exists then the icon is a data scheme
-  if (this.script.icon.hasDownloadURL())
-    deps.push(this.script.icon);
-  if (this.script.icon64.hasDownloadURL())
-    deps.push(this.script.icon64);
+  if (script.icon.hasDownloadURL())
+    deps.push(script.icon);
+
+  if (script.icon64.hasDownloadURL())
+    deps.push(script.icon64);
 
   for (let [, dep] in Iterator(deps)) {
     if (this.checkDependencyURL(dep.urlToDownload)) {
       this.depQueue_.push(dep);
-    } else {
+    }
+    else {
       let errMsg = Scriptish_stringBundle("error.dependency.local");
       if (dep instanceof ScriptIcon) {
         dep.reset();
         Scriptish_logError(new Error(
             Scriptish_stringBundle("error.dependency.loading") + ": " +
             dep.urlToDownload + "\n" + errMsg));
-      } else {
+      }
+      else {
         this.errorInstallDependency(dep, errMsg);
         return;
       }
