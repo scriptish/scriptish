@@ -711,6 +711,7 @@ Script.prototype = {
     this.priority = newPriority;
     this._screenshots = newScript._screenshots;
     this._homepageURL = newScript.homepageURL;
+    this._downloadURL = newScript._downloadURL;
     this._contributionURL = newScript.contributionURL;
     this._contributionAmount = newScript.contributionAmount;
     this.supportURL = newScript.supportURL;
@@ -969,11 +970,19 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
         case "homepage":
         case "homepageurl":
           try {
-            var uri = NetUtil.newURI(value);
-          } catch (e) {
-            break;
+            let uri = NetUtil.newURI(value);
+            script._homepageURL = uri.spec;
           }
-          script._homepageURL = uri.spec;
+          catch (e) {}
+          break;
+        case "downloadurl":
+          try {
+            let uri = NetUtil.newURI(value);
+            script._downloadURL = uri.spec;
+          }
+          catch (e) {
+            Scriptish_logError(e)
+          }
           break;
         case "contributionurl":
           try {
@@ -989,7 +998,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
         case "supporturl":
           try {
             var uri = NetUtil.newURI(value);
-          } catch (e) {
+          }
+          catch (e) {
             break;
           }
           script.supportURL = uri.spec;

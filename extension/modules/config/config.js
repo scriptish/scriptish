@@ -322,8 +322,8 @@ Config.prototype = {
       }.bind(this));
   },
 
-  parse: function(source, uri, aUpdateScript, aPrivate) (
-      Script.parse(this, source, uri, aUpdateScript, aPrivate)),
+  parse: function(source, aDownloadURI, aUpdateScript, aPrivate) (
+      Script.parse(this, source, aDownloadURI, aUpdateScript, aPrivate)),
 
   install: function(aNewScript) {
     var existingIndex = this._find(aNewScript.id);
