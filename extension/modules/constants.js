@@ -1,12 +1,11 @@
 var EXPORTED_SYMBOLS = [
     "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils", "extend", "jetpack",
-    "Services", "Instances", "lazy", "lazyImport", "lazyUtil", "timeout", "e10s"];
+    "Services", "Instances", "lazy", "lazyImport", "lazyUtil", "timeout"];
 
 const {classes: Cc, interfaces: Ci, results: Cr, utils: Cu, Constructor: CC} = Components;
 
 const systemPrincipal = CC('@mozilla.org/systemprincipal;1', 'nsIPrincipal')();
 
-const e10s = !!Cc["@mozilla.org/globalmessagemanager;1"];
 const global = this;
 var Services = {};
 (function(inc, tools){
@@ -71,12 +70,6 @@ lazyService(
 
 lazyService(
     Services, "cs", "@mozilla.org/consoleservice;1", "nsIConsoleService");
-
-if (e10s) {
-  lazyService(
-      Services, "mm", "@mozilla.org/globalmessagemanager;1",
-      "nsIChromeFrameMessageManager");
-}
 
 if (Cc["@mozilla.org/parserutils;1"]) {
   lazyService(
