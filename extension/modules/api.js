@@ -196,7 +196,8 @@ function GM_API(options) {
   if (!Scriptish_BrowserUI || aSafeWin !== aSafeWin.top) {
     this.GM_unregisterMenuCommand = this.GM_registerMenuCommand
         = this.GM_disableMenuCommand = this.GM_enableMenuCommand = DOLITTLE;
-  } else {
+  }
+  else {
     this.GM_registerMenuCommand = function GM_registerMenuCommand(
         aCmdName, aCmdFunc, aAccelKey, aAccelModifiers, aAccessKey) {
       if (!GM_apiLeakCheck("GM_registerMenuCommand")) return;

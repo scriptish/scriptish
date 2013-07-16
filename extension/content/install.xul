@@ -11,6 +11,7 @@
     localize="title"
     defaultButton="cancel">
   <script type="text/javascript" src="chrome://scriptish/content/js/install.js"/>
+
   <hbox align="start" id="xpinstallheader">
     <image class="alert-icon"/>
     <vbox flex="1">

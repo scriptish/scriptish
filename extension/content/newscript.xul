@@ -5,8 +5,7 @@
     buttons="accept,cancel"
     orient="vertical"
     title="menu.new"
-    localize="title"
-    >
+    localize="title">
   <script type="application/x-javascript" src="chrome://scriptish/content/js/newscript.js" />
 
   <grid flex="1">

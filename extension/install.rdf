@@ -61,17 +61,15 @@
     <em:translator>strel (es-ES)</em:translator>
     <em:translator>yfdyh000 (zh-CN); mailto:yfdyh000@gmail.com</em:translator>
 
-    <em:updateURL>http://github.com/downloads/scriptish/scriptish/update.rdf</em:updateURL>
-    <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDjEA/hqcsMgPctoWvqJFfjtNcQbfBi1uP3zoWR3PPMRSXnpBJv/5Kb5lJD9HJ+963CFQ3oFvkgO9+oEWisiKBjxhx94Bynl0Ym2sZ1DdEzTsH9kV4HGFLjeYTix5WkQqdoswyM32ebtDSYrFbSqxpBrgHwVLELfFYM1qZsnWpJKwIDAQAB</em:updateKey>
-
     <!-- Firefox -->
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>21.0</em:minVersion>
-        <em:maxVersion>25.0a1</em:maxVersion>
+        <em:maxVersion>25.0</em:maxVersion>
       </Description>
     </em:targetApplication>
+
     <!-- SeaMonkey -->
     <em:targetApplication>
       <Description>

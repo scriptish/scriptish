@@ -55,9 +55,6 @@ const lazy = XPCOMUtils.defineLazyGetter.bind(XPCOMUtils);
 const lazyService = XPCOMUtils.defineLazyServiceGetter.bind(XPCOMUtils);
 
 lazyService(
-     Services, "as", "@mozilla.org/alerts-service;1", "nsIAlertsService");
-
-lazyService(
     Services, "ass", "@mozilla.org/appshell/appShellService;1",
     "nsIAppShellService");
 

@@ -16,6 +16,7 @@ function GM_ScriptStorage(aScript, aSafeWin) {
   let winID = Scriptish_getWindowIDs(aSafeWin).innerID;
   Scriptish_windowUnloader(function() {
     let prefChanged = this._prefChanged.bind(this);
+
     for (let name in this._watchedPrefs) {
       this.prefMan.unwatch(name, prefChanged);
       delete this._watchedPrefs[name];

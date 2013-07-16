@@ -21,7 +21,8 @@ try {
   scriptContent = window.arguments[0]
       .QueryInterface(Components.interfaces.nsIDialogParamBlock)
       .GetString(0);
-} catch(e) {}
+}
+catch(e) {}
 
 addEventListener("DOMContentLoaded", function init() {
   removeEventListener("DOMContentLoaded", init, false);
