@@ -1208,40 +1208,49 @@ Script.loadFromJSON = function(aConfig, aSkeleton) {
 
   script.domains = aSkeleton.domains;
   script.grant = aSkeleton.grant || {};
-  if (aSkeleton.developers)
+  if (Array.isArray(aSkeleton.developers))
     aSkeleton.developers.forEach(script.addDeveloper.bind(script));
-  if (aSkeleton.contributors)
+  if (Array.isArray(aSkeleton.contributors))
     aSkeleton.contributors.forEach(script.addContributor.bind(script));
   script.addInclude(aSkeleton.includes);
   script.addExclude(aSkeleton.excludes);
   script.addInclude(aSkeleton.user_includes, true);
   script.addExclude(aSkeleton.user_excludes, true);
-  aSkeleton.matches.forEach(function(i) script._matches.push(new MatchPattern(i)));
+  if (Array.isArray(aSkeleton.matches))
+    aSkeleton.matches.forEach(function(i) script._matches.push(new MatchPattern(i)));
 
-  aSkeleton.requires.forEach(function(i) {
-    var scriptRequire = new ScriptRequire(script);
-    scriptRequire._filename = i;
-    script._requires.push(scriptRequire);
-  });
+  if (Array.isArray(aSkeleton.requires)) {
+    aSkeleton.requires.forEach(function(i) {
+      var scriptRequire = new ScriptRequire(script);
+      scriptRequire._filename = i;
+      script._requires.push(scriptRequire);
+    });
+  }
 
-  aSkeleton.resources.forEach(function(i) {
-    var scriptResource = new ScriptResource(script);
-    scriptResource._name = i.name;
-    scriptResource._filename = i.filename;
-    scriptResource._mimetype = i.mimetype;
-    scriptResource._charset = i.charset;
-    script._resources.push(scriptResource);
-  });
+  if (Array.isArray(aSkeleton.resources)) {
+    aSkeleton.resources.forEach(function(i) {
+      var scriptResource = new ScriptResource(script);
+      scriptResource._name = i.name;
+      scriptResource._filename = i.filename;
+      scriptResource._mimetype = i.mimetype;
+      scriptResource._charset = i.charset;
+      script._resources.push(scriptResource);
+    });
+  }
 
-  aSkeleton.css.forEach(function(i) {
-    let scriptCSS = new ScriptCSS(script);
-    scriptCSS._filename = i;
-    script._css.push(scriptCSS);
-  });
+  if (Array.isArray(aSkeleton.css)) {
+    aSkeleton.css.forEach(function(i) {
+      let scriptCSS = new ScriptCSS(script);
+      scriptCSS._filename = i;
+      script._css.push(scriptCSS);
+    });
+  }
 
-  aSkeleton.screenshots.forEach(function(i) {
-    script.addScreenShot(i.url, i.thumbnailURL);
-  });
+  if (Array.isArray(aSkeleton.screenshots)) {
+    aSkeleton.screenshots.forEach(function(i) {
+      script.addScreenShot(i.url, i.thumbnailURL);
+    });
+  }
 
   script.id = aSkeleton.id;
   script._name = aSkeleton.name;
