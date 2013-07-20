@@ -377,10 +377,8 @@ function Scriptish_setupPopup() {
     mi.setAttribute("type", "checkbox");
     mi.setAttribute("closemenu", "none");
     mi.setAttribute("checked", script.enabled.toString());
-    popup.insertBefore(mi, tail);
+    popup.appendChild(mi);
   }
-
-  var tail = $("scriptish-tb-no-scripts-sep");
 
   // remove all the scripts from the list
   for (var i = popup.childNodes.length - 1; ~i; i--) {
@@ -414,7 +412,7 @@ function Scriptish_setupPopup() {
     if (runsOnTop.length) { // only add the separator if there is stuff below
       var separator = document.createElement("menuseparator");
       separator.setAttribute("value", "hack"); // remove it in the loop above
-      popup.insertBefore(separator, tail);
+      popup.appendChild(separator);
     }
   }
   runsOnTop.forEach(appendScriptToPopup);

@@ -47,16 +47,25 @@
         class="toolbarbutton-1 chromeclass-toolbar-additional"
         label="Scriptish">
       <menupopup id="scriptish-tb-popup" observes="scriptish-tb-popup-brd">
-        <menuitem id="scriptish-tb-no-scripts"/>
-        <menuseparator id="scriptish-tb-no-scripts-sep"/>
-        <menu id="scriptish-tb-cmds" observes="scriptish-tb-cmds-brd" disabled="false"><menupopup/></menu>
-        <menuseparator/>
-        <menuitem id="scriptish-tb-options" observes="scriptish-options-brd"/>
-        <menuseparator/>
-        <menuitem id="scriptish-tb-new-us" observes="scriptish-tb-new-us-brd"/>
-        <menuitem id="scriptish-tb-show-us" observes="scriptish-tb-show-us-brd"/>
-        <menuseparator/>
         <menuitem id="scriptish-tb-enabled-item" observes="scriptish-tb-enabled-brd" type="checkbox"/>
+
+        <menuseparator/>
+
+        <menuitem id="scriptish-tb-options" observes="scriptish-options-brd"/>
+
+        <menuseparator/>
+
+        <menuitem id="scriptish-tb-new-us" observes="scriptish-tb-new-us-brd"/>
+
+        <menuitem id="scriptish-tb-show-us" observes="scriptish-tb-show-us-brd"/>
+        
+        <menuseparator/>
+
+        <menu id="scriptish-tb-cmds" observes="scriptish-tb-cmds-brd" disabled="false"><menupopup/></menu>
+
+        <menuseparator id="scriptish-tb-no-scripts-sep"/>
+
+        <menuitem id="scriptish-tb-no-scripts"/>
       </menupopup>
     </toolbarbutton>
   </toolbarpalette>
