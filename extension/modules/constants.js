@@ -109,10 +109,9 @@ function lazyImport(obj, resource, symbols) {
     lazy(obj, s, function() _lazyModules[resource][s]);
   }
 }
-function lazyUtil(obj, name) lazyImport(obj,
-                                        "resource://scriptish/utils/Scriptish_" + name + ".js",
-                                        ["Scriptish_" + name]
-                                        );
+function lazyUtil(obj, name) {
+  return lazyImport(obj, "resource://scriptish/utils/Scriptish_" + name + ".js", ["Scriptish_" + name]);
+}
 
 function extend(a, o) {
   for (var k in a) {
@@ -123,11 +122,10 @@ function extend(a, o) {
   return o;
 }
 
-
 function descriptor(object) {
   let value = {};
-  getOwnPropertyNames(object).forEach(function(name) {
-    value[name] = getOwnPropertyDescriptor(object, name)
+  Object.getOwnPropertyNames(object).forEach(function(name) {
+    value[name] = Object.getOwnPropertyDescriptor(object, name)
   });
   return value;
 }
@@ -159,7 +157,12 @@ const loader = Loader.Loader({
 });
 
 // fake requirer uri scriptish:// (it's used for relative requires and error messages)
-var module = Loader.Module("main", "scriptish://");
-var jetpack = Loader.Require(loader, module);
+const module = Loader.Module("main", "scriptish://");
+const jetpack = Loader.Require(loader, module);
+
+const jpGlobals = jetpack('sdk/system/globals');
+
+// Inject globals ASAP in order to have console API working ASAP
+Object.defineProperties(loader.globals, descriptor(jpGlobals));
 
 const { setTimeout: timeout } = jetpack('sdk/timers');
