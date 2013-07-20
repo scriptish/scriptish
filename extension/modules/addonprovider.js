@@ -25,7 +25,6 @@ const Scriptish_ScriptProvider = {
       var msg = "'" + script.name;
       if (script.version) msg += " " + script.version;
       msg += "' " + Scriptish_stringBundle("statusbar.installed");
-      var callback = Scriptish_openManager;
 
       var showedMsg = Scriptish_popupNotification({
         id: "scriptish-install-popup-notification",
@@ -33,7 +32,7 @@ const Scriptish_ScriptProvider = {
         mainAction: {
           label: Scriptish_stringBundle("openUserScriptsManager"),
           accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
-          callback: callback
+          callback: Scriptish_openManager.bind(null, null, script.id)
         },
         options: {
           removeOnDismissal: true,
@@ -68,25 +67,20 @@ const Scriptish_ScriptProvider = {
       msg += "' " + (("scriptish-script-updated" == aTopic)
           ? Scriptish_stringBundle("statusbar.updated")
           : Scriptish_stringBundle("statusbar.modified"));
-      var callback = Scriptish_openManager;
 
-      var showedMsg = Scriptish_popupNotification({
+      Scriptish_popupNotification({
         id: "scriptish-install-popup-notification",
         message: msg,
         mainAction: {
           label: Scriptish_stringBundle("openUserScriptsManager"),
           accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
-          callback: callback
+          callback: Scriptish_openManager.bind(null, null, script.id)
         },
         options: {
           removeOnDismissal: true,
           persistWhileVisible: true
         }
       });
-
-      if (!showedMsg) {
-        Scriptish_notification(msg, null, null, callback);
-      }
 
       break;
     case "scriptish-script-uninstalling":
