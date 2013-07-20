@@ -1,35 +1,38 @@
 // Checks if Scriptish was updated/installed
-(function(inc, tools) {
-  inc("resource://scriptish/prefmanager.js", tools);
-  inc("resource://scriptish/constants.js", tools);
-  inc("resource://gre/modules/AddonManager.jsm", tools);
+(function(inc) {
+  let { Scriptish_prefRoot } = inc("resource://scriptish/prefmanager.js", {});
+  let { Services, jetpack } = inc("resource://scriptish/constants.js", {});
+  let { AddonManager } = inc("resource://gre/modules/AddonManager.jsm", {});
 
-  var pref = tools.Scriptish_prefRoot;
-  var currentVer = pref.getValue("version", "0.0");
+  var currentVer = Scriptish_prefRoot.getValue("version", "0.0");
 
   // update the currently initialized version so we don't do this work again.
-  tools.AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
-    pref.setValue("version", aAddon.version);
+  AddonManager.getAddonByID("scriptish@erikvold.com", function(aAddon) {
+    Scriptish_prefRoot.setValue("version", aAddon.version);
   });
 
-  if (0 >= tools.Services.vc.compare(currentVer, "0.1b5")) {
-    var chromeWin = tools.Services.wm.getMostRecentWindow("navigator:browser");
-    (chromeWin.Browser ? chromeWin.Browser : chromeWin.gBrowser)
-        .addTab("about:scriptish");
+  // FIRST RUN STUFF!
+  if (0 >= Services.vc.compare(currentVer, "0.1b5")) {
+    let chromeWin = Services.wm.getMostRecentWindow("navigator:browser");
+    let { document, gBrowser } = chromeWin;
 
-    // add toolbaritem to add-on bar
-    var addToBar = chromeWin.document.getElementById("addon-bar");
-    if (!addToBar || chromeWin.document.getElementById("scriptish-button"))
-      return;
-    var addonSet = (addToBar.getAttribute("currentset") || addToBar.getAttribute("defaultset")).split(",");
-    var addonPos = addonSet.indexOf("status-bar");
-    if (addonPos == -1) addonPos = addonSet.length;
-    addonSet.splice(addonPos, 0, "scriptish-button");
-    addonSet = addonSet.join(",");
-    addToBar.setAttribute("currentset", addonSet);
-    addToBar.currentSet = addonSet;
-    chromeWin.BrowserToolboxCustomizeDone(true);
-    chromeWin.document.persist(addToBar.getAttribute("id"), "currentset");
-    if ("addon-bar" == addToBar.getAttribute("id")) addToBar.collapsed = false;
+    // Open about:scriptish in a tab
+    gBrowser.addTab("about:scriptish");
+
+    // Add toolbaritem to add-on bar
+    let addToBar = document.getElementById("nav-bar");
+    let scriptishBtn = document.getElementById("scriptish-button");
+    if (addToBar && !scriptishBtn) {
+      var addonSet = (addToBar.getAttribute("currentset") || addToBar.getAttribute("defaultset")).split(",");
+      var addonPos = addonSet.indexOf("status-bar");
+      if (addonPos == -1) addonPos = addonSet.length;
+      addonSet.splice(addonPos, 0, "scriptish-button");
+      addonSet = addonSet.join(",");
+      addToBar.setAttribute("currentset", addonSet);
+      addToBar.currentSet = addonSet;
+      chromeWin.BrowserToolboxCustomizeDone(true);
+      document.persist(addToBar.getAttribute("id"), "currentset");
+      if ("addon-bar" == addToBar.getAttribute("id")) addToBar.collapsed = false;
+    }
   }
-})(Components.utils.import, {})
+})(Components.utils.import)
