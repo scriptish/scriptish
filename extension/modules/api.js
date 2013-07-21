@@ -244,12 +244,6 @@ function GM_API(options) {
     if (!GM_apiLeakCheck("GM_cryptoHash")) return;
     return Scriptish_cryptoHash.apply(null, arguments);
   }
-
-  //temp solution for #422
-  let scriptName = aScript.name || aScript.id;
-  this.alert = function alert(aMsg) {
-    Scriptish_alert(aMsg, scriptName);
-  }
 }
 
 GM_API.prototype.GM_generateUUID = function GM_generateUUID() (

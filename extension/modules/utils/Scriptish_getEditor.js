@@ -89,7 +89,8 @@ const Scriptish_getEditor = function(parentWindow, change) {
     if (fp.file.exists() && fp.file.isExecutable()) {
       Scriptish_prefRoot.setValue("editor", fp.file.path);
       return fp.file;
-    } else {
+    }
+    else {
       Scriptish_alert(Scriptish_stringBundle("editor.pleasePickExecutable"));
     }
   }

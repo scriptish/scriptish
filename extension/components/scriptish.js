@@ -14,7 +14,6 @@ lazyImport(this, "resource://scriptish/manager.js", ["Scriptish_manager"]);
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 
-const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
 lazyUtil(this, "injectScripts");
 lazyUtil(this, "installUri");
 lazyUtil(this, "isGreasemonkeyable");
@@ -216,9 +215,10 @@ ScriptishService.prototype = {
 
   _tmpDir: Services.dirsvc.get("TmpD", Ci.nsIFile),
   isTempScript: function(uri) {
-    if (!(uri instanceof Ci.nsIFileURL)) return false;
+    if (!(uri instanceof Ci.nsIFileURL))
+      return false;
 
-    var file = uri.file;
+    let file = uri.file;
     return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
   }
 }
