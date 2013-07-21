@@ -105,6 +105,7 @@ function lazyImport(obj, resource, symbols) {
       return _m;
     });
   }
+
   for (let i = symbols.length; ~--i;) {
     let s = symbols[i];
     lazy(obj, s, function() _lazyModules[resource][s]);
