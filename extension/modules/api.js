@@ -183,6 +183,8 @@ function GM_API(options) {
 
   this.GM_openInTab = function GM_openInTab(aURL, aLoadInBackground, aReuse) {
     if (!GM_apiLeakCheck("GM_openInTab")) return;
+    aURL = NetUtil.newURI(
+        aURL, null, NetUtil.newURI(aSafeWin.location.href, null, null)).spec;
     Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin);
     return undefined; // don't return the window, this is intentional
   }
