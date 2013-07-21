@@ -2,12 +2,7 @@
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 
 Components.utils.import("resource://scriptish/constants.js");
-try {
-  Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
-}
-catch (ex) {
-  this.PrivateBrowsingUtils = { isWindowPrivate: function() false };
-}
+Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 
 lazyImport(this, "resource://scriptish/api.js", ["GM_apiSafeCallback"]);
 lazyUtil(this, "stringBundle");
