@@ -223,7 +223,7 @@ Config.prototype = {
           for (let i = len - 1; i >= 0; i--) {
             let script = scripts[i];
             if (!script.blocked && script.isUSOScript())
-              timeout(script.updateUSOData.bind(script), i * 1000);
+              timeout(script.updateUSOData.bind(script), ((i * 100) + 1000));
           }
         }
       }
