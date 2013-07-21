@@ -1027,7 +1027,8 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
           script.domains.push(value);
           continue;
         case "grant":
-          script.grant[value] = true;
+          var splitValue = value.split(/[ \t]+/);
+          splitValue.forEach(function(i) script.grant[i] = true);
           continue;
         case "include":
           script.addInclude(value);
@@ -1038,7 +1039,7 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
         case "match":
           script._matches.push(new MatchPattern(value));
           continue;
-        case 'screenshot':
+        case "screenshot":
           var splitValue = value.match(valueSplitter);
 
           // if there is a thumb url provided
