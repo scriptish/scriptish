@@ -215,14 +215,15 @@ Config.prototype = {
         let interval = Scriptish_prefRoot.getValue("update.uso.interval");
         let lastFetch = Scriptish_prefRoot.getValue("update.uso.lastFetch");
         let now = Math.ceil(Date.now() / 1E3);
-        if (now - lastFetch >= interval) {
+
+        if ((now - lastFetch) >= interval) {
           Scriptish_prefRoot.setValue("update.uso.lastFetch", now);
 
           // Fetch uso data
-          for (var i = len - 1; ~i; i--) {
+          for (let i = len - 1; i >= 0; i--) {
             let script = scripts[i];
             if (!script.blocked && script.isUSOScript())
-              timeout(script.updateUSOData.bind(script), i * 100);
+              timeout(script.updateUSOData.bind(script), i * 1000);
           }
         }
       }
@@ -326,19 +327,23 @@ Config.prototype = {
       Script.parse(this, source, aDownloadURI, aUpdateScript, aPrivate)),
 
   install: function(aNewScript) {
-    var existingIndex = this._find(aNewScript.id);
-    var exists = existingIndex > -1;
+    let existingIndex = this._find(aNewScript.id);
+    let script = null;
 
-    if (exists) {
-      this._scripts[existingIndex].replaceScriptWith(aNewScript);
+    if (existingIndex >= 0) {
+      script = this._scripts[existingIndex];
+      script.replaceScriptWith(aNewScript);
     }
     else {
       aNewScript.installProcess();
-      timeout(aNewScript.updateUSOData.bind(aNewScript));
       this.addScript(aNewScript);
+      script = aNewScript;
 
       Scriptish.notify(aNewScript, "scriptish-script-installed", true);
     }
+
+    // Update the USO review data
+    script.updateUSOData();
 
     this.sortScripts();
   },

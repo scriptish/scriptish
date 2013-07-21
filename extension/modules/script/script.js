@@ -160,7 +160,8 @@ Script.prototype = {
       return usoURLChk.test(this._downloadURL)
           || usoURLChk.test(this._homepageURL)
           || usoURLChk.test(this._updateURL);
-    } catch (e) {
+    }
+    catch (e) {
       return false;
     }
   },
@@ -197,11 +198,13 @@ Script.prototype = {
   get updateDate () new Date(parseInt(this._modified)),
 
   updateUSOData: function() {
-    if (this.blocked || !this.isUSOScript()) return;
-    var script = this;
-    var scriptID = RegExp.$1;
-    var metaURL = "http://userscripts.org/scripts/source/" + scriptID + ".meta.js";
-    var req = Instances.xhr;
+    if (this.blocked || !this.isUSOScript())
+      return;
+    const script = this;
+    const scriptID = RegExp.$1;
+    const metaURL = "https://userscripts.org/scripts/source/" + scriptID + ".meta.js";
+
+    let req = Instances.xhr;
     req.overrideMimeType("text/plain");
     req.open("GET", metaURL, true);
     req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
@@ -209,10 +212,12 @@ Script.prototype = {
       if (4 > req.readyState || (req.status != 200 && req.status != 0)
           || !req.responseText)
         return;
-      var data = Scriptish_parser(req.responseText);
+
+      let data = Scriptish_parser(req.responseText);
       if (!data["uso:rating"] || !data["uso:script"] || data["uso:script"][0] != scriptID
           || !data["uso:reviews"] || !data["uso:installs"])
         return;
+
       script.reviewCount = data["uso:reviews"][0] * 1;
       script.averageRating = data["uso:rating"][0] * 1;
       script.totalDownloads = data["uso:installs"][0] * 1;
