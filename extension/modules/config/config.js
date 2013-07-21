@@ -382,20 +382,6 @@ Config.prototype = {
   get scripts() this._scripts.concat(),
   getMatchingScripts: function(testFunc) this.scripts.filter(testFunc),
   sortScripts: function() this._scripts.sort(function(a, b) b.priority - a.priority),
-  injectScript: function(script) {
-    var safeWin = this.wrappedContentWin;
-    var unsafeWin = safeWin.wrappedJSObject;
-    var unsafeLoc = new XPCNativeWrapper(unsafeWin, "location").location;
-    var href = new XPCNativeWrapper(unsafeLoc, "href").href;
-
-    if (script.enabled && !script.needsUninstall && script.matchesURL(href)) {
-      Scriptish_injectScripts({
-        scripts: [script],
-        url: href,
-        safeWin: safeWin
-      });
-    }
-  },
 
   updateModifiedScripts: function(scriptInjector) {
     var self = this;
