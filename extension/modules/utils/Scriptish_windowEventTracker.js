@@ -1,35 +1,36 @@
 "use strict";
+
 var EXPORTED_SYMBOLS = ["Scriptish_windowEventTracker"];
 
 Components.utils.import("resource://scriptish/constants.js");
-
-lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "windowUnloader");
 
 const events = ["DOMContentLoaded", "load"];
 
-const trackers = {};
+const trackers = Object.create(null);
 
 function Scriptish_windowEventTracker(aWin) {
-  var winID = Scriptish_getWindowIDs(aWin).innerID;
-  if (trackers[winID]) return trackers[winID];
+  const winID = Scriptish_getWindowIDs(aWin).innerID;
+  if (winID in trackers)
+    return trackers[winID];
+
   trackers[winID] = "start";
 
-  aWin.addEventListener("DOMContentLoaded", function() {
+  aWin.addEventListener("DOMContentLoaded", function onDOMContentLoaded() {
+    aWin.removeEventListener("DOMContentLoaded", onDOMContentLoaded, false);
+
     // if the tracker event gte to this one has occurred then ignore
-    if (~events.indexOf(trackers[winID])) return;
+    if (~events.indexOf(trackers[winID]))
+      return;
 
     trackers[winID] = "DOMContentLoaded";
   }, false);
-  /*
-  aWin.document.addEventListener("readystatechange", function() {
-    if ("complete" != aWin.document.readyState) return;
-    trackers[winID] = "readystate@complete";
-  }, false);
-  */
-  aWin.addEventListener("load", function() {
+
+  aWin.addEventListener("load", function onLoad() {
+    aWin.removeEventListener("load", onLoad, false);
+
     trackers[winID] = "load";
   }, false);
 
