@@ -105,6 +105,7 @@
       <preference id="pref-enabledSchemes-about" name="extensions.scriptish.enabledSchemes.about" type="bool"/>
       <preference id="pref-logChrome" name="extensions.scriptish.logChrome" type="bool"/>
       <preference id="pref-logToErrorConsole" name="extensions.scriptish.logToErrorConsole" type="bool"/>
+      <preference id="pref-enableScriptGrantSniffing" name="extensions.scriptish.enableScriptGrantSniffing" type="bool"/>
       <preference id="pref-update-requireSecured" name="extensions.scriptish.update.requireSecured" type="bool"/>
       <preference id="pref-update-requireBuiltInCerts" name="extensions.scriptish.update.requireBuiltInCerts" type="bool"/>
     </preferences>
@@ -125,6 +126,10 @@
             <caption label="options.logging" localize="label" />
             <checkbox preference="pref-logChrome" label="options.logChrome" localize="label"/>
             <checkbox preference="pref-logToErrorConsole" label="options.logToErrorConsole" localize="label"/>
+          </groupbox>
+          <groupbox>
+          <caption label="options.other" localize="label" />
+            <checkbox preference="pref-enableScriptGrantSniffing" label="options.grant.sniffing" localize="label"/>
           </groupbox>
         </tabpanel>
         <tabpanel>

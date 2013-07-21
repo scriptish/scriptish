@@ -17,6 +17,7 @@ pref("extensions.scriptish.enableCopyDownloadURL", false);
 pref("extensions.scriptish.enabledNotifications.popup", true);
 pref("extensions.scriptish.enabledNotifications.sliding", true);
 pref("extensions.scriptish.enableScriptRefreshing", true);
+pref("extensions.scriptish.enableScriptGrantSniffing", true);
 pref("extensions.scriptish.logChrome", false);
 pref("extensions.scriptish.logToErrorConsole", true);
 pref("extensions.scriptish.optimizingRegexpMerge", false);
