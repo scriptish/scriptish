@@ -8,30 +8,6 @@ lazyImport(this, "resource://scriptish/api.js", ["GM_apiSafeCallback"]);
 lazyUtil(this, "stringBundle");
 
 const MIME_JSON = /^(application|text)\/(?:x-)?json/i;
-const PRIVATE_CHANNELS = 'nsIPrivateBrowsingChannel' in Ci;
-
-/**
- * Make a channel private as per pwpbm or LOAD_ANONYMOUS (legacy)
- */
-function makeChannelPrivate(chan) {
-  if (PRIVATE_CHANNELS && chan instanceof Ci.nsIPrivateBrowsingChannel) {
-    chan.setPrivate(true);
-    return;
-  }
-
-  // legacy / non pbc
-  if (chan instanceof Ci.nsIHttpChannel) {
-    chan.setRequestHeader('Referer', '', false);
-    chan.setRequestHeader('Cookie', '', false);
-    try {
-      chan.referrer = null;
-    }
-    catch (ex) {
-      // ignore
-    }
-  }
-  chan.loadFlags |= Ci.nsIRequest.LOAD_ANONYMOUS;
-}
 
 /**
  * Abstract base class for (chained) request notification callback overrides
@@ -214,7 +190,7 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
   // Loads initiated from private windows should always be private as well.
   let makePrivate = details.makePrivate || PrivateBrowsingUtils.isWindowPrivate(this.safeWin);
   if (makePrivate) {
-    makeChannelPrivate(req.channel);
+    req.channel.QueryInterface(Ci.nsIPrivateBrowsingChannel).setPrivate(true);
   }
 
   var body = details.data ? details.data : null;
