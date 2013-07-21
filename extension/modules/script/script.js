@@ -207,7 +207,10 @@ Script.prototype = {
     let req = Instances.xhr;
     req.overrideMimeType("text/plain");
     req.open("GET", metaURL, true);
-    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+    // bypass cache
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
+    // private channel
+    req.channel.QueryInterface(Components.interfaces.nsIPrivateBrowsingChannel).setPrivate(true);
     req.onload = function() {
       if (4 > req.readyState || (req.status != 200 && req.status != 0)
           || !req.responseText)
