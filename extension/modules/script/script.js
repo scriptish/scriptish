@@ -710,7 +710,7 @@ Script.prototype = {
     // Copy new values.
     this.blocked = newScript.blocked;
     this.domains = newScript.domains;
-    this.grant = newScript.grant || {};
+    this.grant = newScript.grant || Object.create(null);
     this._includes = newScript._includes;
     this._excludes = newScript._excludes;
     delete this.__all_includes;

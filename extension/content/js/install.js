@@ -44,7 +44,6 @@ function setupIncludes(type, items) {
 function cleanup() scriptDownloader.cleanupTempFiles();
 function delayedClose() timeout(close, 1);
 
-
 on("load", function() {
   let script = scriptDownloader.script;
   let headers = Scriptish_getScriptHeader(script);
@@ -55,6 +54,7 @@ on("load", function() {
   });
   setupIncludes("requires", headers.require || []);
   setupIncludes("resources", headers.resource || []);
+  setupIncludes("grants", Scriptish_getScriptHeader(script, 'grant', true) || []);
 
   // setup buttons
   let dialog = document.documentElement;

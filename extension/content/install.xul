@@ -54,6 +54,10 @@
         <label id="resources-label"/>
         <description id="resources-desc"/>
       </vbox>
+      <vbox id="grants">
+        <label id="grants-label"/>
+        <description id="grants-desc"/>
+      </vbox>
     </vbox>
     <hbox id="showSource-box">
       <label id="showSource" class="text-link" value="install.showScriptSource" localize="value"/>

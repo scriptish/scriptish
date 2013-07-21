@@ -59,9 +59,13 @@
   display:none;
 }
 
-#excludes-desc, #includes-desc, #matches-desc{font-style:italic;}
+#excludes-desc, #includes-desc, #matches-desc {
+  font-style:italic;
+}
 
-#itemBox vbox.display:not(#script-desc-vbox){display:inherit;}
+#itemBox vbox.display:not(#script-desc-vbox) {
+  display:inherit;
+}
 
 html|ul {
   margin-top: 0;
