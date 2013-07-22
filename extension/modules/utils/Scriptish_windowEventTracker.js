@@ -19,20 +19,28 @@ function Scriptish_windowEventTracker(aWin) {
   trackers[winID] = "start";
 
   aWin.addEventListener("DOMContentLoaded", function onDOMContentLoaded() {
-    aWin.removeEventListener("DOMContentLoaded", onDOMContentLoaded, false);
+    aWin.removeEventListener("DOMContentLoaded", onDOMContentLoaded, true);
 
     // if the tracker event gte to this one has occurred then ignore
     if (~events.indexOf(trackers[winID]))
       return;
 
     trackers[winID] = "DOMContentLoaded";
-  }, false);
+  }, true);
+
+  aWin.document.addEventListener("readystatechange", function readyStateListener() {
+    if ("complete" != aWin.document.readyState)
+      return;
+    aWin.document.removeEventListener("readystatechange", readyStateListener, true);
+
+    trackers[winID] = "readystate@complete";
+  }, true);
 
   aWin.addEventListener("load", function onLoad() {
-    aWin.removeEventListener("load", onLoad, false);
+    aWin.removeEventListener("load", onLoad, true);
 
     trackers[winID] = "load";
-  }, false);
+  }, true);
 
   Scriptish_windowUnloader(function() {
     delete trackers[winID];

@@ -11,7 +11,6 @@ lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scri
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/manager.js", ["Scriptish_manager"]);
-lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 
 lazyUtil(this, "injectScripts");
@@ -20,7 +19,6 @@ lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
-lazyUtil(this, "updateModifiedScripts");
 lazyUtil(this, "windowEventTracker");
 lazyUtil(this, "windowUnloader");
 
@@ -32,7 +30,8 @@ const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
 
 function ScriptishService() {
-  Scriptish_manager.setup.call(this);
+  Scriptish_manager();
+
   Services.obs.addObserver(this, "install-userscript", false);
   Services.obs.addObserver(this, "scriptish-enabled", false);
   Services.obs.addObserver(this, "content-document-global-created", false);
@@ -103,79 +102,6 @@ ScriptishService.prototype = {
         }
         break;
     }
-  },
-
-  docReady: function(href, safeWin) {
-    let unsafeWin = safeWin.wrappedJSObject;
-    let self = this;
-    let winClosed = false;
-    let tracker = Scriptish_windowEventTracker(safeWin);
-
-    // rechecks values that can change at any moment
-    function shouldNotRun() (
-      winClosed || !Scriptish.enabled || !Scriptish_isGreasemonkeyable(href));
-
-    // check if there are any modified scripts
-    Scriptish_updateModifiedScripts(href, safeWin, shouldNotRun);
-
-    // find matching scripts
-    Scriptish_config.initScripts(href, (safeWin === safeWin.top), function(scripts) {
-       let (windowLoaded = ("load" == tracker)) {
-         if (windowLoaded || "DOMContentLoaded" == tracker) {
-           scripts["document-start"] = scripts["document-start"].concat(scripts["document-end"], scripts["document-idle"]);
-           scripts["document-end"] = scripts["document-idle"] = [];
-         }
-
-         if (windowLoaded) {
-           scripts["document-start"] = scripts["document-start"].concat(scripts["window-load"]);
-           scripts["window-load"] = [];
-         }
-       }
-
-      if (scripts["document-end"].length || scripts["document-idle"].length) {
-        safeWin.addEventListener("DOMContentLoaded", function() {
-          if (shouldNotRun()) return;
-
-          if (scripts["document-idle"].length)
-            timeout(function() {
-              if (shouldNotRun()) return;
-              Scriptish_injectScripts({
-                scripts: scripts["document-idle"],
-                url: href,
-                safeWin: safeWin
-              });
-            });
-
-          Scriptish_injectScripts({
-            scripts: scripts["document-end"],
-            url: href,
-            safeWin: safeWin
-          });
-        }, true);
-      }
-
-      if (scripts["window-load"].length) {
-        safeWin.addEventListener("load", function() {
-          if (shouldNotRun()) return;
-          // inject @run-at window-load scripts
-          Scriptish_injectScripts({
-            scripts: scripts["window-load"],
-            url: href,
-            safeWin: safeWin
-          });
-        }, true);
-      }
-
-      Scriptish_injectScripts({
-        scripts: scripts["document-start"],
-        url: href,
-        safeWin: safeWin
-      });
-
-      Scriptish_windowUnloader(function() {
-        winClosed = true;
-      }, Scriptish_getWindowIDs(safeWin).innerID);
-    });
   },
 
   _test_org: {

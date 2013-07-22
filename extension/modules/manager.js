@@ -6,55 +6,52 @@ Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
+lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 
+lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "injectScripts");
 lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "isScriptRunnable");
 lazyUtil(this, "isURLExcluded");
-lazyUtil(this, "getWindowIDs");
+lazyUtil(this, "updateModifiedScripts");
 lazyUtil(this, "windowEventTracker");
 lazyUtil(this, "windowUnloader");
 
-const tests = {
-  _test_org: {
-    "chrome": true,
-    "about": true
-  },
-  _test_cl: {
-    "chrome": true,
-    "resource": true
-  },
-  _reg_userjs: /\.user\.js$/,
-  isTempScript: function(uri) {
-    if (!(uri instanceof Ci.nsIFileURL)) return false;
+const { Class } = jetpack('sdk/core/heritage');
+const { add } = jetpack('sdk/deprecated/observer-service');
 
-    var file = uri.file;
-    return file.parent.equals(this._tmpDir) && file.leafName != "newscript.user.js";
-  }
-};
+const windowsTracked = Object.create(null);
 
-const Scriptish_manager = {
-  setup: function(options) {
-    options = options || {};
+const Scriptish_manager = Class({
+  initialize: function() {
+    const self = this;
 
-    var observer = {
-      observe: (function(aSubject, aTopic, aData) {
-        switch (aTopic) {
-        case "chrome-document-global-created":
-        case "content-document-global-created":
-          Scriptish_manager.docReady_start.call(this, aSubject, options);
-          break;
-        }
-      }).bind(this)
-    };
+    add("document-element-inserted", function(aDocument) {
+      let win = aDocument.defaultView;
+      if (!win) {
+        return;
+      }
+      self.docReady_start(win);
+    });
 
-    Services.obs.addObserver(observer, "content-document-global-created", false);
-    Services.obs.addObserver(observer, "chrome-document-global-created", false);
+    add("content-document-global-created", self.docReady_start.bind(self));
+    add("chrome-document-global-created", self.docReady_start.bind(self));
   },
 
-  docReady_start: function(safeWin, options) {
+  docReady_start: function(safeWin) {
     // TODO: disable observer that calls this when Scriptish is disabled
-    if (!Scriptish.enabled) return;
+    if (!Scriptish.enabled)
+      return;
+
+    if (!('document' in safeWin && safeWin.document.documentElement)) {
+      return;
+    }
+
+    let id = Scriptish_getWindowIDs(safeWin).innerID;
+    if (windowsTracked[id]) {
+      return;
+    }
+    windowsTracked[id] = true;
 
     // start tracking the window's progress
     Scriptish_windowEventTracker(safeWin);
@@ -62,152 +59,128 @@ const Scriptish_manager = {
     // try to get the windows href..
     let href = getURLForWin(safeWin);
 
-    // if we don't have a href and the window is a frame, then wait until we do
-    if (!href && safeWin.frameElement) {
-      Scriptish_manager.waitForFrame.call(this, safeWin, options);
+    if (!Scriptish_isGreasemonkeyable(href))
       return;
-    }
-
-    if (!href || "about:blank" == href) {
-      if ("complete" != safeWin.document.readyState) {
-        Scriptish_manager.waitForAboutBlank.call(this, safeWin, options);
-        return;
-      }
-    }
-
-    if (!Scriptish_isGreasemonkeyable(href)) return;
 
     // if the url is a excluded url then stop
-    if (Scriptish_isURLExcluded(href)) return;
-
-    this.docReady(href, safeWin, options);
-  },
-
-  docReady: function(href, safeWin, options) {
-    // ignore window if it is not the same window used by options
-    if (JSON.stringify(Scriptish_getWindowIDs(options.content))
-        != JSON.stringify(Scriptish_getWindowIDs(safeWin)))
+    if (Scriptish_isURLExcluded(href))
       return;
 
-    var uri = Services.io.newURI(href, null, null);
-    if (tests._reg_userjs.test(href) && !tests.isTempScript(uri)
-        && "view-source" != uri.scheme) {
-      options.global.sendAsyncMessage("Scriptish:InstallScriptURL", href);
-    }
+    this.docReady(href, safeWin);
+  },
 
-    var scripts = {
-      "document-start": [],
-      "document-end": [],
-      "document-idle": [],
-      "window-load": []
-    };
+  docReady: function(href, safeWin) {
+    let unsafeWin = safeWin.wrappedJSObject;
+    let id = Scriptish_getWindowIDs(safeWin).innerID;
 
-    options.scripts.forEach(function(script) {
-      if (Scriptish_isScriptRunnable(script, href, (safeWin === safeWin.top))) {
-        scripts[script.runAt].push(script);
-      }
-    });
+    let winClosed = false;    
+    Scriptish_windowUnloader(function() {
+      winClosed = true;
+      delete windowsTracked[id];
+    }, id);
 
     let tracker = Scriptish_windowEventTracker(safeWin);
-    let (windowLoaded = ("load" == tracker)) {
+
+    // rechecks values that can change at any moment
+    function shouldNotRun() (
+      winClosed || !Scriptish.enabled || !Scriptish_isGreasemonkeyable(href));
+
+    // check if there are any modified scripts
+    Scriptish_updateModifiedScripts(href, safeWin, shouldNotRun);
+
+    // find matching scripts
+    Scriptish_config.initScripts(href, (safeWin === safeWin.top), function(scripts) {
+      let windowLoaded = ("load" == tracker); 
+
       if (windowLoaded || "DOMContentLoaded" == tracker) {
         scripts["document-start"] = scripts["document-start"].concat(scripts["document-end"], scripts["document-idle"]);
         scripts["document-end"] = scripts["document-idle"] = [];
+      }
+
+      if (windowLoaded || "readystate@complete" == tracker) {
+        scripts["document-start"] = scripts["document-start"].concat(scripts["document-complete"]);
+        scripts["document-complete"] = [];
       }
 
       if (windowLoaded) {
         scripts["document-start"] = scripts["document-start"].concat(scripts["window-load"]);
         scripts["window-load"] = [];
       }
-    }
 
-    if (scripts["document-end"].length || scripts["document-idle"].length) {
-      safeWin.addEventListener("DOMContentLoaded", function() {
-        // inject @run-at document-idle scripts
-        if (scripts["document-idle"].length) {
-          timeout(function() {
-            Scriptish_injectScripts(extend(options, {
-              scripts: scripts["document-idle"],
-              url: href,
-              safeWin: safeWin
-            }));
+      // inject @run-at document-start scripts
+      Scriptish_injectScripts({
+        scripts: scripts["document-start"],
+        url: href,
+        safeWin: safeWin
+      });
+
+      // handle @run-at document-end and document-idle
+      if (scripts["document-end"].length || scripts["document-idle"].length) {
+        safeWin.addEventListener("DOMContentLoaded", function listener() {
+          safeWin.removeEventListener("DOMContentLoaded", listener, true);
+          if (shouldNotRun())
+            return;
+
+          // inject @run-at document-end scripts
+          Scriptish_injectScripts({
+            scripts: scripts["document-end"],
+            url: href,
+            safeWin: safeWin
           });
-        }
 
-        // inject @run-at document-end scripts
-        Scriptish_injectScripts(extend(options, {
-          scripts: scripts["document-end"],
-          url: href,
-          safeWin: safeWin
-        }));
-      }, true);
-    }
+          // handle @run-at document-idle
+          if (scripts["document-idle"].length) {
+            timeout(function() {
+              if (shouldNotRun())
+                return;
 
-    if (scripts["window-load"].length) {
-      safeWin.addEventListener("load", function() {
-        // inject @run-at window-load scripts
-        Scriptish_injectScripts(extend(options, {
-          scripts: scripts["window-load"],
-          url: href,
-          safeWin: safeWin
-        }));
-      }, true);
-    }
+              // inject @run-at document-idle scripts
+              Scriptish_injectScripts({
+                scripts: scripts["document-idle"],
+                url: href,
+                safeWin: safeWin
+              });
+            });
+          }
+        }, true);
+      }
 
-    // inject @run-at document-start scripts
-    Scriptish_injectScripts(extend(options, {
-      scripts: scripts["document-start"],
-      url: href,
-      safeWin: safeWin
-    }));
-  },
+      // handle @run-at document-complete
+      if (scripts["document-complete"].length) {
+        safeWin.document.addEventListener("readystatechange", function listener() {
+          if ("complete" != safeWin.document.readyState)
+            return;
+          safeWin.document.removeEventListener("readystatechange", listener, true);
+          if (shouldNotRun())
+            return;
 
-  waitForFrame: function(safeWin, options) {
-    let self = this;
-    safeWin.addEventListener("DOMContentLoaded", function _frame_loader() {
-      // not perfect, but anyway
-      let href = getURLForWin(safeWin);
+          // inject @run-at document-complete scripts
+          Scriptish_injectScripts({
+            scripts: scripts["document-complete"],
+            url: href,
+            safeWin: safeWin
+          });
+        }, true);
+      }
 
-      if (!href) return; // wait for it :p
-      safeWin.removeEventListener("DOMContentLoaded", _frame_loader, false);
-      Scriptish_manager.docReady_start.call(self, safeWin, options);
-    }, false);
-  },
+      // handle @run-at window-load
+      if (scripts["window-load"].length) {
+        safeWin.addEventListener("load", function listener() {
+          safeWin.removeEventListener("load", listener, true);
+          if (shouldNotRun())
+            return;
 
-  // not perfect, but anyway
-  waitForAboutBlank: function(safeWin, options) {
-    let self = this;
-
-    // check if we have a url @ DOMContentLoaded
-    function _loader1() {
-      safeWin.removeEventListener("DOMContentLoaded", _loader1, false);
-
-      let href = getURLForWin(safeWin);
-
-      if (!href || "about:blank" == href) return; // not done yet..
-      Scriptish_manager.docReady_start.call(self, safeWin, options);
-      safeWin.document.removeEventListener("readystatechange", _loader2, false);
-    }
-    safeWin.addEventListener("DOMContentLoaded", _loader1, false);
-
-    // check if we have a url @ readyState == "complete"
-    function _loader2() {
-      if ("complete" != safeWin.document.readyState) return;
-
-      safeWin.removeEventListener("DOMContentLoaded", _loader1, false);
-      safeWin.document.removeEventListener("readystatechange", _loader2, false);
-
-      let href = getURLForWin(safeWin);
-      Scriptish_manager.docReady_start.call(self, safeWin, options);
-
-      // fake DOMContentLoaded to get things rolling
-      var evt = safeWin.document.createEvent("Events");
-      evt.initEvent("DOMContentLoaded", true, true);
-      safeWin.dispatchEvent(evt);
-    }
-    safeWin.document.addEventListener("readystatechange", _loader2, false);
+          // inject @run-at window-load scripts
+          Scriptish_injectScripts({
+            scripts: scripts["window-load"],
+            url: href,
+            safeWin: safeWin
+          });
+        }, true);
+      }
+    });
   }
-};
+});
 
 function getURLForWin(safeWin) {
   return (safeWin.location.href

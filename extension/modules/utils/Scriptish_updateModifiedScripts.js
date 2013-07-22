@@ -21,7 +21,9 @@ function Scriptish_updateModifiedScripts(href, safeWin, shouldNotRun) {
 
     let rdyStateIdx = docRdyStates.indexOf(safeWin.document.readyState);
     function inject() {
-      if (shouldNotRun()) return;
+      if (shouldNotRun())
+        return;
+
       Scriptish_injectScripts({
         scripts: [script],
         url: href,
@@ -30,25 +32,42 @@ function Scriptish_updateModifiedScripts(href, safeWin, shouldNotRun) {
     }
 
     switch (script.runAt) {
-    case "document-end":
-      if (2 > rdyStateIdx) {
-        safeWin.addEventListener("DOMContentLoaded", inject, true);
-        return;
-      }
-      break;
-    case "document-idle":
-      if (2 > rdyStateIdx) {
-        safeWin.addEventListener(
-            "DOMContentLoaded", function() timeout(inject), true);
-        return;
-      }
-      break;
-    case "window-load":
-      if (4 > rdyStateIdx) {
-        safeWin.addEventListener("load", inject, true);
-        return;
-      }
-      break;
+      case "document-end":
+        if (2 > rdyStateIdx) {
+          safeWin.addEventListener("DOMContentLoaded", function listener() {
+            safeWin.removeEventListener("DOMContentLoaded", listener, true);
+            inject();
+          }, true);
+          return;
+        }
+        break;
+      case "document-idle":
+        if (2 > rdyStateIdx) {
+          safeWin.addEventListener("DOMContentLoaded", function listener() {
+            safeWin.removeEventListener("DOMContentLoaded", listener, true);
+            timeout(inject);
+          }, true);
+          return;
+        }
+        break;
+      case "document-complete":
+        if (4 > rdyStateIdx) {
+          safeWin.addEventListener("DOMContentLoaded", function listener() {
+            safeWin.removeEventListener("DOMContentLoaded", listener, true);
+            inject();
+          }, true);
+          return;
+        }
+        break;
+      case "window-load":
+        if (4 > rdyStateIdx) {
+          safeWin.addEventListener("load", function listener() {
+            safeWin.removeEventListener("load", listener, true);
+            inject();
+          }, true);
+          return;
+        }
+        break;
     }
 
     inject();

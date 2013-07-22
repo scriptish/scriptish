@@ -392,7 +392,8 @@ Config.prototype = {
         continue;
       }
 
-      if (!script.isModified()) continue;
+      if (!script.isModified())
+        continue;
 
       let theScript = script;
       Scriptish_getContents(script._file, 0, function(content) {
@@ -412,6 +413,7 @@ Config.prototype.initScripts = function(url, isTopWin, aCallback) {
     "document-start": [],
     "document-end": [],
     "document-idle": [],
+    "document-complete": [],
     "window-load": []
   };
 

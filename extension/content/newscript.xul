@@ -50,9 +50,10 @@
         <label control="run-at" value="newscript.runat" localize="value"/>
         <menulist id="run-at">
           <menupopup>
-            <menuitem label="newscript.runat.documentend" value="document-end" localize="label"/>
             <menuitem label="newscript.runat.documentstart" value="document-start" localize="label"/>
             <menuitem label="newscript.runat.documentidle" value="document-idle" localize="label"/>
+            <menuitem label="newscript.runat.documentend" value="document-end" localize="label"/>
+            <menuitem label="newscript.runat.documentcomplete" value="document-complete" localize="label"/>
             <menuitem label="newscript.runat.windowload" value="window-load" localize="label"/>
           </menupopup>
         </menulist>

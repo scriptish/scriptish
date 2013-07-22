@@ -33,7 +33,7 @@ const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
-const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
+const runAtValues = ["document-start", "document-end", "document-idle", "document-complete", "window-load"];
 const defaultRunAt = runAtValues[1];
 const defaultAutoUpdateState = AddonManager.AUTOUPDATE_DISABLE;
 const usoURLChk = /^https?:\/\/userscripts\.org\/scripts\/[^\d]+(\d+)/i;

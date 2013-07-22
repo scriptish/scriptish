@@ -11,7 +11,7 @@ lazyUtil(this, "isGreasemonkeyable");
 
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
-const runAtValues = ["document-start", "document-end", "document-idle", "window-load"];
+const runAtValues = ["document-start", "document-end", "document-idle", "document-complete", "window-load"];
 const defaultRunAt = runAtValues[1];
 
 function SimpleScript() {
