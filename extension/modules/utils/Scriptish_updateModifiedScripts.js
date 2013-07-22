@@ -52,8 +52,10 @@ function Scriptish_updateModifiedScripts(href, safeWin, shouldNotRun) {
         break;
       case "document-complete":
         if (4 > rdyStateIdx) {
-          safeWin.addEventListener("DOMContentLoaded", function listener() {
-            safeWin.removeEventListener("DOMContentLoaded", listener, true);
+          safeWin.document.addEventListener("readystatechange", function listener() {
+            if ("complete" != safeWin.document.readyState)
+              return;
+            safeWin.document.removeEventListener("readystatechange", listener, true);
             inject();
           }, true);
           return;
