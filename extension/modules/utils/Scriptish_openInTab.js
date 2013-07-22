@@ -4,8 +4,12 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 
+const tabs = jetpack('sdk/tabs');
+const prefs = jetpack('sdk/preferences/service');
+
 function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
   aChromeWin = aChromeWin || Scriptish.getMostRecentWindow();
+  aLoadInBackground = aLoadInBackground || prefs.get('browser.tabs.loadInBackground', true);
 
   // Try to reuse an existing tab
   if (aReuse) {
