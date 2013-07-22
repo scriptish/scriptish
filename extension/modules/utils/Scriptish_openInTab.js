@@ -4,7 +4,6 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 
-const tabs = jetpack('sdk/tabs');
 const prefs = jetpack('sdk/preferences/service');
 
 function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
@@ -38,9 +37,7 @@ function Scriptish_openInTab(aURL, aLoadInBackground, aReuse, aChromeWin) {
   var browser = aChromeWin.gBrowser;
   var selectedTab = browser.selectedTab;
   var newTab = browser.loadOneTab(aURL, {"inBackground": !!aLoadInBackground});
-  var afterCurrent = Services.prefs
-      .getBranch("browser.tabs.")
-      .getBoolPref("insertRelatedAfterCurrent");
+  var afterCurrent = prefs.get('browser.tabs.insertRelatedAfterCurrent', true);
 
   if (afterCurrent)
     browser.moveTabTo(newTab, selectedTab._tPos + 1);
