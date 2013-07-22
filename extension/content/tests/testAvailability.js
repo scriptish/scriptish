@@ -20,7 +20,6 @@ Cu.import("resource://scriptish/utils/Scriptish_getTempFile.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getTLDURL.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getUriFromFile.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getURLsForContentWindow.js", tools);
-Cu.import("resource://scriptish/utils/Scriptish_getWindowIDs.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_getWriteStream.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_installUri.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_launchApplicationWithDoc.js", tools);
@@ -51,7 +50,6 @@ test("Utils", function() {
   equals(typeof(tools.Scriptish_getTLDURL), "function", "has Scriptish_getTLDURL");
   equals(typeof(tools.Scriptish_getUriFromFile), "function", "has Scriptish_getUriFromFile");
   equals(typeof(tools.Scriptish_getURLsForContentWindow), "function", "has Scriptish_getURLsForContentWindow");
-  equals(typeof(tools.Scriptish_getWindowIDs), "function", "has Scriptish_getWindowIDs");
   equals(typeof(tools.Scriptish_getWriteStream), "function", "has Scriptish_getWriteStream");
   equals(typeof(tools.Scriptish_installUri), "function", "has Scriptish_installUri");
   equals(typeof(tools.Scriptish_launchApplicationWithDoc), "function", "has Scriptish_launchApplicationWithDoc");

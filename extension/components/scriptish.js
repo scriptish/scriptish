@@ -17,10 +17,11 @@ lazyUtil(this, "injectScripts");
 lazyUtil(this, "installUri");
 lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "isScriptRunnable");
-lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
 lazyUtil(this, "windowEventTracker");
 lazyUtil(this, "windowUnloader");
+
+const { getInnerId } = jetpack('sdk/window/utils');
 
 const CP = Ci.nsIContentPolicy;
 
@@ -73,7 +74,7 @@ ScriptishService.prototype = {
               gBrowser.getBrowserForDocument(safeWin.document));
         }
 
-        let currentInnerWindowID = Scriptish_getWindowIDs(safeWin).innerID;
+        let currentInnerWindowID = getInnerId(safeWin);
         // if the focused tab's window is the one loading, then attach menuCommander
         if (safeWin === gBrowser.selectedBrowser.contentWindow) {
           if (gmBrowserUI.currentMenuCommander)

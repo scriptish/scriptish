@@ -16,11 +16,12 @@ lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogge
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
 
 lazyUtil(this, "evalInSandbox");
-lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "windowUnloader");
 
 const Scriptish_injectScripts_filename = Components.stack.filename;
 const gTimer = jetpack('sdk/timers');
+const { getInnerId } = jetpack('sdk/window/utils');
+
 const {nsIDOMXPathResult: XPATH_RESULT} = Ci;
 
 function Scriptish_injectScripts(options) {
@@ -31,7 +32,7 @@ function Scriptish_injectScripts(options) {
   if (0 >= scripts.length) return;
 
   let unsafeContentWin = safeWin.wrappedJSObject;
-  let winID = Scriptish_getWindowIDs(safeWin).innerID;
+  let winID = getInnerId(safeWin);
 
   let delays = [];
 

@@ -4,16 +4,17 @@ Components.utils.import("resource://scriptish/constants.js");
 
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_PrefManager"]);
 
-lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "stringBundle");
 lazyUtil(this, "windowUnloader");
+
+const { getInnerId } = jetpack('sdk/window/utils');
 
 function GM_ScriptStorage(aScript, aSafeWin) {
   this.prefMan = new Scriptish_PrefManager(aScript.prefroot);
   this._watchedPrefs = Object.create(null);
 
   // Be sure to remove any watchers when the window unloads
-  let winID = Scriptish_getWindowIDs(aSafeWin).innerID;
+  let winID = getInnerId(aSafeWin);
   Scriptish_windowUnloader(function() {
     let prefChanged = this._prefChanged.bind(this);
 

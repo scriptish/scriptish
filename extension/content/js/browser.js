@@ -15,13 +15,14 @@ lazyImport(window, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(window, "resource://scriptish/config/configdownloader.js", ["Scriptish_configDownloader"]);
 
 lazyUtil(window, "getURLsForContentWindow");
-lazyUtil(window, "getWindowIDs");
 lazyUtil(window, "installUri");
 lazyUtil(window, "isGreasemonkeyable");
 lazyUtil(window, "isURLExcluded");
 lazyUtil(window, "openInEditor");
 lazyUtil(window, "openInTab");
 lazyUtil(window, "stringBundle");
+
+const { getInnerId } = jetpack('sdk/window/utils');
 
 var Ci = tools.Ci;
 var Services = tools.Services;
@@ -243,7 +244,7 @@ Scriptish_BrowserUI.reattachMenuCmds = function() {
     Scriptish_BrowserUI.currentMenuCommander = null;
   }
   var menuCommander = Scriptish_BrowserUI.getCommander(
-      Scriptish_getWindowIDs(gBrowser.selectedBrowser.contentWindow).innerID);
+      getInnerId(gBrowser.selectedBrowser.contentWindow));
   if (menuCommander) (Scriptish_BrowserUI.currentMenuCommander = menuCommander).attach();
 }
 

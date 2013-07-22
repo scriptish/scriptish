@@ -8,7 +8,6 @@ lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/config.js", ["Scriptish_config"]);
 
-lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "injectScripts");
 lazyUtil(this, "isGreasemonkeyable");
 lazyUtil(this, "isScriptRunnable");
@@ -19,6 +18,7 @@ lazyUtil(this, "windowUnloader");
 
 const { Class } = jetpack('sdk/core/heritage');
 const { add } = jetpack('sdk/deprecated/observer-service');
+const { getInnerId } = jetpack('sdk/window/utils');
 
 const windowsTracked = Object.create(null);
 
@@ -47,7 +47,7 @@ const Scriptish_manager = Class({
       return;
     }
 
-    let id = Scriptish_getWindowIDs(safeWin).innerID;
+    let id = getInnerId(safeWin);
     if (windowsTracked[id]) {
       return;
     }
@@ -71,7 +71,7 @@ const Scriptish_manager = Class({
 
   docReady: function(href, safeWin) {
     let unsafeWin = safeWin.wrappedJSObject;
-    let id = Scriptish_getWindowIDs(safeWin).innerID;
+    let id = getInnerId(safeWin);
 
     let winClosed = false;    
     Scriptish_windowUnloader(function() {

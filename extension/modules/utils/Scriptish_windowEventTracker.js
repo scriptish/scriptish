@@ -4,15 +4,16 @@ var EXPORTED_SYMBOLS = ["Scriptish_windowEventTracker"];
 
 Components.utils.import("resource://scriptish/constants.js");
 
-lazyUtil(this, "getWindowIDs");
 lazyUtil(this, "windowUnloader");
+
+const { getInnerId } = jetpack('sdk/window/utils');
 
 const events = ["DOMContentLoaded", "load"];
 
 const trackers = Object.create(null);
 
 function Scriptish_windowEventTracker(aWin) {
-  const winID = Scriptish_getWindowIDs(aWin).innerID;
+  const winID = getInnerId(aWin);
   if (winID in trackers)
     return trackers[winID];
 
