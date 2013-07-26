@@ -80,6 +80,7 @@ function runTests() {
     function() include("tests/testScriptishMemoize.js"),
     function() include("tests/testScriptishLogger.js"),
     function() include("tests/testTimeout.js"),
+    function() include("tests/testGM_xmlhttpRequester.js"),
     function() include("tests/endTests.js")).then(function() {
       QUnit.start(); // once all tests have been loaded run them
     });
