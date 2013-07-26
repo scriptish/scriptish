@@ -5,6 +5,8 @@ Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyUtil(this, "openManager");
 
+const tabs = jetpack('sdk/tabs');
+
 const ICON_16_ON = "chrome://scriptish/skin/scriptish16.png";
 const ICON_16_OFF = "chrome://scriptish/skin/scriptish16_disabled.png";
 const ICON_24_ON = "chrome://scriptish/skin/scriptish24.png";
@@ -33,7 +35,8 @@ Scriptish_BrowserUIM.prototype = {
     if (Scriptish.enabled) {
       menu.setAttribute("image", ICON_16_ON);
       tbImg.removeAttribute("scriptish-disabled");
-    } else {
+    }
+    else {
       menu.setAttribute("image", ICON_16_OFF);
       tbImg.setAttribute("scriptish-disabled", "scriptish-disabled");
     }
@@ -72,5 +75,10 @@ Scriptish_BrowserUIM.prototype = {
   },
   showUserscriptList: function() {
     timeout(Scriptish_openManager);
+  },
+  reportIssue: function() {
+    tabs.open({
+      url: 'https://github.com/scriptish/scriptish/issues'
+    })
   }
 }

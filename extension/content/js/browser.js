@@ -66,6 +66,12 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   sbShowUSEle.setAttribute("oncommand",
       "Scriptish_BrowserUIM.showUserscriptList()");
 
+  let sbReportIssue = $("scriptish-tb-report-issue");
+  sbReportIssue.setAttribute("label", Scriptish_stringBundle("menu.report"));
+  sbReportIssue.setAttribute("accesskey", Scriptish_stringBundle("menu.report.ak"));
+  sbReportIssue.setAttribute("oncommand",
+      "Scriptish_BrowserUIM.reportIssue()");
+
   var sbPopUp = $("scriptish-tb-popup-brd");
   sbPopUp.setAttribute("onclick",
       "Scriptish_popupClicked(event);event.stopPropagation();");
