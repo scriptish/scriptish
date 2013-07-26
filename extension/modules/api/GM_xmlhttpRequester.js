@@ -189,8 +189,8 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
 
   // Loads initiated from private windows should always be private as well.
   let makePrivate = details.makePrivate || PrivateBrowsingUtils.isWindowPrivate(this.safeWin);
-  if (makePrivate) {
-    req.channel.QueryInterface(Ci.nsIPrivateBrowsingChannel).setPrivate(true);
+  if (makePrivate && req.channel instanceof Ci.nsIPrivateBrowsingChannel) {
+    req.channel.setPrivate(true);
   }
 
   var body = details.data ? details.data : null;
