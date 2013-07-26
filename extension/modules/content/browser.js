@@ -1,11 +1,11 @@
 var EXPORTED_SYMBOLS = ["Scriptish_BrowserUIM"];
 
-const Cu = Components.utils;
-Cu.import("resource://scriptish/constants.js");
+Components.utils.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyUtil(this, "openManager");
 
 const tabs = jetpack('sdk/tabs');
+const prefs = jetpack('sdk/preferences/service');
 
 const ICON_16_ON = "chrome://scriptish/skin/scriptish16.png";
 const ICON_16_OFF = "chrome://scriptish/skin/scriptish16_disabled.png";
@@ -30,7 +30,6 @@ Scriptish_BrowserUIM.prototype = {
   refreshStatus: function() {
     var tbImg = this.$("scriptish-button-brd");
     var menu = this.$("scriptish_general_menu");
-    var appName = Services.appinfo.name;
 
     if (Scriptish.enabled) {
       menu.setAttribute("image", ICON_16_ON);
@@ -58,11 +57,7 @@ Scriptish_BrowserUIM.prototype = {
     this.openChromeWindow("chrome://scriptish/content/newscript.xul", params);
   },
   openOptionsWin: function() {
-    var instantApply = false;
-    try {
-      instantApply = Services.prefs.getBoolPref("browser.preferences.instantApply");
-    }
-    catch (ex) {};
+    let instantApply = prefs.get("browser.preferences.instantApply", false);
 
     if (!this._optionsWin || this._optionsWin.closed) {
       this._optionsWin = this._win.openDialog(
@@ -74,7 +69,7 @@ Scriptish_BrowserUIM.prototype = {
     this._optionsWin.focus();
   },
   showUserscriptList: function() {
-    timeout(Scriptish_openManager);
+    Scriptish_openManager();
   },
   reportIssue: function() {
     tabs.open({
