@@ -1,6 +1,5 @@
 var EXPORTED_SYMBOLS = ["Config"];
 
-const SCRIPTISH_CONFIG_XML = "scriptish-config.xml";
 const SCRIPTISH_CONFIG_JSON = "scriptish-config.json";
 const SCRIPTISH_BLOCKLIST = "scriptish-blocklist.json";
 
