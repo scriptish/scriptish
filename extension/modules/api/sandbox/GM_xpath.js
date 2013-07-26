@@ -2,6 +2,10 @@
 function GM_xpath(details) {
   var contextNode, contextDocument, paths, resolver, namespace, result;
 
+  if (typeof details == 'string') {
+    details = { path: details }
+  }
+
   contextNode = "node" in details ? details.node : document;
   if (!contextNode) {
     throw new Error("The value specified for node is invalid");
@@ -67,9 +71,11 @@ function GM_xpath(details) {
         XPathResult.FIRST_ORDERED_NODE_TYPE,
         null
     ).singleNodeValue;
+
     if (result) {
       return result;
     }
   }
+
   return null;
 }
