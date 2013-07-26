@@ -115,6 +115,9 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     case "http":
     case "https":
     case "ftp":
+    case "data":
+    case "moz-blob":
+    case "blob":
       var req = Instances.xhr;
       this.chromeStartRequest(url, details, req);
       break;
