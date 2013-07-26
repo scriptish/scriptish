@@ -21,7 +21,7 @@ Scriptish is a userscript manager for Firefox, forked from Greasemonkey.
 
 ## IRC
 
-irc.mozilla.org #scriptish
+irc.mozilla.org #userscripts
 
 # UserScripts
 
