@@ -31,10 +31,9 @@ const RE_USERSCRIPT = /\.user(?:-\d+)?\.js$/;
 const RE_CONTENTTYPE = /text\/html/i;
 
 // load the USo HTTPS redirector
-jetpack('scriptish/commonjs/uso-redirector');
+jetpack('scriptish/uso-redirector');
 
 function ScriptishService() {
-
   // load the manager
   Scriptish_manager();
 

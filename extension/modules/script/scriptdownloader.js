@@ -11,7 +11,7 @@ lazyImport(this, "resource://scriptish/scriptish.js", ["Scriptish"]);
 lazyImport(this, "resource://scriptish/script/script.js", ["Script"]);
 lazyImport(this, "resource://scriptish/script/scripticon.js", ["ScriptIcon"]);
 
-const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
+const { alert } = jetpack('scriptish/alert');
 lazyUtil(this, "getTempFile");
 lazyUtil(this, "getWriteStream");
 lazyUtil(this, "stringBundle");
@@ -96,7 +96,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
   try {
     // If loading from file, status might be zero on success
     if (req.status != 200 && req.status != 0) {
-      Scriptish_alert(Scriptish_stringBundle("error.script.loading") + ":\n"
+      alert(Scriptish_stringBundle("error.script.loading") + ":\n"
           + req.status + ": " + req.statusText);
       return;
     }
@@ -162,7 +162,7 @@ ScriptDownloader.prototype.handleScriptDownloadComplete = function() {
     }
   }
   catch (e) {
-    Scriptish_alert(Scriptish_stringBundle("error.script.installing") + ": " + e);
+    alert(Scriptish_stringBundle("error.script.installing") + ": " + e);
     throw e;
   }
 }
@@ -373,7 +373,7 @@ ScriptDownloader.prototype.errorInstallDependency = function(dep, msg) {
 
   // if the user has already clicked a nonEM 'install'/'upgrade' button
   if (this.installOnCompletion_) {
-    Scriptish_alert(this.dependencyError);
+    alert(this.dependencyError);
   }
 
   this._callback && this._callback(); // show install dialog
@@ -387,7 +387,7 @@ ScriptDownloader.prototype.installScript = function() {
   if (this.dependencyError) {
     // use timeout to avoid race condition that causes install window to fail
     // to be closed..
-    Scriptish_alert(this.dependencyError, null, 100); 
+    alert(this.dependencyError, null, 100);
     return false;
   }
 

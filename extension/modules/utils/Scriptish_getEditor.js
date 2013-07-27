@@ -4,7 +4,7 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log"]);
-const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
+const { alert } = jetpack('scriptish/alert');
 lazyUtil(this, "stringBundle");
 
 const Scriptish_getEditor = function(parentWindow, change) {
@@ -91,7 +91,7 @@ const Scriptish_getEditor = function(parentWindow, change) {
       return fp.file;
     }
     else {
-      Scriptish_alert(Scriptish_stringBundle("editor.pleasePickExecutable"));
+      alert(Scriptish_stringBundle("editor.pleasePickExecutable"));
     }
   }
 }

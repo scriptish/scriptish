@@ -40,7 +40,7 @@ var Instances = {
       .createInstance(Ci.nsISupportsString),
   get suc() Cc["@mozilla.org/intl/scriptableunicodeconverter"]
       .createInstance(Ci.nsIScriptableUnicodeConverter),
-  get cos() Cc["@mozilla.org/intl/converter-output-stream;1"]  
+  get cos() Cc["@mozilla.org/intl/converter-output-stream;1"]
        .createInstance(Ci.nsIConverterOutputStream),
   get timer() Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
   get wbp() Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
@@ -140,7 +140,7 @@ const loader = Loader.Loader({
   },
   paths: {
     "devtools": "resource:///modules/devtools/",
-    "scriptish/": "resource://scriptish/",
+    "scriptish/": "resource://scriptish/commonjs/",
     "pathfinder/": "resource://scriptish/pathfinder/",
     "sdk/": "resource://gre/modules/commonjs/sdk/",
     "": "resource://gre/modules/commonjs/"

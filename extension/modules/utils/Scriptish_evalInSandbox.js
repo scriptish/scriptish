@@ -10,7 +10,6 @@ lazyUtil(this, "stringBundle");
 
 const { Style } = jetpack("sdk/stylesheet/style");
 const { attach, detach } = jetpack("sdk/content/mod");
-const { alert: Scriptish_alert } = jetpack('scriptish/utils/Scriptish_alert');
 
 const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
 const Scriptish_evalInSandbox_filename = Components.stack.filename;

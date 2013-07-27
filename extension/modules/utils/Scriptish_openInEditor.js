@@ -4,7 +4,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_openInEditor"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
-const { alert: Scriptish_alert } = jetpack("scriptish/utils/Scriptish_alert");
+const { alert } = jetpack("scriptish/alert");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyUtil(this, "getEditor");
 lazyUtil(this, "launchApplicationWithDoc");
@@ -24,7 +24,7 @@ function Scriptish_openInEditor(script, parentWindow) {
   }
   catch (e) {
     // Something may be wrong with the editor the user selected. Remove it.
-    Scriptish_alert(Scriptish_stringBundle("editor.couldNotLaunch") + "\n" + e);
+    alert(Scriptish_stringBundle("editor.couldNotLaunch") + "\n" + e);
     Scriptish_prefRoot.remove("editor");
     throw e;
   }

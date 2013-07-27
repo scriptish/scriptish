@@ -7,7 +7,7 @@ const { Services } = Cu.import("resource://scriptish/constants.js", {});
 
 function alert(aMsg, aTitle, aWait) {
   if (typeof aWait == "number")
-    return setTimeout(function() Scriptish_alert(aMsg, aTitle), aWait);
+    return setTimeout(function() alert(aMsg, aTitle), aWait);
   Services.prompt.alert(null, aTitle || "Scriptish", aMsg+"");
 }
 exports.alert = alert;

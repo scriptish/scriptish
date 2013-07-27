@@ -5,7 +5,6 @@ var tools = {};
 
 (function(Cu) {
 Cu.import("resource://scriptish/constants.js");
-Cu.import("resource://scriptish/utils/Scriptish_alert.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_convert2RegExp.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_createUserScriptSource.js", tools);
 Cu.import("resource://scriptish/utils/Scriptish_cryptoHash.js", tools);
@@ -35,7 +34,6 @@ Cu.import("resource://scriptish/third-party/Scriptish_openFolder.js", tools);
 test("Utils", function() {
   expect(28);
 
-  equals(typeof(tools.Scriptish_alert), "function", "has Scriptish_alert");
   equals(typeof(tools.Scriptish_convert2RegExp), "function", "has Scriptish_convert2RegExp");
   equals(typeof(tools.Scriptish_createUserScriptSource), "function", "has Scriptish_createUserScriptSource");
   equals(typeof(tools.Scriptish_cryptoHash), "function", "has Scriptish_cryptoHash");
