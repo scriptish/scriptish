@@ -79,9 +79,9 @@ function doInstall() {
   var tempFile = Scriptish_getTempFile();
   var foStream = Scriptish_getWriteStream(tempFile);
   var converter = Instances.cos;
-	converter.init(foStream, "UTF-8", 0, 0);  
-	converter.writeString(script);  
-	converter.close(); // this closes foStream  
+	converter.init(foStream, "UTF-8", 0, 0);
+	converter.writeString(script);
+	converter.close(); // this closes foStream
 
   // create a script object with parsed metadata,
   script = Scriptish_config.parse(script);
@@ -123,9 +123,11 @@ function createScriptSource() {
     exclude: $("excludes").value ? $("excludes").value.match(/.+/g) : [],
     "run-at": $("run-at").value
   }
+
   try {
     return Scriptish_createUserScriptSource(header, scriptContent);
-  } catch (e) {
+  }
+  catch (e) {
     alert(e.message);
   }
 }
