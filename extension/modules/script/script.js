@@ -40,6 +40,10 @@ const usoURLChk = /^https?:\/\/userscripts\.org\/scripts\/[^\d]+(\d+)/i;
 const RE_USERSCRIPT_HEADER_START = /\/\/[ \t]*==UserScript==/i;
 const RE_USERSCRIPT_HEADER_END = /\/\/[ \t]*==\/UserScript==/i;
 
+const BLOCKED_DOMAINS = {
+  'usocheckup.dune.net': true
+}
+
 function noUpdateFound(aListener, aReason) {
   if (aListener.onNoUpdateAvailable)
     aListener.onNoUpdateAvailable(this);
@@ -1106,6 +1110,12 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
         case "require":
           try {
             let reqUri = NetUtil.newURI(value, null, aURI);
+
+            // if the uri domain is blocked, then ignore
+            if (BLOCKED_DOMAINS[reqUri.host]) {
+              continue;
+            }
+
             let scriptRequire = new ScriptRequire(script);
 
             scriptRequire._downloadURL = reqUri.spec;
