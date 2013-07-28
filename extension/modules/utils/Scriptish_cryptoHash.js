@@ -2,7 +2,7 @@ var EXPORTED_SYMBOLS = ["Scriptish_cryptoHash"];
 Components.utils.import("resource://scriptish/constants.js");
 lazyUtil(this, "stringBundle");
 
-// this tells updateFromStream to read the entire string 
+// this tells updateFromStream to read the entire string
 const PR_UINT32_MAX = 0xffffffff;
 
 function Scriptish_cryptoHash(aString, aAlg, aCharset) {
@@ -14,14 +14,16 @@ function Scriptish_cryptoHash(aString, aAlg, aCharset) {
 
   try {
     ch.initWithString(alg);
-  } catch (e) {
-    throw new Error(Scriptish_stringBundle("error.hash.algorithm"));
+  }
+  catch (e) {
+    throw Error(Scriptish_stringBundle("error.hash.algorithm"));
   }
 
   try {
     unicodeConverter.charset = charset;
-  } catch(e) {
-    throw new Error(Scriptish_stringBundle("error.charset"));
+  }
+  catch(e) {
+    throw Error(Scriptish_stringBundle("error.charset"));
   }
 
   if (str)

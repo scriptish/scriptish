@@ -77,7 +77,7 @@ Scriptish_MenuCommander.prototype.modifyMenuCommand =
           keys[i].setAttribute("disabled", aAction == "disable");
           break;
         default:
-          throw new Error("Invalid menu command action");
+          throw Error("Invalid menu command action");
       }
       found = true;
       break;
@@ -98,7 +98,7 @@ Scriptish_MenuCommander.prototype.modifyMenuCommand =
           toolsMenuItems[i].setAttribute("disabled", aAction == "disable");
           break;
         default:
-          throw new Error("Invalid menu command action");
+          throw Error("Invalid menu command action");
       }
       found = true;
       break;
@@ -122,7 +122,7 @@ Scriptish_MenuCommander.prototype.modifyMenuCommand =
             tbMenuItems[i].setAttribute("disabled", aAction == "disable");
             break;
           default:
-            throw new Error("Invalid menu command action");
+            throw Error("Invalid menu command action");
         }
         found = true;
         break;

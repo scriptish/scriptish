@@ -81,7 +81,7 @@ function Scriptish_PrefManager(startPoint, syncMode) {
     }
 
     if (!goodType)
-      throw new Error(Scriptish_stringBundle("error.pref.type"));
+      throw Error(Scriptish_stringBundle("error.pref.type"));
 
     // underlying preferences object throws an exception if new pref has a
     // different type than old one. i think we should not do this, so delete

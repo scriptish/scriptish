@@ -65,8 +65,9 @@ function MatchPattern(pattern) {
 
   try {
     var uri = NetUtil.newURI(pattern);
-  } catch (e) {
-    throw new Error(Scriptish_stringBundle("error.pattern.parsing") + ": " + e);
+  }
+  catch (e) {
+    throw Error(Scriptish_stringBundle("error.pattern.parsing") + ": " + e);
   }
 
   var scheme = this.wildScheme ? "all" : uri.scheme;
@@ -74,13 +75,13 @@ function MatchPattern(pattern) {
   var path = uri.path;
 
   if (scheme != "all" && validSchemes.indexOf(scheme) == -1) {
-    throw new Error(Scriptish_stringBundle("error.matchPattern.rules"));
+    throw Error(Scriptish_stringBundle("error.matchPattern.rules"));
   }
   if (!REG_HOST.test(host)) {
-    throw new Error(Scriptish_stringBundle("error.matchPattern.rules"));
+    throw Error(Scriptish_stringBundle("error.matchPattern.rules"));
   }
   if (path[0] !== "/") {
-    throw new Error(Scriptish_stringBundle("error.matchPattern.rules"));
+    throw Error(Scriptish_stringBundle("error.matchPattern.rules"));
   }
 
   this.scheme = scheme;

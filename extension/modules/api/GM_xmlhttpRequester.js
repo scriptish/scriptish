@@ -19,7 +19,7 @@ const MIME_JSON = /^(application|text)\/(?:x-)?json/i;
  * @author Nils Maier
  */
 function NotificationCallbacks(req) {
-  throw new Error("trying to initiate an abstract NotificationCallbacks");
+  throw Error("trying to initiate an abstract NotificationCallbacks");
 }
 NotificationCallbacks.prototype = {
   init: function(req) {
@@ -98,14 +98,15 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
     // Validate and parse the (possibly relative) given URL.
     var uri = NetUtil.newURI(details.url, null, NetUtil.newURI(this.originUrl));
     var url = uri.spec;
-  } catch (e) {
+  }
+  catch (e) {
     // A malformed URL won't be parsed properly.
-    throw new Error(Scriptish_stringBundle("error.api.reqURL") + ": " + details.url);
+    throw Error(Scriptish_stringBundle("error.api.reqURL") + ": " + details.url);
   }
 
   // check if the script is allowed to access the url
   if (!this.script.matchesDomain(url))
-    throw new Error(
+    throw Error(
         "User script is attempting access to restricted domain '" + uri.host + "'",
         this.script.fileURL);
 
@@ -122,7 +123,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
       this.chromeStartRequest(url, details, req);
       break;
     default:
-      throw new Error(Scriptish_stringBundle("error.api.reqURL.scheme") + ": " + details.url);
+      throw Error(Scriptish_stringBundle("error.api.reqURL.scheme") + ": " + details.url);
   }
 
   return {
@@ -173,7 +174,7 @@ GM_xmlhttpRequester.prototype.chromeStartRequest =
   }
   if ("redirectionLimit" in details) {
     if (details.redirectionLimit < 0 || details.redirectionLimit > 10) {
-      throw new Error("redirectionLimit must be within (0, 10), but it is " + details.redirectionLimit);
+      throw Error("redirectionLimit must be within (0, 10), but it is " + details.redirectionLimit);
     }
     redirectionLimit = details.redirectionLimit;
   }

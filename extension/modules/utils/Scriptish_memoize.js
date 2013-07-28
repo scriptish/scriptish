@@ -28,7 +28,7 @@ function Scriptish_memoize(func, limit, num_args) {
 
   switch (num_args) {
   case 0:
-    throw new Error("memoize does not support functions without arguments");
+    throw Error("memoize does not support functions without arguments");
   case 1:
     return function memoize_one_arg(a) {
       key = a.toString();

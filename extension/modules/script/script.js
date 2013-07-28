@@ -1021,19 +1021,21 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
         case "jsversion":
           let jsVerIndx = JSVersions.indexOf(value);
           if (-1 === jsVerIndx) {
-            throw new Error("@jsversion " + value + " " +
+            throw Error("@jsversion " + value + " " +
                 Scriptish_stringBundle("error.isInvalidValue"));
-          } else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
-            throw new Error("@jsversion " + value + " " +
+          }
+          else if (jsVerIndx > JSVersions.indexOf(maxJSVer)) {
+            throw Error("@jsversion " + value + " " +
                 Scriptish_stringBundle("error.notSupported.Firefox"));
-          } else {
+          }
+          else {
             script._jsversion = JSVersions[jsVerIndx];
           }
           continue;
         case "run-at":
           let runAtIndx = runAtValues.indexOf(value);
           if (0 > runAtIndx)
-            throw new Error("@run-at " + value + " " +
+            throw Error("@run-at " + value + " " +
                 Scriptish_stringBundle("error.isInvalidValue"));
           script["_run-at"] = runAtValues[runAtIndx];
           continue;

@@ -86,7 +86,7 @@ var html = (function() {
   html.render = function html_render(aKey, aData) {
     var template = templates[aKey];
     if (!template)
-      throw new Error("There is no template with the key '" + aKey + "'");
+      throw Error("There is no template with the key '" + aKey + "'");
 
     if ("[object Array]" == Object.prototype.toString.call(aData)) {
       var rtn = [];

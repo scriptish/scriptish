@@ -27,7 +27,7 @@ function GM_ScriptStorage(aScript, aSafeWin) {
 
 GM_ScriptStorage.prototype.setValue = function(name, val) {
   if (2 !== arguments.length) {
-    throw new Error(Scriptish_stringBundle("error.api.noSecondArgValue"));
+    throw Error(Scriptish_stringBundle("error.api.noSecondArgValue"));
   }
 
   return this.prefMan.setValue(name, val);
@@ -66,12 +66,12 @@ GM_ScriptStorage.prototype._prefChanged = function(aName) {
 GM_ScriptStorage.prototype.watchValue = function(aName, aListener) {
   // Make sure we were passed everything
   if (!(aName && aListener && "function" === typeof aListener)) {
-    throw new Error(Scriptish_stringBundle("error.api.badArguments"));
+    throw Error(Scriptish_stringBundle("error.api.badArguments"));
   }
 
   // Nothing to do if the preference doesn't exist
   if (!this.prefMan.exists(aName)) {
-    throw new Error(Scriptish_stringBundle("error.api.prefNotFound"));
+    throw Error(Scriptish_stringBundle("error.api.prefNotFound"));
   }
 
   // Generate a UUID for the watcher so it can be unwatched by the user

@@ -38,7 +38,7 @@ function Scriptish_createUserScriptSource(aHeader, aContent) {
   }
 
   if (!aHeader.id || typeof aHeader.id != "string") {
-    throw new Error(Scriptish_stringBundle("newscript.noID"));
+    throw Error(Scriptish_stringBundle("newscript.noID"));
   }
   // push the id first, always
   push("id", aHeader.id);

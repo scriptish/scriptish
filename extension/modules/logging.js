@@ -36,8 +36,8 @@ function Scriptish_logScriptError(aError, aWindow, aFileURL, aId) {
         .getInterface(Ci.nsIDOMWindowUtils)
         .currentInnerWindowID;
     }
-    catch (ex) {
-      throw new Error("failed to get window id");
+    catch (e) {
+      throw Error("failed to get window id");
     }
 
     // defaults

@@ -814,12 +814,14 @@ function validTest( name ) {
 // could be extended in the future to use something like https://github.com/csnover/TraceKit
 function sourceFromStacktrace() {
 	try {
-		throw new Error();
-	} catch ( e ) {
+		throw Error();
+	}
+  catch ( e ) {
 		if (e.stacktrace) {
 			// Opera
 			return e.stacktrace.split("\n")[6];
-		} else if (e.stack) {
+		}
+    else if (e.stack) {
 			// Firefox, Chrome
 			return e.stack.split("\n")[4];
 		}

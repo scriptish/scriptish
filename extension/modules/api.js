@@ -103,7 +103,7 @@ function GM_API(options) {
         baseURI = NetUtil.newURI(aBaseURL);
       }
       catch(e) {
-        throw new Error(Scriptish_stringBundle("error.api.safeHTMLParser.url"));
+        throw Error(Scriptish_stringBundle("error.api.safeHTMLParser.url"));
       }
     }
     else {

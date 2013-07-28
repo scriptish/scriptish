@@ -26,6 +26,6 @@ GM_Resources.prototype.getDep = function(name) {
       return resource;
     }
   }
-  throw new Error(
+  throw Error(
       Scriptish_stringBundle("error.api.noResourceWithName") + ": '" + name + "'");
 }
