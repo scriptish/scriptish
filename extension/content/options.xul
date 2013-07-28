@@ -106,6 +106,7 @@
       <preference id="pref-logChrome" name="extensions.scriptish.logChrome" type="bool"/>
       <preference id="pref-logToErrorConsole" name="extensions.scriptish.logToErrorConsole" type="bool"/>
       <preference id="pref-enableScriptGrantSniffing" name="extensions.scriptish.enableScriptGrantSniffing" type="bool"/>
+      <preference id="pref-enableInstallDetection" name="extensions.scriptish.enableInstallDetection" type="bool"/>
       <preference id="pref-update-requireSecured" name="extensions.scriptish.update.requireSecured" type="bool"/>
       <preference id="pref-update-requireBuiltInCerts" name="extensions.scriptish.update.requireBuiltInCerts" type="bool"/>
     </preferences>
@@ -130,6 +131,7 @@
           <groupbox>
           <caption label="options.other" localize="label" />
             <checkbox preference="pref-enableScriptGrantSniffing" label="options.grant.sniffing" localize="label"/>
+            <checkbox preference="pref-enableInstallDetection" label="options.enableInstallDetection" localize="label"/>
           </groupbox>
         </tabpanel>
         <tabpanel>

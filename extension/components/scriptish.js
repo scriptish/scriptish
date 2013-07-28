@@ -128,10 +128,12 @@ ScriptishService.prototype = {
     }
 
     // don't intercept anything when Scriptish is not enabled
-    if (!Scriptish.enabled) return CP.ACCEPT;
+    if (!Scriptish.enabled || !Scriptish.enableInstallDetection)
+      return CP.ACCEPT;
 
     // don't interrupt the view-source: scheme
-    if ("view-source" == cl.scheme) return CP.ACCEPT;
+    if ("view-source" == cl.scheme)
+      return CP.ACCEPT;
 
     // CP.TYPE is not binary, so do not use bitwise logic tricks
     if ((ct == CP.TYPE_DOCUMENT || ct == CP.TYPE_SUBDOCUMENT)

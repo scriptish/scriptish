@@ -15,6 +15,13 @@ Scriptish_prefRoot.watch("enabled", function() {
   notifyStatusChg(setStatus());
 });
 
+let enableInstallDetection = true;
+function setEnableInstallDetection() {
+  enableInstallDetection = Scriptish_prefRoot.getValue("enableInstallDetection", true);
+}
+setEnableInstallDetection();
+Scriptish_prefRoot.watch("enableInstallDetection", setEnableInstallDetection);
+
 var global = this;
 
 const Scriptish = {
@@ -22,16 +29,19 @@ const Scriptish = {
   notify: function(aSubject, aTopic, aData) {
     if (true === aData) {
       aData = {saved: true};
-    } else if (null !== aData) {
+    }
+    else if (null !== aData) {
       if (!aData) {
         aData = {saved: false};
-      } else if (!aData.saved) {
+      }
+      else if (!aData.saved) {
         aData.saved = false;
       }
     }
     if (aData && aSubject) aData.id = aSubject.id;
     Services.obs.notifyObservers(null, aTopic, JSON.stringify(aData));
   },
+  get enableInstallDetection() enableInstallDetection,
   get enabled() enabled,
   set enabled(aVal) {
     ignoreEnable = true;
