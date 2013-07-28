@@ -28,6 +28,8 @@ lazyUtil(this, "memoize");
 lazyUtil(this, "parser");
 lazyUtil(this, "stringBundle");
 
+const { defer } = jetpack('sdk/core/promise');
+
 const MAX_NAME_LENGTH = 60;
 const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
 const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
@@ -170,9 +172,6 @@ Script.prototype = {
       return false;
     }
   },
-  /*averageRating: undefined,
-  reviewCount: undefined,
-  totalDownloads: undefined,*/
   get reviewURL() ((this.isUSOScript()) ? "http://userscripts.org/scripts/reviews/" + RegExp.$1 : ""),
   get sourceURI () this._downloadURL && NetUtil.newURI(this._downloadURL),
   get userDisabled() !this.enabled,
@@ -203,8 +202,13 @@ Script.prototype = {
   get updateDate () new Date(parseInt(this._modified)),
 
   updateUSOData: function() {
-    if (this.blocked || !this.isUSOScript())
-      return;
+    let { promise, resolve, reject } = defer();
+
+    if (this.blocked || !this.isUSOScript()) {
+      reject();
+      return promise;
+    }
+
     const script = this;
     const scriptID = RegExp.$1;
     const metaURL = "https://userscripts.org/scripts/source/" + scriptID + ".meta.js";
@@ -212,27 +216,37 @@ Script.prototype = {
     let req = Instances.xhr;
     req.overrideMimeType("text/plain");
     req.open("GET", metaURL, true);
+
     // bypass cache
     req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
+
     // private channel
     req.channel.QueryInterface(Components.interfaces.nsIPrivateBrowsingChannel).setPrivate(true);
+
     req.onload = function() {
       if (4 > req.readyState || (req.status != 200 && req.status != 0)
-          || !req.responseText)
-        return;
+          || !req.responseText) {
+        return reject();
+      }
 
       let data = Scriptish_parser(req.responseText);
       if (!data["uso:rating"] || !data["uso:script"] || data["uso:script"][0] != scriptID
-          || !data["uso:reviews"] || !data["uso:installs"])
-        return;
+          || !data["uso:reviews"] || !data["uso:installs"]) {
+        return reject();
+      }
 
       script.reviewCount = data["uso:reviews"][0] * 1;
       script.averageRating = data["uso:rating"][0] * 1;
       script.totalDownloads = data["uso:installs"][0] * 1;
 
       Scriptish.notify(null, "scriptish-config-saved", null);
+
+      return resolve(req.responseText);
     }
+    req.onerror = function() reject();
     req.send(null);
+
+    return promise;
   },
 
   findUpdates: function(aListener, aReason) {

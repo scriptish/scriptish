@@ -205,11 +205,10 @@ Config.prototype = {
 
     // called after the config has been loaded
     function callback(fileModified) {
-      let scripts = self._scripts;
-      let len = scripts.length;
+      let scripts = self.scripts;
 
       // Improves first-run startup time to punt this until a script is installed
-      if (len) {
+      if (scripts.length) {
         // Try to fetch uso usage data if some time has passed
         let interval = Scriptish_prefRoot.getValue("update.uso.interval");
         let lastFetch = Scriptish_prefRoot.getValue("update.uso.lastFetch");
@@ -219,11 +218,11 @@ Config.prototype = {
           Scriptish_prefRoot.setValue("update.uso.lastFetch", now);
 
           // Fetch uso data
-          for (let i = len - 1; i >= 0; i--) {
-            let script = scripts[i];
-            if (!script.blocked && script.isUSOScript())
-              timeout(script.updateUSOData.bind(script), ((i * 100) + 1000));
-          }
+          setTimeout(function next() {
+            if (!scripts.length)
+              return;
+            return scripts.pop().updateUSOData().then(next, next);
+          }, 500);
         }
       }
 
