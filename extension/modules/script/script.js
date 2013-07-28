@@ -976,10 +976,6 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
           if (uri.scheme == "https" || uri.scheme == "http")
             script._updateURL = uri.spec;
           break;
-        case "applybackgroundupdates":
-          script._applyBackgroundUpdates =
-              parseInt(value, 10) || defaultAutoUpdateState;
-          continue;
         case "injectframes":
           if (value != "0") continue;
           script["_noframes"] = true;
