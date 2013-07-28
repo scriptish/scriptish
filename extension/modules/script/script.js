@@ -741,7 +741,6 @@ Script.prototype = {
     this._version = newScript._version;
 
     if (!scriptInjector) {
-      this._file = newScript._file;
       this._basedir = newScript._basedir;
       this._filename = newScript._filename;
       this._icon = newScript._icon;
@@ -751,7 +750,8 @@ Script.prototype = {
       this._css = newScript._css;
       this._modified = newScript._modified;
       this._dependhash = newScript._dependhash;
-      if (newScript._downloadURL) this._downloadURL = newScript._downloadURL;
+      if (newScript._downloadURL)
+        this._downloadURL = newScript._downloadURL;
     }
     else {
       var dependhash = tools.Scriptish_cryptoHash(newScript._rawMeta);
@@ -778,7 +778,8 @@ Script.prototype = {
         Cu.import("resource://scriptish/config/configdownloader.js", tools);
         // Redownload dependencies.
         tools.Scriptish_configDownloader.refetchDependencies(this);
-      } else {
+      }
+      else {
         Scriptish.notify(this, "scriptish-script-modified", {saved: true, reloadUI: true});
       }
     }
