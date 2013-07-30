@@ -32,7 +32,9 @@ const { defer } = jetpack('sdk/core/promise');
 
 const MAX_NAME_LENGTH = 60;
 const metaRegExp = /\/\/[ \t]*(?:==\/?UserScript==|\@\S+(?:[ \t]+(?:[^\r\f\n]+))?)/g;
-const nonIdChars = /[^\w@\.\-_]+/g; // any char matched by this is not valid
+// any char matched by this is not valid
+const nonIdChars = /[^-_@\.\u0400-\u04FF\u3300-\u33FF\u4E00-\u9FFF\w]+/g;
+
 const JSVersions = ['1.6', '1.7', '1.8', '1.8.1'];
 const maxJSVer = JSVersions[2];
 const runAtValues = ["document-start", "document-end", "document-idle", "document-complete", "window-load"];
@@ -387,7 +389,10 @@ Script.prototype = {
     this.matchesURL = Scriptish_memoize(this.matchesURL, 100);
   },
   get id() {
-    if (!this._id) this.id = this.name + "@" + this.namespace;
+    if (!this._id) {
+      this.id = this.name + "@" + this.namespace;
+    }
+
     return this._id;
   },
   set id(aId) {
@@ -622,7 +627,7 @@ Script.prototype = {
       name = name.substring(0, dotIndex);
     }
 
-    name = name.replace(/[^-_A-Z0-9@]+/gi, "");
+    name = name.replace(nonIdChars, "");
     ext = ext.replace(/\s+/g, "_").replace(/[^-_A-Z0-9]+/gi, "");
 
     // Limit long names to a reasonable length
@@ -701,7 +706,8 @@ Script.prototype = {
   fileExists: function() {
     try {
       return this._file.exists();
-    } catch (e) {
+    }
+    catch (e) {
       return false;
     }
   },
