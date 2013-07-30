@@ -129,7 +129,8 @@ Config.prototype = {
       if (!blocklist.uso) return;
 
       var hash = Scriptish_cryptoHash(json);
-      if (self._blocklistHash == hash) return;
+      if (self._blocklistHash == hash)
+        return;
 
       let file = self._blocklistFile;
 
@@ -160,6 +161,7 @@ Config.prototype = {
       if (file.exists()) {
         Scriptish_getContents(file, 0, function(str) {
           self._blocklist = JSON.parse(str);
+
           self._blocklistHash = Scriptish_cryptoHash(str);
 
           // block scripts
@@ -227,7 +229,9 @@ Config.prototype = {
       }
 
       // Load the blocklist
-      if (self._useBlocklist) self._loadBlocklist();
+      if (self._useBlocklist) {
+        self._loadBlocklist();
+      }
 
       // Flag config as loaded
       self.loaded = true;
@@ -263,7 +267,8 @@ Config.prototype = {
       if (self._useBlocklist) {
         // Blocklist was enabled.  Load the blocklist.
         self._loadBlocklist();
-      } else {
+      }
+      else {
         // Blocklist was disabled.  Clean things up.
         self._blocklist = {};
       }
@@ -275,9 +280,19 @@ Config.prototype = {
     scripts: this.scripts.map(function(script) script.toJSON())
   }),
 
+  _usoBlockingPageMod: null,
   _blockScripts: function() {
     var scripts = this._scripts;
-    for (var i = scripts.length - 1; ~i; i--) scripts[i].doBlockCheck();
+    for (let i = scripts.length - 1; ~i; i--) {
+      scripts[i].doBlockCheck();
+    }
+
+    // setup USO blocking page mod
+    if (this._usoBlockingPageMod) {
+      this._usoBlockingPageMod.destroy();
+      this._usoBlockingPageMod = null;
+    }
+    this._usoBlockingPageMod = jetpack('scriptish/setup-uso-blocking').setup(this._blocklist.uso);
   },
 
   _save: function(aSaveNow) {

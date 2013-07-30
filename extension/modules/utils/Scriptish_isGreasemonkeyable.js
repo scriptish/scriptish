@@ -5,7 +5,8 @@ Components.utils.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 
 function Scriptish_isGreasemonkeyable(aURL) {
-  if (!aURL) return false;
+  if (!aURL)
+    return false;
 
   // if the url provide is not a valid url, then an error could be thrown
   try {
@@ -13,9 +14,11 @@ function Scriptish_isGreasemonkeyable(aURL) {
     if (!scheme) {
       return false;
     }
-  } catch (e) {
+  }
+  catch (e) {
     return false;
   }
+
   switch (scheme) {
     case "http":
     case "https":
@@ -27,7 +30,8 @@ function Scriptish_isGreasemonkeyable(aURL) {
 
     case "about":
       // Always allow "about:blank".
-      if (/^about:blank(?:[#?].*)?$/.test(aURL)) return true;
+      if (/^about:blank(?:[#?].*)?$/.test(aURL))
+        return true;
       // no break
     default:
       return Scriptish_prefRoot.getBoolValue("enabledSchemes." + scheme, false);
