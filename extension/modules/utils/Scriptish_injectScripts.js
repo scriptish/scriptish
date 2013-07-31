@@ -102,7 +102,9 @@ function Scriptish_injectScripts(options) {
       });
     }
 
-    sandbox.unsafeWindow = unsafeContentWin;
+    if (script.grant['unsafeWindow']) {
+      sandbox.unsafeWindow = unsafeContentWin;
+    }
 
     let delay = script.delay;
     if (delay || delay === 0) {

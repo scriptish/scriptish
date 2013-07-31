@@ -1,7 +1,7 @@
 var EXPORTED_SYMBOLS = ["Script"];
 
 const valueSplitter = /(\S+)(?:\s+([^\r\f\n]+))?/;
-const GRANT_REGEX = /GM_[a-z]+/gi;
+const GRANT_REGEX = /(?:unsafeWindow|GM_[a-z]+)/gi;
 
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/CertUtils.jsm");
