@@ -34,6 +34,13 @@ const Scriptish_ScriptProvider = {
           accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
           callback: Scriptish_openManager.bind(null, null, script.id)
         },
+        secondaryActions: [{
+          label: Scriptish_stringBundle("Uninstall"),
+          accessKey: Scriptish_stringBundle("Uninstall.ak"),
+          callback: function() {
+            script.uninstall();
+          }
+        }],
         options: {
           removeOnDismissal: true,
           persistWhileVisible: true
@@ -76,6 +83,13 @@ const Scriptish_ScriptProvider = {
           accessKey: Scriptish_stringBundle("openUserScriptsManager.ak"),
           callback: Scriptish_openManager.bind(null, null, script.id)
         },
+        secondaryActions: [{
+          label: Scriptish_stringBundle("Uninstall"),
+          accessKey: Scriptish_stringBundle("Uninstall.ak"),
+          callback: function() {
+            script.uninstall();
+          }
+        }],
         options: {
           removeOnDismissal: true,
           persistWhileVisible: true

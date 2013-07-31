@@ -9,6 +9,8 @@ function Scriptish_popupNotification(details) {
   if (!Scriptish_prefRoot.getValue("enabledNotifications.popup"))
     return Scriptish_log(details.message);
 
+  let secondaryActions = details.secondaryActions || [];
+
   var win = Scriptish.getMostRecentWindow();
   if (win && win.PopupNotifications) {
     timeout(function() {
@@ -24,7 +26,7 @@ function Scriptish_popupNotification(details) {
             details.mainAction.callback();
           }
         },
-        null  /* secondary action */,
+        secondaryActions,
         details.options
       );
     });
