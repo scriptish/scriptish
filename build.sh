@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Set up variables
-if [ "amo" == "$1" ] || [ "staging" == "$1" ]; then
+if [ "amo" = "$1" ]; then
   # For official builds, use the version in install.rdf.
   VER=`grep -Go 'em:version\>\(.*\)\<' extension/install.rdf | grep -Go '>\(.*\)<' | sed -e 's/[><]*//g'`
-elif [ "test" == "$1" ]; then
+elif [ "test" = "$1" ]; then
   VER=`echo test`
 else
   # For beta builds, generate a version number.
@@ -57,6 +57,6 @@ fi
 cd ..
 rm -rf build
 
-if [ "amo" == "$1" ] || [ "staging" == "$1" ]; then
+if [ "amo" = "$1" ]; then
   openssl sha1 "$XPI"
 fi
