@@ -18,7 +18,8 @@ Scriptish is a userscript manager for Firefox, forked from Greasemonkey.
 * [Wiki](https://github.com/scriptish/scriptish/wiki)
 * [Issues](https://github.com/scriptish/scriptish/issues)
 * [Blog](http://scriptish.org/blog)
-* irc.mozilla.org #userscripts
+* irc.mozilla.org #userscripts (for UserScript development help)
+* irc.mozilla.org #scriptish (for Scriptish development)
 * [StackOverflow](http://stackoverflow.com/questions/tagged/userscripts)
 
 # UserScripts
