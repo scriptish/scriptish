@@ -45,7 +45,8 @@ const RE_USERSCRIPT_HEADER_START = /\/\/[ \t]*==UserScript==/i;
 const RE_USERSCRIPT_HEADER_END = /\/\/[ \t]*==\/UserScript==/i;
 
 const BLOCKED_DOMAINS = {
-  'usocheckup.dune.net': true
+  'usocheckup.dune.net': true,
+  'secure.dune.net': true
 }
 
 function noUpdateFound(aListener, aReason) {
