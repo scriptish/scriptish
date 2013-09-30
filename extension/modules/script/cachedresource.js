@@ -18,12 +18,17 @@ CachedResource.prototype = {
   clearCachedTextContent: function() this._textContent = null,
   get textContent() {
     if (!useCache || !this._textContent) {
-      this._textContent = Scriptish_getContents(this._file);
+      this.clearCachedTextContent();
+      let content = Scriptish_getContents(this._file);
+      return useCache ? (this._textContent = content) : content;
     }
+
     return this._textContent;
   },
   _getTextContent_callback: function(aCallback, content) {
-    this._textContent = content;
+    if (useCache) {
+      this._textContent = content;
+    }
     aCallback(content);
   },
   getTextContent: function(aCallback) {
