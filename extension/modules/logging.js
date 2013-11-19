@@ -86,6 +86,20 @@ function Scriptish_logScriptError(aError, aWindow, aFileURL, aId) {
       }
     }
 
+    let stack = aError.stack || aError.location || aError;
+    if (!stack || !(stack instanceof Ci.nsIStackFrame)) {
+      stack = Components.stack;
+      if (stack) {
+        // Unwind one
+        stack = stack.caller;
+      }
+    }
+    let stackLimit = 0;
+    while (stack && (stackLimit++ < 50)) {
+      errorMessage += "\n" + stackLimit + "> " + stack;
+      stack = stack.caller;
+    }
+
     // dispatch
     se.initWithWindowID(
       "[" + (aId  || "Scriptish") + "] " + errorMessage,
