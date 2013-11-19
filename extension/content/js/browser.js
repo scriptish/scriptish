@@ -66,7 +66,7 @@ Scriptish_BrowserUI.tbBtnSetup = function() {
   sbShowUSEle.setAttribute("oncommand",
       "Scriptish_BrowserUIM.showUserscriptList()");
 
-  let sbReportIssue = $("scriptish-tb-report-issue");
+  let sbReportIssue = $("scriptish-tb-report-issue-brd");
   sbReportIssue.setAttribute("label", Scriptish_stringBundle("menu.report"));
   sbReportIssue.setAttribute("accesskey", Scriptish_stringBundle("menu.report.ak"));
   sbReportIssue.setAttribute("oncommand",

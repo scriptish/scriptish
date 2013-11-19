@@ -17,6 +17,7 @@
     <broadcaster id="scriptish-tb-new-us-brd"/>
     <broadcaster id="scriptish-tb-show-us-brd"/>
     <broadcaster id="scriptish-tb-enabled-brd"/>
+    <broadcaster id="scriptish-tb-report-issue-brd"/>
   </broadcasterset>
 
   <menupopup id="menu_ToolsPopup">
@@ -61,7 +62,7 @@
 
         <menuseparator/>
 
-        <menuitem id="scriptish-tb-report-issue"/>
+        <menuitem id="scriptish-tb-report-issue" observes="scriptish-tb-report-issue-brd"/>
 
         <menuseparator/>
 
