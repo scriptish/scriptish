@@ -44,7 +44,7 @@
   <toolbarpalette id="BrowserToolbarPalette">
     <toolbarbutton id="scriptish-button"
         observes="scriptish-button-brd"
-        type="menu-button"
+        type="menu"
         class="toolbarbutton-1 chromeclass-toolbar-additional"
         label="Scriptish">
       <menupopup id="scriptish-tb-popup" observes="scriptish-tb-popup-brd">

@@ -1,9 +1,12 @@
 #scriptish-button {
-  -moz-binding: url("chrome://scriptish/content/third-party/firebug/startButton.xml#scriptish-button");
   -moz-box-orient: horizontal;
   -moz-appearance: none;
   padding: 0;
   margin: 0;
+}
+
+toolbar #scriptish-button {
+  -moz-binding: url("chrome://scriptish/content/third-party/firebug/startButton.xml#scriptish-button");
 }
 
 /* Also set a default icon for the "outer" #scriptish-button.
@@ -18,12 +21,21 @@ toolbar[iconsize="small"] #scriptish-button,
 toolbar[iconsize="small"] #scriptish-button-inner {
   list-style-image: url("chrome://scriptish/skin/scriptish16.png");
 }
+toolbarpaletteitem[place="palette"] > #scriptish-button,
+#scriptish-button[cui-areatype="menu-panel"],
+#scriptish-button[cui-areatype="menu-panel"] > #scriptish-button-inner {
+  list-style-image: url("chrome://scriptish/skin/scriptish32.png");
+}
 
 #scriptish-button-inner[scriptish-disabled] {
   list-style-image: url("chrome://scriptish/skin/scriptish24_disabled.png");
 }
 toolbar[iconsize="small"] #scriptish-button-inner[scriptish-disabled] {
   list-style-image: url("chrome://scriptish/skin/scriptish16_disabled.png");
+}
+#scriptish-button[cui-areatype="menu-panel"][scriptish-disabled],
+#scriptish-button[cui-areatype="menu-panel"] > #scriptish-button-inner[scriptish-disabled] {
+  list-style-image: url("chrome://scriptish/skin/scriptish32_disabled.png");
 }
 
 #scriptish-notification-icon {
