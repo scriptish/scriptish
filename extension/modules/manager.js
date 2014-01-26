@@ -17,7 +17,7 @@ lazyUtil(this, "windowEventTracker");
 lazyUtil(this, "windowUnloader");
 
 const { Class } = jetpack('sdk/core/heritage');
-const { add } = jetpack('sdk/deprecated/observer-service');
+const { on } = jetpack('sdk/system/events');
 const { getInnerId } = jetpack('sdk/window/utils');
 
 const windowsTracked = Object.create(null);
@@ -26,19 +26,17 @@ const Scriptish_manager = Class({
   initialize: function() {
     const self = this;
 
-    add("document-element-inserted", function(aDocument) {
-      let win = aDocument.defaultView;
-      if (!win) {
-        return;
-      }
-      self.docReady_start(win);
-    });
+    on("document-element-inserted", function(aEvent) {
+      let win = aEvent.subject.defaultView;
+      if (!win) return;
+      self.docReady_start.call(self, {subject: win});
+    }, true);
 
-    add("content-document-global-created", self.docReady_start.bind(self));
-    add("chrome-document-global-created", self.docReady_start.bind(self));
+    on("content-document-global-created", self.docReady_start.bind(self), true);
+    on("chrome-document-global-created", self.docReady_start.bind(self), true);
   },
 
-  docReady_start: function(safeWin) {
+  docReady_start: function({subject: safeWin}) {
     // TODO: disable observer that calls this when Scriptish is disabled
     if (!Scriptish.enabled)
       return;
