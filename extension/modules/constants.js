@@ -135,8 +135,12 @@ function descriptor(object) {
 const { Loader } = Components.utils.import("resource://gre/modules/commonjs/toolkit/loader.js", {});
 
 const loader = Loader.Loader({
+  id: "scriptish@erikvold.com",
+  name: "Scriptish",
+  preferencesBranch: "scriptish",
   modules: {
-    "toolkit/loader": Loader
+    "toolkit/loader": Loader,
+    '@test/options': {}
   },
   paths: {
     "devtools": "resource:///modules/devtools/",
