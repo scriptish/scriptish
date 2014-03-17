@@ -1,7 +1,4 @@
-var EXPORTED_SYMBOLS = [
-  "Scriptish_evalInSandbox",
-  "Scriptish_evalInSandbox_filename"
-];
+var EXPORTED_SYMBOLS = [ "Scriptish_evalInSandbox" ];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -12,7 +9,7 @@ const { Style } = jetpack("sdk/stylesheet/style");
 const { attach, detach } = jetpack("sdk/content/mod");
 
 const fileURLPrefix = "chrome://scriptish/content/scriptish.js -> ";
-const Scriptish_evalInSandbox_filename = Components.stack.filename;
+jetpack('scriptish/security/api-check-filenames').add(Components.stack.filename);
 
 function Scriptish_evalInSandbox(aScript, aSandbox, aWindow, options) {
   const jsVer = aScript.jsversion;

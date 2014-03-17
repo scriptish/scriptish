@@ -20,6 +20,8 @@ const { Class } = jetpack('sdk/core/heritage');
 const { on } = jetpack('sdk/system/events');
 const { getInnerId } = jetpack('sdk/window/utils');
 
+jetpack('scriptish/security/api-check-filenames').add(Components.stack.filename);
+
 const windowsTracked = Object.create(null);
 
 const Scriptish_manager = Class({

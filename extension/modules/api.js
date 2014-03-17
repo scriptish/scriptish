@@ -4,8 +4,6 @@ const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
 
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_logError", "Scriptish_logScriptError", "Scriptish_log"]);
-lazyImport(this, "resource://scriptish/utils/Scriptish_evalInSandbox.js", ["Scriptish_evalInSandbox_filename"]);
-lazyImport(this, "resource://scriptish/utils/Scriptish_injectScripts.js", ["Scriptish_injectScripts_filename"]);
 
 const { Style } = jetpack("sdk/stylesheet/style");
 const { attach, detach } = jetpack("sdk/content/mod");
@@ -21,7 +19,9 @@ lazyImport(this, "resource://scriptish/api/GM_xmlhttpRequester.js", ["GM_xmlhttp
 lazyImport(this, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
 lazyImport(this, "resource://scriptish/api/GM_setClipboard.js", ["GM_setClipboard"]);
 
-const moduleFilename = Components.stack.filename;
+const { add, check } = jetpack('scriptish/security/api-check-filenames');
+add(Components.stack.filename);
+
 const NS_XHTML = "http://www.w3.org/1999/xhtml";
 const DOLITTLE = function(){};
 
@@ -34,12 +34,10 @@ function GM_apiLeakCheck(apiName) {
     // Valid stack frames for GM api calls are: native and js when coming from
     // chrome:// URLs and any file name listed in _apiAcceptedFiles.
     if (2 == stack.language && stack.filename &&
-        stack.filename != moduleFilename &&
-        stack.filename != Scriptish_evalInSandbox_filename &&
-        stack.filename != Scriptish_injectScripts_filename &&
+        !check(stack.filename) &&
         stack.filename.substr(0, 6) != "chrome") {
       Scriptish_logError(new Error(
-          Scriptish_stringBundle("error.api.unsafeAccess") + ": " + apiName));
+          Scriptish_stringBundle("error.api.unsafeAccess") + " - " + apiName + ' by ' + stack.filename));
       return false;
     }
   } while (stack = stack.caller);

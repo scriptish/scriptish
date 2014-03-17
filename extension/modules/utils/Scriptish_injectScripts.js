@@ -1,6 +1,5 @@
 var EXPORTED_SYMBOLS = [
-  "Scriptish_injectScripts",
-  "Scriptish_injectScripts_filename"
+  "Scriptish_injectScripts"
 ];
 
 const Cu = Components.utils;
@@ -18,7 +17,8 @@ lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForConten
 lazyUtil(this, "evalInSandbox");
 lazyUtil(this, "windowUnloader");
 
-const Scriptish_injectScripts_filename = Components.stack.filename;
+jetpack('scriptish/security/api-check-filenames').add(Components.stack.filename);
+
 const gTimer = jetpack('sdk/timers');
 const { getInnerId } = jetpack('sdk/window/utils');
 

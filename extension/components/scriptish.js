@@ -23,6 +23,8 @@ lazyUtil(this, "windowUnloader");
 
 const { getInnerId } = jetpack('sdk/window/utils');
 
+jetpack('scriptish/security/api-check-filenames').add(Components.stack.filename);
+
 const CP = Ci.nsIContentPolicy;
 
 // If the file was previously cached it might have been given a number after
@@ -55,7 +57,6 @@ ScriptishService.prototype = {
   }],
   QueryInterface: XPCOMUtils.generateQI([
       Ci.nsISupports, Ci.nsISupportsWeakReference, Ci.nsIContentPolicy]),
-
   observe: function(aSubject, aTopic, aData) {
     switch (aTopic) {
       case "content-document-global-created":
