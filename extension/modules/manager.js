@@ -43,7 +43,7 @@ const Scriptish_manager = Class({
     if (!Scriptish.enabled)
       return;
 
-    if (!('document' in safeWin && safeWin.document.documentElement)) {
+    if (!('document' in safeWin && "documentElement" in safeWin.document)) {
       return;
     }
 

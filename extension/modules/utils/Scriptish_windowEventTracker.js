@@ -13,6 +13,7 @@ const events = ["DOMContentLoaded", "load"];
 const trackers = Object.create(null);
 
 function Scriptish_windowEventTracker(aWin) {
+  return;
   const winID = getInnerId(aWin);
   if (winID in trackers)
     return trackers[winID];
