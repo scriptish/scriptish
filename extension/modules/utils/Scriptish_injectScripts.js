@@ -24,9 +24,14 @@ const { getInnerId } = jetpack('sdk/window/utils');
 
 const {nsIDOMXPathResult: XPATH_RESULT} = Ci;
 
+let useGrants = Scriptish_prefRoot.getValue("enableScriptGrant");
+Scriptish_prefRoot.watch("enableScriptGrant", _ => {
+  useGrants = Scriptish_prefRoot.getValue("enableScriptGrant");
+});
+
 function Scriptish_injectScripts(options) {
-  var {scripts, url, safeWin} = options;
-  var chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
+  const { scripts, url, safeWin } = options;
+  const chromeWin = Scriptish_getBrowserForContentWindow(safeWin).wrappedJSObject;
   if (!chromeWin || !chromeWin.Scriptish_BrowserUI) return;
 
   if (0 >= scripts.length) return;
@@ -61,7 +66,8 @@ function Scriptish_injectScripts(options) {
 
     Cu.evalInSandbox(GM_updatingEnabled, sandbox);
 
-    if (script.grant['GM_xpath']) {
+    Scriptish_log('granting: ' + Object.keys(script.grant).join(', '))
+    if (!useGrants || script.grant['GM_xpath']) {
       Cu.evalInSandbox(GM_xpath, sandbox);
     }
 
@@ -74,8 +80,8 @@ function Scriptish_injectScripts(options) {
       unsafeWin: unsafeContentWin,
       chromeWin: chromeWin
     }))) {
-      for (var funcName in GM_api) {
-        if (script.grant[funcName]) {
+      for (let funcName in GM_api) {
+        if (!useGrants || script.grant[funcName]) {
           sandbox[funcName] = GM_api[funcName];
         }
         else {
@@ -88,10 +94,10 @@ function Scriptish_injectScripts(options) {
       return GM_console(script, safeWin, chromeWin);
     });
 
-    if (script.grant['GM_log']) {
+    if (!useGrants || script.grant['GM_log']) {
       lazy(sandbox, "GM_log", function() {
         if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
-          var logger = new GM_ScriptLogger(script);
+          let logger = new GM_ScriptLogger(script);
           return function() {
             const args = Array.slice(arguments);
             logger.log(args.join(" "));
