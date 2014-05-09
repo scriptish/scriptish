@@ -5,7 +5,7 @@
     <em:type>2</em:type>
     <em:id>scriptish@erikvold.com</em:id>
     <em:name>Scriptish</em:name>
-    <em:description>A Script Extension Manager for Firefox</em:description>
+    <em:description>A User Script Extension Manager for Firefox</em:description>
     <em:version>0.1.13pre</em:version>
     <em:aboutURL>chrome://scriptish/content/aboutStub.xul</em:aboutURL>
     <em:homepageURL>http://scriptish.org</em:homepageURL>
@@ -13,7 +13,7 @@
     <em:iconURL>chrome://scriptish/skin/scriptish32.png</em:iconURL>
     <em:icon64URL>chrome://scriptish/skin/scriptish64.png</em:icon64URL>
 
-    <em:creator>Erik Vold; http://erikvold.com/</em:creator>
+    <em:creator>Erik Vold</em:creator>
 
     <em:developer>Greg Parris; http://phob.net/</em:developer>
     <em:developer>Nils Maier; https://tn123.org/</em:developer>
@@ -66,7 +66,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>29.0</em:minVersion>
-        <em:maxVersion>31.*</em:maxVersion>
+        <em:maxVersion>32.*</em:maxVersion>
       </Description>
     </em:targetApplication>
 
