@@ -273,14 +273,23 @@ Script.prototype = {
   checkForRemoteUpdate: function(aCallback) {
     var updateURL = this.updateURL;
     if (this.blocked || !updateURL) return aCallback.call(this, false);
+
     var req = Instances.xhr;
     req.open("GET", updateURL, true);
-    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE; // bypass cache
+
+    // indicate we only require the metadata block
+    req.setRequestHeader("Accept", "text/x-userscript-meta");
+
+    // bypass cache
+    req.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
+
     // suppress "bad certificate" dialogs and fail on redirects from a bad certificate.
     req.channel.notificationCallbacks =
         new BadCertHandler(!Scriptish.updateSecurely || !Scriptish_prefRoot.getValue("update.requireBuiltInCerts"));
+
     req.onload = this.checkRemoteVersion.bind(this, req, aCallback);
     req.onerror = this.checkRemoteVersionErr.bind(this, aCallback);
+
     req.send(null);
   },
   checkRemoteVersion: function(req, aCallback) {
