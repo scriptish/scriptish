@@ -1,19 +1,23 @@
-# About
+# Scriptish
+
+[![Gitter chat](https://badges.gitter.im/scriptish/scriptish.png)](https://gitter.im/scriptish/scriptish)
+
+## About
 
 Scriptish is a userscript manager for Firefox, forked from Greasemonkey.
 
-# Browsers Supported
+## Browsers Supported
 
 * Firefox 21+
 * Seamonkey 2.8+
 
 
-# Download
+## Download
 
 * [Addons.Mozilla.Org (AMO)](https://addons.mozilla.org/firefox/addon/scriptish)
 * [Source Code](https://github.com/scriptish/scriptish)
 
-# Help
+## Help
 
 * [Wiki](https://github.com/scriptish/scriptish/wiki)
 * [Issues](https://github.com/scriptish/scriptish/issues)
@@ -22,6 +26,6 @@ Scriptish is a userscript manager for Firefox, forked from Greasemonkey.
 * irc.mozilla.org #scriptish (for Scriptish development)
 * [StackOverflow](http://stackoverflow.com/questions/tagged/userscripts)
 
-# UserScripts
+## UserScripts
 
 * [Userscripts](http://userscripts.org)
