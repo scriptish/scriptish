@@ -140,6 +140,8 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
 // that it can access other domains without security warning
 GM_xmlhttpRequester.prototype.chromeStartRequest =
     function(safeUrl, details, req) {
+  details = Components.utils.waiveXrays(details);
+  
   this.setupRequestEvent(this.unsafeContentWin, req, "onload", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onerror", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onprogress", details);
