@@ -67,9 +67,8 @@ function Scriptish_injectScripts(options) {
     Cu.evalInSandbox(GM_updatingEnabled, sandbox);
 
     Scriptish_log('granting: ' + Object.keys(script.grant).join(', '))
-    if (!useGrants || script.grant['GM_xpath']) {
-      Cu.evalInSandbox(GM_xpath, sandbox);
-    }
+    Cu.evalInSandbox(GM_xpath, sandbox);
+
 
     // add GM_* API to sandbox
     let (GM_api = new GM_API(extend(options, {
