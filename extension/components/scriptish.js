@@ -81,7 +81,8 @@ ScriptishService.prototype = {
 
         let currentInnerWindowID = getInnerId(safeWin);
         // if the focused tab's window is the one loading, then attach menuCommander
-        if (safeWin === gBrowser.selectedBrowser.contentWindow) {
+        if (gBrowser && gBrowser.selectedBrowser &&
+            safeWin === gBrowser.selectedBrowser.contentWindow) {
           if (gmBrowserUI.currentMenuCommander)
             gmBrowserUI.currentMenuCommander.detach();
 
