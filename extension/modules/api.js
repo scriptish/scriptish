@@ -1,4 +1,4 @@
-var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback"];
+var EXPORTED_SYMBOLS = ["GM_API", "GM_apiSafeCallback", "GM_waiveXrays", "GM_checkedPrincipal"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
@@ -58,6 +58,48 @@ function GM_apiSafeCallback(aWindow, aScript, aThis, aCb, aArgs) {
   }, 0);
 }
 
+// Waive Xrays on an object
+const GM_waiveXrays = (function() {
+  if (Components.utils.waiveXrays) {
+    return function GM_waiveXrays(obj) {
+      return Components.utils.waiveXrays(obj);
+    };
+  }
+  return function GM_waiveXrays(obj) {
+    return obj;
+  };
+})();
+
+// Check that o2 has the same principal as o1 and return o2.
+// Otherwise return null.
+const GM_checkedPrincipal = (function() {
+  if (Components.utils.getObjectPrincipal) {
+    return function GM_checkedPrincipal(o1, o2) {
+      try {
+        if (!o2) {
+          return null;
+        }
+        var op1 = Components.utils.getObjectPrincipal(o1);
+        var op2 = Components.utils.getObjectPrincipal(o2);
+        if (!op1.equals(op2)) {
+          Scriptish_logError(new Error("Principal mismatch"));
+          return null;
+        }
+        return o2;
+      }
+      catch (ex) {
+        Scriptish_logError(new Error("Principal mismatch"));
+        return null;
+      }
+    };
+  }
+
+  return function GM_checkedPrincipal(o1, o2) {
+    return o2;
+  }
+})();
+
+
 // note: must not depend on aChromeWin below, it should always be optional!
 function GM_API(options) {
   var {
@@ -66,7 +108,8 @@ function GM_API(options) {
     winID: aWinID,
     safeWin: aSafeWin,
     unsafeWin: aUnsafeContentWin,
-    chromeWin: aChromeWin
+    chromeWin: aChromeWin,
+    sandbox: sandbox
   } = options;
 
   var document = aSafeWin.document;
@@ -76,7 +119,7 @@ function GM_API(options) {
 
   var lazyLoaders = {};
   lazy(lazyLoaders, "xhr", function() {
-    return new GM_xmlhttpRequester(aUnsafeContentWin, aSafeWin, aURL, aScript);
+    return new GM_xmlhttpRequester(aUnsafeContentWin, aSafeWin, aURL, aScript, sandbox);
   });
   lazy(lazyLoaders, "storage", function() {
     return new GM_ScriptStorage(aScript, aSafeWin);

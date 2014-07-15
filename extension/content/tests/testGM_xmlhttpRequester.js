@@ -14,7 +14,7 @@ test("exports", function() {
     fileURL: "file:///test.js",
     matchesDomain: function() true
   };
-  const xhrp = new GM_xmlhttpRequester(window, window, "http://example.org", script);
+  const xhrp = new GM_xmlhttpRequester(window, window, "http://example.org", script, window);
   const xhr = xhrp.contentStartRequest.bind(xhrp);
 
   asyncTest("plain GET", function() {

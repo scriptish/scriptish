@@ -78,7 +78,8 @@ function Scriptish_injectScripts(options) {
       winID: winID,
       safeWin: safeWin,
       unsafeWin: unsafeContentWin,
-      chromeWin: chromeWin
+      chromeWin: chromeWin,
+      sandbox: sandbox
     }))) {
       for (let funcName in GM_api) {
         if (!useGrants || script.grant[funcName]) {

@@ -1,10 +1,13 @@
 "use strict";
 var EXPORTED_SYMBOLS = ["GM_xmlhttpRequester"];
 
+const Cu = Components.utils;
+
 Components.utils.import("resource://scriptish/constants.js");
 Components.utils.import("resource://gre/modules/PrivateBrowsingUtils.jsm");
 
-lazyImport(this, "resource://scriptish/api.js", ["GM_apiSafeCallback"]);
+lazyImport(this, "resource://scriptish/api.js",
+           ["GM_apiSafeCallback", "GM_waiveXrays", "GM_checkedPrincipal"]);
 lazyUtil(this, "stringBundle");
 
 const MIME_JSON = /^(application|text)\/(?:x-)?json/i;
@@ -78,11 +81,13 @@ IgnoreRedirect.prototype = {
 };
 
 
-function GM_xmlhttpRequester(unsafeContentWin, safeWin, originUrl, aScript) {
+function GM_xmlhttpRequester(unsafeContentWin, safeWin, originUrl, aScript,
+                             sandbox) {
   this.unsafeContentWin = unsafeContentWin;
   this.safeWin = safeWin;
   this.originUrl = originUrl;
   this.script = aScript;
+  this.sandbox = sandbox;
 }
 
 // this function gets called by user scripts in content security scope to
@@ -141,6 +146,7 @@ GM_xmlhttpRequester.prototype.contentStartRequest = function(details) {
 GM_xmlhttpRequester.prototype.chromeStartRequest =
     function(safeUrl, details, req) {
   this.setupRequestEvent(this.unsafeContentWin, req, "onload", details);
+  this.setupRequestEvent(this.unsafeContentWin, req, "onloadend", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onerror", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onprogress", details);
   this.setupRequestEvent(this.unsafeContentWin, req, "onreadystatechange", details);
@@ -210,7 +216,10 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
   var origMimeType = details.overrideMimeType;
   var script = this.script;
 
-  if (details[event]) {
+  var realDetails = GM_waiveXrays(details);
+  var realEvent = GM_checkedPrincipal(this.sandbox, realDetails[event]);
+
+  if (realEvent) {
     req[event] = function(ev) {
       var responseState = {
         // can't support responseXML because security won't
@@ -256,7 +265,7 @@ GM_xmlhttpRequester.prototype.setupRequestEvent =
       }
 
       GM_apiSafeCallback(
-          unsafeContentWin, script, details, details[event], [responseState]);
+          unsafeContentWin, script, realDetails, realEvent, [responseState]);
     }
   }
 }
