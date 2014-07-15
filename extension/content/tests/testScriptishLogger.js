@@ -113,7 +113,7 @@ asyncTest("logScriptError: js error", 7, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
-    equal(message.errorMessage, "[baz] Error: foo");
+    ok(message.errorMessage.contains("[baz] Error: foo"));
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
     equal(message.sourceLine, "");
     ok(message.lineNumber > 10);
@@ -127,7 +127,7 @@ asyncTest("logScriptError: nsIScriptError", 8, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
-    equal(message.errorMessage, "[baz] foo");
+    ok(message.errorMessage.contains("[baz] foo"));
     equal(message.sourceName, "source");
     equal(message.sourceLine, "line");
     equal(message.lineNumber, 0xaa);
@@ -144,7 +144,7 @@ asyncTest("logScriptError: nsIScriptError; omit id", 8, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
-    equal(message.errorMessage, "[Scriptish] foo");
+    ok(message.errorMessage.contains("[Scriptish] foo"));
     equal(message.sourceName, "source");
     equal(message.sourceLine, "line");
     equal(message.lineNumber, 0xaa);
@@ -161,7 +161,7 @@ asyncTest("test nsIScriptError; omit optionals", 8, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
-    equal(message.errorMessage, "[Scriptish] foo");
+    ok(message.errorMessage.contains("[Scriptish] foo"));
     equal(message.sourceName, "[user.js]");
     equal(message.sourceLine, "line");
     equal(message.lineNumber, 0xaa);
@@ -178,7 +178,7 @@ asyncTest("test nsIException", 7, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
-    equal(message.errorMessage, "[baz] foo");
+    ok(message.errorMessage.contains("[baz] foo"));
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
     equal(message.sourceLine, "");
     ok(message.lineNumber > 10);
@@ -193,7 +193,7 @@ asyncTest("test TypeError", 7, function() {
   runListener(function(message) {
     ok(message instanceof Ci.nsIScriptError);
 
-    equal(message.errorMessage, "[baz] TypeError: f is undefined");
+    ok(message.errorMessage.contains("[baz] TypeError: f is undefined"));
     equal(message.sourceName, "chrome://scriptish/content/tests/testScriptishLogger.js");
     equal(message.sourceLine, "");
     ok(message.lineNumber > 10);
