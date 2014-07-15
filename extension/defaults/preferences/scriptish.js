@@ -18,6 +18,7 @@ pref("extensions.scriptish.enabledNotifications.popup", true);
 pref("extensions.scriptish.enabledNotifications.sliding", true);
 pref("extensions.scriptish.enableScriptRefreshing", true);
 pref("extensions.scriptish.enableScriptGrant", true);
+pref("extensions.scriptish.enableScriptGrantSniffing", true);
 pref("extensions.scriptish.enableInstallDetection", true);
 pref("extensions.scriptish.logChrome", false);
 pref("extensions.scriptish.logToErrorConsole", true);

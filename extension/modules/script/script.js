@@ -1,6 +1,7 @@
 var EXPORTED_SYMBOLS = ["Script"];
 
 const valueSplitter = /(\S+)(?:\s+([^\r\f\n]+))?/;
+const GRANT_REGEX = /(?:unsafeWindow|GM_[a-z]+)/gi;
 
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/CertUtils.jsm");
@@ -918,6 +919,11 @@ Script.parse = function Script_parse(aConfig, aSource, aURI, aUpdateScript, aPri
 
   if (aURI && aPrivate === false)
     script._downloadURL = aURI.spec;
+
+  // sniff @grant ?
+  if (Scriptish_prefRoot.getValue("enableScriptGrantSniffing")) {
+    (aSource.match(GRANT_REGEX) || []).forEach(function(i) script.grant[i] = true);
+  }
 
   // read one line at a time looking for start meta delimiter or EOF
   var lines = aSource.match(metaRegExp);
