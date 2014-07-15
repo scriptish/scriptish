@@ -12,27 +12,28 @@
   });
 
   // FIRST RUN STUFF!
-  if (0 >= Services.vc.compare(currentVer, "0.1b5")) {
-    let chromeWin = Services.wm.getMostRecentWindow("navigator:browser");
-    let { document, gBrowser } = chromeWin;
-
-    // Open about:scriptish in a tab
-    gBrowser.addTab("about:scriptish");
-
-    // Add toolbaritem to add-on bar
-    let addToBar = document.getElementById("nav-bar");
-    let scriptishBtn = document.getElementById("scriptish-button");
-    if (addToBar && !scriptishBtn) {
-      var addonSet = (addToBar.getAttribute("currentset") || addToBar.getAttribute("defaultset")).split(",");
-      var addonPos = addonSet.indexOf("status-bar");
-      if (addonPos == -1) addonPos = addonSet.length;
-      addonSet.splice(addonPos, 0, "scriptish-button");
-      addonSet = addonSet.join(",");
-      addToBar.setAttribute("currentset", addonSet);
-      addToBar.currentSet = addonSet;
-      chromeWin.BrowserToolboxCustomizeDone(true);
-      document.persist(addToBar.getAttribute("id"), "currentset");
-      if ("addon-bar" == addToBar.getAttribute("id")) addToBar.collapsed = false;
-    }
+  if (0 < Services.vc.compare(currentVer, "0.1b5")) {
+    return;
   }
-})(Components.utils.import)
+  let window = Services.wm.getMostRecentWindow("navigator:browser");
+  let { document, gBrowser } = window;
+
+  // Open about:scriptish in a tab
+  gBrowser.addTab("about:scriptish");
+
+  // Add toolbaritem to add-on bar
+  if (!window.CustomizableUI) {
+    return;
+  }
+
+  const button = "scriptish-button";
+  let placement = window.CustomizableUI.getPlacementOfWidget(button);
+  if (!placement) {
+    // New and not placed yet
+    placement = {area: 'nav-bar', position: undefined};
+    window.CustomizableUI.addWidgetToArea(button,
+                                          placement.area,
+                                          placement.position);
+    window.CustomizableUI.ensureWidgetPlacedInWindow(button, window);
+  }
+})(Components.utils.import);
