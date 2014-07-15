@@ -1,4 +1,6 @@
 
+var GM_updatingEnabled = true;
+
 function GM_xpath(details) {
   var contextNode, contextDocument, paths, resolver, namespace, result;
 

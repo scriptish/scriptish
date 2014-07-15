@@ -1,14 +1,12 @@
-var EXPORTED_SYMBOLS = [
-  "Scriptish_injectScripts"
-];
+var EXPORTED_SYMBOLS = [ "Scriptish_injectScripts" ];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/constants.js");
+Cu.import("resource://scriptish/api/GM_sandboxScripts.js");
 
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
-lazyImport(this, "resource://scriptish/api/GM_sandboxScripts.js", ["GM_updatingEnabled", "GM_xpath"]);
 lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
 lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
 
@@ -64,22 +62,21 @@ function Scriptish_injectScripts(options) {
     // hack XPathResult since that is so commonly used
     sandbox.XPathResult = XPATH_RESULT;
 
-    Cu.evalInSandbox(GM_updatingEnabled, sandbox);
-
-    Scriptish_log('granting: ' + Object.keys(script.grant).join(', '))
-    Cu.evalInSandbox(GM_xpath, sandbox);
-
+    Cu.evalInSandbox(GM_SandboxScripts, sandbox, "latest", "@initializer", 1);
 
     // add GM_* API to sandbox
-    let (GM_api = new GM_API(extend(options, {
-      script: script,
-      url: url,
-      winID: winID,
-      safeWin: safeWin,
-      unsafeWin: unsafeContentWin,
-      chromeWin: chromeWin,
-      sandbox: sandbox
-    }))) {
+    Scriptish_log('granting: ' + Object.keys(script.grant).join(', '))
+    {
+      let GM_api = new GM_API(extend(options, {
+        script: script,
+        url: url,
+        winID: winID,
+        safeWin: safeWin,
+        unsafeWin: unsafeContentWin,
+        chromeWin: chromeWin,
+        sandbox: sandbox
+      }));
+
       for (let funcName in GM_api) {
         if (!useGrants || script.grant[funcName]) {
           sandbox[funcName] = GM_api[funcName];
