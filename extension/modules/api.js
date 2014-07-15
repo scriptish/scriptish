@@ -40,6 +40,11 @@ function GM_apiLeakCheck(apiName) {
           Scriptish_stringBundle("error.api.unsafeAccess") + " - " + apiName + ' by ' + stack.filename));
       return false;
     }
+    if (stack.filename && stack.filename === 'resource://scriptish/utils/Scriptish_injectScripts.js') {
+      // No point in checking beyond this point.
+      // Also fixed at least https://github.com/scriptish/scriptish/issues/231
+      break;
+    }
   } while (stack = stack.caller);
   return true;
 }
