@@ -19,8 +19,7 @@ function ScriptDependency(aScript) {
   this.updateScript = false;
 }
 
-ScriptDependency.prototype = {
-  __proto__: CachedResource.prototype,
+ScriptDependency.prototype = subclass(CachedResource.prototype, {
   get _file() {
     var file = this._script._basedirFile;
     file.append(this._filename);
@@ -58,4 +57,4 @@ ScriptDependency.prototype = {
     this._tempFile.moveTo(file.parent, file.leafName);
     this._tempFile = null;
   }
-}
+});

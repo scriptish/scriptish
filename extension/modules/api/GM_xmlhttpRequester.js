@@ -57,8 +57,7 @@ function IgnoreRedirect(req, ignoreFlags) {
   this.init(req);
   this.ignoreFlags = ignoreFlags;
 }
-IgnoreRedirect.prototype = {
-  __proto__: NotificationCallbacks.prototype,
+IgnoreRedirect.prototype = subclass(NotificationCallbacks.prototype, {
   query: XPCOMUtils.generateQI([Ci.nsIChannelEventSink]),
   asyncOnChannelRedirect: function(oldChannel, newChannel, flags, callback) {
     if (this.ignoreFlags & flags) {
@@ -78,7 +77,7 @@ IgnoreRedirect.prototype = {
 
     callback.onRedirectVerifyCallback(Cr.NS_OK);
   }
-};
+});
 
 
 function GM_xmlhttpRequester(unsafeContentWin, safeWin, originUrl, aScript,

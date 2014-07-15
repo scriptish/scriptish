@@ -1,5 +1,5 @@
 var EXPORTED_SYMBOLS = [
-    "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils", "extend", "jetpack",
+    "Cc", "Ci", "Cr", "NetUtil", "XPCOMUtils", "extend", "subclass", "jetpack",
     "Services", "Instances", "lazy", "lazyImport", "lazyUtil", "timeout"];
 
 const {classes: Cc, interfaces: Ci, results: Cr, utils: Cu, Constructor: CC} = Components;
@@ -11,10 +11,9 @@ var Services = {};
 (function(inc, tools){
   inc("resource://gre/modules/XPCOMUtils.jsm");
   inc("resource://gre/modules/NetUtil.jsm");
-  inc("resource://gre/modules/Services.jsm", tools);
-
-  Services.__proto__ = tools.Services;
-})(Components.utils.import, {})
+  inc("resource://gre/modules/Services.jsm" );
+  Services = Object.create(Services);
+})(Components.utils.import, {});
 
 var Instances = {
   get bis() Cc["@mozilla.org/binaryinputstream;1"]
@@ -122,6 +121,14 @@ function extend(a, o) {
     }
   }
   return o;
+}
+
+function subclass(clazz, prototype) {
+  let rv = Object.create(clazz);
+  for (let x of Object.getOwnPropertyNames(prototype)) {
+    Object.defineProperty(rv , x, Object.getOwnPropertyDescriptor(prototype, x));
+  }
+  return rv;
 }
 
 function descriptor(object) {

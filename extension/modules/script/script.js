@@ -114,8 +114,7 @@ function Script(config) {
   this._jsversion = null;
   this["_run-at"] = null;
 }
-Script.prototype = {
-  __proto__: CachedResource.prototype,
+Script.prototype = subclass(CachedResource.prototype, {
   includesDisabled: false,
   isCompatible: true,
   blocklistState: Ci.nsIBlocklistService.STATE_NOT_BLOCKED,
@@ -892,7 +891,7 @@ Script.prototype = {
     this._dependhash = tools.Scriptish_cryptoHash(this._rawMeta);
     return this;
   }
-};
+});
 
 Script.prototype.addScreenShot = function(aURL, aThumbURL) {
   if (!AddonManagerPrivate.AddonScreenshot) return;
