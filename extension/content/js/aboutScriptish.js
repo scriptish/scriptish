@@ -14,7 +14,7 @@ function include(aSrc) {
 Cu.import("resource://scriptish/constants.js");
 lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "AddonManagerPrivate"]);
 
-(function() {
+addEventListener("DOMContentLoaded", function() {
   "use strict";
 
   // Show about:scriptish?test
@@ -57,4 +57,4 @@ lazyImport(this, "resource://gre/modules/AddonManager.jsm", ["AddonManager", "Ad
     addPersons($("contlist"), aAddon.contributors);
     addPersons($("translist"), aAddon.translators);
   });
-})();
+});
