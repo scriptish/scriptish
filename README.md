@@ -1,6 +1,6 @@
 # Scriptish
 
-[![Gitter chat](https://badges.gitter.im/scriptish/scriptish.png)](https://gitter.im/scriptish/scriptish)
+[![Gitter chat](https://badges.gitter.im/scriptish/scriptish.svg)](https://gitter.im/scriptish/scriptish)
 
 ## About
 
