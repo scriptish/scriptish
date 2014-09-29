@@ -14,7 +14,7 @@ var $ = function(aID) document.getElementById(aID);
 var $$ = function(q) document.querySelector(q);
 var $$$ = function(q) document.querySelectorAll(q);
 
-Scriptish_localizeOnLoad(this);
+Scriptish_localizeOnLoad(window);
 
 var scriptContent = "";
 try {
