@@ -86,7 +86,7 @@ function checkSync() {
   syncOp("editor");
 }
 
-Scriptish_localizeOnLoad(this);
+Scriptish_localizeOnLoad(window);
 
 addEventListener("load", function init() {
   removeEventListener("load", init, false);

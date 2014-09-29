@@ -10,7 +10,7 @@ lazyImport(this, "resource://scriptish/utils/Scriptish_localizeDOM.js", ["Script
 lazyUtil(this, "getScriptHeader");
 lazyUtil(this, "stringBundle");
 
-Scriptish_localizeOnLoad(this);
+Scriptish_localizeOnLoad(window);
 
 function $(id) document.getElementById(id);
 function $t(text) document.createTextNode(text);

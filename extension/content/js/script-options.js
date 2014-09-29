@@ -9,7 +9,7 @@ lazyUtil(this, "stringBundle");
 var $ = function(aID) document.getElementById(aID);
 var script;
 
-Scriptish_localizeOnLoad(this);
+Scriptish_localizeOnLoad(window);
 
 window.addEventListener("DOMContentLoaded", function() {
   var scriptID = window.location.search.match(/[\?&]id=([^&,]+)/i);
