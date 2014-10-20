@@ -88,7 +88,7 @@ function Scriptish_injectScripts(options) {
     }
 
     lazy(sandbox, "console", function() {
-      return GM_console(script, safeWin, chromeWin);
+      return GM_console(sandbox, script, safeWin, chromeWin);
     });
 
     if (!useGrants || script.grant['GM_log']) {

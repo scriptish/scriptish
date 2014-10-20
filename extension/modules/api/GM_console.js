@@ -32,7 +32,7 @@ function getConsoleFor(contentWindow, chromeWindow) {
   };
 }
 
-function GM_console(script, contentWindow, chromeWindow) {
+function GM_console_legacy(script, contentWindow, chromeWindow) {
   const _console = getConsoleFor(contentWindow, chromeWindow);
   const console = { __exposedProps__: {__noSuchMethod__: "r"} };
   const prefix = "[" + (script.id || "Scriptish") + "]";
@@ -82,6 +82,72 @@ function GM_console(script, contentWindow, chromeWindow) {
       }
       console.log("No such method in console", id);
     }
+  });
+
+  return console;
+}
+
+function GM_console(sandbox, script, contentWindow, chromeWindow) {
+  if (!("createObjectIn" in Cu) || !("exportFunction" in Cu)) {
+    return GM_console_legacy(script, contentWindow, chromeWindow);
+  }
+
+  const _console = getConsoleFor(contentWindow, chromeWindow);
+  const console = Cu.createObjectIn(sandbox, {defineAs: "console"});
+  const prefix = "[" + (script.id || "Scriptish") + "]";
+
+  // Wrap log functions
+  // Redirect any missing log function to .log
+  for (let i = 0, e = log_functions.length; i < e; ++i) {
+    let fn = log_functions[i];
+    if (fn in _console) {
+      Cu.exportFunction(_console[fn].bind(_console, prefix), console, {
+        defineAs: fn
+      });
+    }
+    else if (fn == "trace") {
+      let trace = function() {
+        let args = Array.slice(arguments);
+        let msg = "";
+
+        // Skip the top two frames
+        let stack = Components.stack.caller;
+        if (stack && (stack = stack.caller)) {
+          for (let i = 0; i < 10 && stack; ++i, stack = stack.caller) {
+            msg += "\n[@" + stack.filename + ":" + stack.lineNumber + "]";
+          }
+          args.push(msg);
+        }
+        console.log.apply(console, args);
+      };
+      Cu.exportFunction(trace, console, {defineAs: "trace"});
+    }
+    else {
+      Cu.exportFunction(_console.log.bind(_console, prefix), console, {
+        defineAs: fn
+      });
+    }
+  }
+
+  // Wrap aux functions
+  for (let i = 0, e = aux_functions.length; i < e; ++i) {
+    let fn = aux_functions[i];
+    if (fn in _console) {
+      Cu.exportFunction(_console[fn].bind(_console, prefix), console, {
+        defineAs: fn
+      });
+    }
+  }
+
+  const nsm = function(id, args) {
+    if (aux_functions.indexOf(id) != -1) {
+      let fn = _console[id] || (function() {});
+      return fn.apply(_console, args);
+    }
+    console.log("No such method in console", id);
+  };
+  Cu.exportFunction(nsm, console, {
+    defineAs: "__noSuchMethod__"
   });
 
   return console;
