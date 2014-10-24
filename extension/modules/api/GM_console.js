@@ -1,5 +1,5 @@
 "use strict";
-var EXPORTED_SYMBOLS = ["GM_console"];
+var EXPORTED_SYMBOLS = ["GM_console", "GM_getConsoleFor"];
 
 const Cu = Components.utils;
 Cu.import("resource://scriptish/logging.js");
@@ -15,7 +15,7 @@ const aux_functions = ["assert", "dir", "dirxml", "group", "groupEnd", "time",
                         "timeEnd", "count", "profile", "profileEnd"
                         ];
 
-function getConsoleFor(contentWindow, chromeWindow) {
+function GM_getConsoleFor(contentWindow, chromeWindow) {
   // we dont have a chromeWindow for e10s atm, see Scriptish_injectScripts impl
   if (chromeWindow) {
     let (rv = Scriptish_getFirebugConsole(contentWindow, chromeWindow)) {
@@ -33,7 +33,7 @@ function getConsoleFor(contentWindow, chromeWindow) {
 }
 
 function GM_console_legacy(script, contentWindow, chromeWindow) {
-  const _console = getConsoleFor(contentWindow, chromeWindow);
+  const _console = GM_getConsoleFor(contentWindow, chromeWindow);
   const console = { __exposedProps__: {__noSuchMethod__: "r"} };
   const prefix = "[" + (script.id || "Scriptish") + "]";
 
@@ -92,7 +92,7 @@ function GM_console(sandbox, script, contentWindow, chromeWindow) {
     return GM_console_legacy(script, contentWindow, chromeWindow);
   }
 
-  const _console = getConsoleFor(contentWindow, chromeWindow);
+  const _console = GM_getConsoleFor(contentWindow, chromeWindow);
   const console = Cu.createObjectIn(sandbox, {defineAs: "console"});
   const prefix = "[" + (script.id || "Scriptish") + "]";
 

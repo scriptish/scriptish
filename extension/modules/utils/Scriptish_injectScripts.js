@@ -7,7 +7,7 @@ Cu.import("resource://scriptish/api/GM_sandboxScripts.js");
 lazyImport(this, "resource://scriptish/logging.js", ["Scriptish_log", "Scriptish_logError"]);
 lazyImport(this, "resource://scriptish/prefmanager.js", ["Scriptish_prefRoot"]);
 lazyImport(this, "resource://scriptish/api.js", ["GM_API"]);
-lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console"]);
+lazyImport(this, "resource://scriptish/api/GM_console.js", ["GM_console", "GM_getConsoleFor"]);
 lazyImport(this, "resource://scriptish/api/GM_ScriptLogger.js", ["GM_ScriptLogger"]);
 
 lazyImport(this, "resource://scriptish/third-party/Scriptish_getBrowserForContentWindow.js", ["Scriptish_getBrowserForContentWindow"]);
@@ -93,15 +93,16 @@ function Scriptish_injectScripts(options) {
 
     if (!useGrants || script.grant['GM_log']) {
       lazy(sandbox, "GM_log", function() {
+        const _console = GM_getConsoleFor(safeWisafeWin, chromeWin);
         if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
           let logger = new GM_ScriptLogger(script);
           return function() {
             const args = Array.slice(arguments);
             logger.log(args.join(" "));
-            sandbox.console.log.apply(sandbox.console, args);
+            _console.log.apply(_console, args);
           }
         }
-        return sandbox.console.log.bind(sandbox.console);
+        return _console.log.bind(_console);
       });
     }
 
