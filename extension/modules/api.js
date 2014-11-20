@@ -19,8 +19,10 @@ lazyImport(this, "resource://scriptish/api/GM_xmlhttpRequester.js", ["GM_xmlhttp
 lazyImport(this, "resource://scriptish/api/GM_Resources.js", ["GM_Resources"]);
 lazyImport(this, "resource://scriptish/api/GM_setClipboard.js", ["GM_setClipboard"]);
 
-const { add, check } = jetpack('scriptish/security/api-check-filenames');
+const { add, addPrefix, check } = jetpack('scriptish/security/api-check-filenames');
 add(Components.stack.filename);
+addPrefix("resource://gre/modules/");
+addPrefix("resource://gre/components/");
 
 const NS_XHTML = "http://www.w3.org/1999/xhtml";
 const DOLITTLE = function(){};
