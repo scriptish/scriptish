@@ -93,7 +93,7 @@ function Scriptish_injectScripts(options) {
 
     if (!useGrants || script.grant['GM_log']) {
       lazy(sandbox, "GM_log", function() {
-        const _console = GM_getConsoleFor(safeWisafeWin, chromeWin);
+        const _console = GM_getConsoleFor(safeWin, chromeWin);
         if (Scriptish_prefRoot.getValue("logToErrorConsole")) {
           let logger = new GM_ScriptLogger(script);
           return function() {
